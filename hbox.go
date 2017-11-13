@@ -32,13 +32,6 @@ func (w *HBox) Mount(parent NativeWidget) (MountedWidget, error) {
 	return &MountedHBox{parent: parent, children: c, align: align}, nil
 }
 
-type MountedHBox struct {
-	parent         NativeWidget
-	children       []MountedWidget
-	align          Alignment
-	preferredWidth int
-}
-
 func (_ *MountedHBox) Kind() *WidgetKind {
 	return &hboxKind
 }

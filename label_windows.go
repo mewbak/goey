@@ -10,7 +10,6 @@ import (
 var (
 	staticClassName     *uint16
 	oldStaticWindowProc uintptr
-	staticMaxWidth      int
 )
 
 func init() {
@@ -27,15 +26,8 @@ func (w *Label) Mount(parent NativeWidget) (MountedWidget, error) {
 		return nil, err
 	}
 
-	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.SS_LEFT)
-	if w.Align == Center {
-		style = style | win.SS_CENTER
-	} else if w.Align == Right {
-		style = style | win.SS_RIGHT
-	}
-
 	hwnd := win.CreateWindowEx(0, staticClassName, &text[0],
-		style,
+		win.WS_CHILD|win.WS_VISIBLE|win.SS_LEFT,
 		10, 10, 100, 100,
 		parent.hWnd, 0, 0, nil)
 	if hwnd == 0 {
@@ -63,27 +55,6 @@ type MountedLabel struct {
 }
 
 func (w *MountedLabel) PreferredWidth() int {
-	// If the printed text will be more than 60 characters wide, it will start
-	// to impact readability.  We want to force reflow in this case, so we limit
-	// the width
-	//
-	// See the following for the conversion from characters to relative pixels.
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	if staticMaxWidth == 0 {
-		hdc := win.GetDC(w.hWnd)
-		if hMessageFont != 0 {
-			win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
-		}
-		rect := win.RECT{0, 0, 0xffff, 0xffff}
-		caption, err := syscall.UTF16FromString("ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz")
-		if err != nil {
-			panic(err)
-		}
-		win.DrawTextEx(hdc, &caption[0], int32(len(caption)), &rect, win.DT_CALCRECT, nil)
-		win.ReleaseDC(w.hWnd, hdc)
-		staticMaxWidth = int(rect.Right)
-	}
-
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
@@ -92,23 +63,12 @@ func (w *MountedLabel) PreferredWidth() int {
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	// For reflow if the text is more than 60 characters wide
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	if int(rect.Right) > staticMaxWidth {
-		return staticMaxWidth
-	}
 	return int(rect.Right)
 }
 
 func (w *MountedLabel) CalculateHeight(width int) int {
-	hdc := win.GetDC(w.hWnd)
-	if hMessageFont != 0 {
-		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
-	}
-	rect := win.RECT{0, 0, int32(width), 0xffff}
-	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
-	win.ReleaseDC(w.hWnd, hdc)
-	return int(rect.Bottom)
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	return 13
 }
 
 func (w *MountedLabel) SetBounds(bounds image.Rectangle) {

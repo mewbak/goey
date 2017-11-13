@@ -5,6 +5,14 @@ import (
 	"image"
 )
 
+type MountedHBox struct {
+	parent   NativeWidget
+	children []MountedWidget
+	align    Alignment
+
+	preferredWidth int
+}
+
 func (w *MountedHBox) PreferredWidth() int {
 	if len(w.children) == 0 {
 		return 0

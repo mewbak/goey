@@ -3,7 +3,6 @@ package goey
 import (
 	"github.com/lxn/win"
 	"image"
-	"strings"
 )
 
 func (w *MountedVBox) PreferredWidth() int {
@@ -28,11 +27,8 @@ func calculateGap(previous MountedWidget, current MountedWidget) int {
 	// need to infer the relationship.
 	//
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	if label, ok := previous.(*MountedLabel); ok {
-		text := label.Text()
-		if strings.HasSuffix(text, ":") {
-			return 5
-		}
+	if _, ok := previous.(*MountedLabel); ok {
+		return 5
 	}
 	if _, ok := previous.(*MountedCheckbox); ok {
 		if _, ok := current.(*MountedCheckbox); ok {
@@ -68,9 +64,10 @@ func (w *MountedVBox) SetBounds(bounds image.Rectangle) {
 	previous := w.children[0]
 	height := previous.CalculateHeight(width)
 	previous.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+height))
+	posY += height
 
 	// Assuming that height of bounds is sufficient
-	for _, v := range w.children {
+	for _, v := range w.children[1:] {
 		posY += calculateGap(previous, v)
 		previous = v
 

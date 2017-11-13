@@ -127,7 +127,6 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 
 	case win.WM_GETMINMAXINFO:
 		mmi := (*win.MINMAXINFO)(unsafe.Pointer(lParam))
-		println(mmi.PtMinTrackSize.X)
 		if mmi.PtMinTrackSize.X > 0 {
 			mmi.PtMinTrackSize.Y = mmi.PtMinTrackSize.X
 		}
@@ -145,10 +144,7 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 	return win.DefWindowProc(hwnd, msg, wParam, lParam)
 }
 
-// New creates and opens a new webview window using the given settings. The
-// returned object implements the WebView interface. This function returns nil
-// if a window can not be created.
-func NewMainWindow(title string, children []Widget) (*MainWindow, error) {
+func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 	const Width = 640
 	const Height = 480
 
@@ -252,12 +248,14 @@ func (w *MainWindow) SetChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
 	vbox := VBox{children}
 	err := w.MountedVBox.UpdateProps(&vbox)
+	w.clientPreferredWidth = 0
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
 	currentHwnd := win.HWND_TOP
 	for _, v := range w.children {
 		currentHwnd = v.SetOrder(currentHwnd)
 	}
+	w.clientPreferredWidth = 0
 	onSize(w.hWnd, w)
 	// ... and we're done
 	return err

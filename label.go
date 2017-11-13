@@ -4,19 +4,8 @@ var (
 	labelKind = WidgetKind{"label"}
 )
 
-type Alignment uint8
-
-const (
-	DefaultAlign = Alignment(iota)
-	Left
-	Center
-	Right
-	Justify
-)
-
 type Label struct {
-	Text  string
-	Align Alignment
+	Text string
 }
 
 func (_ *Label) Kind() *WidgetKind {

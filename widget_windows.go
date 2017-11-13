@@ -10,6 +10,8 @@ var (
 	dpi image.Point
 )
 
+type DP int
+
 type NativeWidget struct {
 	hWnd win.HWND
 }
@@ -24,7 +26,7 @@ func (w NativeWidget) SetDisabled(value bool) {
 
 func (w *NativeWidget) SetBounds(bounds image.Rectangle) {
 
-	win.MoveWindow(w.hWnd, int32(bounds.Min.X*dpi.X/96), int32(bounds.Min.Y*dpi.Y/96), int32(bounds.Dx()*dpi.X/96), int32(bounds.Dy()*dpi.Y/96), true)
+	win.MoveWindow(w.hWnd, int32(bounds.Min.X), int32(bounds.Min.Y), int32(bounds.Dx()), int32(bounds.Dy()), true)
 }
 
 func (w *NativeWidget) SetOrder(previous win.HWND) win.HWND {
