@@ -3,8 +3,21 @@ package goey
 import (
 	"github.com/lxn/win"
 	"image"
+	"sync/atomic"
 	"syscall"
 )
+
+// Control ID
+
+var (
+	currentControlID uint32 = 100
+)
+
+func nextControlID() uint32 {
+	return atomic.AddUint32(&currentControlID, 1)
+}
+
+// DPI support
 
 var (
 	dpi image.Point
@@ -19,6 +32,8 @@ func (dp DP) ToPixelsX() int {
 func (dp DP) ToPixelsY() int {
 	return int(dp) * dpi.Y / 96
 }
+
+// NativeWidget
 
 type NativeWidget struct {
 	hWnd win.HWND
