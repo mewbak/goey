@@ -88,12 +88,12 @@ type MountedSelectInput struct {
 	onBlur   func()
 }
 
-func (w *MountedSelectInput) PreferredWidth() int {
+func (w *MountedSelectInput) MinimumWidth() DP {
 	// In the future, we should calculate the width based on the length of the text.
 	return 160
 }
 
-func (w *MountedSelectInput) CalculateHeight(width int) int {
+func (w *MountedSelectInput) CalculateHeight(width DP) DP {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23
 }

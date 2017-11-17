@@ -12,6 +12,14 @@ var (
 
 type DP int
 
+func (dp DP) ToPixelsX() int {
+	return int(dp) * dpi.X / 96
+}
+
+func (dp DP) ToPixelsY() int {
+	return int(dp) * dpi.Y / 96
+}
+
 type NativeWidget struct {
 	hWnd win.HWND
 }
@@ -58,8 +66,8 @@ func (w *NativeWidget) Close() {
 }
 
 type NativeMountedWidget interface {
-	PreferredWidth() int
-	CalculateHeight(width int) int
+	MinimumWidth() DP
+	CalculateHeight(width DP) DP
 	SetBounds(bounds image.Rectangle)
 	SetOrder(previous win.HWND) win.HWND
 }

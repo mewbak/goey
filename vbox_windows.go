@@ -5,14 +5,14 @@ import (
 	"image"
 )
 
-func (w *MountedVBox) PreferredWidth() int {
+func (w *MountedVBox) MinimumWidth() DP {
 	if len(w.children) == 0 {
 		return 0
 	}
 
-	retval := w.children[0].PreferredWidth()
+	retval := w.children[0].MinimumWidth()
 	for _, v := range w.children[1:] {
-		tmp := v.PreferredWidth()
+		tmp := v.MinimumWidth()
 		if tmp > retval {
 			retval = tmp
 		}
@@ -20,7 +20,7 @@ func (w *MountedVBox) PreferredWidth() int {
 	return retval
 }
 
-func calculateGap(previous MountedWidget, current MountedWidget) int {
+func calculateGap(previous MountedWidget, current MountedWidget) DP {
 	// The vertical gap between most controls is 11 relative pixels.  However,
 	// this is reduced to 5 relative pixels between a label and the following
 	// control.  This relationship is not capture in the widget tree, so we
@@ -39,7 +39,7 @@ func calculateGap(previous MountedWidget, current MountedWidget) int {
 	return 11
 }
 
-func (w *MountedVBox) CalculateHeight(width int) int {
+func (w *MountedVBox) CalculateHeight(width DP) DP {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -60,18 +60,19 @@ func (w *MountedVBox) SetBounds(bounds image.Rectangle) {
 
 	posY := bounds.Min.Y
 	width := bounds.Dx()
+	widthDP := DP(width * 96 / dpi.X)
 
 	previous := w.children[0]
-	height := previous.CalculateHeight(width)
+	height := previous.CalculateHeight(widthDP).ToPixelsY()
 	previous.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+height))
 	posY += height
 
 	// Assuming that height of bounds is sufficient
 	for _, v := range w.children[1:] {
-		posY += calculateGap(previous, v)
+		posY += calculateGap(previous, v).ToPixelsY()
 		previous = v
 
-		height := v.CalculateHeight(width)
+		height := v.CalculateHeight(widthDP).ToPixelsY()
 		v.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+height))
 		posY += height
 	}

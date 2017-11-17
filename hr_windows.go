@@ -72,11 +72,11 @@ type MountedHR struct {
 	NativeWidget
 }
 
-func (w *MountedHR) PreferredWidth() int {
+func (w *MountedHR) MinimumWidth() DP {
 	return 1
 }
 
-func (w *MountedHR) CalculateHeight(width int) int {
+func (w *MountedHR) CalculateHeight(width DP) DP {
 	// Same as static text
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 13

@@ -52,7 +52,7 @@ type MountedP struct {
 	text []uint16
 }
 
-func (w *MountedP) PreferredWidth() int {
+func (w *MountedP) MinimumWidth() DP {
 	// If the printed text will be more than 60 characters wide, it will start
 	// to impact readability.  We want to force reflow in this case, so we limit
 	// the width
@@ -83,12 +83,12 @@ func (w *MountedP) PreferredWidth() int {
 	// For reflow if the text is more than 60 characters wide
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	if int(rect.Right) > paragraphMaxMinWidth {
-		return paragraphMaxMinWidth
+		return DP(paragraphMaxMinWidth * 96 / dpi.X)
 	}
-	return int(rect.Right)
+	return DP(int(rect.Right) * 96 / dpi.X)
 }
 
-func (w *MountedP) CalculateHeight(width int) int {
+func (w *MountedP) CalculateHeight(width DP) DP {
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
@@ -96,7 +96,7 @@ func (w *MountedP) CalculateHeight(width int) int {
 	rect := win.RECT{0, 0, int32(width), 0xffff}
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
 	win.ReleaseDC(w.hWnd, hdc)
-	return int(rect.Bottom)
+	return DP(int(rect.Bottom) * 96 / dpi.X)
 }
 
 func (w *MountedP) SetBounds(bounds image.Rectangle) {

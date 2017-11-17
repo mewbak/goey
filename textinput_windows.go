@@ -92,12 +92,12 @@ type MountedTextInput struct {
 	onEnterKey func(value string)
 }
 
-func (w *MountedTextInput) PreferredWidth() int {
+func (w *MountedTextInput) MinimumWidth() DP {
 	// In the future, we should calculate the width based on the length of the text.
-	return 160
+	return 80
 }
 
-func (w *MountedTextInput) CalculateHeight(width int) int {
+func (w *MountedTextInput) CalculateHeight(width DP) DP {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23
 }

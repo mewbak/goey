@@ -79,13 +79,13 @@ type MountedButton struct {
 	onBlur  func()
 }
 
-func (w *MountedButton) PreferredWidth() int {
+func (w *MountedButton) MinimumWidth() DP {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	// In the future, we should calculate the width based on the length of the text.
 	return 50
 }
 
-func (w *MountedButton) CalculateHeight(width int) int {
+func (w *MountedButton) CalculateHeight(width DP) DP {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23
 }

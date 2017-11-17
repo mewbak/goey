@@ -41,9 +41,9 @@ func init() {
 type MainWindow struct {
 	MountedVBox
 
-	hWnd                 win.HWND
-	dpi                  image.Point
-	clientPreferredWidth int
+	hWnd               win.HWND
+	dpi                image.Point
+	clientMinimumWidth int
 }
 
 func registerMainWindowClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, error) {
@@ -78,7 +78,7 @@ func onSize(hwnd win.HWND, mw *MainWindow) {
 
 	// We will adjust the margins based on the screen size and preferred width
 	// of the content.
-	cpw := mw.ClientPreferredWidth()
+	cpw := mw.ClientMinimumWidth()
 	width := rect.Right - rect.Left
 	if cpw+2*margin <= int(width) {
 		mw.SetBounds(image.Rect(int(rect.Left)+margin, int(rect.Top)+margin, int(rect.Right)-margin, int(rect.Bottom)-margin))
@@ -231,13 +231,13 @@ func (w *MainWindow) Close() {
 	win.OleUninitialize()
 }
 
-func (w *MainWindow) ClientPreferredWidth() int {
-	if w.clientPreferredWidth > 0 {
-		return w.clientPreferredWidth
+func (w *MainWindow) ClientMinimumWidth() int {
+	if w.clientMinimumWidth > 0 {
+		return w.clientMinimumWidth
 	}
 
-	w.clientPreferredWidth = w.MountedVBox.PreferredWidth()
-	return w.clientPreferredWidth
+	w.clientMinimumWidth = w.MountedVBox.MinimumWidth().ToPixelsX()
+	return w.clientMinimumWidth
 }
 
 func (w *MainWindow) SetText(value string) error {
@@ -248,14 +248,14 @@ func (w *MainWindow) SetChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
 	vbox := VBox{children}
 	err := w.MountedVBox.UpdateProps(&vbox)
-	w.clientPreferredWidth = 0
+	w.clientMinimumWidth = 0
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
 	currentHwnd := win.HWND_TOP
 	for _, v := range w.children {
 		currentHwnd = v.SetOrder(currentHwnd)
 	}
-	w.clientPreferredWidth = 0
+	w.clientMinimumWidth = 0
 	onSize(w.hWnd, w)
 	// ... and we're done
 	return err
