@@ -28,7 +28,7 @@ func main() {
 			}},
 			&goey.HBox{Children: []goey.Widget{
 				&goey.Button{Text: "D1"},
-				&goey.Button{Text: "D2"},
+				&goey.Button{Text: "D2", Disabled: true},
 				&goey.Button{Text: "D3"},
 			},
 				Align: goey.Right,

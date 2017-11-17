@@ -1,9 +1,29 @@
 package goey
 
 import (
-	"github.com/lxn/win"
 	"image"
+
+	"github.com/lxn/win"
 )
+
+type MountedVBox struct {
+	parent   NativeWidget
+	children []MountedWidget
+}
+
+func (w *VBox) Mount(parent NativeWidget) (MountedWidget, error) {
+	c := make([]MountedWidget, 0, len(w.Children))
+
+	for _, v := range w.Children {
+		mountedChild, err := v.Mount(parent)
+		if err != nil {
+			return nil, err
+		}
+		c = append(c, mountedChild)
+	}
+
+	return &MountedVBox{parent: parent, children: c}, nil
+}
 
 func (w *MountedVBox) MinimumWidth() DP {
 	if len(w.children) == 0 {
@@ -76,6 +96,12 @@ func (w *MountedVBox) SetBounds(bounds image.Rectangle) {
 		v.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+height))
 		posY += height
 	}
+}
+
+func (w *MountedVBox) SetChildren(children []Widget) error {
+	err := error(nil)
+	w.children, err = diffChildren(w.parent, w.children, children)
+	return err
 }
 
 func (w *MountedVBox) SetOrder(previous win.HWND) win.HWND {

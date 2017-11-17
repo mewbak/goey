@@ -12,25 +12,6 @@ func (_ *VBox) Kind() *WidgetKind {
 	return &vboxKind
 }
 
-func (w *VBox) Mount(parent NativeWidget) (MountedWidget, error) {
-	c := make([]MountedWidget, 0, len(w.Children))
-
-	for _, v := range w.Children {
-		mountedChild, err := v.Mount(parent)
-		if err != nil {
-			return nil, err
-		}
-		c = append(c, mountedChild)
-	}
-
-	return &MountedVBox{parent: parent, children: c}, nil
-}
-
-type MountedVBox struct {
-	parent   NativeWidget
-	children []MountedWidget
-}
-
 func (_ *MountedVBox) Kind() *WidgetKind {
 	return &vboxKind
 }
@@ -43,12 +24,6 @@ func (w *MountedVBox) Close() {
 func (w *MountedVBox) UpdateProps(data_ Widget) error {
 	data := data_.(*VBox)
 	return w.SetChildren(data.Children)
-}
-
-func (w *MountedVBox) SetChildren(children []Widget) error {
-	err := error(nil)
-	w.children, err = diffChildren(w.parent, w.children, children)
-	return err
 }
 
 func diffChildren(parent NativeWidget, lhs []MountedWidget, rhs []Widget) ([]MountedWidget, error) {
