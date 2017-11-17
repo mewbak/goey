@@ -1,10 +1,15 @@
 package goey
 
 import (
+	"os"
+
 	"github.com/lxn/win"
 )
 
-func Run() error {
+func run() error {
+	os.LockOSThread()
+	defer os.UnlockOSThread()
+
 	err := Loop(true)
 	for err == nil {
 		err = Loop(true)

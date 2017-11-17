@@ -13,25 +13,6 @@ func (_ *HBox) Kind() *WidgetKind {
 	return &hboxKind
 }
 
-func (w *HBox) Mount(parent NativeWidget) (MountedWidget, error) {
-	c := make([]MountedWidget, 0, len(w.Children))
-
-	for _, v := range w.Children {
-		mountedChild, err := v.Mount(parent)
-		if err != nil {
-			return nil, err
-		}
-		c = append(c, mountedChild)
-	}
-
-	align := w.Align
-	if align == DefaultAlign {
-		align = Justify
-	}
-
-	return &MountedHBox{parent: parent, children: c, align: align}, nil
-}
-
 func (_ *MountedHBox) Kind() *WidgetKind {
 	return &hboxKind
 }
