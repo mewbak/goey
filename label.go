@@ -12,6 +12,6 @@ func (_ *Label) Kind() *WidgetKind {
 	return &labelKind
 }
 
-func (_ *MountedLabel) Kind() *WidgetKind {
+func (_ *mountedLabel) Kind() *WidgetKind {
 	return &labelKind
 }

@@ -62,31 +62,31 @@ func (w *HR) Mount(parent NativeWidget) (MountedWidget, error) {
 		return nil, err
 	}
 
-	retval := &MountedHR{NativeWidget: NativeWidget{hwnd}}
+	retval := &mountedHR{NativeWidget: NativeWidget{hwnd}}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
-type MountedHR struct {
+type mountedHR struct {
 	NativeWidget
 }
 
-func (w *MountedHR) MinimumWidth() DP {
+func (w *mountedHR) MinimumWidth() DP {
 	return 1
 }
 
-func (w *MountedHR) CalculateHeight(width DP) DP {
+func (w *mountedHR) CalculateHeight(width DP) DP {
 	// Same as static text
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 13
 }
 
-func (w *MountedHR) SetBounds(bounds image.Rectangle) {
+func (w *mountedHR) SetBounds(bounds image.Rectangle) {
 	w.NativeWidget.SetBounds(bounds)
 }
 
-func (w *MountedHR) UpdateProps(data_ Widget) error {
+func (w *mountedHR) UpdateProps(data_ Widget) error {
 	return nil
 }
 
@@ -96,7 +96,7 @@ func hrWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (re
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*MountedHR)(unsafe.Pointer(w))
+			ptr := (*mountedHR)(unsafe.Pointer(w))
 			ptr.hWnd = 0
 		}
 		// Defer to the old window proc

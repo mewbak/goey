@@ -12,16 +12,11 @@ func (_ *VBox) Kind() *WidgetKind {
 	return &vboxKind
 }
 
-func (_ *MountedVBox) Kind() *WidgetKind {
+func (_ *mountedVBox) Kind() *WidgetKind {
 	return &vboxKind
 }
 
-func (w *MountedVBox) Close() {
-	// This widget does not hold a native control, so there are no resources
-	// beyond memory to cleanup.
-}
-
-func (w *MountedVBox) UpdateProps(data_ Widget) error {
+func (w *mountedVBox) UpdateProps(data_ Widget) error {
 	data := data_.(*VBox)
 	return w.SetChildren(data.Children)
 }

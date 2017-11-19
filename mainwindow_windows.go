@@ -39,7 +39,7 @@ func init() {
 }
 
 type MainWindow struct {
-	MountedVBox
+	mountedVBox
 
 	hWnd               win.HWND
 	dpi                image.Point
@@ -208,12 +208,12 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 	win.ReleaseDC(hwnd, hdc)
 
 	vbox := VBox{children}
-	mountedVBox, err := vbox.Mount(NativeWidget{hwnd})
+	mounted, err := vbox.Mount(NativeWidget{hwnd})
 	if err != nil {
 		win.DestroyWindow(hwnd)
 		return nil, err
 	}
-	retval.MountedVBox = *mountedVBox.(*MountedVBox)
+	retval.mountedVBox = *mounted.(*mountedVBox)
 
 	win.ShowWindow(hwnd, win.SW_SHOW /* info.wShowWindow */)
 	win.UpdateWindow(hwnd)
@@ -236,7 +236,7 @@ func (w *MainWindow) ClientMinimumWidth() int {
 		return w.clientMinimumWidth
 	}
 
-	w.clientMinimumWidth = w.MountedVBox.MinimumWidth().ToPixelsX()
+	w.clientMinimumWidth = w.mountedVBox.MinimumWidth().ToPixelsX()
 	return w.clientMinimumWidth
 }
 
@@ -247,7 +247,7 @@ func (w *MainWindow) SetText(value string) error {
 func (w *MainWindow) SetChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
 	vbox := VBox{children}
-	err := w.MountedVBox.UpdateProps(&vbox)
+	err := w.mountedVBox.UpdateProps(&vbox)
 	w.clientMinimumWidth = 0
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.

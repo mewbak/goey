@@ -61,7 +61,7 @@ func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
 	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_WNDPROC, syscall.NewCallback(buttonWindowProc))
 
-	retval := &MountedButton{
+	retval := &mountedButton{
 		NativeWidget: NativeWidget{hwnd},
 		onClick:      w.OnClick,
 		onFocus:      w.OnFocus,
@@ -72,25 +72,25 @@ func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-type MountedButton struct {
+type mountedButton struct {
 	NativeWidget
 	onClick func()
 	onFocus func()
 	onBlur  func()
 }
 
-func (w *MountedButton) MinimumWidth() DP {
+func (w *mountedButton) MinimumWidth() DP {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	// In the future, we should calculate the width based on the length of the text.
 	return 50
 }
 
-func (w *MountedButton) CalculateHeight(width DP) DP {
+func (w *mountedButton) CalculateHeight(width DP) DP {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23
 }
 
-func (w *MountedButton) UpdateProps(data_ Widget) error {
+func (w *mountedButton) UpdateProps(data_ Widget) error {
 	data := data_.(*Button)
 
 	w.SetText(data.Text)
@@ -109,14 +109,14 @@ func buttonWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*MountedButton)(unsafe.Pointer(w))
+			ptr := (*mountedButton)(unsafe.Pointer(w))
 			ptr.hWnd = 0
 		}
 		// Defer to the old window proc
 
 	case win.WM_SETFOCUS:
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*MountedButton)(unsafe.Pointer(w))
+			ptr := (*mountedButton)(unsafe.Pointer(w))
 			if ptr.onFocus != nil {
 				ptr.onFocus()
 			}
@@ -125,7 +125,7 @@ func buttonWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 
 	case win.WM_KILLFOCUS:
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*MountedButton)(unsafe.Pointer(w))
+			ptr := (*mountedButton)(unsafe.Pointer(w))
 			if ptr.onBlur != nil {
 				ptr.onBlur()
 			}
@@ -137,7 +137,7 @@ func buttonWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 		switch notification {
 		case win.BN_CLICKED:
 			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*MountedButton)(unsafe.Pointer(w))
+				ptr := (*mountedButton)(unsafe.Pointer(w))
 				if ptr.onClick != nil {
 					ptr.onClick()
 				}

@@ -11,6 +11,6 @@ func (_ *HR) Kind() *WidgetKind {
 	return &hrKind
 }
 
-func (_ *MountedHR) Kind() *WidgetKind {
+func (_ *mountedHR) Kind() *WidgetKind {
 	return &hrKind
 }

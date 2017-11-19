@@ -13,15 +13,11 @@ func (_ *HBox) Kind() *WidgetKind {
 	return &hboxKind
 }
 
-func (_ *MountedHBox) Kind() *WidgetKind {
+func (_ *mountedHBox) Kind() *WidgetKind {
 	return &hboxKind
 }
 
-func (w *MountedHBox) Close() {
-	// This widget does not hold a native control, so there are no resources
-	// beyond memory to cleanup.
-}
-
-func (w *MountedHBox) UpdateProps(data_ Widget) error {
-	panic("not implemented")
+func (w *mountedHBox) UpdateProps(data_ Widget) error {
+	data := data_.(*HBox)
+	return w.SetChildren(data.Children)
 }

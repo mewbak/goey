@@ -70,7 +70,7 @@ func (w *SelectInput) Mount(parent NativeWidget) (MountedWidget, error) {
 	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_WNDPROC, syscall.NewCallback(comboboxWindowProc))
 
-	retval := &MountedSelectInput{
+	retval := &mountedSelectInput{
 		NativeWidget: NativeWidget{hwnd},
 		onChange:     w.OnChange,
 		onFocus:      w.OnFocus,
@@ -81,24 +81,24 @@ func (w *SelectInput) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-type MountedSelectInput struct {
+type mountedSelectInput struct {
 	NativeWidget
 	onChange func(value int)
 	onFocus  func()
 	onBlur   func()
 }
 
-func (w *MountedSelectInput) MinimumWidth() DP {
+func (w *mountedSelectInput) MinimumWidth() DP {
 	// In the future, we should calculate the width based on the length of the text.
 	return 160
 }
 
-func (w *MountedSelectInput) CalculateHeight(width DP) DP {
+func (w *mountedSelectInput) CalculateHeight(width DP) DP {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23
 }
 
-func (w *MountedSelectInput) UpdateProps(data_ Widget) error {
+func (w *mountedSelectInput) UpdateProps(data_ Widget) error {
 	data := data_.(*SelectInput)
 
 	// TODO:  Update the items in the combobox
@@ -120,14 +120,14 @@ func comboboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*MountedSelectInput)(unsafe.Pointer(w))
+			ptr := (*mountedSelectInput)(unsafe.Pointer(w))
 			ptr.hWnd = 0
 		}
 		// Defer to the old window proc
 
 	case win.WM_SETFOCUS:
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*MountedSelectInput)(unsafe.Pointer(w))
+			ptr := (*mountedSelectInput)(unsafe.Pointer(w))
 			if ptr.onFocus != nil {
 				ptr.onFocus()
 			}
@@ -136,7 +136,7 @@ func comboboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 
 	case win.WM_KILLFOCUS:
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*MountedSelectInput)(unsafe.Pointer(w))
+			ptr := (*mountedSelectInput)(unsafe.Pointer(w))
 			if ptr.onBlur != nil {
 				ptr.onBlur()
 			}
@@ -148,7 +148,7 @@ func comboboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 		switch notification {
 		case win.CBN_SELCHANGE:
 			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*MountedSelectInput)(unsafe.Pointer(w))
+				ptr := (*mountedSelectInput)(unsafe.Pointer(w))
 				if ptr.onChange != nil {
 					cursel := win.SendMessage(hwnd, win.CB_GETCURSEL, 0, 0)
 					ptr.onChange(int(cursel))

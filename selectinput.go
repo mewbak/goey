@@ -18,6 +18,6 @@ func (_ *SelectInput) Kind() *WidgetKind {
 	return &selectKind
 }
 
-func (_ *MountedSelectInput) Kind() *WidgetKind {
+func (_ *mountedSelectInput) Kind() *WidgetKind {
 	return &selectKind
 }

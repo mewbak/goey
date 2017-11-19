@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type MountedHBox struct {
+type mountedHBox struct {
 	NativeWidget
 	children []MountedWidget
 }
@@ -27,7 +27,7 @@ func (w *HBox) Mount(parent NativeWidget) (MountedWidget, error) {
 		children = append(children, mountedWidget)
 	}
 
-	retval := &MountedHBox{
+	retval := &mountedHBox{
 		NativeWidget: NativeWidget{&control.Container.Widget},
 		children:     children,
 	}
@@ -38,11 +38,11 @@ func (w *HBox) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-func hbox_onDestroy(widget *gtk.Box, mounted *MountedHBox) {
+func hbox_onDestroy(widget *gtk.Box, mounted *mountedHBox) {
 	mounted.handle = nil
 }
 
-func (w *MountedHBox) SetChildren(children []Widget) error {
+func (w *mountedHBox) SetChildren(children []Widget) error {
 	err := error(nil)
 	w.children, err = diffChildren(w.NativeWidget, w.children, children)
 	return err

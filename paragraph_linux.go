@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type MountedP struct {
+type mountedP struct {
 	NativeWidget
 }
 
@@ -20,7 +20,7 @@ func (w *P) Mount(parent NativeWidget) (MountedWidget, error) {
 	control.SetLineWrap(true)
 	control.Show()
 
-	retval := &MountedP{
+	retval := &mountedP{
 		NativeWidget: NativeWidget{&control.Widget},
 	}
 
@@ -29,10 +29,10 @@ func (w *P) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-func paragraph_onDestroy(widget *gtk.Label, mounted *MountedP) {
+func paragraph_onDestroy(widget *gtk.Label, mounted *mountedP) {
 	mounted.handle = nil
 }
 
-func (w *MountedP) UpdateProps(data Widget) error {
+func (w *mountedP) UpdateProps(data Widget) error {
 	panic("not implemented")
 }

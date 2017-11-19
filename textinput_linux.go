@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type MountedTextInput struct {
+type mountedTextInput struct {
 	NativeWidget
 
 	onChange func(string)
@@ -23,7 +23,7 @@ func (w *TextInput) Mount(parent NativeWidget) (MountedWidget, error) {
 	control.SetText(w.Text)
 	control.SetPlaceholderText(w.Placeholder)
 
-	retval := &MountedTextInput{
+	retval := &mountedTextInput{
 		NativeWidget: NativeWidget{&control.Widget},
 		onChange:     w.OnChange,
 		onFocus:      w.OnFocus,
@@ -39,7 +39,7 @@ func (w *TextInput) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-func textinput_onChanged(widget *gtk.Entry, mounted *MountedTextInput) {
+func textinput_onChanged(widget *gtk.Entry, mounted *mountedTextInput) {
 	text, err := widget.GetText()
 	if err != nil {
 		// TODO:  What is the correct reporting here
@@ -48,10 +48,10 @@ func textinput_onChanged(widget *gtk.Entry, mounted *MountedTextInput) {
 	mounted.onChange(text)
 }
 
-func textinput_onDestroy(widget *gtk.Entry, mounted *MountedTextInput) {
+func textinput_onDestroy(widget *gtk.Entry, mounted *mountedTextInput) {
 	mounted.handle = nil
 }
 
-func (w *MountedTextInput) UpdateProps(data Widget) error {
+func (w *mountedTextInput) UpdateProps(data Widget) error {
 	panic("not implemented")
 }

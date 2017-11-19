@@ -6,7 +6,7 @@ import (
 	"github.com/lxn/win"
 )
 
-type MountedHBox struct {
+type mountedHBox struct {
 	parent   NativeWidget
 	children []MountedWidget
 	align    Alignment
@@ -30,10 +30,14 @@ func (w *HBox) Mount(parent NativeWidget) (MountedWidget, error) {
 		align = Justify
 	}
 
-	return &MountedHBox{parent: parent, children: c, align: align}, nil
+	return &mountedHBox{parent: parent, children: c, align: align}, nil
 }
 
-func (w *MountedHBox) MinimumWidth() DP {
+func (w *mountedHBox) Close() {
+	// nothing required
+}
+
+func (w *mountedHBox) MinimumWidth() DP {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -46,7 +50,7 @@ func (w *MountedHBox) MinimumWidth() DP {
 	return retval
 }
 
-func (w *MountedHBox) CalculateHeight(width DP) DP {
+func (w *mountedHBox) CalculateHeight(width DP) DP {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -81,7 +85,7 @@ func (w *MountedHBox) CalculateHeight(width DP) DP {
 	return retval
 }
 
-func (w *MountedHBox) SetBounds(bounds image.Rectangle) {
+func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 	width := bounds.Dx()
 	widthDP := DP(width * dpi.X / 96)
 	length := len(w.children)
@@ -118,7 +122,11 @@ func (w *MountedHBox) SetBounds(bounds image.Rectangle) {
 	}
 }
 
-func (w *MountedHBox) SetOrder(previous win.HWND) win.HWND {
+func (w *mountedHBox) SetChildren(children []Widget) error {
+	panic("not implemented")
+}
+
+func (w *mountedHBox) SetOrder(previous win.HWND) win.HWND {
 	for _, v := range w.children {
 		previous = v.SetOrder(previous)
 	}

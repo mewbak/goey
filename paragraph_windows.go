@@ -41,18 +41,18 @@ func (w *P) Mount(parent NativeWidget) (MountedWidget, error) {
 		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
 	}
 
-	retval := &MountedP{NativeWidget: NativeWidget{hwnd}, text: text}
+	retval := &mountedP{NativeWidget: NativeWidget{hwnd}, text: text}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
-type MountedP struct {
+type mountedP struct {
 	NativeWidget
 	text []uint16
 }
 
-func (w *MountedP) MinimumWidth() DP {
+func (w *mountedP) MinimumWidth() DP {
 	// If the printed text will be more than 60 characters wide, it will start
 	// to impact readability.  We want to force reflow in this case, so we limit
 	// the width
@@ -88,7 +88,7 @@ func (w *MountedP) MinimumWidth() DP {
 	return DP(int(rect.Right) * 96 / dpi.X)
 }
 
-func (w *MountedP) CalculateHeight(width DP) DP {
+func (w *mountedP) CalculateHeight(width DP) DP {
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
@@ -99,7 +99,7 @@ func (w *MountedP) CalculateHeight(width DP) DP {
 	return DP(int(rect.Bottom) * 96 / dpi.X)
 }
 
-func (w *MountedP) SetBounds(bounds image.Rectangle) {
+func (w *mountedP) SetBounds(bounds image.Rectangle) {
 	w.NativeWidget.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't
@@ -107,7 +107,7 @@ func (w *MountedP) SetBounds(bounds image.Rectangle) {
 	win.InvalidateRect(w.hWnd, nil, true)
 }
 
-func (w *MountedP) UpdateProps(data_ Widget) error {
+func (w *mountedP) UpdateProps(data_ Widget) error {
 	data := data_.(*Label)
 
 	text, err := syscall.UTF16FromString(data.Text)

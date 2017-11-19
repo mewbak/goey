@@ -4,6 +4,7 @@ var (
 	buttonKind = WidgetKind{"button"}
 )
 
+// Button describes a widget that users can click to initiate an action.
 type Button struct {
 	Text     string
 	Disabled bool
@@ -17,6 +18,6 @@ func (_ *Button) Kind() *WidgetKind {
 	return &buttonKind
 }
 
-func (_ *MountedButton) Kind() *WidgetKind {
+func (_ *mountedButton) Kind() *WidgetKind {
 	return &buttonKind
 }

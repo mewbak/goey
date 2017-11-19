@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type MountedButton struct {
+type mountedButton struct {
 	handle *gtk.Button
 
 	onClick func()
@@ -22,7 +22,7 @@ func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 	control.SetSensitive(!w.Disabled)
 
-	retval := &MountedButton{
+	retval := &mountedButton{
 		handle:  control,
 		onClick: w.OnClick,
 		onFocus: nil,
@@ -38,22 +38,22 @@ func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-func button_onClick(widget *gtk.Button, mounted *MountedButton) {
+func button_onClick(widget *gtk.Button, mounted *mountedButton) {
 	mounted.onClick()
 }
 
-func button_onDestroy(widget *gtk.Button, mounted *MountedButton) {
+func button_onDestroy(widget *gtk.Button, mounted *mountedButton) {
 	mounted.handle = nil
 }
 
-func (w *MountedButton) Close() {
+func (w *mountedButton) Close() {
 	if w.handle != nil {
 		w.handle.Destroy()
 		w.handle = nil
 	}
 }
 
-func (w *MountedButton) UpdateProps(data_ Widget) error {
+func (w *mountedButton) UpdateProps(data_ Widget) error {
 	data := data_.(*Button)
 
 	label_, err := w.handle.GetChild()

@@ -43,18 +43,18 @@ func (w *Label) Mount(parent NativeWidget) (MountedWidget, error) {
 		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
 	}
 
-	retval := &MountedLabel{NativeWidget: NativeWidget{hwnd}, text: text}
+	retval := &mountedLabel{NativeWidget: NativeWidget{hwnd}, text: text}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
-type MountedLabel struct {
+type mountedLabel struct {
 	NativeWidget
 	text []uint16
 }
 
-func (w *MountedLabel) MinimumWidth() DP {
+func (w *mountedLabel) MinimumWidth() DP {
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
@@ -66,12 +66,12 @@ func (w *MountedLabel) MinimumWidth() DP {
 	return DP(int(rect.Right) * 96 / dpi.X)
 }
 
-func (w *MountedLabel) CalculateHeight(width DP) DP {
+func (w *mountedLabel) CalculateHeight(width DP) DP {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 13
 }
 
-func (w *MountedLabel) SetBounds(bounds image.Rectangle) {
+func (w *mountedLabel) SetBounds(bounds image.Rectangle) {
 	w.NativeWidget.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't
@@ -79,7 +79,7 @@ func (w *MountedLabel) SetBounds(bounds image.Rectangle) {
 	win.InvalidateRect(w.hWnd, nil, true)
 }
 
-func (w *MountedLabel) UpdateProps(data_ Widget) error {
+func (w *mountedLabel) UpdateProps(data_ Widget) error {
 	data := data_.(*Label)
 
 	text, err := syscall.UTF16FromString(data.Text)

@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type MountedLabel struct {
+type mountedLabel struct {
 	NativeWidget
 }
 
@@ -21,7 +21,7 @@ func (w *Label) Mount(parent NativeWidget) (MountedWidget, error) {
 	control.SetLineWrap(false)
 	control.Show()
 
-	retval := &MountedLabel{
+	retval := &mountedLabel{
 		NativeWidget: NativeWidget{&control.Widget},
 	}
 
@@ -30,10 +30,10 @@ func (w *Label) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-func label_onDestroy(widget *gtk.Label, mounted *MountedLabel) {
+func label_onDestroy(widget *gtk.Label, mounted *mountedLabel) {
 	mounted.handle = nil
 }
 
-func (w *MountedLabel) UpdateProps(data Widget) error {
+func (w *mountedLabel) UpdateProps(data Widget) error {
 	panic("not implemented")
 }

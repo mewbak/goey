@@ -47,30 +47,30 @@ func (w *Checkbox) Mount(parent NativeWidget) (MountedWidget, error) {
 	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_WNDPROC, syscall.NewCallback(checkboxWindowProc))
 
-	retval := &MountedCheckbox{NativeWidget: NativeWidget{hwnd}, onChange: w.OnChange}
+	retval := &mountedCheckbox{NativeWidget: NativeWidget{hwnd}, onChange: w.OnChange}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
-type MountedCheckbox struct {
+type mountedCheckbox struct {
 	NativeWidget
 	onChange func(value bool)
 	onFocus  func()
 	onBlur   func()
 }
 
-func (w *MountedCheckbox) MinimumWidth() DP {
+func (w *mountedCheckbox) MinimumWidth() DP {
 	// In the future, we should calculate the width based on the length of the text.
 	return 160
 }
 
-func (w *MountedCheckbox) CalculateHeight(width DP) DP {
+func (w *mountedCheckbox) CalculateHeight(width DP) DP {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 17
 }
 
-func (w *MountedCheckbox) UpdateProps(data_ Widget) error {
+func (w *mountedCheckbox) UpdateProps(data_ Widget) error {
 	data := data_.(*Checkbox)
 
 	w.SetText(data.Text)
@@ -94,7 +94,7 @@ func checkboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*MountedCheckbox)(unsafe.Pointer(w))
+			ptr := (*mountedCheckbox)(unsafe.Pointer(w))
 			ptr.hWnd = 0
 		}
 		// Defer to the old window proc
@@ -109,7 +109,7 @@ func checkboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 			}
 			win.SendMessage(hwnd, win.BM_SETCHECK, check, 0)
 			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*MountedCheckbox)(unsafe.Pointer(w))
+				ptr := (*mountedCheckbox)(unsafe.Pointer(w))
 				if ptr.onChange != nil {
 					ptr.onChange(check == win.BST_CHECKED)
 				}

@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type MountedSelectInput struct {
+type mountedSelectInput struct {
 	NativeWidget
 
 	onChange func(int)
@@ -24,7 +24,7 @@ func (w *SelectInput) Mount(parent NativeWidget) (MountedWidget, error) {
 		control.AppendText(v)
 	}
 
-	retval := &MountedSelectInput{
+	retval := &mountedSelectInput{
 		NativeWidget: NativeWidget{&control.Widget},
 		onChange:     w.OnChange,
 		onFocus:      w.OnFocus,
@@ -40,14 +40,14 @@ func (w *SelectInput) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-func selectinput_onChanged(widget *gtk.ComboBoxText, mounted *MountedSelectInput) {
+func selectinput_onChanged(widget *gtk.ComboBoxText, mounted *mountedSelectInput) {
 	mounted.onChange(widget.GetActive())
 }
 
-func selectinput_onDestroy(widget *gtk.ComboBoxText, mounted *MountedSelectInput) {
+func selectinput_onDestroy(widget *gtk.ComboBoxText, mounted *mountedSelectInput) {
 	mounted.handle = nil
 }
 
-func (w *MountedSelectInput) UpdateProps(data Widget) error {
+func (w *mountedSelectInput) UpdateProps(data Widget) error {
 	panic("not implemented")
 }

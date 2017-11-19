@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type MountedVBox struct {
+type mountedVBox struct {
 	NativeWidget
 	children []MountedWidget
 }
@@ -27,7 +27,7 @@ func (w *VBox) Mount(parent NativeWidget) (MountedWidget, error) {
 		children = append(children, mountedWidget)
 	}
 
-	retval := &MountedVBox{
+	retval := &mountedVBox{
 		NativeWidget: NativeWidget{&control.Widget},
 		children:     children,
 	}
@@ -38,11 +38,11 @@ func (w *VBox) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-func vbox_onDestroy(widget *gtk.Box, mounted *MountedVBox) {
+func vbox_onDestroy(widget *gtk.Box, mounted *mountedVBox) {
 	mounted.handle = nil
 }
 
-func (w *MountedVBox) SetChildren(children []Widget) error {
+func (w *mountedVBox) SetChildren(children []Widget) error {
 	err := error(nil)
 	w.children, err = diffChildren(w.NativeWidget, w.children, children)
 	return err

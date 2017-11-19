@@ -17,6 +17,6 @@ func (_ *Checkbox) Kind() *WidgetKind {
 	return &checkboxKind
 }
 
-func (_ *MountedCheckbox) Kind() *WidgetKind {
+func (_ *mountedCheckbox) Kind() *WidgetKind {
 	return &checkboxKind
 }

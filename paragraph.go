@@ -23,6 +23,6 @@ func (_ *P) Kind() *WidgetKind {
 	return &paragraphKind
 }
 
-func (_ *MountedP) Kind() *WidgetKind {
+func (_ *mountedP) Kind() *WidgetKind {
 	return &paragraphKind
 }

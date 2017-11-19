@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type MountedCheckbox struct {
+type mountedCheckbox struct {
 	NativeWidget
 
 	onChange func(bool)
@@ -21,7 +21,7 @@ func (w *Checkbox) Mount(parent NativeWidget) (MountedWidget, error) {
 	}
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 
-	retval := &MountedCheckbox{
+	retval := &mountedCheckbox{
 		NativeWidget: NativeWidget{&control.Bin.Container.Widget},
 		onChange:     w.OnChange,
 		onFocus:      nil,
@@ -37,14 +37,14 @@ func (w *Checkbox) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-func checkbox_onClicked(widget *gtk.CheckButton, mounted *MountedCheckbox) {
+func checkbox_onClicked(widget *gtk.CheckButton, mounted *mountedCheckbox) {
 	mounted.onChange(widget.GetActive())
 }
 
-func checkbox_onDestroy(widget *gtk.CheckButton, mounted *MountedCheckbox) {
+func checkbox_onDestroy(widget *gtk.CheckButton, mounted *mountedCheckbox) {
 	mounted.handle = nil
 }
 
-func (w *MountedCheckbox) UpdateProps(data Widget) error {
+func (w *mountedCheckbox) UpdateProps(data Widget) error {
 	panic("not implemented")
 }

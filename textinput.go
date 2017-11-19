@@ -18,6 +18,6 @@ func (_ *TextInput) Kind() *WidgetKind {
 	return &textInputKind
 }
 
-func (_ *MountedTextInput) Kind() *WidgetKind {
+func (_ *mountedTextInput) Kind() *WidgetKind {
 	return &textInputKind
 }

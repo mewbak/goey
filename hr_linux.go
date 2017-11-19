@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type MountedHR struct {
+type mountedHR struct {
 	NativeWidget
 }
 
@@ -17,7 +17,7 @@ func (w *HR) Mount(parent NativeWidget) (MountedWidget, error) {
 	}
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 
-	retval := &MountedHR{
+	retval := &mountedHR{
 		NativeWidget: NativeWidget{&control.Widget},
 	}
 
@@ -27,10 +27,10 @@ func (w *HR) Mount(parent NativeWidget) (MountedWidget, error) {
 	return retval, nil
 }
 
-func hr_onDestroy(widget *gtk.Separator, mounted *MountedHR) {
+func hr_onDestroy(widget *gtk.Separator, mounted *mountedHR) {
 	mounted.handle = nil
 }
 
-func (w *MountedHR) UpdateProps(data Widget) error {
+func (w *mountedHR) UpdateProps(data Widget) error {
 	return nil
 }

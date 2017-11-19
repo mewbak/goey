@@ -6,7 +6,7 @@ import (
 	"github.com/lxn/win"
 )
 
-type MountedVBox struct {
+type mountedVBox struct {
 	parent   NativeWidget
 	children []MountedWidget
 }
@@ -22,10 +22,15 @@ func (w *VBox) Mount(parent NativeWidget) (MountedWidget, error) {
 		c = append(c, mountedChild)
 	}
 
-	return &MountedVBox{parent: parent, children: c}, nil
+	return &mountedVBox{parent: parent, children: c}, nil
 }
 
-func (w *MountedVBox) MinimumWidth() DP {
+func (w *mountedVBox) Close() {
+	// On this platform, the mountedVBox handles layout, but does not actually
+	// have an HWND, so there are no resources to release.
+}
+
+func (w *mountedVBox) MinimumWidth() DP {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -47,11 +52,11 @@ func calculateGap(previous MountedWidget, current MountedWidget) DP {
 	// need to infer the relationship.
 	//
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	if _, ok := previous.(*MountedLabel); ok {
+	if _, ok := previous.(*mountedLabel); ok {
 		return 5
 	}
-	if _, ok := previous.(*MountedCheckbox); ok {
-		if _, ok := current.(*MountedCheckbox); ok {
+	if _, ok := previous.(*mountedCheckbox); ok {
+		if _, ok := current.(*mountedCheckbox); ok {
 			return 7
 		}
 	}
@@ -59,7 +64,7 @@ func calculateGap(previous MountedWidget, current MountedWidget) DP {
 	return 11
 }
 
-func (w *MountedVBox) CalculateHeight(width DP) DP {
+func (w *mountedVBox) CalculateHeight(width DP) DP {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -73,7 +78,7 @@ func (w *MountedVBox) CalculateHeight(width DP) DP {
 	return retval
 }
 
-func (w *MountedVBox) SetBounds(bounds image.Rectangle) {
+func (w *mountedVBox) SetBounds(bounds image.Rectangle) {
 	if len(w.children) == 0 {
 		return
 	}
@@ -98,13 +103,13 @@ func (w *MountedVBox) SetBounds(bounds image.Rectangle) {
 	}
 }
 
-func (w *MountedVBox) SetChildren(children []Widget) error {
+func (w *mountedVBox) SetChildren(children []Widget) error {
 	err := error(nil)
 	w.children, err = diffChildren(w.parent, w.children, children)
 	return err
 }
 
-func (w *MountedVBox) SetOrder(previous win.HWND) win.HWND {
+func (w *mountedVBox) SetOrder(previous win.HWND) win.HWND {
 	for _, v := range w.children {
 		previous = v.SetOrder(previous)
 	}
