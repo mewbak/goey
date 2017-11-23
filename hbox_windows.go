@@ -37,52 +37,62 @@ func (w *mountedHBox) Close() {
 	// nothing required
 }
 
-func (w *mountedHBox) MinimumWidth() DP {
+func (w *mountedHBox) MeasureWidth() (DP, DP) {
 	if len(w.children) == 0 {
-		return 0
+		return 0, 0
 	}
 
-	retval := w.children[0].MinimumWidth()
+	min, max := w.children[0].MeasureWidth()
 	for _, v := range w.children[1:] {
-		retval = retval + v.MinimumWidth() + 8
+		tmpMin, tmpMax := v.MeasureWidth()
+		min = min + tmpMin + 8
+		max = max + tmpMax + 8
 	}
-	w.minimumWidth = retval
-	return retval
+	w.minimumWidth = min
+	return min, max
 }
 
-func (w *mountedHBox) CalculateHeight(width DP) DP {
+func (w *mountedHBox) MeasureHeight(width DP) (DP, DP) {
 	if len(w.children) == 0 {
-		return 0
+		return 0, 0
 	}
 
 	if w.minimumWidth == 0 {
-		w.MinimumWidth()
+		w.MeasureWidth()
 		if w.minimumWidth == 0 {
-			return 0
+			return 0, 0
 		}
 	}
 
 	if w.minimumWidth >= width || w.align == Justify {
 		width = (width + 8) / DP(len(w.children))
 
-		retval := w.children[0].CalculateHeight(width)
+		min, max := w.children[0].MeasureHeight(width)
 		for _, v := range w.children[1:] {
-			tmp := v.CalculateHeight(width)
-			if tmp > retval {
-				retval = tmp
+			tmpMin, tmpMax := v.MeasureHeight(width)
+			if tmpMin > min {
+				min = tmpMin
+			}
+			if tmpMax > max {
+				max = tmpMax
 			}
 		}
-		return retval
+		return min, max
 	}
 
-	retval := w.children[0].CalculateHeight(w.children[0].MinimumWidth())
+	minWidth, _ := w.children[0].MeasureWidth()
+	min, max := w.children[0].MeasureHeight(minWidth)
 	for _, v := range w.children[1:] {
-		tmp := v.CalculateHeight(w.children[0].MinimumWidth())
-		if tmp > retval {
-			retval = tmp
+		minWidth, _ = v.MeasureWidth()
+		tmpMin, tmpMax := v.MeasureHeight(minWidth)
+		if tmpMin > min {
+			min = tmpMin
+		}
+		if tmpMax > max {
+			max = tmpMax
 		}
 	}
-	return retval
+	return min, max
 }
 
 func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
@@ -91,7 +101,7 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 	length := len(w.children)
 
 	if w.minimumWidth == 0 {
-		w.MinimumWidth()
+		w.MeasureWidth()
 		if w.minimumWidth == 0 {
 			return
 		}
@@ -107,7 +117,8 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 	} else if w.align == Left {
 		posX := bounds.Min.X
 		for _, v := range w.children {
-			posX2 := posX + v.MinimumWidth().ToPixelsX()
+			min, _ := v.MeasureWidth()
+			posX2 := posX + min.ToPixelsX()
 			v.SetBounds(image.Rect(posX, bounds.Min.Y, posX2, bounds.Max.Y))
 			posX = posX2 + 8
 		}
@@ -115,7 +126,8 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 		posX := bounds.Max.X
 		for i := len(w.children); i > 0; i-- {
 			v := w.children[i-1]
-			posX2 := posX - v.MinimumWidth().ToPixelsX()
+			min, _ := v.MeasureWidth()
+			posX2 := posX - min.ToPixelsX()
 			v.SetBounds(image.Rect(posX2, bounds.Min.Y, posX, bounds.Max.Y))
 			posX = posX2 - 8
 		}

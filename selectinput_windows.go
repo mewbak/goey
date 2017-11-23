@@ -88,14 +88,14 @@ type mountedSelectInput struct {
 	onBlur   func()
 }
 
-func (w *mountedSelectInput) MinimumWidth() DP {
+func (w *mountedSelectInput) MeasureWidth() (DP, DP) {
 	// In the future, we should calculate the width based on the length of the text.
-	return 160
+	return 160, 160
 }
 
-func (w *mountedSelectInput) CalculateHeight(width DP) DP {
+func (w *mountedSelectInput) MeasureHeight(width DP) (DP, DP) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23
+	return 23, 23
 }
 
 func (w *mountedSelectInput) UpdateProps(data_ Widget) error {

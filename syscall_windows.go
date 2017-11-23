@@ -12,11 +12,13 @@ var (
 	moduxtheme  = syscall.MustLoadDLL("uxtheme")
 
 	procGetDesktopWindow              = moduser32.MustFindProc("GetDesktopWindow")
-	procSetWindowText                 = moduser32.MustFindProc("SetWindowTextW")
 	procGetWindowText                 = moduser32.MustFindProc("GetWindowTextW")
 	procGetWindowTextLength           = moduser32.MustFindProc("GetWindowTextLengthW")
+	procSetWindowText                 = moduser32.MustFindProc("SetWindowTextW")
 	procGetDialogBaseUnits            = moduser32.MustFindProc("GetDialogBaseUnits")
 	procMapWindowPoints               = moduser32.MustFindProc("MapWindowPoints")
+	procEnableScrollBar               = moduser32.MustFindProc("EnableScrollBar")
+	procShowScrollBar                 = moduser32.MustFindProc("ShowScrollBar")
 	procInitCommonControls            = modcomctl32.MustFindProc("InitCommonControls")
 	procGetThemeBackgroundContentRect = moduxtheme.MustFindProc("GetThemeBackgroundContentRect")
 )
@@ -67,4 +69,15 @@ func MapWindowPoints(hWndFrom win.HWND, hWndTo win.HWND, lpPoints *win.POINT, cP
 
 func InitCommonControls() {
 	syscall.Syscall(procInitCommonControls.Addr(), 0, 0, 0, 0)
+}
+
+func EnableScrollBar(hWnd win.HWND, wSBFlags uint, wArrows uint) win.BOOL {
+	r0, _, _ := syscall.Syscall(procSetWindowText.Addr(), 3, uintptr(hWnd), uintptr(wSBFlags), uintptr(wArrows))
+	return win.BOOL(r0)
+}
+
+func ShowScrollBar(hWnd win.HWND, wSBFlags uint, bShow win.BOOL) win.BOOL {
+
+	r0, _, _ := syscall.Syscall(procShowScrollBar.Addr(), 3, uintptr(hWnd), uintptr(wSBFlags), uintptr(bShow))
+	return win.BOOL(r0)
 }

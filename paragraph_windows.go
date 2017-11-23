@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	paragraphMaxMinWidth int
+	paragraphMinWidth int
+	paragraphMaxWidth int
 )
 
 func (w *P) Mount(parent NativeWidget) (MountedWidget, error) {
@@ -52,24 +53,29 @@ type mountedP struct {
 	text []uint16
 }
 
-func (w *mountedP) MinimumWidth() DP {
-	// If the printed text will be more than 60 characters wide, it will start
+func paragraphMeasureReflowLimits(hwnd win.HWND) {
+	hdc := win.GetDC(hwnd)
+	if hMessageFont != 0 {
+		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
+	}
+	// Calculate the width of a single 'm' (find the em width)
+	rect := win.RECT{0, 0, 0xffff, 0xffff}
+	caption := [...]uint16{'m'}
+	win.DrawTextEx(hdc, &caption[0], 1, &rect, win.DT_CALCRECT, nil)
+	win.ReleaseDC(hwnd, hdc)
+	paragraphMinWidth = int(rect.Right) * 20
+	paragraphMaxWidth = int(rect.Right) * 80
+}
+
+func (w *mountedP) MeasureWidth() (DP, DP) {
+	// If the printed text will be more than 80 characters wide, it will start
 	// to impact readability.  We want to force reflow in this case, so we limit
 	// the width
 	//
 	// See the following for the conversion from characters to relative pixels.
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	if paragraphMaxMinWidth == 0 {
-		hdc := win.GetDC(w.hWnd)
-		if hMessageFont != 0 {
-			win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
-		}
-		// Calculate the width of a single 'm' (find the em width)
-		rect := win.RECT{0, 0, 0xffff, 0xffff}
-		caption := [...]uint16{'m'}
-		win.DrawTextEx(hdc, &caption[0], 1, &rect, win.DT_CALCRECT, nil)
-		win.ReleaseDC(w.hWnd, hdc)
-		paragraphMaxMinWidth = int(rect.Right) * 40
+	if paragraphMaxWidth == 0 {
+		paragraphMeasureReflowLimits(w.hWnd)
 	}
 
 	hdc := win.GetDC(w.hWnd)
@@ -82,13 +88,16 @@ func (w *mountedP) MinimumWidth() DP {
 
 	// For reflow if the text is more than 60 characters wide
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	if int(rect.Right) > paragraphMaxMinWidth {
-		return DP(paragraphMaxMinWidth * 96 / dpi.X)
+	if int(rect.Right) > paragraphMinWidth {
+		return DP(paragraphMinWidth * 96 / dpi.X), DP(paragraphMaxWidth * 96 / dpi.X)
 	}
-	return DP(int(rect.Right) * 96 / dpi.X)
+
+	// Not enough text for reflow.
+	retval := DP(int(rect.Right) * 96 / dpi.X)
+	return retval, retval
 }
 
-func (w *mountedP) CalculateHeight(width DP) DP {
+func (w *mountedP) MeasureHeight(width DP) (DP, DP) {
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
@@ -96,7 +105,9 @@ func (w *mountedP) CalculateHeight(width DP) DP {
 	rect := win.RECT{0, 0, int32(width), 0xffff}
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
 	win.ReleaseDC(w.hWnd, hdc)
-	return DP(int(rect.Bottom) * 96 / dpi.X)
+
+	retval := DP(int(rect.Bottom) * 96 / dpi.X)
+	return retval, retval
 }
 
 func (w *mountedP) SetBounds(bounds image.Rectangle) {

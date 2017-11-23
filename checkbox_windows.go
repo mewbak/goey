@@ -60,14 +60,14 @@ type mountedCheckbox struct {
 	onBlur   func()
 }
 
-func (w *mountedCheckbox) MinimumWidth() DP {
+func (w *mountedCheckbox) MeasureWidth() (DP, DP) {
 	// In the future, we should calculate the width based on the length of the text.
-	return 160
+	return 160, 160
 }
 
-func (w *mountedCheckbox) CalculateHeight(width DP) DP {
+func (w *mountedCheckbox) MeasureHeight(width DP) (DP, DP) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 17
+	return 17, 17
 }
 
 func (w *mountedCheckbox) UpdateProps(data_ Widget) error {

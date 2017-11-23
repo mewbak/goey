@@ -13,6 +13,7 @@ var (
 		className *uint16
 		atom      win.ATOM
 	}
+
 	mainWindowCount int32 = 0
 	hMessageFont    win.HFONT
 	activeWindow    uintptr
@@ -41,9 +42,13 @@ func init() {
 type MainWindow struct {
 	mountedVBox
 
-	hWnd               win.HWND
-	dpi                image.Point
-	clientMinimumWidth int
+	hWnd             win.HWND
+	dpi              image.Point
+	clientMinWidth   int
+	clientMaxWidth   int
+	clientMinHeight  int
+	clientHeight     int
+	scrollbarVisible bool
 }
 
 func registerMainWindowClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, error) {
@@ -62,6 +67,16 @@ func registerMainWindowClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, er
 	return atom, nil
 }
 
+func onSizeCalcMargin(clientMinWidth int, availableWidth int, margin int) int {
+	if clientMinWidth+2*margin <= availableWidth {
+		return margin
+	} else if clientMinWidth >= availableWidth {
+		return 0
+	} else {
+		return (availableWidth - clientMinWidth) / 2
+	}
+}
+
 func onSize(hwnd win.HWND, mw *MainWindow) {
 	// The recommended margin in device independent pixels.
 	const margin = 11
@@ -69,6 +84,7 @@ func onSize(hwnd win.HWND, mw *MainWindow) {
 	// Get the client rect for the main window.  This is the layout region.
 	rect := win.RECT{}
 	win.GetClientRect(hwnd, &rect)
+	scrollPos := 0
 
 	// Yes it's ugly, the SetBounds method for windows uses the screen DPI to
 	// convert device independent pixels into actual pixels, but the DPI can change
@@ -78,16 +94,55 @@ func onSize(hwnd win.HWND, mw *MainWindow) {
 
 	// We will adjust the margins based on the screen size and preferred width
 	// of the content.
-	cpw := mw.ClientMinimumWidth()
-	width := rect.Right - rect.Left
-	if cpw+2*margin <= int(width) {
-		mw.SetBounds(image.Rect(int(rect.Left)+margin, int(rect.Top)+margin, int(rect.Right)-margin, int(rect.Bottom)-margin))
-	} else if cpw >= int(width) {
-		mw.SetBounds(image.Rect(int(rect.Left), int(rect.Top)+margin, int(rect.Right), int(rect.Bottom)-margin))
+	availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin)
+	width := int(rect.Right-rect.Left) - 2*availableMargin
+	minHeight, _ := mw.MeasureHeight(ToDPsX(width))
+	if minHeight.ToPixelsY() > int(rect.Bottom-rect.Top)-2*margin {
+		if !mw.scrollbarVisible {
+			// Create the scroll bar
+			ShowScrollBar(hwnd, win.SB_VERT, win.TRUE)
+			mw.scrollbarVisible = true
+
+			// The client rect will have changed.  Need to refresh.
+			win.GetClientRect(hwnd, &rect)
+
+			// Update the calculations above, since we now need to account for
+			// the width of the scroll bar
+			availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin)
+			width := int(rect.Right-rect.Left) - 2*availableMargin
+			minHeight, _ = mw.MeasureHeight(ToDPsX(width))
+		}
+		si := win.SCROLLINFO{
+			FMask: win.SIF_PAGE | win.SIF_RANGE,
+			NMin:  0,
+			NMax:  int32(minHeight.ToPixelsY()) + 2*margin,
+			NPage: uint32(rect.Bottom - rect.Top),
+		}
+		si.CbSize = uint32(unsafe.Sizeof(si))
+		win.SetScrollInfo(hwnd, win.SB_VERT, &si, true)
+		si.FMask = win.SIF_POS
+		win.GetScrollInfo(hwnd, win.SB_CTL, &si)
+		scrollPos = int(si.NPos)
 	} else {
-		left := (int(width) - cpw) / 2
-		mw.SetBounds(image.Rect(left, int(rect.Top)+margin, left+cpw, int(rect.Bottom)-margin))
+		if mw.scrollbarVisible {
+			// Remove the scroll bar
+			ShowScrollBar(hwnd, win.SB_VERT, win.FALSE)
+			mw.scrollbarVisible = false
+
+			// The client rect will have changed.  Need to refresh.
+			win.GetClientRect(hwnd, &rect)
+
+			// Update the calculations above, since we now need to account for
+			// the width of the scroll bar
+			availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin)
+			width := int(rect.Right-rect.Left) - 2*availableMargin
+			minHeight, _ = mw.MeasureHeight(ToDPsX(width))
+		}
 	}
+
+	// Update the position of all of the children
+	mw.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin-scrollPos, int(rect.Right)-availableMargin, int(rect.Top)+margin+minHeight.ToPixelsY()-scrollPos))
+	win.InvalidateRect(hwnd, &rect, true)
 }
 
 func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr {
@@ -126,11 +181,84 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 		// Defer to the default window proc
 
 	case win.WM_GETMINMAXINFO:
-		mmi := (*win.MINMAXINFO)(unsafe.Pointer(lParam))
-		if mmi.PtMinTrackSize.X > 0 {
-			mmi.PtMinTrackSize.Y = mmi.PtMinTrackSize.X
+		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
+			mw := (*MainWindow)(unsafe.Pointer(w))
+			mmi := (*win.MINMAXINFO)(unsafe.Pointer(lParam))
+			if mmi.PtMinTrackSize.X < int32(mw.clientMinWidth) {
+				mmi.PtMinTrackSize.X = int32(mw.clientMinWidth)
+			}
+			//if mmi.PtMaxTrackSize.X > int32(mw.clientMaxWidth) {
+			//	mmi.PtMaxTrackSize.X = int32(mw.clientMaxWidth)
+			//}
+			mmi.PtMinTrackSize.Y += int32(mw.clientMinHeight)
+			if mmi.PtMinTrackSize.Y > 480 {
+				mmi.PtMinTrackSize.Y = 480
+			}
 		}
 		return 0
+
+	case win.WM_VSCROLL:
+		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
+			mw := (*MainWindow)(unsafe.Pointer(w))
+
+			// Get all the vertial scroll bar information.
+			si := win.SCROLLINFO{FMask: win.SIF_ALL}
+			si.CbSize = uint32(unsafe.Sizeof(si))
+			win.GetScrollInfo(hwnd, win.SB_VERT, &si)
+
+			// Save the position for comparison later on.
+			yPos := si.NPos
+			switch win.LOWORD(uint32(wParam)) {
+			// User clicked the HOME keyboard key.
+			case win.SB_TOP:
+				si.NPos = si.NMin
+
+			// User clicked the END keyboard key.
+			case win.SB_BOTTOM:
+				si.NPos = si.NMax
+
+			// User clicked the top arrow.
+			case win.SB_LINEUP:
+				si.NPos -= 11
+
+			// User clicked the bottom arrow.
+			case win.SB_LINEDOWN:
+				si.NPos += 11
+
+			// User clicked the scroll bar shaft above the scroll box.
+			case win.SB_PAGEUP:
+				si.NPos -= int32(si.NPage)
+
+			// User clicked the scroll bar shaft below the scroll box.
+			case win.SB_PAGEDOWN:
+				si.NPos += int32(si.NPage)
+
+			// User dragged the scroll box.
+			case win.SB_THUMBTRACK:
+				si.NPos = si.NTrackPos
+			}
+
+			// Set the position and then retrieve it.  Due to adjustments
+			// by Windows it may not be the same as the value set.
+			si.FMask = win.SIF_POS
+			win.SetScrollInfo(hwnd, win.SB_VERT, &si, true)
+			win.GetScrollInfo(hwnd, win.SB_VERT, &si)
+
+			// If the position has changed, scroll window and update it.
+			if si.NPos != yPos {
+				const margin = 11
+
+				rect := win.RECT{}
+				win.GetClientRect(hwnd, &rect)
+				availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin)
+				mw.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin-int(si.NPos), int(rect.Right)-availableMargin, int(rect.Bottom)-margin))
+
+				// TODO:  Use ScrollWindow function to reduce flicker during scrolling
+				win.InvalidateRect(hwnd, &rect, true)
+			}
+
+			return 0
+		}
 
 	case win.WM_COMMAND:
 		if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE {
@@ -164,7 +292,7 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 		mainWindow.atom = atom
 	}
 
-	style := uint32(win.WS_OVERLAPPEDWINDOW)
+	style := uint32(win.WS_OVERLAPPEDWINDOW | win.WS_VSCROLL)
 	//if !settings.Resizable {
 	//	style = win.WS_OVERLAPPED | win.WS_CAPTION | win.WS_MINIMIZEBOX | win.WS_SYSMENU
 	//}
@@ -185,8 +313,8 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 	if err != nil {
 		return nil, err
 	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, mainWindow.className, windowName_, style, rect.Left, rect.Top,
-		rect.Right-rect.Left, rect.Bottom-rect.Top,
+	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, mainWindow.className, windowName_, style,
+		rect.Left, rect.Top, rect.Right-rect.Left, rect.Bottom-rect.Top,
 		win.HWND_DESKTOP, 0, hInstance, nil)
 	if hwnd == 0 {
 		win.OleUninitialize()
@@ -214,12 +342,24 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 		return nil, err
 	}
 	retval.mountedVBox = *mounted.(*mountedVBox)
+	retval.determineSizeConstraints()
 
 	win.ShowWindow(hwnd, win.SW_SHOW /* info.wShowWindow */)
 	win.UpdateWindow(hwnd)
 	win.SetFocus(hwnd)
 
 	return retval, nil
+}
+
+func (w *MainWindow) determineSizeConstraints() {
+	dpi = w.dpi
+	clientMinWidth, clientMaxWidth := w.mountedVBox.MeasureWidth()
+	w.clientMinWidth, w.clientMaxWidth = (clientMinWidth + 22).ToPixelsX(), (clientMaxWidth + 22).ToPixelsX()
+	clientMinHeight, _ := w.mountedVBox.MeasureHeight(clientMaxWidth)
+	w.clientMinHeight = (clientMinHeight + 22).ToPixelsY()
+	if w.clientMinHeight > 480 {
+		w.clientMinHeight = 480
+	}
 }
 
 func (w *MainWindow) Close() {
@@ -231,32 +371,23 @@ func (w *MainWindow) Close() {
 	win.OleUninitialize()
 }
 
-func (w *MainWindow) ClientMinimumWidth() int {
-	if w.clientMinimumWidth > 0 {
-		return w.clientMinimumWidth
-	}
-
-	w.clientMinimumWidth = w.mountedVBox.MinimumWidth().ToPixelsX()
-	return w.clientMinimumWidth
-}
-
-func (w *MainWindow) SetText(value string) error {
-	return NativeWidget{w.hWnd}.SetText(value)
-}
-
 func (w *MainWindow) SetChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
 	vbox := VBox{children}
 	err := w.mountedVBox.UpdateProps(&vbox)
-	w.clientMinimumWidth = 0
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
 	currentHwnd := win.HWND_TOP
 	for _, v := range w.children {
 		currentHwnd = v.SetOrder(currentHwnd)
 	}
-	w.clientMinimumWidth = 0
+	// Determine the size constraints for the window
+	w.determineSizeConstraints()
 	onSize(w.hWnd, w)
 	// ... and we're done
 	return err
+}
+
+func (w *MainWindow) SetText(value string) error {
+	return NativeWidget{w.hWnd}.SetText(value)
 }

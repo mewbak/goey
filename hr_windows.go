@@ -72,14 +72,14 @@ type mountedHR struct {
 	NativeWidget
 }
 
-func (w *mountedHR) MinimumWidth() DP {
-	return 1
+func (w *mountedHR) MeasureWidth() (DP, DP) {
+	return 1, 0xffff
 }
 
-func (w *mountedHR) CalculateHeight(width DP) DP {
+func (w *mountedHR) MeasureHeight(width DP) (DP, DP) {
 	// Same as static text
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 13
+	return 13, 13
 }
 
 func (w *mountedHR) SetBounds(bounds image.Rectangle) {

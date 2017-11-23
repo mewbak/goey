@@ -79,15 +79,16 @@ type mountedButton struct {
 	onBlur  func()
 }
 
-func (w *mountedButton) MinimumWidth() DP {
+func (w *mountedButton) MeasureWidth() (DP, DP) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	// In the future, we should calculate the width based on the length of the text.
-	return 50
+	// In the future, we should calculate the width based on the length of the
+	// text, and update the minimum if required.
+	return 50, 50
 }
 
-func (w *mountedButton) CalculateHeight(width DP) DP {
+func (w *mountedButton) MeasureHeight(width DP) (DP, DP) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23
+	return 23, 23
 }
 
 func (w *mountedButton) UpdateProps(data_ Widget) error {

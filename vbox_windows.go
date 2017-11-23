@@ -30,19 +30,22 @@ func (w *mountedVBox) Close() {
 	// have an HWND, so there are no resources to release.
 }
 
-func (w *mountedVBox) MinimumWidth() DP {
+func (w *mountedVBox) MeasureWidth() (DP, DP) {
 	if len(w.children) == 0 {
-		return 0
+		return 0, 0
 	}
 
-	retval := w.children[0].MinimumWidth()
+	min, max := w.children[0].MeasureWidth()
 	for _, v := range w.children[1:] {
-		tmp := v.MinimumWidth()
-		if tmp > retval {
-			retval = tmp
+		tmpMin, tmpMax := v.MeasureWidth()
+		if tmpMin > min {
+			min = tmpMin
+		}
+		if tmpMax > max {
+			max = tmpMax
 		}
 	}
-	return retval
+	return min, max
 }
 
 func calculateGap(previous MountedWidget, current MountedWidget) DP {
@@ -64,18 +67,21 @@ func calculateGap(previous MountedWidget, current MountedWidget) DP {
 	return 11
 }
 
-func (w *mountedVBox) CalculateHeight(width DP) DP {
+func (w *mountedVBox) MeasureHeight(width DP) (DP, DP) {
 	if len(w.children) == 0 {
-		return 0
+		return 0, 0
 	}
 
 	previous := w.children[0]
-	retval := previous.CalculateHeight(width)
+	min, max := previous.MeasureHeight(width)
 	for _, v := range w.children[1:] {
-		retval += calculateGap(previous, v) + v.CalculateHeight(width)
+		tmpMin, tmpMax := v.MeasureHeight(width)
+		gap := calculateGap(previous, v)
+		min += tmpMin + gap
+		max += tmpMax + gap
 		previous = v
 	}
-	return retval
+	return min, max
 }
 
 func (w *mountedVBox) SetBounds(bounds image.Rectangle) {
@@ -88,7 +94,8 @@ func (w *mountedVBox) SetBounds(bounds image.Rectangle) {
 	widthDP := DP(width * 96 / dpi.X)
 
 	previous := w.children[0]
-	height := previous.CalculateHeight(widthDP).ToPixelsY()
+	min, _ := previous.MeasureHeight(widthDP)
+	height := min.ToPixelsY()
 	previous.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+height))
 	posY += height
 
@@ -97,7 +104,8 @@ func (w *mountedVBox) SetBounds(bounds image.Rectangle) {
 		posY += calculateGap(previous, v).ToPixelsY()
 		previous = v
 
-		height := v.CalculateHeight(widthDP).ToPixelsY()
+		min, _ := previous.MeasureHeight(widthDP)
+		height := min.ToPixelsY()
 		v.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+height))
 		posY += height
 	}

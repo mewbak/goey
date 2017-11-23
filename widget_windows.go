@@ -33,6 +33,10 @@ func (dp DP) ToPixelsY() int {
 	return int(dp) * dpi.Y / 96
 }
 
+func ToDPsX(pixels int) DP {
+	return DP(int(pixels) * 96 / dpi.X)
+}
+
 // NativeWidget
 
 type NativeWidget struct {
@@ -48,7 +52,6 @@ func (w NativeWidget) SetDisabled(value bool) {
 }
 
 func (w *NativeWidget) SetBounds(bounds image.Rectangle) {
-
 	win.MoveWindow(w.hWnd, int32(bounds.Min.X), int32(bounds.Min.Y), int32(bounds.Dx()), int32(bounds.Dy()), true)
 }
 
@@ -81,8 +84,8 @@ func (w *NativeWidget) Close() {
 }
 
 type NativeMountedWidget interface {
-	MinimumWidth() DP
-	CalculateHeight(width DP) DP
+	MeasureWidth() (min DP, max DP)
+	MeasureHeight(width DP) (min DP, max DP)
 	SetBounds(bounds image.Rectangle)
 	SetOrder(previous win.HWND) win.HWND
 }

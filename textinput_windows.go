@@ -92,14 +92,18 @@ type mountedTextInput struct {
 	onEnterKey func(value string)
 }
 
-func (w *mountedTextInput) MinimumWidth() DP {
+func (w *mountedTextInput) MeasureWidth() (DP, DP) {
+	if paragraphMaxWidth == 0 {
+		paragraphMeasureReflowLimits(w.hWnd)
+	}
+
 	// In the future, we should calculate the width based on the length of the text.
-	return 80
+	return DP(paragraphMinWidth * 96 / dpi.X), DP(paragraphMaxWidth * 96 / dpi.X)
 }
 
-func (w *mountedTextInput) CalculateHeight(width DP) DP {
+func (w *mountedTextInput) MeasureHeight(width DP) (DP, DP) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23
+	return 23, 23
 }
 
 func (w *mountedTextInput) UpdateProps(data_ Widget) error {
