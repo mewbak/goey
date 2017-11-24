@@ -56,6 +56,7 @@ func render() []goey.Widget {
 	}
 	return []goey.Widget{
 		&goey.Button{Text: text,
+			Default: true,
 			OnClick: func() {
 				clickCount++
 				update()

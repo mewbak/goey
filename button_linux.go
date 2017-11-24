@@ -3,15 +3,16 @@ package goey
 import (
 	"unsafe"
 
+	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 type mountedButton struct {
 	handle *gtk.Button
 
-	onClick func()
-	onFocus func()
-	onBlur  func()
+	onClick clickSlot
+	onFocus focusSlot
+	onBlur  blurSlot
 }
 
 func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
@@ -19,27 +20,38 @@ func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
 	if err != nil {
 		return nil, err
 	}
+	control.AddEvents(int(gdk.FOCUS_CHANGE_MASK))
+
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 	control.SetSensitive(!w.Disabled)
+	control.SetCanDefault(true)
+	if w.Default {
+		control.GrabDefault()
+	}
 
 	retval := &mountedButton{
-		handle:  control,
-		onClick: w.OnClick,
-		onFocus: nil,
-		onBlur:  nil,
+		handle: control,
 	}
 
-	if w.OnClick != nil {
-		control.Connect("clicked", button_onClick, retval)
-	}
 	control.Connect("destroy", button_onDestroy, retval)
+	err = retval.onClick.Set(&control.Widget, w.OnClick)
+	if err != nil {
+		control.Destroy()
+		return nil, err
+	}
+	err = retval.onFocus.Set(&control.Widget, w.OnFocus)
+	if err != nil {
+		control.Destroy()
+		return nil, err
+	}
+	err = retval.onBlur.Set(&control.Widget, w.OnBlur)
+	if err != nil {
+		control.Destroy()
+		return nil, err
+	}
 	control.Show()
 
 	return retval, nil
-}
-
-func button_onClick(widget *gtk.Button, mounted *mountedButton) {
-	mounted.onClick()
 }
 
 func button_onDestroy(widget *gtk.Button, mounted *mountedButton) {
@@ -48,6 +60,9 @@ func button_onDestroy(widget *gtk.Button, mounted *mountedButton) {
 
 func (w *mountedButton) Close() {
 	if w.handle != nil {
+		w.onClick.Close(&w.handle.Widget)
+		w.onFocus.Close(&w.handle.Widget)
+		w.onBlur.Close(&w.handle.Widget)
 		w.handle.Destroy()
 		w.handle = nil
 	}
@@ -63,10 +78,22 @@ func (w *mountedButton) UpdateProps(data_ Widget) error {
 
 	(*gtk.Label)(unsafe.Pointer(label_)).SetText(data.Text)
 	w.handle.SetSensitive(!data.Disabled)
-	// TODO:  Update property .Default
-	w.onClick = data.OnClick
-	w.onFocus = data.OnFocus
-	w.onBlur = data.OnBlur
+
+	if data.Default {
+		w.handle.GrabDefault()
+	}
+	err = w.onClick.Set(&w.handle.Widget, data.OnClick)
+	if err != nil {
+		return err
+	}
+	err = w.onFocus.Set(&w.handle.Widget, data.OnFocus)
+	if err != nil {
+		return err
+	}
+	err = w.onBlur.Set(&w.handle.Widget, data.OnBlur)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
