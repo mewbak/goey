@@ -47,3 +47,9 @@ func (w *mountedVBox) SetChildren(children []Widget) error {
 	w.children, err = diffChildren(w.NativeWidget, w.children, children)
 	return err
 }
+
+func (w *mountedVBox) UpdateProps(data_ Widget) error {
+	data := data_.(*VBox)
+
+	return w.SetChildren(data.Children)
+}

@@ -198,3 +198,11 @@ func (w *mountedVBox) SetOrder(previous win.HWND) win.HWND {
 	}
 	return previous
 }
+
+func (w *mountedVBox) UpdateProps(data_ Widget) error {
+	data := data_.(*VBox)
+
+	w.alignMain = data.AlignMain
+	w.alignCross = data.AlignCross
+	return w.SetChildren(data.Children)
+}

@@ -37,14 +37,6 @@ func (_ *mountedVBox) Kind() *WidgetKind {
 	return &vboxKind
 }
 
-func (w *mountedVBox) UpdateProps(data_ Widget) error {
-	data := data_.(*VBox)
-
-	w.alignMain = data.AlignMain
-	w.alignCross = data.AlignCross
-	return w.SetChildren(data.Children)
-}
-
 func diffChildren(parent NativeWidget, lhs []MountedWidget, rhs []Widget) ([]MountedWidget, error) {
 
 	// If the new tree does not contain any children, then we can trivially

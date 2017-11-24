@@ -16,7 +16,7 @@ func init() {
 
 type MainWindow struct {
 	handle *gtk.Window
-	vbox   MountedVBox
+	vbox   mountedVBox
 }
 
 func newMainWindow(title string, children []Widget) (*MainWindow, error) {
@@ -26,7 +26,7 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 	}
 	atomic.AddInt32(&mainWindowCount, 1)
 
-	retval := &MainWindow{app, MountedVBox{}}
+	retval := &MainWindow{app, mountedVBox{}}
 
 	app.SetTitle(title)
 	app.Connect("destroy", mainwindow_onDestroy, retval)
@@ -38,7 +38,7 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 		app.Destroy()
 		return nil, err
 	}
-	retval.vbox = *vbox.(*MountedVBox)
+	retval.vbox = *vbox.(*mountedVBox)
 
 	return retval, nil
 }
@@ -50,9 +50,14 @@ func (mw *MainWindow) Close() {
 	}
 }
 
+func (w *MainWindow) SetAlignment(main MainAxisAlign, cross CrossAxisAlign) {
+	//w.alignMain = main
+	//w.alignCross = cross
+}
+
 func (mw *MainWindow) SetChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
-	vbox := VBox{children}
+	vbox := VBox{Children: children}
 	err := mw.vbox.UpdateProps(&vbox)
 	// ... and we're done
 	return err
