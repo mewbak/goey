@@ -54,7 +54,7 @@ type mountedLabel struct {
 	text []uint16
 }
 
-func (w *mountedLabel) MeasureWidth() (DP, DP) {
+func (w *mountedLabel) MeasureWidth() (DIP, DIP) {
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
@@ -63,11 +63,11 @@ func (w *mountedLabel) MeasureWidth() (DP, DP) {
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	retval := DP(int(rect.Right) * 96 / dpi.X)
+	retval := ToDIPX(int(rect.Right))
 	return retval, retval
 }
 
-func (w *mountedLabel) MeasureHeight(width DP) (DP, DP) {
+func (w *mountedLabel) MeasureHeight(width DIP) (DIP, DIP) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 13, 13
 }

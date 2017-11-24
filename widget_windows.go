@@ -17,26 +17,6 @@ func nextControlID() uint32 {
 	return atomic.AddUint32(&currentControlID, 1)
 }
 
-// DPI support
-
-var (
-	dpi image.Point
-)
-
-type DP int
-
-func (dp DP) ToPixelsX() int {
-	return int(dp) * dpi.X / 96
-}
-
-func (dp DP) ToPixelsY() int {
-	return int(dp) * dpi.Y / 96
-}
-
-func ToDPsX(pixels int) DP {
-	return DP(int(pixels) * 96 / dpi.X)
-}
-
 // NativeWidget
 
 type NativeWidget struct {
@@ -84,8 +64,8 @@ func (w *NativeWidget) Close() {
 }
 
 type NativeMountedWidget interface {
-	MeasureWidth() (min DP, max DP)
-	MeasureHeight(width DP) (min DP, max DP)
+	MeasureWidth() (min DIP, max DIP)
+	MeasureHeight(width DIP) (min DIP, max DIP)
 	SetBounds(bounds image.Rectangle)
 	SetOrder(previous win.HWND) win.HWND
 }

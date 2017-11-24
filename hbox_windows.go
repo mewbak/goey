@@ -9,9 +9,9 @@ import (
 type mountedHBox struct {
 	parent   NativeWidget
 	children []MountedWidget
-	align    Alignment
+	align    TextAlignment
 
-	minimumWidth DP
+	minimumWidth DIP
 }
 
 func (w *HBox) Mount(parent NativeWidget) (MountedWidget, error) {
@@ -37,7 +37,7 @@ func (w *mountedHBox) Close() {
 	// nothing required
 }
 
-func (w *mountedHBox) MeasureWidth() (DP, DP) {
+func (w *mountedHBox) MeasureWidth() (DIP, DIP) {
 	if len(w.children) == 0 {
 		return 0, 0
 	}
@@ -52,7 +52,7 @@ func (w *mountedHBox) MeasureWidth() (DP, DP) {
 	return min, max
 }
 
-func (w *mountedHBox) MeasureHeight(width DP) (DP, DP) {
+func (w *mountedHBox) MeasureHeight(width DIP) (DIP, DIP) {
 	if len(w.children) == 0 {
 		return 0, 0
 	}
@@ -65,7 +65,7 @@ func (w *mountedHBox) MeasureHeight(width DP) (DP, DP) {
 	}
 
 	if w.minimumWidth >= width || w.align == Justify {
-		width = (width + 8) / DP(len(w.children))
+		width = (width + 8) / DIP(len(w.children))
 
 		min, max := w.children[0].MeasureHeight(width)
 		for _, v := range w.children[1:] {
@@ -97,7 +97,7 @@ func (w *mountedHBox) MeasureHeight(width DP) (DP, DP) {
 
 func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 	width := bounds.Dx()
-	widthDP := DP(width * dpi.X / 96)
+	widthDP := ToDIPX(width)
 	length := len(w.children)
 
 	if w.minimumWidth == 0 {
@@ -118,7 +118,7 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 		posX := bounds.Min.X
 		for _, v := range w.children {
 			min, _ := v.MeasureWidth()
-			posX2 := posX + min.ToPixelsX()
+			posX2 := posX + min.PixelsX()
 			v.SetBounds(image.Rect(posX, bounds.Min.Y, posX2, bounds.Max.Y))
 			posX = posX2 + 8
 		}
@@ -127,7 +127,7 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 		for i := len(w.children); i > 0; i-- {
 			v := w.children[i-1]
 			min, _ := v.MeasureWidth()
-			posX2 := posX - min.ToPixelsX()
+			posX2 := posX - min.PixelsX()
 			v.SetBounds(image.Rect(posX2, bounds.Min.Y, posX, bounds.Max.Y))
 			posX = posX2 - 8
 		}

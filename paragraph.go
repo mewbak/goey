@@ -4,10 +4,10 @@ var (
 	paragraphKind = WidgetKind{"paragraph"}
 )
 
-type Alignment uint8
+type TextAlignment uint8
 
 const (
-	DefaultAlign = Alignment(iota)
+	DefaultAlign = TextAlignment(iota)
 	Left
 	Center
 	Right
@@ -16,7 +16,7 @@ const (
 
 type P struct {
 	Text  string
-	Align Alignment
+	Align TextAlignment
 }
 
 func (_ *P) Kind() *WidgetKind {

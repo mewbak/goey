@@ -20,7 +20,7 @@ func init() {
 }
 
 func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
-	text, err := syscall.UTF16PtrFromString(w.Text)
+	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
 		style = style | win.BS_DEFPUSHBUTTON
 	}
 
-	hwnd := win.CreateWindowEx(0, buttonClassName, text, style,
+	hwnd := win.CreateWindowEx(0, buttonClassName, &text[0], style,
 		10, 10, 100, 100,
 		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
@@ -63,6 +63,7 @@ func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
 
 	retval := &mountedButton{
 		NativeWidget: NativeWidget{hwnd},
+		text:         text,
 		onClick:      w.OnClick,
 		onFocus:      w.OnFocus,
 		onBlur:       w.OnBlur,
@@ -74,19 +75,33 @@ func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
 
 type mountedButton struct {
 	NativeWidget
+	text []uint16
+
 	onClick func()
 	onFocus func()
 	onBlur  func()
 }
 
-func (w *mountedButton) MeasureWidth() (DP, DP) {
+func (w *mountedButton) MeasureWidth() (DIP, DIP) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	// In the future, we should calculate the width based on the length of the
-	// text, and update the minimum if required.
-	return 50, 50
+
+	hdc := win.GetDC(w.hWnd)
+	if hMessageFont != 0 {
+		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
+	}
+	rect := win.RECT{0, 0, 0xffff, 0xffff}
+	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
+	win.ReleaseDC(w.hWnd, hdc)
+
+	retval := ToDIPX(int(rect.Right) + 7)
+	if retval < 75 {
+		return 75, 75
+	}
+
+	return retval, retval
 }
 
-func (w *mountedButton) MeasureHeight(width DP) (DP, DP) {
+func (w *mountedButton) MeasureHeight(width DIP) (DIP, DIP) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23, 23
 }
@@ -94,7 +109,13 @@ func (w *mountedButton) MeasureHeight(width DP) (DP, DP) {
 func (w *mountedButton) UpdateProps(data_ Widget) error {
 	data := data_.(*Button)
 
+	text, err := syscall.UTF16FromString(data.Text)
+	if err != nil {
+		return err
+	}
+
 	w.SetText(data.Text)
+	w.text = text
 	w.SetDisabled(data.Disabled)
 	// TODO:  Update property .Default
 	w.onClick = data.OnClick

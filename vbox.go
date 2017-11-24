@@ -4,8 +4,29 @@ var (
 	vboxKind = WidgetKind{"vbox"}
 )
 
+type MainAxisAlign uint8
+
+const (
+	MainStart = MainAxisAlign(iota)
+	MainCenter
+	MainEnd
+	SpaceAround
+	SpaceBetween
+)
+
+type CrossAxisAlign uint8
+
+const (
+	Stretch = CrossAxisAlign(iota)
+	CrossStart
+	CrossCenter
+	CrossEnd
+)
+
 type VBox struct {
-	Children []Widget
+	Children   []Widget
+	AlignMain  MainAxisAlign
+	AlignCross CrossAxisAlign
 }
 
 func (_ *VBox) Kind() *WidgetKind {
@@ -18,6 +39,9 @@ func (_ *mountedVBox) Kind() *WidgetKind {
 
 func (w *mountedVBox) UpdateProps(data_ Widget) error {
 	data := data_.(*VBox)
+
+	w.alignMain = data.AlignMain
+	w.alignCross = data.AlignCross
 	return w.SetChildren(data.Children)
 }
 

@@ -6,7 +6,7 @@ var (
 
 type HBox struct {
 	Children []Widget
-	Align    Alignment
+	Align    TextAlignment
 }
 
 func (_ *HBox) Kind() *WidgetKind {

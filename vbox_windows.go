@@ -7,8 +7,10 @@ import (
 )
 
 type mountedVBox struct {
-	parent   NativeWidget
-	children []MountedWidget
+	parent     NativeWidget
+	children   []MountedWidget
+	alignMain  MainAxisAlign
+	alignCross CrossAxisAlign
 }
 
 func (w *VBox) Mount(parent NativeWidget) (MountedWidget, error) {
@@ -30,7 +32,7 @@ func (w *mountedVBox) Close() {
 	// have an HWND, so there are no resources to release.
 }
 
-func (w *mountedVBox) MeasureWidth() (DP, DP) {
+func (w *mountedVBox) MeasureWidth() (DIP, DIP) {
 	if len(w.children) == 0 {
 		return 0, 0
 	}
@@ -48,7 +50,7 @@ func (w *mountedVBox) MeasureWidth() (DP, DP) {
 	return min, max
 }
 
-func calculateGap(previous MountedWidget, current MountedWidget) DP {
+func calculateGap(previous MountedWidget, current MountedWidget) DIP {
 	// The vertical gap between most controls is 11 relative pixels.  However,
 	// this is reduced to 5 relative pixels between a label and the following
 	// control.  This relationship is not capture in the widget tree, so we
@@ -67,7 +69,7 @@ func calculateGap(previous MountedWidget, current MountedWidget) DP {
 	return 11
 }
 
-func (w *mountedVBox) MeasureHeight(width DP) (DP, DP) {
+func (w *mountedVBox) MeasureHeight(width DIP) (DIP, DIP) {
 	if len(w.children) == 0 {
 		return 0, 0
 	}
@@ -91,23 +93,96 @@ func (w *mountedVBox) SetBounds(bounds image.Rectangle) {
 
 	posY := bounds.Min.Y
 	width := bounds.Dx()
-	widthDP := DP(width * 96 / dpi.X)
+	widthDP := ToDIPX(width)
+	height := bounds.Dy()
+	heightDP := ToDIPY(height)
+	minTotal, maxTotal := w.MeasureHeight(widthDP)
+
+	if heightDP < minTotal {
+		panic("not implemented")
+	}
+
+	// If there is more space than necessary, then we need to distribute the extra space.
+	extraGap := 0
+	if heightDP >= maxTotal {
+		switch w.alignMain {
+		case MainStart:
+			// No need to do any adjustment.  The algorithm below will lay out
+			// controls aligned to the top.
+		case MainCenter:
+			// Adjust the starting position to align the contents.
+			posY += (height - maxTotal.PixelsY()) / 2
+
+		case MainEnd:
+			// Adjust the starting position to align the contents.
+			posY += height - maxTotal.PixelsY()
+
+		case SpaceAround:
+			extraGap = (heightDP - maxTotal).PixelsY() / (len(w.children) + 1)
+			posY += extraGap
+
+		case SpaceBetween:
+			if len(w.children) > 1 {
+				extraGap = (heightDP - maxTotal).PixelsY() / (len(w.children) - 1)
+			} else {
+				// There are no controls between which to put the extra space.
+				// The following essentially convert SpaceBetween to SpaceAround
+				extraGap = (heightDP - maxTotal).PixelsY() / (len(w.children) + 1)
+				posY += extraGap
+			}
+		}
+
+		// Reduce available height
+		heightDP = maxTotal
+		height = heightDP.PixelsY()
+	}
+
+	scale1, scale2 := DIP(0), DIP(1)
+	if heightDP > minTotal && maxTotal > minTotal {
+		scale1, scale2 = heightDP-minTotal, maxTotal-minTotal
+	}
 
 	previous := w.children[0]
-	min, _ := previous.MeasureHeight(widthDP)
-	height := min.ToPixelsY()
-	previous.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+height))
-	posY += height
+	min, max := previous.MeasureHeight(widthDP)
+	h := (min + (max-min)*scale1/scale2).PixelsY()
+	switch w.alignCross {
+	case CrossStart:
+		_, maxX := previous.MeasureWidth()
+		if newWidth := maxX.PixelsX(); newWidth < width {
+			previous.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Min.X+newWidth, posY+h))
+		} else {
+			previous.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+h))
+		}
+	case CrossCenter:
+		_, maxX := previous.MeasureWidth()
+		if newWidth := maxX.PixelsX(); newWidth < width {
+			x1 := (bounds.Min.X + bounds.Max.X - newWidth) / 2
+			x2 := (bounds.Min.X + bounds.Max.X + newWidth) / 2
+			previous.SetBounds(image.Rect(x1, posY, x2, posY+h))
+		} else {
+			previous.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+h))
+		}
+	case CrossEnd:
+		_, maxX := previous.MeasureWidth()
+		if newWidth := maxX.PixelsX(); newWidth < width {
+			previous.SetBounds(image.Rect(bounds.Max.X-newWidth, posY, bounds.Max.X, posY+h))
+		} else {
+			previous.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+h))
+		}
+	case Stretch:
+		previous.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+h))
+	}
+	posY += h
 
 	// Assuming that height of bounds is sufficient
 	for _, v := range w.children[1:] {
-		posY += calculateGap(previous, v).ToPixelsY()
+		posY += calculateGap(previous, v).PixelsY() + extraGap
 		previous = v
 
-		min, _ := previous.MeasureHeight(widthDP)
-		height := min.ToPixelsY()
-		v.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+height))
-		posY += height
+		min, max := previous.MeasureHeight(widthDP)
+		h := (min + (max-min)*scale1/scale2).PixelsY()
+		v.SetBounds(image.Rect(bounds.Min.X, posY, bounds.Max.X, posY+h))
+		posY += h
 	}
 }
 

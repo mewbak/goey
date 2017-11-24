@@ -1,7 +1,7 @@
 package goey
 
 var (
-	textInputKind = WidgetKind{"textInput"}
+	textInputKind = WidgetKind{"textinput"}
 )
 
 type TextInput struct {

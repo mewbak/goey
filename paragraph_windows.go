@@ -67,7 +67,7 @@ func paragraphMeasureReflowLimits(hwnd win.HWND) {
 	paragraphMaxWidth = int(rect.Right) * 80
 }
 
-func (w *mountedP) MeasureWidth() (DP, DP) {
+func (w *mountedP) MeasureWidth() (DIP, DIP) {
 	// If the printed text will be more than 80 characters wide, it will start
 	// to impact readability.  We want to force reflow in this case, so we limit
 	// the width
@@ -89,15 +89,15 @@ func (w *mountedP) MeasureWidth() (DP, DP) {
 	// For reflow if the text is more than 60 characters wide
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	if int(rect.Right) > paragraphMinWidth {
-		return DP(paragraphMinWidth * 96 / dpi.X), DP(paragraphMaxWidth * 96 / dpi.X)
+		return ToDIPX(paragraphMinWidth), ToDIPX(paragraphMaxWidth)
 	}
 
 	// Not enough text for reflow.
-	retval := DP(int(rect.Right) * 96 / dpi.X)
+	retval := ToDIPX(int(rect.Right))
 	return retval, retval
 }
 
-func (w *mountedP) MeasureHeight(width DP) (DP, DP) {
+func (w *mountedP) MeasureHeight(width DIP) (DIP, DIP) {
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
@@ -106,7 +106,7 @@ func (w *mountedP) MeasureHeight(width DP) (DP, DP) {
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	retval := DP(int(rect.Bottom) * 96 / dpi.X)
+	retval := ToDIPY(int(rect.Bottom))
 	return retval, retval
 }
 

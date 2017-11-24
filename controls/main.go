@@ -34,6 +34,7 @@ func main() {
 				Align: goey.Right,
 			},
 			&goey.SelectInput{Items: []string{"Choice 1", "Choice 2", "Choice 3"}, OnChange: func(v int) { println("cb1 ", v) }},
+			&goey.TextArea{},
 		},
 	)
 	if err != nil {

@@ -1,7 +1,7 @@
 package goey
 
 var (
-	selectKind = WidgetKind{"select"}
+	selectKind = WidgetKind{"selectinput"}
 )
 
 type SelectInput struct {

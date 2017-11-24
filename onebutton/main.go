@@ -18,6 +18,7 @@ func main() {
 		return
 	}
 	defer mw.Close()
+	mw.SetAlignment(goey.MainCenter, goey.CrossCenter)
 	mainWindow = mw
 
 	goey.Run()

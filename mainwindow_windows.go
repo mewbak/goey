@@ -90,14 +90,14 @@ func onSize(hwnd win.HWND, mw *MainWindow) {
 	// convert device independent pixels into actual pixels, but the DPI can change
 	// from window to window when the computer has multiple monitors.  Fortunately,
 	// all layout should happen in the GUI thread.
-	dpi = mw.dpi
+	DPI = mw.dpi
 
 	// We will adjust the margins based on the screen size and preferred width
 	// of the content.
 	availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin)
 	width := int(rect.Right-rect.Left) - 2*availableMargin
-	minHeight, _ := mw.MeasureHeight(ToDPsX(width))
-	if minHeight.ToPixelsY() > int(rect.Bottom-rect.Top)-2*margin {
+	minHeight, _ := mw.MeasureHeight(ToDIPX(width))
+	if minHeight.PixelsY() > int(rect.Bottom-rect.Top)-2*margin {
 		if !mw.scrollbarVisible {
 			// Create the scroll bar
 			ShowScrollBar(hwnd, win.SB_VERT, win.TRUE)
@@ -110,12 +110,12 @@ func onSize(hwnd win.HWND, mw *MainWindow) {
 			// the width of the scroll bar
 			availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin)
 			width := int(rect.Right-rect.Left) - 2*availableMargin
-			minHeight, _ = mw.MeasureHeight(ToDPsX(width))
+			minHeight, _ = mw.MeasureHeight(ToDIPX(width))
 		}
 		si := win.SCROLLINFO{
 			FMask: win.SIF_PAGE | win.SIF_RANGE,
 			NMin:  0,
-			NMax:  int32(minHeight.ToPixelsY()) + 2*margin,
+			NMax:  int32(minHeight.PixelsY()) + 2*margin,
 			NPage: uint32(rect.Bottom - rect.Top),
 		}
 		si.CbSize = uint32(unsafe.Sizeof(si))
@@ -123,6 +123,9 @@ func onSize(hwnd win.HWND, mw *MainWindow) {
 		si.FMask = win.SIF_POS
 		win.GetScrollInfo(hwnd, win.SB_CTL, &si)
 		scrollPos = int(si.NPos)
+
+		// Perform layout
+		mw.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin-scrollPos, int(rect.Right)-availableMargin, int(rect.Top)+margin+minHeight.PixelsY()-scrollPos))
 	} else {
 		if mw.scrollbarVisible {
 			// Remove the scroll bar
@@ -134,14 +137,14 @@ func onSize(hwnd win.HWND, mw *MainWindow) {
 
 			// Update the calculations above, since we now need to account for
 			// the width of the scroll bar
-			availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin)
-			width := int(rect.Right-rect.Left) - 2*availableMargin
-			minHeight, _ = mw.MeasureHeight(ToDPsX(width))
+			availableMargin = onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin)
 		}
+
+		// Perform layout
+		mw.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin, int(rect.Right)-availableMargin, int(rect.Bottom)-margin))
 	}
 
 	// Update the position of all of the children
-	mw.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin-scrollPos, int(rect.Right)-availableMargin, int(rect.Top)+margin+minHeight.ToPixelsY()-scrollPos))
 	win.InvalidateRect(hwnd, &rect, true)
 }
 
@@ -251,7 +254,9 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 				rect := win.RECT{}
 				win.GetClientRect(hwnd, &rect)
 				availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin)
-				mw.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin-int(si.NPos), int(rect.Right)-availableMargin, int(rect.Bottom)-margin))
+				width := int(rect.Right-rect.Left) - 2*availableMargin
+				minHeight, _ := mw.MeasureHeight(ToDIPX(width))
+				mw.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin-int(si.NPos), int(rect.Right)-availableMargin, int(rect.Top)+margin+minHeight.PixelsY()-int(si.NPos)))
 
 				// TODO:  Use ScrollWindow function to reduce flicker during scrolling
 				win.InvalidateRect(hwnd, &rect, true)
@@ -292,7 +297,7 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 		mainWindow.atom = atom
 	}
 
-	style := uint32(win.WS_OVERLAPPEDWINDOW | win.WS_VSCROLL)
+	style := uint32(win.WS_OVERLAPPEDWINDOW)
 	//if !settings.Resizable {
 	//	style = win.WS_OVERLAPPED | win.WS_CAPTION | win.WS_MINIMIZEBOX | win.WS_SYSMENU
 	//}
@@ -335,7 +340,7 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 	retval.dpi.Y = int(win.GetDeviceCaps(hdc, win.LOGPIXELSY))
 	win.ReleaseDC(hwnd, hdc)
 
-	vbox := VBox{children}
+	vbox := VBox{children, MainStart, Stretch}
 	mounted, err := vbox.Mount(NativeWidget{hwnd})
 	if err != nil {
 		win.DestroyWindow(hwnd)
@@ -352,11 +357,11 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 }
 
 func (w *MainWindow) determineSizeConstraints() {
-	dpi = w.dpi
+	DPI = w.dpi
 	clientMinWidth, clientMaxWidth := w.mountedVBox.MeasureWidth()
-	w.clientMinWidth, w.clientMaxWidth = (clientMinWidth + 22).ToPixelsX(), (clientMaxWidth + 22).ToPixelsX()
+	w.clientMinWidth, w.clientMaxWidth = (clientMinWidth + 22).PixelsX(), (clientMaxWidth + 22).PixelsX()
 	clientMinHeight, _ := w.mountedVBox.MeasureHeight(clientMaxWidth)
-	w.clientMinHeight = (clientMinHeight + 22).ToPixelsY()
+	w.clientMinHeight = (clientMinHeight + 22).PixelsY()
 	if w.clientMinHeight > 480 {
 		w.clientMinHeight = 480
 	}
@@ -371,9 +376,16 @@ func (w *MainWindow) Close() {
 	win.OleUninitialize()
 }
 
+func (w *MainWindow) SetAlignment(main MainAxisAlign, cross CrossAxisAlign) {
+	w.alignMain = main
+	w.alignCross = cross
+
+	onSize(w.hWnd, w)
+}
+
 func (w *MainWindow) SetChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
-	vbox := VBox{children}
+	vbox := VBox{children, w.mountedVBox.alignMain, w.mountedVBox.alignCross}
 	err := w.mountedVBox.UpdateProps(&vbox)
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
