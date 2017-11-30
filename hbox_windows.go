@@ -7,11 +7,13 @@ import (
 )
 
 type mountedHBox struct {
-	parent   NativeWidget
-	children []MountedWidget
-	align    TextAlignment
+	parent     NativeWidget
+	children   []MountedWidget
+	alignMain  MainAxisAlign
+	alignCross CrossAxisAlign
 
 	minimumWidth DIP
+	maximumWidth DIP
 }
 
 func (w *HBox) Mount(parent NativeWidget) (MountedWidget, error) {
@@ -25,12 +27,10 @@ func (w *HBox) Mount(parent NativeWidget) (MountedWidget, error) {
 		c = append(c, mountedChild)
 	}
 
-	align := w.Align
-	if align == DefaultAlign {
-		align = Justify
-	}
-
-	return &mountedHBox{parent: parent, children: c, align: align}, nil
+	return &mountedHBox{parent: parent, children: c,
+		alignMain:  w.AlignMain,
+		alignCross: w.AlignCross,
+	}, nil
 }
 
 func (w *mountedHBox) Close() {
@@ -49,6 +49,7 @@ func (w *mountedHBox) MeasureWidth() (DIP, DIP) {
 		max = max + tmpMax + 8
 	}
 	w.minimumWidth = min
+	w.maximumWidth = max
 	return min, max
 }
 
@@ -64,27 +65,18 @@ func (w *mountedHBox) MeasureHeight(width DIP) (DIP, DIP) {
 		}
 	}
 
-	if w.minimumWidth >= width || w.align == Justify {
-		width = (width + 8) / DIP(len(w.children))
-
-		min, max := w.children[0].MeasureHeight(width)
-		for _, v := range w.children[1:] {
-			tmpMin, tmpMax := v.MeasureHeight(width)
-			if tmpMin > min {
-				min = tmpMin
-			}
-			if tmpMax > max {
-				max = tmpMax
-			}
-		}
-		return min, max
+	scale1, scale2 := DIP(0), DIP(1)
+	if width > w.minimumWidth && w.maximumWidth > w.minimumWidth {
+		scale1, scale2 = width-w.minimumWidth, w.maximumWidth-w.minimumWidth
 	}
 
-	minWidth, _ := w.children[0].MeasureWidth()
-	min, max := w.children[0].MeasureHeight(minWidth)
+	minWidth, maxWidth := w.children[0].MeasureWidth()
+	childWidth := (minWidth + (maxWidth-minWidth)*scale1/scale2)
+	min, max := w.children[0].MeasureHeight(childWidth)
 	for _, v := range w.children[1:] {
-		minWidth, _ = v.MeasureWidth()
-		tmpMin, tmpMax := v.MeasureHeight(minWidth)
+		minWidth, maxWidth = v.MeasureWidth()
+		childWidth := (minWidth + (maxWidth-minWidth)*scale1/scale2)
+		tmpMin, tmpMax := v.MeasureHeight(childWidth)
 		if tmpMin > min {
 			min = tmpMin
 		}
@@ -96,9 +88,13 @@ func (w *mountedHBox) MeasureHeight(width DIP) (DIP, DIP) {
 }
 
 func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
+	if len(w.children) == 0 {
+		return
+	}
+
+	posX := bounds.Min.X
 	width := bounds.Dx()
 	widthDP := ToDIPX(width)
-	length := len(w.children)
 
 	if w.minimumWidth == 0 {
 		w.MeasureWidth()
@@ -107,30 +103,51 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 		}
 	}
 
-	// Assuming that height of bounds is sufficient
-	if w.minimumWidth >= widthDP || w.align == Justify {
-		for i, v := range w.children {
-			posX1 := bounds.Min.X + (width+8)*i/length
-			posX2 := bounds.Min.X + (width+8)*(i+1)/length - 8
-			v.SetBounds(image.Rect(posX1, bounds.Min.Y, posX2, bounds.Max.Y))
+	// If there is more space than necessary, then we need to distribute the extra space.
+	extraGap := 0
+	if widthDP >= w.maximumWidth {
+		switch w.alignMain {
+		case MainStart:
+			// No need to do any adjustment.  The algorithm below will lay out
+			// controls aligned to the top.
+		case MainCenter:
+			// Adjust the starting position to align the contents.
+			posX += (width - w.maximumWidth.PixelsX()) / 2
+
+		case MainEnd:
+			// Adjust the starting position to align the contents.
+			posX += width - w.maximumWidth.PixelsY()
+
+		case SpaceAround:
+			extraGap = (widthDP - w.maximumWidth).PixelsX() / (len(w.children) + 1)
+			posX += extraGap
+
+		case SpaceBetween:
+			if len(w.children) > 1 {
+				extraGap = (widthDP - w.maximumWidth).PixelsX() / (len(w.children) - 1)
+			} else {
+				// There are no controls between which to put the extra space.
+				// The following essentially convert SpaceBetween to SpaceAround
+				extraGap = (widthDP - w.maximumWidth).PixelsX() / (len(w.children) + 1)
+				posX += extraGap
+			}
 		}
-	} else if w.align == Left {
-		posX := bounds.Min.X
-		for _, v := range w.children {
-			min, _ := v.MeasureWidth()
-			posX2 := posX + min.PixelsX()
-			v.SetBounds(image.Rect(posX, bounds.Min.Y, posX2, bounds.Max.Y))
-			posX = posX2 + 8
-		}
-	} else {
-		posX := bounds.Max.X
-		for i := len(w.children); i > 0; i-- {
-			v := w.children[i-1]
-			min, _ := v.MeasureWidth()
-			posX2 := posX - min.PixelsX()
-			v.SetBounds(image.Rect(posX2, bounds.Min.Y, posX, bounds.Max.Y))
-			posX = posX2 - 8
-		}
+
+		// Reduce available height
+		widthDP = w.maximumWidth
+		width = widthDP.PixelsY()
+	}
+
+	scale1, scale2 := DIP(0), DIP(1)
+	if widthDP > w.minimumWidth && w.maximumWidth > w.minimumWidth {
+		scale1, scale2 = widthDP-w.minimumWidth, w.maximumWidth-w.minimumWidth
+	}
+
+	for _, v := range w.children {
+		minWidth, maxWidth := v.MeasureWidth()
+		childWidth := (minWidth + (maxWidth-minWidth)*scale1/scale2)
+		v.SetBounds(image.Rect(posX, bounds.Min.Y, posX+childWidth.PixelsX(), bounds.Max.Y))
+		posX += childWidth.PixelsX() + 8 + extraGap
 	}
 }
 

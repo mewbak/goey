@@ -31,7 +31,7 @@ func main() {
 				&goey.Button{Text: "D2", Disabled: true},
 				&goey.Button{Text: "D3"},
 			},
-				Align: goey.Right,
+				AlignMain: goey.MainEnd,
 			},
 			&goey.SelectInput{Items: []string{"Choice 1", "Choice 2", "Choice 3"}, OnChange: func(v int) { println("cb1 ", v) }},
 			&goey.TextArea{},

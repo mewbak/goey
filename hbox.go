@@ -5,8 +5,10 @@ var (
 )
 
 type HBox struct {
-	Children []Widget
-	Align    TextAlignment
+	Children   []Widget
+	AlignMain  MainAxisAlign
+	AlignCross CrossAxisAlign
+	Grid       bool
 }
 
 func (_ *HBox) Kind() *WidgetKind {
