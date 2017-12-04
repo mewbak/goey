@@ -14,10 +14,11 @@ type Button struct {
 	OnBlur   func()
 }
 
-func (_ *Button) Kind() *WidgetKind {
+// Kind returns the concrete type for use in the Widget interface.
+func (*Button) Kind() *WidgetKind {
 	return &buttonKind
 }
 
-func (_ *mountedButton) Kind() *WidgetKind {
+func (*mountedButton) Kind() *WidgetKind {
 	return &buttonKind
 }

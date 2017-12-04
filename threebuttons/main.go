@@ -9,16 +9,18 @@ import (
 var (
 	mainWindow *goey.MainWindow
 	clickCount int
+	alignMain  = goey.SpaceAround
+	alignCross = goey.Stretch
 )
 
 func main() {
-	mw, err := goey.NewMainWindow("One Button", render())
+	mw, err := goey.NewMainWindow("Three Buttons", render())
 	if err != nil {
 		println(err.Error())
 		return
 	}
 	defer mw.Close()
-	mw.SetAlignment(goey.SpaceAround, goey.Stretch)
+	mw.SetAlignment(alignMain, alignCross)
 	mainWindow = mw
 
 	goey.Run()
@@ -31,10 +33,22 @@ func update() {
 	}
 }
 
-func onclick(ndx int) func() {
-	return func() {
-		fmt.Println("click", ndx)
+func cycleMainAxisAlign() {
+	alignMain++
+	if alignMain > goey.SpaceBetween {
+		alignMain = goey.MainStart
 	}
+	mainWindow.SetAlignment(alignMain, alignCross)
+	update()
+}
+
+func cycleCrossAxisAlign() {
+	alignCross++
+	if alignCross > goey.CrossEnd {
+		alignCross = goey.Stretch
+	}
+	mainWindow.SetAlignment(goey.SpaceAround, alignCross)
+	update()
 }
 
 func onfocus(ndx int) func() {
@@ -65,12 +79,12 @@ func render() []goey.Widget {
 			OnBlur:  onblur(1),
 		},
 		&goey.Button{Text: "Extra button",
-			OnClick: onclick(2),
+			OnClick: cycleMainAxisAlign,
 			OnFocus: onfocus(2),
 			OnBlur:  onblur(2),
 		},
-		&goey.Button{Text: "Supplefluous button",
-			OnClick: onclick(3),
+		&goey.Button{Text: "Cycle cross axis align",
+			OnClick: cycleCrossAxisAlign,
 			OnFocus: onfocus(3),
 			OnBlur:  onblur(3),
 		},

@@ -42,11 +42,15 @@ func (w *mountedHBox) MeasureWidth() (DIP, DIP) {
 		return 0, 0
 	}
 
-	min, max := w.children[0].MeasureWidth()
+	previous := w.children[0]
+	min, max := previous.MeasureWidth()
 	for _, v := range w.children[1:] {
-		tmpMin, tmpMax := v.MeasureWidth()
-		min = min + tmpMin + 8
-		max = max + tmpMax + 8
+		gap := calculateHGap(previous, v)
+		previous = v
+		tmpMin, tmpMax := previous.MeasureWidth()
+
+		min = min + tmpMin + gap
+		max = max + tmpMax + gap
 	}
 	w.minimumWidth = min
 	w.maximumWidth = max
@@ -143,11 +147,16 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 		scale1, scale2 = widthDP-w.minimumWidth, w.maximumWidth-w.minimumWidth
 	}
 
+	previous := MountedWidget(nil)
 	for _, v := range w.children {
+		if previous != nil {
+			posX += calculateHGap(previous, v).PixelsX()
+		}
 		minWidth, maxWidth := v.MeasureWidth()
 		childWidth := (minWidth + (maxWidth-minWidth)*scale1/scale2)
 		v.SetBounds(image.Rect(posX, bounds.Min.Y, posX+childWidth.PixelsX(), bounds.Max.Y))
-		posX += childWidth.PixelsX() + 8 + extraGap
+		posX += childWidth.PixelsX() + extraGap
+		previous = v
 	}
 }
 

@@ -12,7 +12,8 @@ var (
 )
 
 // DIP is a distance measured in device-independent pixels.  There are nominally
-// 96 DIPs per inch.
+// 96 DIPs per inch.  This definition corresponds with the definition of a
+// pixel for both CSS and on Windows.
 type DIP int
 
 // PixelsX converts the distance measurement in DIPs to physical pixels, based
