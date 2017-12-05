@@ -1,7 +1,6 @@
 package goey
 
 import (
-	"errors"
 	"github.com/lxn/win"
 	"syscall"
 	"unsafe"
@@ -10,7 +9,6 @@ import (
 var (
 	comboboxClassName     *uint16
 	oldComboboxWindowProc uintptr
-	ErrInvalidValue       = errors.New("invalid value for select input")
 )
 
 func init() {
@@ -21,9 +19,9 @@ func init() {
 	}
 }
 
-func (w *SelectInput) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *SelectInput) mount(parent NativeWidget) (MountedWidget, error) {
 	if w.Value >= len(w.Items) {
-		return nil, ErrInvalidValue
+		w.Value = len(w.Items) - 1
 	}
 	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, comboboxClassName, nil,
 		win.WS_CHILD|win.WS_VISIBLE|win.WS_TABSTOP|win.CBS_DROPDOWNLIST,
@@ -98,9 +96,7 @@ func (w *mountedSelectInput) MeasureHeight(width DIP) (DIP, DIP) {
 	return 23, 23
 }
 
-func (w *mountedSelectInput) UpdateProps(data_ Widget) error {
-	data := data_.(*SelectInput)
-
+func (w *mountedSelectInput) updateProps(data *SelectInput) error {
 	// TODO:  Update the items in the combobox
 	// TODO:  Update the selection based on Value
 	// TODO:  Update the selection based on Unset.

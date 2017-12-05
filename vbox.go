@@ -4,37 +4,57 @@ var (
 	vboxKind = WidgetKind{"vbox"}
 )
 
+// MainAxisAlign identifies the different types of alignment that is possible
+// along the main axis for a vertical box or horizontal box layout.
 type MainAxisAlign uint8
 
 const (
-	MainStart = MainAxisAlign(iota)
-	MainCenter
-	MainEnd
-	SpaceAround
-	SpaceBetween
+	MainStart    = MainAxisAlign(iota) // Children will be packed at the top or left of the box
+	MainCenter                         // Children will be packed together and centered in the box.
+	MainEnd                            // Children will be packed together at the bottom or right of the box
+	SpaceAround                        // Children will be spaced apart
+	SpaceBetween                       // Children will be spaced apart, but the first and last children will but the ends of the box.
 )
 
+// CrossAxisAlign identifies the different types of alignment that is possible
+// along the cross axis for vertical box and horizontal box layouts.
 type CrossAxisAlign uint8
 
 const (
-	Stretch = CrossAxisAlign(iota)
-	CrossStart
-	CrossCenter
-	CrossEnd
+	Stretch     = CrossAxisAlign(iota) // Children will be stretched so that the extend across box
+	CrossStart                         // Children will be aligned to the left or top of the box
+	CrossCenter                        // Children will be aligned in the center of the box
+	CrossEnd                           // Children will be aligned to the right or bottom of the box
 )
 
+// VBox describes a vertical layout.  Children are positioned in order from
+// the top towards the bottom.  The main axis for alignment is therefore vertical,
+// with the cross axis for alignment horiztonal.
 type VBox struct {
 	Children   []Widget
 	AlignMain  MainAxisAlign
 	AlignCross CrossAxisAlign
 }
 
-func (_ *VBox) Kind() *WidgetKind {
+// Kind returns the concrete type for use in the Widget interface.
+// Users should not need to use this method directly.
+func (*VBox) Kind() *WidgetKind {
 	return &vboxKind
 }
 
-func (_ *mountedVBox) Kind() *WidgetKind {
+// Mount creates a vertical layout for child widgets in the GUI.
+// The newly created widget will be a child of the widget specified by parent.
+func (w *VBox) Mount(parent NativeWidget) (MountedWidget, error) {
+	// Forward to the platform-dependant code
+	return w.mount(parent)
+}
+
+func (*mountedVBox) Kind() *WidgetKind {
 	return &vboxKind
+}
+
+func (w *mountedVBox) UpdateProps(data Widget) error {
+	return w.updateProps(data.(*VBox))
 }
 
 func diffChildren(parent NativeWidget, lhs []MountedWidget, rhs []Widget) ([]MountedWidget, error) {

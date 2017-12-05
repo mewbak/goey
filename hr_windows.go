@@ -38,7 +38,7 @@ func registerHRClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, error) {
 	return atom, nil
 }
 
-func (w *HR) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *HR) mount(parent NativeWidget) (MountedWidget, error) {
 	hInstance := win.GetModuleHandle(nil)
 	if hInstance == 0 {
 		return nil, syscall.GetLastError()
@@ -84,10 +84,6 @@ func (w *mountedHR) MeasureHeight(width DIP) (DIP, DIP) {
 
 func (w *mountedHR) SetBounds(bounds image.Rectangle) {
 	w.NativeWidget.SetBounds(bounds)
-}
-
-func (w *mountedHR) UpdateProps(data_ Widget) error {
-	return nil
 }
 
 func hrWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (result uintptr) {

@@ -12,7 +12,7 @@ var (
 	paragraphMaxWidth int
 )
 
-func (w *P) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *P) mount(parent NativeWidget) (MountedWidget, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -118,9 +118,7 @@ func (w *mountedP) SetBounds(bounds image.Rectangle) {
 	win.InvalidateRect(w.hWnd, nil, true)
 }
 
-func (w *mountedP) UpdateProps(data_ Widget) error {
-	data := data_.(*Label)
-
+func (w *mountedP) updateProps(data *P) error {
 	text, err := syscall.UTF16FromString(data.Text)
 	if err != nil {
 		return err

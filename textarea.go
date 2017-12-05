@@ -4,20 +4,35 @@ var (
 	textareaKind = WidgetKind{"textarea"}
 )
 
+// TextArea describes a widget that users input or update a multi-line of text.
+// The model for the value is a string value.
 type TextArea struct {
-	Text        string
-	Placeholder string
-	Disabled    bool
-	MinLines    int
-	OnChange    func(value string)
-	OnFocus     func()
-	OnBlur      func()
+	Value       string             // Values is the current string for the field
+	Placeholder string             // Placeholder is a descriptive text that can be displayed when the field is empty
+	Disabled    bool               // Disabled is a flag indicating that the user cannot interact with this field
+	MinLines    int                // MinLines describes the minimum number of lines that should be visible for layout
+	OnChange    func(value string) // OnChange will be called whenever the user changes the value for this field
+	OnFocus     func()             // OnFocus will be called whenever the field receives the keyboard focus
+	OnBlur      func()             // OnBlur will be called whenever the field loses the keyboard focus
 }
 
-func (_ *TextArea) Kind() *WidgetKind {
+// Kind returns the concrete type for use in the Widget interface.
+// Users should not need to use this method directly.
+func (*TextArea) Kind() *WidgetKind {
 	return &textareaKind
 }
 
-func (_ *mountedTextArea) Kind() *WidgetKind {
+// Mount creates a text area control in the GUI.  The newly created widget
+// will be a child of the widget specified by parent.
+func (w *TextArea) Mount(parent NativeWidget) (MountedWidget, error) {
+	// Forward to the platform-dependant code
+	return w.mount(parent)
+}
+
+func (*mountedTextArea) Kind() *WidgetKind {
 	return &textareaKind
+}
+
+func (w *mountedTextArea) UpdateProps(data Widget) error {
+	return w.updateProps(data.(*TextArea))
 }

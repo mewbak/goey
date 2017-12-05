@@ -16,7 +16,7 @@ type mountedHBox struct {
 	maximumWidth DIP
 }
 
-func (w *HBox) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *HBox) mount(parent NativeWidget) (MountedWidget, error) {
 	c := make([]MountedWidget, 0, len(w.Children))
 
 	for _, v := range w.Children {

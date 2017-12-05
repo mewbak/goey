@@ -7,24 +7,29 @@ import (
 )
 
 var (
+	modkernel32 = syscall.MustLoadDLL("kernel32.dll")
 	moduser32   = syscall.MustLoadDLL("user32.dll")
 	modcomctl32 = syscall.MustLoadDLL("comctl32")
-	moduxtheme  = syscall.MustLoadDLL("uxtheme")
 
-	procGetDesktopWindow              = moduser32.MustFindProc("GetDesktopWindow")
-	procGetWindowText                 = moduser32.MustFindProc("GetWindowTextW")
-	procGetWindowTextLength           = moduser32.MustFindProc("GetWindowTextLengthW")
-	procSetWindowText                 = moduser32.MustFindProc("SetWindowTextW")
-	procGetDialogBaseUnits            = moduser32.MustFindProc("GetDialogBaseUnits")
-	procMapWindowPoints               = moduser32.MustFindProc("MapWindowPoints")
-	procEnableScrollBar               = moduser32.MustFindProc("EnableScrollBar")
-	procShowScrollBar                 = moduser32.MustFindProc("ShowScrollBar")
-	procInitCommonControls            = modcomctl32.MustFindProc("InitCommonControls")
-	procGetThemeBackgroundContentRect = moduxtheme.MustFindProc("GetThemeBackgroundContentRect")
+	procGetThreadId         = modkernel32.MustFindProc("GetCurrentThreadId")
+	procGetDesktopWindow    = moduser32.MustFindProc("GetDesktopWindow")
+	procGetWindowText       = moduser32.MustFindProc("GetWindowTextW")
+	procGetWindowTextLength = moduser32.MustFindProc("GetWindowTextLengthW")
+	procSetWindowText       = moduser32.MustFindProc("SetWindowTextW")
+	procShowScrollBar       = moduser32.MustFindProc("ShowScrollBar")
+	procInitCommonControls  = modcomctl32.MustFindProc("InitCommonControls")
 )
 
 func init() {
 	InitCommonControls()
+}
+
+func GetThreadID() uint32 {
+	r0, _, err := syscall.Syscall(procGetThreadId.Addr(), 0, 0, 0, 0)
+	if err != 0 {
+		panic(err)
+	}
+	return uint32(r0)
 }
 
 func GetDesktopWindow() win.HWND {
@@ -57,27 +62,11 @@ func SetWindowText(hWnd win.HWND, text *uint16) win.BOOL {
 	return win.BOOL(r0)
 }
 
-func GetDialogBaseUnits() (v uint16, h uint16) {
-	r0, _, _ := syscall.Syscall(procGetDialogBaseUnits.Addr(), 0, 0, 0, 0)
-	return win.HIWORD(uint32(r0)), win.LOWORD(uint32(r0))
-}
-
-func MapWindowPoints(hWndFrom win.HWND, hWndTo win.HWND, lpPoints *win.POINT, cPoints uint32) (dx uint16, dy uint16) {
-	r0, _, _ := syscall.Syscall6(procMapWindowPoints.Addr(), 4, uintptr(hWndFrom), uintptr(hWndTo), uintptr(unsafe.Pointer(lpPoints)), uintptr(cPoints), 0, 0)
-	return win.HIWORD(uint32(r0)), win.LOWORD(uint32(r0))
+func ShowScrollBar(hWnd win.HWND, wSBFlags uint, bShow win.BOOL) win.BOOL {
+	r0, _, _ := syscall.Syscall(procShowScrollBar.Addr(), 3, uintptr(hWnd), uintptr(wSBFlags), uintptr(bShow))
+	return win.BOOL(r0)
 }
 
 func InitCommonControls() {
 	syscall.Syscall(procInitCommonControls.Addr(), 0, 0, 0, 0)
-}
-
-func EnableScrollBar(hWnd win.HWND, wSBFlags uint, wArrows uint) win.BOOL {
-	r0, _, _ := syscall.Syscall(procSetWindowText.Addr(), 3, uintptr(hWnd), uintptr(wSBFlags), uintptr(wArrows))
-	return win.BOOL(r0)
-}
-
-func ShowScrollBar(hWnd win.HWND, wSBFlags uint, bShow win.BOOL) win.BOOL {
-
-	r0, _, _ := syscall.Syscall(procShowScrollBar.Addr(), 3, uintptr(hWnd), uintptr(wSBFlags), uintptr(bShow))
-	return win.BOOL(r0)
 }

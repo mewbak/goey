@@ -14,6 +14,7 @@ type WidgetKind struct {
 type Widget interface {
 	// Kind returns the concrete type's WidgetKind.  The returned value should
 	// be constant, and the same for all instances of a concrete type.
+	// Users should not need to use this method directly.
 	Kind() *WidgetKind
 	// Mount creates a widget or control in the GUI.  The newly created widget
 	// will be a child of the widget specified by parent.  If non-nil, the returned
@@ -30,6 +31,7 @@ type MountedWidget interface {
 	NativeMountedWidget
 
 	// Kind returns the concrete type for the MountedWidget.
+	// Users should not need to use this method directly.
 	Kind() *WidgetKind
 	// UpdateProps will update the properties of the widget.  The Kind for
 	// the parameter data must match the Kind for the interface.

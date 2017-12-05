@@ -6,7 +6,7 @@ import (
 	"unsafe"
 )
 
-func (w *Checkbox) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Checkbox) mount(parent NativeWidget) (MountedWidget, error) {
 	text, err := syscall.UTF16PtrFromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -70,9 +70,7 @@ func (w *mountedCheckbox) MeasureHeight(width DIP) (DIP, DIP) {
 	return 17, 17
 }
 
-func (w *mountedCheckbox) UpdateProps(data_ Widget) error {
-	data := data_.(*Checkbox)
-
+func (w *mountedCheckbox) updateProps(data *Checkbox) error {
 	w.SetText(data.Text)
 	w.SetDisabled(data.Disabled)
 	if data.Value {

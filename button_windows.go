@@ -19,7 +19,7 @@ func init() {
 	}
 }
 
-func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Button) mount(parent NativeWidget) (MountedWidget, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -106,9 +106,7 @@ func (w *mountedButton) MeasureHeight(width DIP) (DIP, DIP) {
 	return 23, 23
 }
 
-func (w *mountedButton) UpdateProps(data_ Widget) error {
-	data := data_.(*Button)
-
+func (w *mountedButton) updateProps(data *Button) error {
 	text, err := syscall.UTF16FromString(data.Text)
 	if err != nil {
 		return err

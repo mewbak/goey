@@ -13,8 +13,8 @@ func minlinesDefault(value int) int {
 	return value
 }
 
-func (w *TextArea) Mount(parent NativeWidget) (MountedWidget, error) {
-	text, err := syscall.UTF16PtrFromString(w.Text)
+func (w *TextArea) mount(parent NativeWidget) (MountedWidget, error) {
+	text, err := syscall.UTF16PtrFromString(w.Value)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (w *TextArea) Mount(parent NativeWidget) (MountedWidget, error) {
 	win.SetWindowLongPtr(hwnd, win.GWLP_WNDPROC, syscall.NewCallback(textareaWindowProc))
 
 	// Create placeholder, if required.
-	if w.Text == "" && w.Placeholder != "" {
+	if w.Value == "" && w.Placeholder != "" {
 		textPlaceholder, err := syscall.UTF16PtrFromString(w.Placeholder)
 		if err != nil {
 			win.DestroyWindow(hwnd)
@@ -97,11 +97,9 @@ func (w *mountedTextArea) MeasureHeight(width DIP) (DIP, DIP) {
 	return 23 + 16*DIP(w.minLines-1), 23 + 16*39
 }
 
-func (w *mountedTextArea) UpdateProps(data_ Widget) error {
-	data := data_.(*TextArea)
-
-	if data.Text != w.Text() {
-		w.SetText(data.Text)
+func (w *mountedTextArea) updateProps(data *TextArea) error {
+	if data.Value != w.Text() {
+		w.SetText(data.Value)
 	}
 
 	if data.Placeholder != "" {

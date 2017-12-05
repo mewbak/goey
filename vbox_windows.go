@@ -13,7 +13,7 @@ type mountedVBox struct {
 	alignCross CrossAxisAlign
 }
 
-func (w *VBox) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *VBox) mount(parent NativeWidget) (MountedWidget, error) {
 	c := make([]MountedWidget, 0, len(w.Children))
 
 	for _, v := range w.Children {
@@ -105,9 +105,7 @@ func (w *mountedVBox) SetOrder(previous win.HWND) win.HWND {
 	return previous
 }
 
-func (w *mountedVBox) UpdateProps(data_ Widget) error {
-	data := data_.(*VBox)
-
+func (w *mountedVBox) updateProps(data *VBox) error {
 	w.alignMain = data.AlignMain
 	w.alignCross = data.AlignCross
 	return w.SetChildren(data.Children)

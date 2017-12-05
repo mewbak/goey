@@ -20,7 +20,7 @@ func init() {
 	}
 }
 
-func (w *Label) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Label) mount(parent NativeWidget) (MountedWidget, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -80,9 +80,7 @@ func (w *mountedLabel) SetBounds(bounds image.Rectangle) {
 	win.InvalidateRect(w.hWnd, nil, true)
 }
 
-func (w *mountedLabel) UpdateProps(data_ Widget) error {
-	data := data_.(*Label)
-
+func (w *mountedLabel) updateProps(data *Label) error {
 	text, err := syscall.UTF16FromString(data.Text)
 	if err != nil {
 		return err

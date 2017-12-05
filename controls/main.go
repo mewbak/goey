@@ -15,11 +15,11 @@ func main() {
 			&goey.P{Text: lorem},
 			&goey.P{Text: "This is a label.", Align: goey.Center},
 			&goey.Label{Text: "Input 1:"},
-			&goey.TextInput{Text: "Some input...", OnChange: func(v string) { println("t1 ", v) }, OnEnterKey: func(v string) { println("t1* ", v) }},
+			&goey.TextInput{Value: "Some input...", OnChange: func(v string) { println("t1 ", v) }, OnEnterKey: func(v string) { println("t1* ", v) }},
 			&goey.HR{},
 			&goey.Button{Text: "This is button 1", OnClick: func() { println("b1") }},
 			&goey.Label{Text: "Input 2:"},
-			&goey.TextInput{Text: "", Placeholder: "Type some text here.  And some more.  And something really long.", OnChange: func(v string) { println("t2 ", v) }},
+			&goey.TextInput{Value: "", Placeholder: "Type some text here.  And some more.  And something really long.", OnChange: func(v string) { println("t2 ", v) }},
 			&goey.Checkbox{Text: "Check this box", Value: true, OnChange: func(b bool) { println("c1", b) }},
 			&goey.Button{Text: "This is second button", Default: true},
 			&goey.HBox{Children: []goey.Widget{

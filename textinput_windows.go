@@ -19,8 +19,8 @@ func init() {
 	}
 }
 
-func (w *TextInput) Mount(parent NativeWidget) (MountedWidget, error) {
-	text, err := syscall.UTF16PtrFromString(w.Text)
+func (w *TextInput) mount(parent NativeWidget) (MountedWidget, error) {
+	text, err := syscall.UTF16PtrFromString(w.Value)
 	if err != nil {
 		return nil, err
 	}
@@ -106,11 +106,9 @@ func (w *mountedTextInput) MeasureHeight(width DIP) (DIP, DIP) {
 	return 23, 23
 }
 
-func (w *mountedTextInput) UpdateProps(data_ Widget) error {
-	data := data_.(*TextInput)
-
-	if data.Text != w.Text() {
-		w.SetText(data.Text)
+func (w *mountedTextInput) updateProps(data *TextInput) error {
+	if data.Value != w.Text() {
+		w.SetText(data.Value)
 	}
 
 	if data.Placeholder != "" {
