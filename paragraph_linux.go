@@ -10,7 +10,7 @@ type mountedP struct {
 	NativeWidget
 }
 
-func (w *P) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *P) mount(parent NativeWidget) (MountedWidget, error) {
 	control, err := gtk.LabelNew(w.Text)
 	if err != nil {
 		return nil, err
@@ -33,6 +33,6 @@ func paragraph_onDestroy(widget *gtk.Label, mounted *mountedP) {
 	mounted.handle = nil
 }
 
-func (w *mountedP) UpdateProps(data Widget) error {
+func (w *mountedP) updateProps(data *P) error {
 	panic("not implemented")
 }

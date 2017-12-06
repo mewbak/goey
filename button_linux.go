@@ -15,7 +15,7 @@ type mountedButton struct {
 	onBlur  blurSlot
 }
 
-func (w *Button) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Button) mount(parent NativeWidget) (MountedWidget, error) {
 	control, err := gtk.ButtonNewWithLabel(w.Text)
 	if err != nil {
 		return nil, err
@@ -68,9 +68,7 @@ func (w *mountedButton) Close() {
 	}
 }
 
-func (w *mountedButton) UpdateProps(data_ Widget) error {
-	data := data_.(*Button)
-
+func (w *mountedButton) updateProps(data *Button) error {
 	label_, err := w.handle.GetChild()
 	if err != nil {
 		return err

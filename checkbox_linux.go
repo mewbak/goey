@@ -14,7 +14,7 @@ type mountedCheckbox struct {
 	onBlur   func()
 }
 
-func (w *Checkbox) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Checkbox) mount(parent NativeWidget) (MountedWidget, error) {
 	control, err := gtk.CheckButtonNewWithLabel(w.Text)
 	if err != nil {
 		return nil, err
@@ -45,6 +45,6 @@ func checkbox_onDestroy(widget *gtk.CheckButton, mounted *mountedCheckbox) {
 	mounted.handle = nil
 }
 
-func (w *mountedCheckbox) UpdateProps(data Widget) error {
+func (w *mountedCheckbox) updateProps(data *Checkbox) error {
 	panic("not implemented")
 }

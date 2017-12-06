@@ -14,13 +14,13 @@ type mountedTextInput struct {
 	onBlur   func()
 }
 
-func (w *TextInput) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *TextInput) mount(parent NativeWidget) (MountedWidget, error) {
 	control, err := gtk.EntryNew()
 	if err != nil {
 		return nil, err
 	}
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
-	control.SetText(w.Text)
+	control.SetText(w.Value)
 	control.SetPlaceholderText(w.Placeholder)
 
 	retval := &mountedTextInput{
@@ -52,6 +52,6 @@ func textinput_onDestroy(widget *gtk.Entry, mounted *mountedTextInput) {
 	mounted.handle = nil
 }
 
-func (w *mountedTextInput) UpdateProps(data Widget) error {
+func (w *mountedTextInput) updateProps(data *TextInput) error {
 	panic("not implemented")
 }

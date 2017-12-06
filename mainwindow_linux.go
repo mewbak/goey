@@ -43,24 +43,29 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 	return retval, nil
 }
 
-func (mw *MainWindow) Close() {
+func (mw *MainWindow) close() {
 	if mw.handle != nil {
 		mw.handle.Destroy()
 		mw.handle = nil
 	}
 }
 
-func (w *MainWindow) SetAlignment(main MainAxisAlign, cross CrossAxisAlign) {
+func (w *MainWindow) setAlignment(main MainAxisAlign, cross CrossAxisAlign) {
 	//w.alignMain = main
 	//w.alignCross = cross
 }
 
-func (mw *MainWindow) SetChildren(children []Widget) error {
+func (mw *MainWindow) setChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
 	vbox := VBox{Children: children}
-	err := mw.vbox.UpdateProps(&vbox)
+	err := mw.vbox.updateProps(&vbox)
 	// ... and we're done
 	return err
+}
+
+func (mw *MainWindow) setTitle(value string) error {
+	mw.handle.SetTitle(value)
+	return nil
 }
 
 func mainwindow_onDestroy(widget *gtk.Window, mw *MainWindow) {

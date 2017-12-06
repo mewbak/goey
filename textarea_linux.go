@@ -14,12 +14,12 @@ type mountedTextArea struct {
 	onBlur   func()
 }
 
-func (w *TextArea) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *TextArea) mount(parent NativeWidget) (MountedWidget, error) {
 	buffer, err := gtk.TextBufferNew(nil)
 	if err != nil {
 		return nil, err
 	}
-	buffer.SetText(w.Text)
+	buffer.SetText(w.Value)
 
 	control, err := gtk.TextViewNewWithBuffer(buffer)
 	if err != nil {
@@ -70,6 +70,6 @@ func textarea_onDestroy(widget *gtk.TextView, mounted *mountedTextArea) {
 	mounted.handle = nil
 }
 
-func (w *mountedTextArea) UpdateProps(data Widget) error {
+func (w *mountedTextArea) updateProps(data *TextArea) error {
 	panic("not implemented")
 }

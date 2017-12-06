@@ -10,7 +10,7 @@ type mountedHR struct {
 	NativeWidget
 }
 
-func (w *HR) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *HR) mount(parent NativeWidget) (MountedWidget, error) {
 	control, err := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
 	if err != nil {
 		return nil, err
@@ -29,8 +29,4 @@ func (w *HR) Mount(parent NativeWidget) (MountedWidget, error) {
 
 func hr_onDestroy(widget *gtk.Separator, mounted *mountedHR) {
 	mounted.handle = nil
-}
-
-func (w *mountedHR) UpdateProps(data Widget) error {
-	return nil
 }

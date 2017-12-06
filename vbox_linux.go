@@ -11,7 +11,7 @@ type mountedVBox struct {
 	children []MountedWidget
 }
 
-func (w *VBox) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *VBox) mount(parent NativeWidget) (MountedWidget, error) {
 	control, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 11)
 	if err != nil {
 		return nil, err
@@ -48,8 +48,6 @@ func (w *mountedVBox) SetChildren(children []Widget) error {
 	return err
 }
 
-func (w *mountedVBox) UpdateProps(data_ Widget) error {
-	data := data_.(*VBox)
-
+func (w *mountedVBox) updateProps(data *VBox) error {
 	return w.SetChildren(data.Children)
 }

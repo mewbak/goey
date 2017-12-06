@@ -14,7 +14,7 @@ type mountedSelectInput struct {
 	onBlur   func()
 }
 
-func (w *SelectInput) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *SelectInput) mount(parent NativeWidget) (MountedWidget, error) {
 	control, err := gtk.ComboBoxTextNew()
 	if err != nil {
 		return nil, err
@@ -48,6 +48,6 @@ func selectinput_onDestroy(widget *gtk.ComboBoxText, mounted *mountedSelectInput
 	mounted.handle = nil
 }
 
-func (w *mountedSelectInput) UpdateProps(data Widget) error {
+func (w *mountedSelectInput) updateProps(data *SelectInput) error {
 	panic("not implemented")
 }

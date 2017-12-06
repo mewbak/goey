@@ -11,7 +11,7 @@ type mountedHBox struct {
 	children []MountedWidget
 }
 
-func (w *HBox) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *HBox) mount(parent NativeWidget) (MountedWidget, error) {
 	control, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 11)
 	if err != nil {
 		return nil, err
