@@ -11,7 +11,6 @@ var (
 	moduser32   = syscall.MustLoadDLL("user32.dll")
 	modcomctl32 = syscall.MustLoadDLL("comctl32")
 
-	procGetThreadId         = modkernel32.MustFindProc("GetCurrentThreadId")
 	procGetDesktopWindow    = moduser32.MustFindProc("GetDesktopWindow")
 	procGetWindowText       = moduser32.MustFindProc("GetWindowTextW")
 	procGetWindowTextLength = moduser32.MustFindProc("GetWindowTextLengthW")
@@ -22,14 +21,6 @@ var (
 
 func init() {
 	InitCommonControls()
-}
-
-func GetThreadID() uint32 {
-	r0, _, err := syscall.Syscall(procGetThreadId.Addr(), 0, 0, 0, 0)
-	if err != 0 {
-		panic(err)
-	}
-	return uint32(r0)
 }
 
 func GetDesktopWindow() win.HWND {
