@@ -2,10 +2,9 @@ package goey
 
 import (
 	"strconv"
-	"testing"
 )
 
-func ExampleButton(t *testing.T) {
+func ExampleButton() {
 	clickCount := 0
 
 	// In a full application, this variable would be updated to point to
