@@ -61,7 +61,7 @@ func diffChildren(parent NativeWidget, lhs []MountedWidget, rhs []Widget) ([]Mou
 
 	// If the new tree does not contain any children, then we can trivially
 	// match the tree by deleting the actual widgets.
-	if len(lhs) == 0 {
+	if len(rhs) == 0 {
 		for _, v := range lhs {
 			v.Close()
 		}
