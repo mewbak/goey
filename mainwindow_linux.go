@@ -7,26 +7,26 @@ import (
 )
 
 var (
-	mainWindowCount int32 = 0
+	windowCount int32 = 0
 )
 
 func init() {
 	gtk.Init(nil)
 }
 
-type MainWindow struct {
+type windowImpl struct {
 	handle *gtk.Window
 	vbox   mountedVBox
 }
 
-func newMainWindow(title string, children []Widget) (*MainWindow, error) {
+func newWindow(title string, children []Widget) (*Window, error) {
 	app, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
 		return nil, err
 	}
-	atomic.AddInt32(&mainWindowCount, 1)
+	atomic.AddInt32(&windowCount, 1)
 
-	retval := &MainWindow{app, mountedVBox{}}
+	retval := &Window{windowImpl{app, mountedVBox{}}}
 
 	app.SetTitle(title)
 	app.Connect("destroy", mainwindow_onDestroy, retval)
@@ -43,19 +43,19 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 	return retval, nil
 }
 
-func (mw *MainWindow) close() {
+func (mw *windowImpl) close() {
 	if mw.handle != nil {
 		mw.handle.Destroy()
 		mw.handle = nil
 	}
 }
 
-func (w *MainWindow) setAlignment(main MainAxisAlign, cross CrossAxisAlign) {
+func (w *windowImpl) setAlignment(main MainAxisAlign, cross CrossAxisAlign) {
 	//w.alignMain = main
 	//w.alignCross = cross
 }
 
-func (mw *MainWindow) setChildren(children []Widget) error {
+func (mw *windowImpl) setChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
 	vbox := VBox{Children: children}
 	err := mw.vbox.updateProps(&vbox)
@@ -63,7 +63,7 @@ func (mw *MainWindow) setChildren(children []Widget) error {
 	return err
 }
 
-func (mw *MainWindow) setTitle(value string) error {
+func (mw *windowImpl) setTitle(value string) error {
 	mw.handle.SetTitle(value)
 	return nil
 }

@@ -1,7 +1,7 @@
 package goey
 
 // WidgetKind identifies the different kind of widgets.  Most widgets have two
-// type associated with their behaviour.  First, there is a type with data
+// concrete types associated with their behaviour.  First, there is a type with data
 // to describe the widget when unmounted.  Second, there is a type with a handle
 // to the windowing system when mounted.  Automatic reconciliation of two widget
 // trees relies on WidgetKind to match the unmounted and mounted widgets.

@@ -7,12 +7,12 @@ import (
 )
 
 var (
-	mainWindow *goey.MainWindow
+	mainWindow *goey.Window
 	clickCount int
 )
 
 func main() {
-	mw, err := goey.NewMainWindow("One Button", render())
+	mw, err := goey.NewWindow("One Button", render())
 	if err != nil {
 		println(err.Error())
 		return
