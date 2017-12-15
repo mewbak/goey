@@ -46,7 +46,7 @@ func init() {
 	}
 }
 
-type mainWindow struct {
+type windowImpl struct {
 	vbox mountedVBox
 
 	hWnd             win.HWND
@@ -84,7 +84,7 @@ func onSizeCalcMargin(clientMinWidth int, availableWidth int, margin int) int {
 	}
 }
 
-func onSize(hwnd win.HWND, mw *MainWindow) {
+func (mw *windowImpl) onSize(hwnd win.HWND) {
 	// The recommended margin in device independent pixels.
 	const margin = DIP(11)
 
@@ -167,7 +167,7 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*MainWindow)(unsafe.Pointer(w))
+			ptr := (*windowImpl)(unsafe.Pointer(w))
 			ptr.hWnd = 0
 		}
 		// Make sure we are no longer linked to as the active window
@@ -187,12 +187,13 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 
 	case win.WM_SIZE:
 		w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
-		onSize(hwnd, (*MainWindow)(unsafe.Pointer(w)))
+		mw := (*windowImpl)(unsafe.Pointer(w))
+		mw.onSize(hwnd)
 		// Defer to the default window proc
 
 	case win.WM_GETMINMAXINFO:
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			mw := (*MainWindow)(unsafe.Pointer(w))
+			mw := (*windowImpl)(unsafe.Pointer(w))
 			mmi := (*win.MINMAXINFO)(unsafe.Pointer(lParam))
 			if mmi.PtMinTrackSize.X < int32(mw.clientMinWidth) {
 				mmi.PtMinTrackSize.X = int32(mw.clientMinWidth)
@@ -209,7 +210,7 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 
 	case win.WM_VSCROLL:
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			mw := (*MainWindow)(unsafe.Pointer(w))
+			mw := (*windowImpl)(unsafe.Pointer(w))
 
 			// Get all the vertial scroll bar information.
 			si := win.SCROLLINFO{FMask: win.SIF_ALL}
@@ -284,7 +285,7 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 	return win.DefWindowProc(hwnd, msg, wParam, lParam)
 }
 
-func newMainWindow(title string, children []Widget) (*MainWindow, error) {
+func newWindow(title string, children []Widget) (*Window, error) {
 	const Width = 640
 	const Height = 480
 
@@ -338,8 +339,8 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 		win.SendMessage(hwnd, win.WM_SETFONT, 0, 0)
 	}
 
-	retval := &MainWindow{hWnd: hwnd}
-	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
+	retval := &Window{windowImpl{hWnd: hwnd}}
+	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(&retval.windowImpl)))
 
 	// Determine the DPI for this window
 	hdc := win.GetDC(hwnd)
@@ -363,7 +364,7 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 	return retval, nil
 }
 
-func (w *MainWindow) determineSizeConstraints() {
+func (w *windowImpl) determineSizeConstraints() {
 	w.updateGlobalDPI()
 
 	clientMinWidth, clientMaxWidth := w.vbox.MeasureWidth()
@@ -375,7 +376,7 @@ func (w *MainWindow) determineSizeConstraints() {
 	}
 }
 
-func (w *MainWindow) close() {
+func (w *windowImpl) close() {
 	// Want to be able to close windows in Go, even if they have already been
 	// destroyed in the Win32 system
 	if w.hWnd != 0 {
@@ -384,15 +385,17 @@ func (w *MainWindow) close() {
 	win.OleUninitialize()
 }
 
-func (w *MainWindow) setAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
+func (w *windowImpl) setAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
+	// Save the new parameter values
 	w.vbox.alignMain = main
 	w.vbox.alignCross = cross
 
-	onSize(w.hWnd, w)
+	// Rerun the layout
+	w.onSize(w.hWnd)
 	return nil
 }
 
-func (w *MainWindow) setChildren(children []Widget) error {
+func (w *windowImpl) setChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
 	vbox := VBox{children, w.vbox.alignMain, w.vbox.alignCross}
 	err := w.vbox.UpdateProps(&vbox)
@@ -404,15 +407,15 @@ func (w *MainWindow) setChildren(children []Widget) error {
 	}
 	// Determine the size constraints for the window
 	w.determineSizeConstraints()
-	onSize(w.hWnd, w)
+	w.onSize(w.hWnd)
 	// ... and we're done
 	return err
 }
 
-func (w *MainWindow) setTitle(value string) error {
+func (w *windowImpl) setTitle(value string) error {
 	return NativeWidget{w.hWnd}.SetText(value)
 }
 
-func (w *MainWindow) updateGlobalDPI() {
+func (w *windowImpl) updateGlobalDPI() {
 	DPI = image.Point{int(float32(w.dpi.X) * Scale), int(float32(w.dpi.Y) * Scale)}
 }

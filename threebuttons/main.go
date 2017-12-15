@@ -7,14 +7,14 @@ import (
 )
 
 var (
-	mainWindow *goey.MainWindow
+	mainWindow *goey.Window
 	clickCount int
 	alignMain  = goey.SpaceAround
 	alignCross = goey.Stretch
 )
 
 func main() {
-	mw, err := goey.NewMainWindow("Three Buttons", render())
+	mw, err := goey.NewWindow("Three Buttons", render())
 	if err != nil {
 		println(err.Error())
 		return

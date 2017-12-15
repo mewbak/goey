@@ -10,7 +10,7 @@ var (
 )
 
 func main() {
-	mw, err := goey.NewMainWindow("Example",
+	mw, err := goey.NewWindow("Example",
 		[]goey.Widget{
 			&goey.P{Text: lorem},
 			&goey.P{Text: "This is a label.", Align: goey.Center},

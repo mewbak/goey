@@ -14,19 +14,19 @@ func init() {
 	gtk.Init(nil)
 }
 
-type mainWindow struct {
+type windowImpl struct {
 	handle *gtk.Window
 	vbox   mountedVBox
 }
 
-func newMainWindow(title string, children []Widget) (*MainWindow, error) {
+func newWindow(title string, children []Widget) (*Window, error) {
 	app, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
 		return nil, err
 	}
 	atomic.AddInt32(&mainWindowCount, 1)
 
-	retval := &MainWindow{mainWindow{app, mountedVBox{}}}
+	retval := &Window{windowImpl{app, mountedVBox{}}}
 
 	app.SetTitle(title)
 	app.Connect("destroy", mainwindow_onDestroy, retval)
@@ -43,31 +43,31 @@ func newMainWindow(title string, children []Widget) (*MainWindow, error) {
 	return retval, nil
 }
 
-func (mw *mainWindow) close() {
+func (mw *windowImpl) close() {
 	if mw.handle != nil {
 		mw.handle.Destroy()
 		mw.handle = nil
 	}
 }
 
-func (w *mainWindow) setAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
+func (w *windowImpl) setAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
 	w.vbox.setAlignment(main, cross)
 	return nil
 }
 
-func (mw *mainWindow) setChildren(children []Widget) error {
+func (mw *windowImpl) setChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
 	err := mw.vbox.setChildren(children)
 	// ... and we're done
 	return err
 }
 
-func (mw *mainWindow) setTitle(value string) error {
+func (mw *windowImpl) setTitle(value string) error {
 	mw.handle.SetTitle(value)
 	return nil
 }
 
-func mainwindow_onDestroy(widget *gtk.Window, mw *MainWindow) {
+func mainwindow_onDestroy(widget *gtk.Window, mw *Window) {
 	mw.handle = nil
 	if c := atomic.AddInt32(&mainWindowCount, -1); c == 0 {
 		gtk.MainQuit()

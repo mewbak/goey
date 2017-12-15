@@ -9,7 +9,6 @@ type HBox struct {
 	Children   []Widget
 	AlignMain  MainAxisAlign
 	AlignCross CrossAxisAlign
-	Grid       bool
 }
 
 // Kind returns the concrete type for use in the Widget interface.

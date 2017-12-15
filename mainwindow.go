@@ -1,24 +1,24 @@
 package goey
 
-// MainWindow holds data for a top-level window.
-type MainWindow struct {
-	mainWindow // Platform-specific implementation
+// Window represents a top-level window that contain other widgets.
+type Window struct {
+	windowImpl
 }
 
-// NewMainWindow create a new top-level window for the application.
-func NewMainWindow(title string, children []Widget) (*MainWindow, error) {
-	return newMainWindow(title, children)
+// NewWindow create a new top-level window for the application.
+func NewWindow(title string, children []Widget) (*Window, error) {
+	return newWindow(title, children)
 }
 
 // Close destroys the window, and releases all associated resources.
-func (w *MainWindow) Close() {
+func (w *Window) Close() {
 	w.close()
 }
 
 // SetAlignment changes the vertical and horiztonal alignment properties of
-// the window.  If necessary, the position of contained widgets will be updated
-// to match new layout properties.
-func (w *MainWindow) SetAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
+// the window.  These properties affect the layout of child widgets.  The
+// main axis for alignment is vertical, with the cross axis being horizontal.
+func (w *Window) SetAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
 	return w.setAlignment(main, cross)
 }
 
@@ -27,11 +27,11 @@ func (w *MainWindow) SetAlignment(main MainAxisAlign, cross CrossAxisAlign) erro
 // match the widgets described by the parameter children.  If necessary, the
 // position of contained widgets will be updated to match the new layout
 // properties.
-func (w *MainWindow) SetChildren(children []Widget) error {
+func (w *Window) SetChildren(children []Widget) error {
 	return w.setChildren(children)
 }
 
-// SetTitle changes the caption or title of the window.
-func (w *MainWindow) SetTitle(title string) error {
+// SetTitle changes the caption in the title bar for the main window.
+func (w *Window) SetTitle(title string) error {
 	return w.setTitle(title)
 }
