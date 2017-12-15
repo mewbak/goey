@@ -10,6 +10,10 @@ type NativeWidget struct {
 	handle *gtk.Widget
 }
 
+func (w *NativeWidget) Handle() *gtk.Widget {
+	return w.handle
+}
+
 func (w *NativeWidget) Close() {
 	if w.handle != nil {
 		w.handle.Destroy()
@@ -18,6 +22,7 @@ func (w *NativeWidget) Close() {
 }
 
 type NativeMountedWidget interface {
+	Handle() *gtk.Widget
 }
 
 type clickSlot struct {

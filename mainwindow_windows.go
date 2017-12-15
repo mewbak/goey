@@ -1,11 +1,12 @@
 package goey
 
 import (
-	"github.com/lxn/win"
 	"image"
 	"sync/atomic"
 	"syscall"
 	"unsafe"
+
+	"github.com/lxn/win"
 )
 
 var (
@@ -45,7 +46,7 @@ func init() {
 	}
 }
 
-type MainWindow struct {
+type mainWindow struct {
 	vbox mountedVBox
 
 	hWnd             win.HWND
@@ -383,11 +384,12 @@ func (w *MainWindow) close() {
 	win.OleUninitialize()
 }
 
-func (w *MainWindow) setAlignment(main MainAxisAlign, cross CrossAxisAlign) {
+func (w *MainWindow) setAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
 	w.vbox.alignMain = main
 	w.vbox.alignCross = cross
 
 	onSize(w.hWnd, w)
+	return nil
 }
 
 func (w *MainWindow) setChildren(children []Widget) error {

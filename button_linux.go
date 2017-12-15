@@ -68,6 +68,10 @@ func (w *mountedButton) Close() {
 	}
 }
 
+func (w *mountedButton) Handle() *gtk.Widget {
+	return &w.handle.Widget
+}
+
 func (w *mountedButton) updateProps(data *Button) error {
 	label_, err := w.handle.GetChild()
 	if err != nil {
