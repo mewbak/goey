@@ -19,6 +19,10 @@ var (
 	procInitCommonControls  = modcomctl32.MustFindProc("InitCommonControls")
 )
 
+const (
+	STM_SETIMAGE = 0x0172
+)
+
 func init() {
 	InitCommonControls()
 }
