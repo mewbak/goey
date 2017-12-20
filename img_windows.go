@@ -7,13 +7,21 @@ import (
 	"unsafe"
 )
 
-func imageToBitmap(prop image.Image) (win.HBITMAP, error) {
+func imageToBitmap(prop image.Image) (win.HBITMAP, []uint8, error) {
 	if img, ok := prop.(*image.RGBA); ok {
-		hbitmap := win.CreateBitmap(int32(img.Rect.Dx()), int32(img.Rect.Dy()), 4, 8, unsafe.Pointer(&img.Pix[0]))
+		// Create a copy of the backing for the pixel data
+		buffer := append([]uint8(nil), img.Pix...)
+		// Need to convert RGB to BGR
+		for i := 0; i < len(buffer); i += 4 {
+			buffer[i+0], buffer[i+2] = buffer[i+2], buffer[i+0]
+		}
+
+		// Create the bitmap
+		hbitmap := win.CreateBitmap(int32(img.Rect.Dx()), int32(img.Rect.Dy()), 4, 8, unsafe.Pointer(&buffer[0]))
 		if hbitmap == 0 {
 			panic("Error in CreateBitmap")
 		}
-		return hbitmap, nil
+		return hbitmap, buffer, nil
 	} else {
 		panic("Unsupported image format.")
 	}
@@ -21,7 +29,7 @@ func imageToBitmap(prop image.Image) (win.HBITMAP, error) {
 
 func (w *Img) mount(parent NativeWidget) (MountedWidget, error) {
 	// Create the bitmap
-	hbitmap, err := imageToBitmap(w.Image)
+	hbitmap, buffer, err := imageToBitmap(w.Image)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +47,7 @@ func (w *Img) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 	win.SendMessage(hwnd, STM_SETIMAGE, win.IMAGE_BITMAP, uintptr(hbitmap))
 
-	retval := &mountedImg{NativeWidget: NativeWidget{hwnd}, width: w.Width, height: w.Height}
+	retval := &mountedImg{NativeWidget: NativeWidget{hwnd}, imageData: buffer, width: w.Width, height: w.Height}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
@@ -47,6 +55,7 @@ func (w *Img) mount(parent NativeWidget) (MountedWidget, error) {
 
 type mountedImg struct {
 	NativeWidget
+	imageData     []uint8
 	width, height DIP
 }
 
@@ -70,10 +79,11 @@ func (w *mountedImg) updateProps(data *Img) error {
 	w.width, w.height = data.Width, data.Height
 
 	// Create the bitmap
-	hbitmap, err := imageToBitmap(data.Image)
+	hbitmap, buffer, err := imageToBitmap(data.Image)
 	if err != nil {
 		return err
 	}
+	w.imageData = buffer
 	win.SendMessage(w.hWnd, STM_SETIMAGE, win.IMAGE_BITMAP, uintptr(hbitmap))
 
 	return nil

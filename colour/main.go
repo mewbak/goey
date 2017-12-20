@@ -19,6 +19,9 @@ var (
 		color.RGBA{0, 0xff, 0, 0xff},
 		color.RGBA{0, 0, 0xff, 0xff},
 	}
+	colorNames = [3]string{
+		"Red", "Green", "Blue",
+	}
 
 	gopher image.Image
 )
@@ -63,12 +66,15 @@ func update() {
 
 func render() []goey.Widget {
 	img := image.Image(nil)
+	description := ""
 	if clickCount%4 == 3 {
 		img = gopher
+		description = "Image of the Go gopher."
 	} else {
 		rgbimg := image.NewRGBA(image.Rect(0, 0, 100, 100))
 		draw.Draw(rgbimg, rgbimg.Bounds(), image.NewUniform(colors[clickCount%4]), image.Point{}, draw.Src)
 		img = rgbimg
+		description = colorNames[clickCount%4]
 	}
 
 	return []goey.Widget{
@@ -81,5 +87,6 @@ func render() []goey.Widget {
 			Width:  goey.DIP(img.Bounds().Dx()),
 			Height: goey.DIP(img.Bounds().Dy()),
 		},
+		&goey.P{Text:description},
 	}
 }
