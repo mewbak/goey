@@ -67,7 +67,7 @@ func render() []goey.Widget {
 		img = gopher
 	} else {
 		rgbimg := image.NewRGBA(image.Rect(0, 0, 100, 100))
-		draw.Draw(rgbimg, rgbimg.Bounds(), image.NewUniform(colors[clickCount%3]), image.Point{}, draw.Src)
+		draw.Draw(rgbimg, rgbimg.Bounds(), image.NewUniform(colors[clickCount%4]), image.Point{}, draw.Src)
 		img = rgbimg
 	}
 
