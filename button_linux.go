@@ -34,21 +34,9 @@ func (w *Button) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 
 	control.Connect("destroy", button_onDestroy, retval)
-	err = retval.onClick.Set(&control.Widget, w.OnClick)
-	if err != nil {
-		control.Destroy()
-		return nil, err
-	}
-	err = retval.onFocus.Set(&control.Widget, w.OnFocus)
-	if err != nil {
-		control.Destroy()
-		return nil, err
-	}
-	err = retval.onBlur.Set(&control.Widget, w.OnBlur)
-	if err != nil {
-		control.Destroy()
-		return nil, err
-	}
+	retval.onClick.Set(&control.Widget, w.OnClick)
+	retval.onFocus.Set(&control.Widget, w.OnFocus)
+	retval.onBlur.Set(&control.Widget, w.OnBlur)
 	control.Show()
 
 	return retval, nil
@@ -60,9 +48,6 @@ func button_onDestroy(widget *gtk.Button, mounted *mountedButton) {
 
 func (w *mountedButton) Close() {
 	if w.handle != nil {
-		w.onClick.Close(&w.handle.Widget)
-		w.onFocus.Close(&w.handle.Widget)
-		w.onBlur.Close(&w.handle.Widget)
 		w.handle.Destroy()
 		w.handle = nil
 	}
@@ -84,18 +69,9 @@ func (w *mountedButton) updateProps(data *Button) error {
 	if data.Default {
 		w.handle.GrabDefault()
 	}
-	err = w.onClick.Set(&w.handle.Widget, data.OnClick)
-	if err != nil {
-		return err
-	}
-	err = w.onFocus.Set(&w.handle.Widget, data.OnFocus)
-	if err != nil {
-		return err
-	}
-	err = w.onBlur.Set(&w.handle.Widget, data.OnBlur)
-	if err != nil {
-		return err
-	}
+	w.onClick.Set(&w.handle.Widget, data.OnClick)
+	w.onFocus.Set(&w.handle.Widget, data.OnFocus)
+	w.onBlur.Set(&w.handle.Widget, data.OnBlur)
 
 	return nil
 }
