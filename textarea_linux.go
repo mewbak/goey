@@ -9,6 +9,8 @@ import (
 
 type mountedTextArea struct {
 	handle *gtk.TextView
+	buffer *gtk.TextBuffer
+	frame  *gtk.Frame
 
 	onChange func(string)
 	shChange glib.SignalHandle
@@ -29,11 +31,30 @@ func (w *TextArea) mount(parent NativeWidget) (MountedWidget, error) {
 		return nil, err
 	}
 	control.SetWrapMode(gtk.WRAP_WORD)
-	buffer.Unref()
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
+
+	swindow, err := gtk.ScrolledWindowNew(nil, nil)
+	if err != nil {
+		control.Destroy()
+		return nil, err
+	}
+	swindow.Add(control)
+	swindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+	swindow.SetBorderWidth(3)
+	swindow.SetVExpand(true)
+
+	frame, err := gtk.FrameNew("")
+	if err != nil {
+		swindow.Destroy()
+		return nil, err
+	}
+	frame.SetShadowType(gtk.SHADOW_ETCHED_IN)
+	frame.Add(swindow)
+	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(frame)
 
 	retval := &mountedTextArea{
 		handle:   control,
+		buffer:   buffer,
+		frame:    frame,
 		onChange: w.OnChange,
 	}
 
@@ -47,7 +68,7 @@ func (w *TextArea) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
-	control.Show()
+	frame.ShowAll()
 
 	return retval, nil
 }
@@ -67,8 +88,11 @@ func textarea_onDestroy(widget *gtk.TextView, mounted *mountedTextArea) {
 
 func (w *mountedTextArea) Close() {
 	if w.handle != nil {
-		w.handle.Destroy()
+		w.frame.Destroy()
+		w.buffer.Unref()
 		w.handle = nil
+		w.frame = nil
+		w.buffer = nil
 	}
 }
 
