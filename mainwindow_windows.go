@@ -302,6 +302,9 @@ func newWindow(title string, children []Widget) (*Window, error) {
 		if err != nil {
 			return nil, err
 		}
+		if atom == 0 {
+			panic("internal error:  atom==0 although no error returned")
+		}
 		mainWindow.atom = atom
 	}
 
@@ -383,6 +386,12 @@ func (w *windowImpl) close() {
 		win.DestroyWindow(w.hWnd)
 	}
 	win.OleUninitialize()
+}
+
+// NativeHandle returns the handle to the platform-specific window handle
+// (i.e. a HWND on WIN32).
+func (w *windowImpl) NativeHandle() win.HWND {
+	return w.hWnd
 }
 
 func (w *windowImpl) setAlignment(main MainAxisAlign, cross CrossAxisAlign) error {

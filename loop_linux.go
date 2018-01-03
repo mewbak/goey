@@ -16,8 +16,8 @@ func run() error {
 
 func do(action func() error) error {
 	err := make(chan error, 1)
-	glib.IdleAdd( func() {
-		err  <- action()
+	glib.IdleAdd(func() {
+		err <- action()
 	})
 	return <-err
 }

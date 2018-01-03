@@ -29,7 +29,7 @@ var (
 //
 // Modification of the GUI should happen only on the GUI thread.  Any
 // modifications should be schedule using a callback on the function Do.
-func Run() error {
+func Run(action func() error) error {
 	// Pin the GUI message loop to a single thread
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
@@ -43,6 +43,12 @@ func Run() error {
 	defer func() {
 		atomic.StoreUint32(&isRunning, 0)
 	}()
+
+	// Since we have now locked the OS thread, we can call the initial action.
+	err := action()
+	if err != nil {
+		return err
+	}
 
 	// Defer to platform-specific code.
 	return run()

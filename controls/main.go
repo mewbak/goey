@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"goey"
 )
 
@@ -10,7 +11,14 @@ var (
 )
 
 func main() {
-	mw, err := goey.NewWindow("Example",
+	err := goey.Run(createWindow)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+}
+
+func createWindow() error {
+	_, err := goey.NewWindow("Example",
 		[]goey.Widget{
 			&goey.P{Text: lorem},
 			&goey.P{Text: "This is a label.", Align: goey.Center},
@@ -37,11 +45,5 @@ func main() {
 			&goey.TextArea{},
 		},
 	)
-	if err != nil {
-		println(err.Error())
-		return
-	}
-	defer mw.Close()
-
-	goey.Run()
+	return err
 }

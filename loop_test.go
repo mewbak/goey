@@ -29,9 +29,10 @@ func ExampleDo() {
 }
 
 func TestRun(t *testing.T) {
-	mw, err := NewMainWindow("Test", nil)
+	init := func() error {
+	mw, err := NewWindow("Test", nil)
 	if err != nil {
-		t.Fatalf("Fail in call to NewMainWindow, %s", err)
+		t.Fatalf("Fail in call to NewWindow, %s", err)
 	}
 
 	go func() {
@@ -45,7 +46,10 @@ func TestRun(t *testing.T) {
 		}
 	}()
 
-	err = Run()
+	return nil
+}
+
+	err := Run(init)
 	if err != nil {
 		t.Errorf("Unexpected error in call to Run")
 	}

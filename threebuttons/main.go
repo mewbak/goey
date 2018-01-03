@@ -14,19 +14,24 @@ var (
 )
 
 func main() {
+	err := goey.Run(createWindow)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+}
+
+func createWindow() error {
 	mw, err := goey.NewWindow("Three Buttons", render())
 	if err != nil {
-		println(err.Error())
-		return
+		return err
 	}
-	defer mw.Close()
 	mw.SetAlignment(alignMain, alignCross)
 	mainWindow = mw
 
-	goey.Run()
+	return nil
 }
 
-func update() {
+func updateWindow() {
 	err := mainWindow.SetChildren(render())
 	if err != nil {
 		fmt.Println("Error: ", err.Error())
@@ -39,7 +44,7 @@ func cycleMainAxisAlign() {
 		alignMain = goey.MainStart
 	}
 	mainWindow.SetAlignment(alignMain, alignCross)
-	update()
+	updateWindow()
 }
 
 func cycleCrossAxisAlign() {
@@ -47,8 +52,8 @@ func cycleCrossAxisAlign() {
 	if alignCross > goey.CrossEnd {
 		alignCross = goey.Stretch
 	}
-	mainWindow.SetAlignment(goey.SpaceAround, alignCross)
-	update()
+	mainWindow.SetAlignment(alignMain, alignCross)
+	updateWindow()
 }
 
 func onfocus(ndx int) func() {
@@ -73,7 +78,7 @@ func render() []goey.Widget {
 			Default: true,
 			OnClick: func() {
 				clickCount++
-				update()
+				updateWindow()
 			},
 			OnFocus: onfocus(1),
 			OnBlur:  onblur(1),
