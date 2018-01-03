@@ -67,7 +67,7 @@ func (w *mountedTextInput) updateProps(data *TextInput) error {
 	w.handle.SetText(data.Value)
 	w.handle.SetPlaceholderText(data.Placeholder)
 	w.onChange = data.OnChange
-	w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "-changed", textinput_onChanged, w)
+	w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "changed", textinput_onChanged, w)
 	w.onFocus.Set(&w.handle.Widget, data.OnFocus)
 	w.onBlur.Set(&w.handle.Widget, data.OnBlur)
 
