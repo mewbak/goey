@@ -30,21 +30,28 @@ func (w *TextArea) mount(parent NativeWidget) (MountedWidget, error) {
 		buffer.Unref()
 		return nil, err
 	}
+	control.SetLeftMargin(3)
+	control.SetRightMargin(3)
+	control.SetMarginTop(3)    // missing function SetTopMargin
+	control.SetMarginBottom(3) // missing function SetBottomMargin
 	control.SetWrapMode(gtk.WRAP_WORD)
 
 	swindow, err := gtk.ScrolledWindowNew(nil, nil)
 	if err != nil {
+		control.RefSink()
 		control.Destroy()
+		control.Unref()
 		return nil, err
 	}
 	swindow.Add(control)
 	swindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-	swindow.SetBorderWidth(3)
 	swindow.SetVExpand(true)
 
 	frame, err := gtk.FrameNew("")
 	if err != nil {
+		swindow.RefSink()
 		swindow.Destroy()
+		swindow.Unref()
 		return nil, err
 	}
 	frame.SetShadowType(gtk.SHADOW_ETCHED_IN)
