@@ -8,11 +8,10 @@ var (
 type TextAlignment uint8
 
 const (
-	DefaultAlign = TextAlignment(iota) // Default alignment for paragraphs
-	Left                               // Text aligned to the left (ragged right)
-	Center                             // Center alignment
-	Right                              // Text aligned to the right (ragged left)
-	Justify                            // Text justified so that both left and right are flush
+	Left    = TextAlignment(iota) // Text aligned to the left (ragged right)
+	Center                        // Center alignment
+	Right                         // Text aligned to the right (ragged left)
+	Justify                       // Text justified so that both left and right are flush
 )
 
 // P describes a widget that contains significant text, which can reflow if necessary.

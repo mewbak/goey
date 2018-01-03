@@ -65,7 +65,6 @@ func TestWindow_SetAlignment(t *testing.T) {
 		if mw == nil {
 			t.Fatalf("Unexpected nil for window")
 		}
-		defer mw.Close()
 		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
 			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
 		}
@@ -122,7 +121,6 @@ func TestNewWindow_SetChildren(t *testing.T) {
 		if mw == nil {
 			t.Fatalf("Unexpected nil for window")
 		}
-		defer mw.Close()
 		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
 			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
 		}
@@ -194,7 +192,6 @@ func TestNewWindow_SetTitle(t *testing.T) {
 		if mw == nil {
 			t.Fatalf("Unexpected nil for window")
 		}
-		defer mw.Close()
 		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
 			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
 		}
@@ -202,16 +199,24 @@ func TestNewWindow_SetTitle(t *testing.T) {
 		go func() {
 			t.Logf("Starting set title tests")
 			time.Sleep(50 * time.Millisecond)
-			mw.SetTitle("Flash!")
+			err := Do(func() error {
+				return mw.SetTitle("Flash!")
+			})
+			if err != nil {
+				t.Errorf("Error calling SetTitle, %", err)
+			}
 			time.Sleep(50 * time.Millisecond)
 			t.Logf("Stopping alignment tests")
 
 			// Note:  No work after this call to Do, since the call to Run may be
 			// terminated when the call to Do returns.
-			Do(func() error {
+			err = Do(func() error {
 				mw.Close()
 				return nil
 			})
+			if err != nil {
+				t.Errorf("Error calling Close, %", err)
+			}
 		}()
 
 		return nil
