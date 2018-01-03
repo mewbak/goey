@@ -29,6 +29,7 @@ func newWindow(title string, children []Widget) (*Window, error) {
 	retval := &Window{windowImpl{app, mountedVBox{}}}
 
 	app.SetTitle(title)
+	app.SetBorderWidth(10)
 	app.Connect("destroy", mainwindow_onDestroy, retval)
 	app.Show()
 
