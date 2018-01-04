@@ -1,12 +1,13 @@
 package goey
 
 import (
-	"github.com/lxn/win"
 	win2 "goey/syscall"
 	"image"
 	"image/draw"
 	"syscall"
 	"unsafe"
+
+	"github.com/lxn/win"
 )
 
 func imageToIcon(prop image.Image) (win.HICON, []uint8, error) {
@@ -65,23 +66,23 @@ func imageToBitmap(prop image.Image) (win.HBITMAP, []uint8, error) {
 			panic("Error in CreateBitmap")
 		}
 		return hbitmap, buffer, nil
-	} else {
-		// Create a new image in RGBA format
-		bounds := prop.Bounds()
-		img := image.NewRGBA(bounds)
-		draw.Draw(img, bounds, prop, bounds.Min, draw.Src)
-		// Need to convert RGB to BGR
-		for i := 0; i < len(img.Pix); i += 4 {
-			img.Pix[i+0], img.Pix[i+2] = img.Pix[i+2], img.Pix[i+0]
-		}
-
-		// Create the bitmap
-		hbitmap := win.CreateBitmap(int32(img.Rect.Dx()), int32(img.Rect.Dy()), 4, 8, unsafe.Pointer(&img.Pix[0]))
-		if hbitmap == 0 {
-			panic("Error in CreateBitmap")
-		}
-		return hbitmap, img.Pix, nil
 	}
+
+	// Create a new image in RGBA format
+	bounds := prop.Bounds()
+	img := image.NewRGBA(bounds)
+	draw.Draw(img, bounds, prop, bounds.Min, draw.Src)
+	// Need to convert RGB to BGR
+	for i := 0; i < len(img.Pix); i += 4 {
+		img.Pix[i+0], img.Pix[i+2] = img.Pix[i+2], img.Pix[i+0]
+	}
+
+	// Create the bitmap
+	hbitmap := win.CreateBitmap(int32(img.Rect.Dx()), int32(img.Rect.Dy()), 4, 8, unsafe.Pointer(&img.Pix[0]))
+	if hbitmap == 0 {
+		panic("Error in CreateBitmap")
+	}
+	return hbitmap, img.Pix, nil
 }
 
 func (w *Img) mount(parent NativeWidget) (MountedWidget, error) {

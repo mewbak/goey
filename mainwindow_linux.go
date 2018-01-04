@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"image"
 	"sync/atomic"
 
 	"github.com/gotk3/gotk3/gtk"
@@ -61,6 +62,15 @@ func (mw *windowImpl) setChildren(children []Widget) error {
 	err := mw.vbox.setChildren(children)
 	// ... and we're done
 	return err
+}
+
+func (mw *windowImpl) setIcon(img image.Image) error {
+	pixbuf, _, err := imageToPixbuf(img)
+	if err != nil {
+		return err
+	}
+	mw.handle.SetIcon(pixbuf)
+	return nil
 }
 
 func (mw *windowImpl) setTitle(value string) error {

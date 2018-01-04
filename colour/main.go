@@ -1,4 +1,4 @@
-// Package main for an example application using the goey package to display 
+// Package main for an example application using the goey package to display
 // various images.  The images can be cycled by clicking a button, and each
 // image has an associated description.
 package main

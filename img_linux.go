@@ -3,6 +3,7 @@ package goey
 import (
 	"goey/syscall"
 	"image"
+	"image/draw"
 	"unsafe"
 
 	"github.com/gotk3/gotk3/gdk"
@@ -20,9 +21,16 @@ func imageToPixbuf(prop image.Image) (*gdk.Pixbuf, []uint8, error) {
 		buffer := append([]byte(nil), img.Pix...)
 		pixbuf := syscall.PixbufNewFromBytes(buffer, gdk.COLORSPACE_RGB, true, 8, img.Rect.Dx(), img.Rect.Dy(), img.Stride)
 		return pixbuf, buffer, nil
-	} else {
-		panic("Unsupported image format.")
 	}
+
+	// Create a new image in RGBA format
+	bounds := prop.Bounds()
+	img := image.NewRGBA(bounds)
+	draw.Draw(img, bounds, prop, bounds.Min, draw.Src)
+
+	// Create the bitmap
+	pixbuf := syscall.PixbufNewFromBytes(img.Pix, gdk.COLORSPACE_RGB, true, 8, img.Rect.Dx(), img.Rect.Dy(), img.Stride)
+	return pixbuf, img.Pix, nil
 }
 
 func (w *Img) mount(parent NativeWidget) (MountedWidget, error) {
