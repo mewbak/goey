@@ -1,5 +1,9 @@
 package goey
 
+import (
+	"image"
+)
+
 // Window represents a top-level window that contain other widgets.
 type Window struct {
 	windowImpl
@@ -22,13 +26,18 @@ func (w *Window) SetAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
 	return w.setAlignment(main, cross)
 }
 
-// SetChildren changes the child windows and widgets of the main window.  As
-// necessary GUI widgets will be created or destroyed so that the GUI widgets
-// match the widgets described by the parameter children.  If necessary, the
+// SetChildren changes the child windows and widgets of the window.  As
+// necessary, GUI widgets will be created or destroyed so that the GUI widgets
+// match the widgets described by the parameter children.  The
 // position of contained widgets will be updated to match the new layout
 // properties.
 func (w *Window) SetChildren(children []Widget) error {
 	return w.setChildren(children)
+}
+
+// SetIcon changes the icon associated with the window.
+func (w *Window) SetIcon(img image.Image) error {
+	return w.setIcon(img)
 }
 
 // SetTitle changes the caption in the title bar for the main window.

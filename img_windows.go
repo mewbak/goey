@@ -4,9 +4,42 @@ import (
 	"github.com/lxn/win"
 	win2 "goey/syscall"
 	"image"
+	"image/draw"
 	"syscall"
 	"unsafe"
 )
+
+func imageToIcon(prop image.Image) (win.HICON, []uint8, error) {
+	// Create a mask for the icon.
+	// Currently, we are using a straight white mask, but perhaps this
+	// should be a copy of the alpha channel if the source image is
+	// RGBA.
+	bounds := prop.Bounds()
+	imgMask := image.NewGray(prop.Bounds())
+	draw.Draw(imgMask, bounds, image.White, image.Point{}, draw.Src)
+	hmask, _, err := imageToBitmap(imgMask)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	// Convert the image to a bitmap.
+	hbitmap, buffer, err := imageToBitmap(prop)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	// Create the icon
+	iconinfo := win.ICONINFO{
+		FIcon:    win.TRUE,
+		HbmMask:  hmask,
+		HbmColor: hbitmap,
+	}
+	hicon := win.CreateIconIndirect(&iconinfo)
+	if hicon == 0 {
+		panic("Error in CreateIconIndirect")
+	}
+	return hicon, buffer, nil
+}
 
 func imageToBitmap(prop image.Image) (win.HBITMAP, []uint8, error) {
 	if img, ok := prop.(*image.RGBA); ok {
@@ -23,8 +56,31 @@ func imageToBitmap(prop image.Image) (win.HBITMAP, []uint8, error) {
 			panic("Error in CreateBitmap")
 		}
 		return hbitmap, buffer, nil
+	} else if img, ok := prop.(*image.Gray); ok {
+		// Create a copy of the backing for the pixel data
+		buffer := append([]uint8(nil), img.Pix...)
+		// Create the bitmap
+		hbitmap := win.CreateBitmap(int32(img.Rect.Dx()), int32(img.Rect.Dy()), 1, 8, unsafe.Pointer(&img.Pix[0]))
+		if hbitmap == 0 {
+			panic("Error in CreateBitmap")
+		}
+		return hbitmap, buffer, nil
 	} else {
-		panic("Unsupported image format.")
+		// Create a new image in RGBA format
+		bounds := prop.Bounds()
+		img := image.NewRGBA(bounds)
+		draw.Draw(img, bounds, prop, bounds.Min, draw.Src)
+		// Need to convert RGB to BGR
+		for i := 0; i < len(img.Pix); i += 4 {
+			img.Pix[i+0], img.Pix[i+2] = img.Pix[i+2], img.Pix[i+0]
+		}
+
+		// Create the bitmap
+		hbitmap := win.CreateBitmap(int32(img.Rect.Dx()), int32(img.Rect.Dy()), 4, 8, unsafe.Pointer(&img.Pix[0]))
+		if hbitmap == 0 {
+			panic("Error in CreateBitmap")
+		}
+		return hbitmap, img.Pix, nil
 	}
 }
 

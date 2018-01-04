@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	modkernel32 = syscall.MustLoadDLL("kernel32.dll")
-	moduser32   = syscall.MustLoadDLL("user32.dll")
+	moduser32 = syscall.MustLoadDLL("user32.dll")
 
+	procSetClassLongPtr     = moduser32.MustFindProc("SetClassLongPtrW")
 	procGetDesktopWindow    = moduser32.MustFindProc("GetDesktopWindow")
 	procGetWindowText       = moduser32.MustFindProc("GetWindowTextW")
 	procGetWindowTextLength = moduser32.MustFindProc("GetWindowTextLengthW")
@@ -25,8 +25,21 @@ var (
 )
 
 const (
+	GCLP_HICON   = -14
+	GCLP_HICONSM = -34
+
 	STM_SETIMAGE = 0x0172
 )
+
+// SetClassLong is a wrapper.
+func SetClassLongPtr(hWnd win.HWND, index int32, value uintptr) uintptr {
+	ret, _, _ := syscall.Syscall(procSetClassLongPtr.Addr(), 3,
+		uintptr(hWnd),
+		uintptr(index),
+		value)
+
+	return ret
+}
 
 // GetDesktpoWindow is a wrapper.
 func GetDesktopWindow() win.HWND {

@@ -123,7 +123,7 @@ func TestButtonEvents(t *testing.T) {
 					t.Errorf("Error in Do, %s", err)
 				}
 			}
-			
+
 			// Close the window
 			err := Do(func() error {
 				mw.Close()

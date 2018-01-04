@@ -422,6 +422,15 @@ func (w *windowImpl) setChildren(children []Widget) error {
 	return err
 }
 
+func (w *windowImpl) setIcon(img image.Image) error {
+	hicon, _, err := imageToIcon(img)
+	if err != nil {
+		return err
+	}
+	win2.SetClassLongPtr(w.hWnd, win2.GCLP_HICON, uintptr(hicon))
+	return nil
+}
+
 func (w *windowImpl) setTitle(value string) error {
 	return NativeWidget{w.hWnd}.SetText(value)
 }
