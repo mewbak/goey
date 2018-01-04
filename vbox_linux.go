@@ -20,13 +20,14 @@ func (w *VBox) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 
+	halign := w.AlignCross.HAlign()
 	children := make([]MountedWidget, 0, len(w.Children))
 	for _, v := range w.Children {
 		mountedWidget, err := v.Mount(NativeWidget{&control.Widget})
 		if err != nil {
 			return nil, err
 		}
-		mountedWidget.Handle().SetHAlign(w.AlignCross.HAlign())
+		vbox_crossAlign(mountedWidget, halign)
 		children = append(children, mountedWidget)
 	}
 
@@ -62,6 +63,17 @@ func vbox_onDestroy(widget *gtk.Box, mounted *mountedVBox) {
 	mounted.handle = nil
 }
 
+func vbox_crossAlign(widget MountedWidget, align gtk.Align) {
+	// Label's don't stretch, and we don't want them to be centered.
+	if align == gtk.ALIGN_FILL {
+		if ptr, ok := widget.(*mountedLabel); ok {
+			ptr.handle.SetHAlign(gtk.ALIGN_START)
+			return
+		}
+	}
+	widget.Handle().SetHAlign(align)
+}
+
 func (w *mountedVBox) setAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
 	// Save main axis alignment
 	w.alignMain = main
@@ -69,8 +81,9 @@ func (w *mountedVBox) setAlignment(main MainAxisAlign, cross CrossAxisAlign) err
 	// Save cross axis alignment, update children
 	if w.alignCross != cross {
 		w.alignCross = cross
+		halign := cross.HAlign()
 		for _, v := range w.children {
-			v.Handle().SetHAlign(cross.HAlign())
+			vbox_crossAlign(v, halign)
 		}
 	}
 

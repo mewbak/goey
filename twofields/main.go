@@ -47,6 +47,8 @@ func render() []goey.Widget {
 				characterCount[0] = len(value)
 				updateWindow()
 			},
+			OnFocus: onfocus(1),
+			OnBlur:  onblur(1),
 		},
 		&goey.Label{Text: "This is a secondary field:"},
 		&goey.TextArea{Value: text[1], Placeholder: "...and here.",
@@ -54,11 +56,26 @@ func render() []goey.Widget {
 				text[1] = value
 				characterCount[1] = len(value)
 				updateWindow()
-			}},
+			},
+			OnFocus: onfocus(2),
+			OnBlur:  onblur(2),
+		},
 		//	},
 		//	Breaks: []goey.Break{goey.Cols(12, 5, 4, 3), goey.Cols(12, 7, 8, 9), goey.Cols(12, 5, 4, 3), goey.Cols(12, 7, 8, 9)},
 		//},
 		&goey.HR{},
 		&goey.Label{Text: "The total character count is:  " + strconv.Itoa(characterCount[0]+characterCount[1])},
+	}
+}
+
+func onfocus(ndx int) func() {
+	return func() {
+		fmt.Println("focus", ndx)
+	}
+}
+
+func onblur(ndx int) func() {
+	return func() {
+		fmt.Println("blur", ndx)
 	}
 }

@@ -31,13 +31,7 @@ func (w *TextInput) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 
 	control.Connect("destroy", textinput_onDestroy, retval)
-	if w.OnChange != nil {
-		sh, err := control.Connect("changed", textinput_onChanged, retval)
-		if err != nil {
-			panic("Failed to connect 'changed' event")
-		}
-		retval.shChange = sh
-	}
+	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "changed", textinput_onChanged, retval)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
 	control.Show()
@@ -73,16 +67,7 @@ func (w *mountedTextInput) updateProps(data *TextInput) error {
 	w.handle.SetText(data.Value)
 	w.handle.SetPlaceholderText(data.Placeholder)
 	w.onChange = data.OnChange
-	if data.OnChange != nil && w.shChange == 0 {
-		sh, err := w.handle.Connect("changed", textinput_onChanged, w)
-		if err != nil {
-			panic("Failed to connect 'changed' event")
-		}
-		w.shChange = sh
-	} else if data.OnChange == nil && w.shChange != 0 {
-		w.handle.HandlerDisconnect(w.shChange)
-		w.shChange = 0
-	}
+	w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "changed", textinput_onChanged, w)
 	w.onFocus.Set(&w.handle.Widget, data.OnFocus)
 	w.onBlur.Set(&w.handle.Widget, data.OnBlur)
 

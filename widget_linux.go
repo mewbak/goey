@@ -84,7 +84,7 @@ func (c *focusSlot) Set(control *gtk.Widget, value func()) {
 
 func focusSlotThunk(widget interface{}, event *gdk.Event, c *focusSlot) bool {
 	c.callback()
-	return true
+	return false
 }
 
 type blurSlot struct {
@@ -108,5 +108,5 @@ func (c *blurSlot) Set(control *gtk.Widget, value func()) {
 
 func blurSlotThunk(widget interface{}, event *gdk.Event, c *focusSlot) bool {
 	c.callback()
-	return true
+	return false
 }
