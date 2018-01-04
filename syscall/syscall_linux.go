@@ -1,3 +1,9 @@
+// Package syscall fills in some missing APIs from GTK+ 3 that are not provided
+// by gotk3's package.  These are limited to those required by the package goey,
+// and should be candidates for upstreaming.  Naming convention is to convert
+// snake-case used by the C API to camel-case.
+//
+// This package is intended for internal use.
 package syscall
 
 import (
@@ -18,6 +24,7 @@ func fromBool(value bool) C.gboolean {
 	return C.FALSE
 }
 
+// PixbufNewFromBytes is a wrapper around gdk_pixbuf_new_from_data().
 func PixbufNewFromBytes(bytes []uint8, colorspace gdk.Colorspace, hasAlpha bool, bitsPerSample int,
 	width int, height int, rowStride int) *gdk.Pixbuf {
 

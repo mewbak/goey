@@ -7,6 +7,7 @@ import (
 	"unsafe"
 
 	"github.com/lxn/win"
+	win2 "goey/syscall"
 )
 
 var (
@@ -107,7 +108,7 @@ func (mw *windowImpl) onSize(hwnd win.HWND) {
 	if minHeight.PixelsY() > int(rect.Bottom-rect.Top)-2*margin.PixelsY() {
 		if !mw.scrollbarVisible {
 			// Create the scroll bar
-			ShowScrollBar(hwnd, win.SB_VERT, win.TRUE)
+			win2.ShowScrollBar(hwnd, win.SB_VERT, win.TRUE)
 			mw.scrollbarVisible = true
 
 			// The client rect will have changed.  Need to refresh.
@@ -136,7 +137,7 @@ func (mw *windowImpl) onSize(hwnd win.HWND) {
 	} else {
 		if mw.scrollbarVisible {
 			// Remove the scroll bar
-			ShowScrollBar(hwnd, win.SB_VERT, win.FALSE)
+			win2.ShowScrollBar(hwnd, win.SB_VERT, win.FALSE)
 			mw.scrollbarVisible = false
 
 			// The client rect will have changed.  Need to refresh.
@@ -317,7 +318,7 @@ func newWindow(title string, children []Widget) (*Window, error) {
 	win.AdjustWindowRect(&rect, win.WS_OVERLAPPEDWINDOW, false)
 
 	var clientRect win.RECT
-	win.GetClientRect(GetDesktopWindow(), &clientRect)
+	win.GetClientRect(win2.GetDesktopWindow(), &clientRect)
 	left := (clientRect.Right / 2) - ((rect.Right - rect.Left) / 2)
 	top := (clientRect.Bottom / 2) - ((rect.Bottom - rect.Top) / 2)
 	rect.Right = rect.Right - rect.Left + left

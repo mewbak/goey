@@ -2,6 +2,7 @@ package goey
 
 import (
 	"github.com/lxn/win"
+	win2 "goey/syscall"
 	"image"
 	"syscall"
 	"unsafe"
@@ -86,7 +87,7 @@ func (w *mountedLabel) updateProps(data *Label) error {
 		return err
 	}
 	w.text = text
-	SetWindowText(w.hWnd, &text[0])
+	win2.SetWindowText(w.hWnd, &text[0])
 	// TODO:  Update alignment
 
 	return nil

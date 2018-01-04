@@ -2,6 +2,7 @@ package goey
 
 import (
 	"github.com/lxn/win"
+	win2 "goey/syscall"
 	"syscall"
 	"unsafe"
 )
@@ -164,7 +165,7 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
 				ptr := (*mountedTextInput)(unsafe.Pointer(w))
 				if ptr.onEnterKey != nil {
-					ptr.onEnterKey(GetWindowText(hwnd))
+					ptr.onEnterKey(win2.GetWindowText(hwnd))
 					return 0
 				}
 			}
@@ -178,7 +179,7 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
 				ptr := (*mountedTextInput)(unsafe.Pointer(w))
 				if ptr.onChange != nil {
-					ptr.onChange(GetWindowText(hwnd))
+					ptr.onChange(win2.GetWindowText(hwnd))
 				}
 			}
 		}

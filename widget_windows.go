@@ -2,10 +2,25 @@ package goey
 
 import (
 	"github.com/lxn/win"
+	win2 "goey/syscall"
 	"image"
 	"sync/atomic"
 	"syscall"
+	"unsafe"
 )
+
+func init() {
+	// If the return of the call to InitCommonControlsEx is checked, we see
+	// false, which according to the documentation indicates that it failed.
+	// However, there is no error with syscall.GetLastError().
+	//
+	// Note:  The init function for github.com/lxn/win also calls this
+	// function, but does not include ICC_STANDARD_CLASSES.
+	initCtrls := win.INITCOMMONCONTROLSEX{}
+	initCtrls.DwSize = uint32(unsafe.Sizeof(initCtrls))
+	initCtrls.DwICC = win.ICC_STANDARD_CLASSES
+	win.InitCommonControlsEx(&initCtrls)
+}
 
 // Control ID
 
@@ -25,7 +40,7 @@ type NativeWidget struct {
 
 // Text copies text of the underlying window
 func (w NativeWidget) Text() string {
-	return GetWindowText(w.hWnd)
+	return win2.GetWindowText(w.hWnd)
 }
 
 func (w NativeWidget) SetDisabled(value bool) {
@@ -50,7 +65,7 @@ func (w NativeWidget) SetText(value string) error {
 		return err
 	}
 
-	rc := SetWindowText(w.hWnd, utf16)
+	rc := win2.SetWindowText(w.hWnd, utf16)
 	if rc == 0 {
 		return syscall.GetLastError()
 	}

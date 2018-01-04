@@ -2,6 +2,7 @@ package goey
 
 import (
 	"github.com/lxn/win"
+	win2 "goey/syscall"
 	"image"
 	"syscall"
 	"unsafe"
@@ -45,7 +46,7 @@ func (w *Img) mount(parent NativeWidget) (MountedWidget, error) {
 		}
 		return nil, err
 	}
-	win.SendMessage(hwnd, STM_SETIMAGE, win.IMAGE_BITMAP, uintptr(hbitmap))
+	win.SendMessage(hwnd, win2.STM_SETIMAGE, win.IMAGE_BITMAP, uintptr(hbitmap))
 
 	retval := &mountedImg{NativeWidget: NativeWidget{hwnd}, imageData: buffer, width: w.Width, height: w.Height}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
@@ -84,7 +85,7 @@ func (w *mountedImg) updateProps(data *Img) error {
 		return err
 	}
 	w.imageData = buffer
-	win.SendMessage(w.hWnd, STM_SETIMAGE, win.IMAGE_BITMAP, uintptr(hbitmap))
+	win.SendMessage(w.hWnd, win2.STM_SETIMAGE, win.IMAGE_BITMAP, uintptr(hbitmap))
 
 	return nil
 }

@@ -2,6 +2,7 @@ package goey
 
 import (
 	"github.com/lxn/win"
+	win2 "goey/syscall"
 	"syscall"
 	"unsafe"
 )
@@ -157,7 +158,7 @@ func textareaWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
 				ptr := (*mountedTextArea)(unsafe.Pointer(w))
 				if ptr.onChange != nil {
-					ptr.onChange(GetWindowText(hwnd))
+					ptr.onChange(win2.GetWindowText(hwnd))
 				}
 			}
 		}
