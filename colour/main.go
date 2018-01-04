@@ -1,3 +1,6 @@
+// Package main for an example application using the goey package to display 
+// various images.  The images can be cycled by clicking a button, and each
+// image has an associated description.
 package main
 
 import (
@@ -37,6 +40,16 @@ func loadImage(filename string) (image.Image, error) {
 	return img, err
 }
 
+func selectImage(index int) (image.Image, string) {
+	if clickCount%4 == 3 {
+		return gopher, "Image of the Go gopher."
+	} else {
+		img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+		draw.Draw(img, img.Bounds(), image.NewUniform(colors[index%4]), image.Point{}, draw.Src)
+		return img, colorNames[index%4]
+	}
+}
+
 func main() {
 	err := error(nil)
 	gopher, err = loadImage("gopher.png")
@@ -45,16 +58,26 @@ func main() {
 		return
 	}
 
+	err = goey.Run(createWindow)
+	if err != nil {
+		fmt.Println("Error: ", err.Error())
+	}
+}
+
+func createWindow() error {
+	// Add the controls
 	mw, err := goey.NewWindow("Colour", render())
 	if err != nil {
-		println(err.Error())
-		return
+		return err
 	}
-	defer mw.Close()
 	mw.SetAlignment(goey.MainCenter, goey.CrossCenter)
 	mainWindow = mw
 
-	goey.Run()
+	// Set the icon
+	img, _ := selectImage(clickCount)
+	mw.SetIcon(img)
+
+	return nil
 }
 
 func update() {
@@ -62,20 +85,13 @@ func update() {
 	if err != nil {
 		fmt.Println("Error: ", err.Error())
 	}
+
+	img, _ := selectImage(clickCount)
+	mainWindow.SetIcon(img)
 }
 
 func render() []goey.Widget {
-	img := image.Image(nil)
-	description := ""
-	if clickCount%4 == 3 {
-		img = gopher
-		description = "Image of the Go gopher."
-	} else {
-		rgbimg := image.NewRGBA(image.Rect(0, 0, 100, 100))
-		draw.Draw(rgbimg, rgbimg.Bounds(), image.NewUniform(colors[clickCount%4]), image.Point{}, draw.Src)
-		img = rgbimg
-		description = colorNames[clickCount%4]
-	}
+	img, description := selectImage(clickCount)
 
 	return []goey.Widget{
 		&goey.Button{Text: "Change the colour", OnClick: func() {
@@ -87,6 +103,6 @@ func render() []goey.Widget {
 			Width:  goey.DIP(img.Bounds().Dx()),
 			Height: goey.DIP(img.Bounds().Dy()),
 		},
-		&goey.P{Text:description},
+		&goey.P{Text: description},
 	}
 }

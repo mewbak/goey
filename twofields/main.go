@@ -1,3 +1,6 @@
+// Package main for an example application using the goey package to show
+// two editable multiline text fields.  As the fields are edited, a
+// status line with the total count of characters is maintained.
 package main
 
 import (
