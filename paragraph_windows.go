@@ -2,7 +2,7 @@ package goey
 
 import (
 	"github.com/lxn/win"
-	win2 "goey/syscall"
+	win2 "bitbucket.org/rj/goey/syscall"
 	"image"
 	"syscall"
 	"unsafe"

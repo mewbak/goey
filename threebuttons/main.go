@@ -7,7 +7,7 @@ package main
 
 import (
 	"fmt"
-	"goey"
+	"bitbucket.org/rj/goey"
 	"strconv"
 )
 

@@ -6,8 +6,8 @@ import (
 	"syscall"
 	"unsafe"
 
+	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
-	win2 "goey/syscall"
 )
 
 var (

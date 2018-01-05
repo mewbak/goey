@@ -5,7 +5,7 @@ package main
 
 import (
 	"fmt"
-	"goey"
+	"bitbucket.org/rj/goey"
 	"image"
 	"image/color"
 	"image/draw"

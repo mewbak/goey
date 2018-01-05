@@ -4,8 +4,8 @@
 package main
 
 import (
+	"bitbucket.org/rj/goey"
 	"fmt"
-	"goey"
 	"strconv"
 )
 

@@ -1,7 +1,7 @@
 package goey
 
 import (
-	win2 "goey/syscall"
+	win2 "bitbucket.org/rj/goey/syscall"
 	"image"
 	"image/draw"
 	"syscall"

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"goey"
+	"bitbucket.org/rj/goey"
 	"strconv"
 )
 

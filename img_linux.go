@@ -1,7 +1,7 @@
 package goey
 
 import (
-	"goey/syscall"
+	"bitbucket.org/rj/goey/syscall"
 	"image"
 	"image/draw"
 	"unsafe"
