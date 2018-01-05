@@ -28,8 +28,21 @@ const (
 	GCLP_HICON   = -14
 	GCLP_HICONSM = -34
 
+	DTM_FIRST         = 0x1000
+	DTM_CLOSEMONTHCAL = DTM_FIRST + 13
+
+	MCM_FIRST  = 0x1000
+	MCN_FIRST  = uint32(0xFFFFFD12)
+	MCN_SELECT = MCN_FIRST + 4
+
 	STM_SETIMAGE = 0x0172
 )
+
+type NMSELCHANGE struct {
+	Nmhdr      win.NMHDR
+	StSelStart win.SYSTEMTIME
+	StSelEnd   win.SYSTEMTIME
+}
 
 // SetClassLong is a wrapper.
 func SetClassLongPtr(hWnd win.HWND, index int32, value uintptr) uintptr {

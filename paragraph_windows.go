@@ -13,21 +13,24 @@ var (
 	paragraphMaxWidth int
 )
 
-func (w *P) mount(parent NativeWidget) (MountedWidget, error) {
-	text, err := syscall.UTF16FromString(w.Text)
-	if err != nil {
-		return nil, err
-	}
-
+func (w *P) calcStyle() uint32 {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.SS_LEFT)
 	if w.Align == Center {
 		style = style | win.SS_CENTER
 	} else if w.Align == Right {
 		style = style | win.SS_RIGHT
 	}
+	return style
+}
+
+func (w *P) mount(parent NativeWidget) (MountedWidget, error) {
+	text, err := syscall.UTF16FromString(w.Text)
+	if err != nil {
+		return nil, err
+	}
 
 	hwnd := win.CreateWindowEx(0, staticClassName, &text[0],
-		style,
+		w.calcStyle(),
 		10, 10, 100, 100,
 		parent.hWnd, 0, 0, nil)
 	if hwnd == 0 {
@@ -126,7 +129,7 @@ func (w *mountedP) updateProps(data *P) error {
 	}
 	w.text = text
 	win2.SetWindowText(w.hWnd, &text[0])
-	// TODO:  Update alignment
+	win.SetWindowLongPtr(w.hWnd, win.GWL_STYLE, uintptr(data.calcStyle()))
 
 	return nil
 }

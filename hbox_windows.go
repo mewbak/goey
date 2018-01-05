@@ -34,7 +34,14 @@ func (w *HBox) mount(parent NativeWidget) (MountedWidget, error) {
 }
 
 func (w *mountedHBox) Close() {
-	// nothing required
+	// On this platform, the mountedHBox handles layout, but does not actually
+	// have an HWND, so there are no direct resources to release.
+
+	// However, still need to free the children
+	for _, v := range w.children {
+		v.Close()
+	}
+	w.children = nil
 }
 
 func (w *mountedHBox) MeasureWidth() (DIP, DIP) {

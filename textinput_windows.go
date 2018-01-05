@@ -73,19 +73,19 @@ func (w *TextInput) mount(parent NativeWidget) (MountedWidget, error) {
 		win.SendMessage(hwnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
 	}
 
-	retval := &mountedTextInput{
+	retval := &mountedTextInput{mountedTextInputBase{
 		NativeWidget: NativeWidget{hwnd},
 		onChange:     w.OnChange,
 		onFocus:      w.OnFocus,
 		onBlur:       w.OnBlur,
 		onEnterKey:   w.OnEnterKey,
-	}
+	}}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
-type mountedTextInput struct {
+type mountedTextInputBase struct {
 	NativeWidget
 	onChange   func(value string)
 	onFocus    func()
@@ -93,7 +93,11 @@ type mountedTextInput struct {
 	onEnterKey func(value string)
 }
 
-func (w *mountedTextInput) MeasureWidth() (DIP, DIP) {
+type mountedTextInput struct {
+	mountedTextInputBase
+}
+
+func (w *mountedTextInputBase) MeasureWidth() (DIP, DIP) {
 	if paragraphMaxWidth == 0 {
 		paragraphMeasureReflowLimits(w.hWnd)
 	}
@@ -102,12 +106,12 @@ func (w *mountedTextInput) MeasureWidth() (DIP, DIP) {
 	return ToDIPX(paragraphMinWidth), ToDIPX(paragraphMaxWidth)
 }
 
-func (w *mountedTextInput) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedTextInputBase) MeasureHeight(width DIP) (DIP, DIP) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23, 23
 }
 
-func (w *mountedTextInput) updateProps(data *TextInput) error {
+func (w *mountedTextInputBase) updateProps(data *TextInput) error {
 	if data.Value != w.Text() {
 		w.SetText(data.Value)
 	}
@@ -137,14 +141,14 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedTextInput)(unsafe.Pointer(w))
+			ptr := (*mountedTextInputBase)(unsafe.Pointer(w))
 			ptr.hWnd = 0
 		}
 		// Defer to the old window proc
 
 	case win.WM_SETFOCUS:
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedTextInput)(unsafe.Pointer(w))
+			ptr := (*mountedTextInputBase)(unsafe.Pointer(w))
 			if ptr.onFocus != nil {
 				ptr.onFocus()
 			}
@@ -153,7 +157,7 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 
 	case win.WM_KILLFOCUS:
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedTextInput)(unsafe.Pointer(w))
+			ptr := (*mountedTextInputBase)(unsafe.Pointer(w))
 			if ptr.onBlur != nil {
 				ptr.onBlur()
 			}
@@ -163,7 +167,7 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 	case win.WM_KEYDOWN:
 		if wParam == win.VK_RETURN {
 			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*mountedTextInput)(unsafe.Pointer(w))
+				ptr := (*mountedTextInputBase)(unsafe.Pointer(w))
 				if ptr.onEnterKey != nil {
 					ptr.onEnterKey(win2.GetWindowText(hwnd))
 					return 0
@@ -177,7 +181,7 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 		switch notification {
 		case win.EN_UPDATE:
 			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*mountedTextInput)(unsafe.Pointer(w))
+				ptr := (*mountedTextInputBase)(unsafe.Pointer(w))
 				if ptr.onChange != nil {
 					ptr.onChange(win2.GetWindowText(hwnd))
 				}
