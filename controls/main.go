@@ -76,8 +76,10 @@ func renderWindow() []goey.Widget {
 				AlignMain: goey.MainEnd,
 			},
 			&goey.HR{},
-			&goey.SelectInput{Items: []string{"Choice 1", "Choice 2", "Choice 3"}, OnChange: func(v int) { println("cb1 ", v) }},
-			&goey.TextArea{},
+			&goey.SelectInput{Items: []string{"Choice 1", "Choice 2", "Choice 3"},
+				OnChange: func(v int) { println("select input: ", v) }},
+			&goey.TextArea{Value: "", Placeholder: "Room to write",
+				OnChange: func(v string) { println("text area: ", v) }},
 		)
 	}
 

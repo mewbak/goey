@@ -217,3 +217,21 @@ func setBoundsWithAlign(widget MountedWidget, bounds image.Rectangle, align Cros
 
 	return h
 }
+
+func subclassWindowProcedure(hWnd win.HWND, oldWindowProc *uintptr, newWindowProc uintptr) {
+	// We need a copy of the address of the old window proc when subclassing.
+	// Unhandled messages need to be forwarded.
+	if *oldWindowProc == 0 {
+		*oldWindowProc = win.GetWindowLongPtr(hWnd, win.GWLP_WNDPROC)
+	} else {
+		// Paranoia.  Windows creates with the same class should have the same
+		// window proc set, but just in case we will double check.
+		tmp := win.GetWindowLongPtr(hWnd, win.GWLP_WNDPROC)
+		if tmp != *oldWindowProc {
+			panic("Window procedure does not match.")
+		}
+	}
+
+	// Subclass the window by setting a new window proc.
+	win.SetWindowLongPtr(hWnd, win.GWLP_WNDPROC, newWindowProc)
+}

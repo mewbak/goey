@@ -58,15 +58,7 @@ func (w *SelectInput) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 
 	// Subclass the window procedure
-	if oldComboboxWindowProc == 0 {
-		oldComboboxWindowProc = win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-	} else {
-		oldWindowProc := win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-		if oldWindowProc != oldComboboxWindowProc {
-			panic("Corrupted data")
-		}
-	}
-	win.SetWindowLongPtr(hwnd, win.GWLP_WNDPROC, syscall.NewCallback(comboboxWindowProc))
+	subclassWindowProcedure(hwnd, &oldComboboxWindowProc, syscall.NewCallback(comboboxWindowProc))
 
 	retval := &mountedSelectInput{
 		NativeWidget: NativeWidget{hwnd},

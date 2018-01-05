@@ -51,15 +51,7 @@ func (w *Button) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 
 	// Subclass the window procedure
-	if oldButtonWindowProc == 0 {
-		oldButtonWindowProc = win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-	} else {
-		oldWindowProc := win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-		if oldWindowProc != oldButtonWindowProc {
-			panic("Corrupted data")
-		}
-	}
-	win.SetWindowLongPtr(hwnd, win.GWLP_WNDPROC, syscall.NewCallback(buttonWindowProc))
+	subclassWindowProcedure(hwnd, &oldButtonWindowProc, syscall.NewCallback(buttonWindowProc))
 
 	retval := &mountedButton{
 		NativeWidget: NativeWidget{hwnd},

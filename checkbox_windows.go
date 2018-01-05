@@ -37,15 +37,7 @@ func (w *Checkbox) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 
 	// Subclass the window procedure
-	if oldButtonWindowProc == 0 {
-		oldButtonWindowProc = win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-	} else {
-		oldWindowProc := win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-		if oldWindowProc != oldButtonWindowProc {
-			panic("Corrupted data")
-		}
-	}
-	win.SetWindowLongPtr(hwnd, win.GWLP_WNDPROC, syscall.NewCallback(checkboxWindowProc))
+	subclassWindowProcedure(hwnd, &oldButtonWindowProc, syscall.NewCallback(checkboxWindowProc))
 
 	retval := &mountedCheckbox{NativeWidget: NativeWidget{hwnd}, onChange: w.OnChange}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))

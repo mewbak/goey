@@ -60,15 +60,7 @@ func (w *DateInput) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 
 	// Subclass the window procedure
-	if oldDateTimePickWindowProc == 0 {
-		oldDateTimePickWindowProc = win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-	} else {
-		oldWindowProc := win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-		if oldWindowProc != oldDateTimePickWindowProc {
-			panic("Corrupted data")
-		}
-	}
-	win.SetWindowLongPtr(hwnd, win.GWLP_WNDPROC, syscall.NewCallback(dateinputWindowProc))
+	subclassWindowProcedure(hwnd, &oldDateTimePickWindowProc, syscall.NewCallback(dateinputWindowProc))
 
 	retval := &mountedDateInput{
 		NativeWidget: NativeWidget{hwnd},

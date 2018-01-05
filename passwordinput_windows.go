@@ -38,15 +38,7 @@ func (w *PasswordInput) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 
 	// Subclass the window procedure
-	if oldEditWindowProc == 0 {
-		oldEditWindowProc = win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-	} else {
-		oldWindowProc := win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-		if oldWindowProc != oldEditWindowProc {
-			panic("Corrupted data")
-		}
-	}
-	win.SetWindowLongPtr(hwnd, win.GWLP_WNDPROC, syscall.NewCallback(textinputWindowProc))
+	subclassWindowProcedure(hwnd, &oldEditWindowProc, syscall.NewCallback(textinputWindowProc))
 
 	// Create placeholder, if required.
 	if w.Placeholder != "" {

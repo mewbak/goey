@@ -2,7 +2,6 @@ package goey
 
 import (
 	"github.com/lxn/win"
-	win2 "goey/syscall"
 	"syscall"
 	"unsafe"
 )
@@ -43,15 +42,7 @@ func (w *TextArea) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 
 	// Subclass the window procedure
-	if oldEditWindowProc == 0 {
-		oldEditWindowProc = win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-	} else {
-		oldWindowProc := win.GetWindowLongPtr(hwnd, win.GWLP_WNDPROC)
-		if oldWindowProc != oldEditWindowProc {
-			panic("Corrupted data")
-		}
-	}
-	win.SetWindowLongPtr(hwnd, win.GWLP_WNDPROC, syscall.NewCallback(textareaWindowProc))
+	subclassWindowProcedure(hwnd, &oldEditWindowProc, syscall.NewCallback(textinputWindowProc))
 
 	// Create placeholder, if required.
 	if w.Value == "" && w.Placeholder != "" {
@@ -64,12 +55,13 @@ func (w *TextArea) mount(parent NativeWidget) (MountedWidget, error) {
 		win.SendMessage(hwnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
 	}
 
-	retval := &mountedTextArea{
+	retval := &mountedTextArea{mountedTextInputBase{
 		NativeWidget: NativeWidget{hwnd},
-		minLines:     minlinesDefault(w.MinLines),
 		onChange:     w.OnChange,
 		onFocus:      w.OnFocus,
 		onBlur:       w.OnBlur,
+	},
+		minlinesDefault(w.MinLines),
 	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
@@ -77,20 +69,8 @@ func (w *TextArea) mount(parent NativeWidget) (MountedWidget, error) {
 }
 
 type mountedTextArea struct {
-	NativeWidget
+	mountedTextInputBase
 	minLines int
-	onChange func(value string)
-	onFocus  func()
-	onBlur   func()
-}
-
-func (w *mountedTextArea) MeasureWidth() (DIP, DIP) {
-	if paragraphMaxWidth == 0 {
-		paragraphMeasureReflowLimits(w.hWnd)
-	}
-
-	// In the future, we should calculate the width based on the length of the text.
-	return ToDIPX(paragraphMinWidth), ToDIPX(paragraphMaxWidth)
 }
 
 func (w *mountedTextArea) MeasureHeight(width DIP) (DIP, DIP) {
@@ -120,51 +100,4 @@ func (w *mountedTextArea) updateProps(data *TextArea) error {
 	w.onBlur = data.OnBlur
 
 	return nil
-}
-
-func textareaWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (result uintptr) {
-	switch msg {
-	case win.WM_DESTROY:
-		// Make sure that the data structure on the Go-side does not point to a non-existent
-		// window.
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedTextArea)(unsafe.Pointer(w))
-			ptr.hWnd = 0
-		}
-		// Defer to the old window proc
-
-	case win.WM_SETFOCUS:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedTextArea)(unsafe.Pointer(w))
-			if ptr.onFocus != nil {
-				ptr.onFocus()
-			}
-		}
-		// Defer to the old window proc
-
-	case win.WM_KILLFOCUS:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedTextArea)(unsafe.Pointer(w))
-			if ptr.onBlur != nil {
-				ptr.onBlur()
-			}
-		}
-		// Defer to the old window proc
-
-	case win.WM_COMMAND:
-		notification := win.HIWORD(uint32(wParam))
-		switch notification {
-		case win.EN_UPDATE:
-			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*mountedTextArea)(unsafe.Pointer(w))
-				if ptr.onChange != nil {
-					ptr.onChange(win2.GetWindowText(hwnd))
-				}
-			}
-		}
-		return 0
-
-	}
-
-	return win.CallWindowProc(oldEditWindowProc, hwnd, msg, wParam, lParam)
 }
