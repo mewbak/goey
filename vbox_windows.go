@@ -30,6 +30,12 @@ func (w *VBox) mount(parent NativeWidget) (MountedWidget, error) {
 func (w *mountedVBox) Close() {
 	// On this platform, the mountedVBox handles layout, but does not actually
 	// have an HWND, so there are no resources to release.
+
+	// However, still need to free the children
+	for _, v := range w.children {
+		v.Close()
+	}
+	w.children = nil
 }
 
 func (w *mountedVBox) MeasureWidth() (DIP, DIP) {
