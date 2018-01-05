@@ -45,6 +45,14 @@ func newWindow(title string, children []Widget) (*Window, error) {
 	return retval, nil
 }
 
+func (w *windowImpl) getAlignment() (MainAxisAlign, CrossAxisAlign) {
+	return w.vbox.alignMain, w.vbox.alignCross
+}
+
+func (w *windowImpl) getChildren() []MountedWidget {
+	return w.children
+}
+
 func (mw *windowImpl) close() {
 	if mw.handle != nil {
 		mw.handle.Destroy()

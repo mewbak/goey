@@ -70,12 +70,12 @@ func (w *mountedCheckbox) MeasureWidth() (DIP, DIP) {
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	retval := ToDIPX(int(rect.Right))
+	retval := ToDIPX(int(rect.Right)) + 17
 	if retval < 75 {
 		return 75, 75
 	}
 
-	return retval + 17, retval + 17
+	return retval, retval
 }
 
 func (w *mountedCheckbox) MeasureHeight(width DIP) (DIP, DIP) {

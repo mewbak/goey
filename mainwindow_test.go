@@ -88,6 +88,13 @@ func TestWindow_SetAlignment(t *testing.T) {
 						mw.SetAlignment(i, j)
 						return nil
 					})
+					itmp, jtmp := mw.Alignment()
+					if itmp != i {
+						t.Errorf("Expected main alignment itmp==i, got %d and %d", itmp, i)
+					}
+					if jtmp != j {
+						t.Errorf("Expected cross alignment jtmp==j, got %d and %d", jtmp, j)
+					}
 				}
 			}
 			time.Sleep(50 * time.Millisecond)
@@ -317,18 +324,38 @@ func TestNewWindow_SetTitle(t *testing.T) {
 
 func testingRenderWidgets(t *testing.T, widgets []Widget) {
 	init := func() error {
+		// Create the window.  Some of the tests here are not expected in
+		// production code, but we can be a little paranoid here.
 		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
 		}
 		window, err := NewWindow(t.Name(), widgets)
 		if err != nil {
 			t.Errorf("Failed to create window, %s", err)
+			return nil
 		}
 		if window == nil {
-			t.Fatalf("Unexpected nil for window")
+			t.Errorf("Unexpected nil for window")
+			return nil
 		}
 		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
+			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
+			return nil
+		}
+
+		// Check that the controls that were mounted match with the list
+		if children := window.Children(); children != nil {
+			if len(children) != len(widgets) {
+				t.Errorf("Wanted len(children) == len(widgets), got %d and %d", len(children), len(widgets))
+			} else {
+				for i := range children {
+					if n1, n2 := children[i].Kind(), widgets[i].Kind(); n1 != n2 {
+						t.Errorf("Wanted children[%d].Kind() != widgets[%d].Kind(), got %s and %s", i, i, n1, n2)
+					}
+				}
+			}
+		} else {
+			t.Errorf("Want window.Children()!=nil")
 		}
 
 		go func(window *Window) {

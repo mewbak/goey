@@ -374,6 +374,15 @@ func newWindow(title string, children []Widget) (*Window, error) {
 	return retval, nil
 }
 
+func (w *windowImpl) close() {
+	// Want to be able to close windows in Go, even if they have already been
+	// destroyed in the Win32 system
+	if w.hWnd != 0 {
+		win.DestroyWindow(w.hWnd)
+	}
+	win.OleUninitialize()
+}
+
 func (w *windowImpl) determineSizeConstraints() {
 	w.updateGlobalDPI()
 
@@ -386,13 +395,12 @@ func (w *windowImpl) determineSizeConstraints() {
 	}
 }
 
-func (w *windowImpl) close() {
-	// Want to be able to close windows in Go, even if they have already been
-	// destroyed in the Win32 system
-	if w.hWnd != 0 {
-		win.DestroyWindow(w.hWnd)
-	}
-	win.OleUninitialize()
+func (w *windowImpl) getAlignment() (MainAxisAlign, CrossAxisAlign) {
+	return w.vbox.alignMain, w.vbox.alignCross
+}
+
+func (w *windowImpl) getChildren() []MountedWidget {
+	return w.vbox.children
 }
 
 // NativeHandle returns the handle to the platform-specific window handle

@@ -19,6 +19,18 @@ func (w *Window) Close() {
 	w.close()
 }
 
+// Alignment returns the vertical and horiztonal alignment properties of
+// the window.
+func (w *Window) Alignment() (MainAxisAlign, CrossAxisAlign) {
+	return w.getAlignment()
+}
+
+// Children returns the mounted children for the window.  In general, this
+// method should not be used.
+func (w *Window) Children() []MountedWidget {
+	return w.getChildren()
+}
+
 // SetAlignment changes the vertical and horiztonal alignment properties of
 // the window.  These properties affect the layout of child widgets.  The
 // main axis for alignment is vertical, with the cross axis being horizontal.
