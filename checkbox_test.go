@@ -3,7 +3,6 @@ package goey
 import (
 	"bytes"
 	"testing"
-	"time"
 )
 
 func TestCheckboxCreate(t *testing.T) {
@@ -29,7 +28,6 @@ func TestCheckboxEvents(t *testing.T) {
 		go func(window *Window) {
 			// Run the actions, which are counted.
 			for i := 0; i < 3; i++ {
-				time.Sleep(1000 * time.Millisecond)
 				err := Do(func() error {
 					testingSetFocus(t, window, i)
 					return nil

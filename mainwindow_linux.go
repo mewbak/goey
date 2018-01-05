@@ -50,7 +50,7 @@ func (w *windowImpl) getAlignment() (MainAxisAlign, CrossAxisAlign) {
 }
 
 func (w *windowImpl) getChildren() []MountedWidget {
-	return w.children
+	return w.vbox.children
 }
 
 func (mw *windowImpl) close() {
