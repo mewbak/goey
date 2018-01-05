@@ -314,3 +314,42 @@ func TestNewWindow_SetTitle(t *testing.T) {
 		t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
 	}
 }
+
+func testingRenderWidgets(t *testing.T, widgets []Widget) {
+	init := func() error {
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
+		}
+		window, err := NewWindow(t.Name(), widgets)
+		if err != nil {
+			t.Errorf("Failed to create window, %s", err)
+		}
+		if window == nil {
+			t.Fatalf("Unexpected nil for window")
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
+			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
+		}
+
+		go func(window *Window) {
+			err := Do(func() error {
+				time.Sleep(50 * time.Millisecond)
+				window.Close()
+				return nil
+			})
+			if err != nil {
+				t.Errorf("Error in Do, %s", err)
+			}
+		}(window)
+
+		return nil
+	}
+
+	err := Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
+	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+	}
+}

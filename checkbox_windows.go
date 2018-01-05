@@ -7,12 +7,12 @@ import (
 )
 
 func (w *Checkbox) mount(parent NativeWidget) (MountedWidget, error) {
-	text, err := syscall.UTF16PtrFromString(w.Text)
+	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
 	}
 
-	hwnd := win.CreateWindowEx(0, buttonClassName, text,
+	hwnd := win.CreateWindowEx(0, buttonClassName, &text[0],
 		win.WS_CHILD|win.WS_VISIBLE|win.WS_TABSTOP|win.BS_CHECKBOX|win.BS_TEXT|win.BS_NOTIFY,
 		10, 10, 100, 100,
 		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
@@ -39,7 +39,13 @@ func (w *Checkbox) mount(parent NativeWidget) (MountedWidget, error) {
 	// Subclass the window procedure
 	subclassWindowProcedure(hwnd, &oldButtonWindowProc, syscall.NewCallback(checkboxWindowProc))
 
-	retval := &mountedCheckbox{NativeWidget: NativeWidget{hwnd}, onChange: w.OnChange}
+	retval := &mountedCheckbox{
+		NativeWidget: NativeWidget{hwnd},
+		text:         text,
+		onChange:     w.OnChange,
+		onFocus:      w.OnFocus,
+		onBlur:       w.OnBlur,
+	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
@@ -47,14 +53,29 @@ func (w *Checkbox) mount(parent NativeWidget) (MountedWidget, error) {
 
 type mountedCheckbox struct {
 	NativeWidget
+	text     []uint16
 	onChange func(value bool)
 	onFocus  func()
 	onBlur   func()
 }
 
 func (w *mountedCheckbox) MeasureWidth() (DIP, DIP) {
-	// In the future, we should calculate the width based on the length of the text.
-	return 160, 160
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+
+	hdc := win.GetDC(w.hWnd)
+	if hMessageFont != 0 {
+		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
+	}
+	rect := win.RECT{0, 0, 0xffff, 0xffff}
+	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
+	win.ReleaseDC(w.hWnd, hdc)
+
+	retval := ToDIPX(int(rect.Right))
+	if retval < 75 {
+		return 75, 75
+	}
+
+	return retval + 17, retval + 17
 }
 
 func (w *mountedCheckbox) MeasureHeight(width DIP) (DIP, DIP) {
@@ -86,6 +107,24 @@ func checkboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
 			ptr := (*mountedCheckbox)(unsafe.Pointer(w))
 			ptr.hWnd = 0
+		}
+		// Defer to the old window proc
+
+	case win.WM_SETFOCUS:
+		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
+			ptr := (*mountedCheckbox)(unsafe.Pointer(w))
+			if ptr.onFocus != nil {
+				ptr.onFocus()
+			}
+		}
+		// Defer to the old window proc
+
+	case win.WM_KILLFOCUS:
+		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
+			ptr := (*mountedCheckbox)(unsafe.Pointer(w))
+			if ptr.onBlur != nil {
+				ptr.onBlur()
+			}
 		}
 		// Defer to the old window proc
 

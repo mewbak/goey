@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"github.com/lxn/win"
 	"testing"
 )
 
@@ -44,4 +45,21 @@ func TestCalculateVGap(t *testing.T) {
 			t.Errorf("Incorrect vertical gap calculated, %d =/= %d", out, v.expected)
 		}
 	}
+}
+
+func testingSetFocus(t *testing.T, w *Window, i int) {
+	hwnd := win.GetWindow(w.hWnd, win.GW_CHILD)
+	if hwnd == 0 {
+		t.Errorf("Internal error to testing, failure in GetWindow")
+		return
+	}
+	for i := i; i > 0; i-- {
+		hwnd = win.GetWindow(hwnd, win.GW_HWNDNEXT)
+	}
+	if hwnd == 0 {
+		t.Errorf("Internal error to testing, failure in GetWindow")
+		return
+	}
+
+	win.SetFocus(hwnd)
 }
