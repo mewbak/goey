@@ -18,7 +18,7 @@ func init() {
 	// function, but does not include ICC_STANDARD_CLASSES.
 	initCtrls := win.INITCOMMONCONTROLSEX{}
 	initCtrls.DwSize = uint32(unsafe.Sizeof(initCtrls))
-	initCtrls.DwICC = win.ICC_STANDARD_CLASSES
+	initCtrls.DwICC = win.ICC_STANDARD_CLASSES | win.ICC_DATE_CLASSES
 	win.InitCommonControlsEx(&initCtrls)
 }
 

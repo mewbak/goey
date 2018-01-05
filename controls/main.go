@@ -3,11 +3,14 @@ package main
 import (
 	"fmt"
 	"goey"
+	"time"
 )
 
 var (
 	currentCD  string
 	s1, s2, s3 bool
+	showLorem  bool
+	window     *goey.Window
 )
 
 func main() {
@@ -18,20 +21,51 @@ func main() {
 }
 
 func createWindow() error {
-	_, err := goey.NewWindow("Example",
-		[]goey.Widget{
+	w, err := goey.NewWindow("Example", renderWindow())
+	if err != nil {
+		return err
+	}
+	window = w
+	return nil
+}
+
+func updateWindow() {
+	window.SetChildren(renderWindow())
+}
+
+func renderWindow() []goey.Widget {
+	// Fixed part at top
+	ret := []goey.Widget{
+		&goey.Checkbox{Text: "Show text of lorem ipsum.", Value: showLorem, OnChange: func(ok bool) {
+			showLorem = ok
+			updateWindow()
+		}},
+		&goey.HR{},
+	}
+
+	// Depends
+	if showLorem {
+		ret = append(ret,
 			&goey.P{Text: lorem},
-			&goey.P{Text: "This is a label.", Align: goey.Center},
-			&goey.Label{Text: "Input 1:"},
-			&goey.TextInput{Value: "Some input...", OnChange: func(v string) { println("t1 ", v) }, OnEnterKey: func(v string) { println("t1* ", v) }},
+		)
+	} else {
+		ret = append(ret,
+			&goey.P{Text: "This is a paragraph, but without much text.", Align: goey.Center},
+			&goey.Label{Text: "Text input:"},
+			&goey.TextInput{Value: "Some input...", Placeholder: "Type some text here.  And some more.  And something really long.",
+				OnChange: func(v string) { println("text input ", v) }, OnEnterKey: func(v string) { println("t1* ", v) }},
+			&goey.Label{Text: "Password input:"},
+			&goey.PasswordInput{Value: "", Placeholder: "Don't share",
+				OnChange: func(v string) { println("password input ", v) }},
+			&goey.Label{Text: "Integer input:"},
+			&goey.IntInput{Value: 3, Placeholder: "Please enter a number",
+				OnChange: func(v int64) { println("int input ", v) }},
+			&goey.Label{Text: "Date input:"},
+			&goey.DateInput{Value: time.Now().Add(24 * time.Hour),
+				OnChange: func(v time.Time) { println("date input: ", v.String()) }},
 			&goey.HR{},
-			&goey.Button{Text: "This is button 1", OnClick: func() { println("b1") }},
-			&goey.Label{Text: "Input 2:"},
-			&goey.TextInput{Value: "", Placeholder: "Type some text here.  And some more.  And something really long.", OnChange: func(v string) { println("t2 ", v) }},
-			&goey.Checkbox{Text: "Check this box", Value: true, OnChange: func(b bool) { println("c1", b) }},
-			&goey.Button{Text: "This is second button", Default: true},
 			&goey.HBox{Children: []goey.Widget{
-				&goey.Button{Text: "C1"},
+				&goey.Button{Text: "C1", Default: true},
 				&goey.Button{Text: "C2"},
 			}},
 			&goey.HBox{Children: []goey.Widget{
@@ -41,9 +75,11 @@ func createWindow() error {
 			},
 				AlignMain: goey.MainEnd,
 			},
+			&goey.HR{},
 			&goey.SelectInput{Items: []string{"Choice 1", "Choice 2", "Choice 3"}, OnChange: func(v int) { println("cb1 ", v) }},
 			&goey.TextArea{},
-		},
-	)
-	return err
+		)
+	}
+
+	return ret
 }

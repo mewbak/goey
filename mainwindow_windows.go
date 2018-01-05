@@ -280,6 +280,12 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 		}
 		// Defer to the default window proc
 
+	case win.WM_NOTIFY:
+		if n := (*win.NMHDR)(unsafe.Pointer(lParam)); true {
+			return win.SendMessage(n.HwndFrom, win.WM_NOTIFY, wParam, lParam)
+		}
+		// Defer to the default window proc
+
 	}
 
 	// Let the default window proc handle all other messages
