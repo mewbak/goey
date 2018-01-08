@@ -11,11 +11,11 @@ var (
 // DateInput describes a widget that users input or update a single date.
 // The model for the value is a string value.
 type DateInput struct {
-	Value       time.Time          // Values is the current string for the field
-	Disabled    bool               // Disabled is a flag indicating that the user cannot interact with this field
-	OnChange    func(value time.Time) // OnChange will be called whenever the user changes the value for this field
-	OnFocus     func()             // OnFocus will be called whenever the field receives the keyboard focus
-	OnBlur      func()             // OnBlur will be called whenever the field loses the keyboard focus
+	Value    time.Time             // Values is the current string for the field
+	Disabled bool                  // Disabled is a flag indicating that the user cannot interact with this field
+	OnChange func(value time.Time) // OnChange will be called whenever the user changes the value for this field
+	OnFocus  func()                // OnFocus will be called whenever the field receives the keyboard focus
+	OnBlur   func()                // OnBlur will be called whenever the field loses the keyboard focus
 }
 
 // Kind returns the concrete type for use in the Widget interface.

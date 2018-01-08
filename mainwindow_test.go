@@ -165,7 +165,7 @@ func TestNewWindow_SetChildren(t *testing.T) {
 					t.Logf("Error setting children, %s", err)
 				}
 			}
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			t.Logf("Stopping set children tests")
 
 			// Note:  No work after this call to Do, since the call to Run may be
@@ -235,7 +235,7 @@ func TestNewWindow_SetIcon(t *testing.T) {
 				if err != nil {
 					t.Errorf("Error calling SetTitle, %", err)
 				}
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(50 * time.Millisecond)
 			}
 			t.Logf("Stopping icon tests")
 
@@ -296,7 +296,6 @@ func TestNewWindow_SetTitle(t *testing.T) {
 			if err != nil {
 				t.Errorf("Error calling SetTitle, %", err)
 			}
-			time.Sleep(50 * time.Millisecond)
 			t.Logf("Stopping alignment tests")
 
 			// Note:  No work after this call to Do, since the call to Run may be
@@ -319,64 +318,5 @@ func TestNewWindow_SetTitle(t *testing.T) {
 	}
 	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 		t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-	}
-}
-
-func testingRenderWidgets(t *testing.T, widgets []Widget) {
-	init := func() error {
-		// Create the window.  Some of the tests here are not expected in
-		// production code, but we can be a little paranoid here.
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-		}
-		window, err := NewWindow(t.Name(), widgets)
-		if err != nil {
-			t.Errorf("Failed to create window, %s", err)
-			return nil
-		}
-		if window == nil {
-			t.Errorf("Unexpected nil for window")
-			return nil
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
-			return nil
-		}
-
-		// Check that the controls that were mounted match with the list
-		if children := window.Children(); children != nil {
-			if len(children) != len(widgets) {
-				t.Errorf("Wanted len(children) == len(widgets), got %d and %d", len(children), len(widgets))
-			} else {
-				for i := range children {
-					if n1, n2 := children[i].Kind(), widgets[i].Kind(); n1 != n2 {
-						t.Errorf("Wanted children[%d].Kind() != widgets[%d].Kind(), got %s and %s", i, i, n1, n2)
-					}
-				}
-			}
-		} else {
-			t.Errorf("Want window.Children()!=nil")
-		}
-
-		go func(window *Window) {
-			err := Do(func() error {
-				time.Sleep(50 * time.Millisecond)
-				window.Close()
-				return nil
-			})
-			if err != nil {
-				t.Errorf("Error in Do, %s", err)
-			}
-		}(window)
-
-		return nil
-	}
-
-	err := Run(init)
-	if err != nil {
-		t.Errorf("Failed to run GUI loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
 	}
 }

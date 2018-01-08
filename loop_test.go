@@ -1,10 +1,10 @@
 package goey
 
 import (
+	"errors"
 	"fmt"
 	"sync/atomic"
 	"testing"
-	"time"
 )
 
 func TestDoFailure(t *testing.T) {
@@ -43,8 +43,16 @@ func TestRun(t *testing.T) {
 		}
 
 		go func() {
-			time.Sleep(1 * time.Second)
-			err := Do(func() error {
+			// Try running the main loop again, but in parallel.  We shoudl get an error.
+			err := Run(func() error {
+				return nil
+			})
+			if err != ErrAlreadyRunning {
+				t.Errorf("Expected ErrAlreadyRunning, got %s", err)
+			}
+
+			// Close the window.  This should stop the GUI loop.
+			err = Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -62,6 +70,22 @@ func TestRun(t *testing.T) {
 	}
 	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+	}
+}
+
+func TestRunWithError(t *testing.T) {
+	const errorString = "No luck"
+
+	// Make sure that error is passed through to caller
+	init := func() error {
+		return errors.New(errorString)
+	}
+
+	err := Run(init)
+	if err == nil {
+		t.Errorf("Unexpected success, no error returned")
+	} else if s := err.Error(); errorString != s {
+		t.Errorf("Unexpected error, want %s, got %s", errorString, s)
 	}
 }
 
