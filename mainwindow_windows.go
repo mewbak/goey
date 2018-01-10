@@ -410,6 +410,7 @@ func (w *windowImpl) NativeHandle() win.HWND {
 }
 
 func (w *windowImpl) message(m *Message) {
+	m.title = win2.GetWindowText(w.hWnd)
 	m.handle = uintptr(w.hWnd)
 }
 

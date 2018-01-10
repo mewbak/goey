@@ -92,8 +92,6 @@ func ExampleWindow_Message() {
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
-
-	//Output:
 }
 
 func TestWindow_SetAlignment(t *testing.T) {
