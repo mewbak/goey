@@ -409,6 +409,10 @@ func (w *windowImpl) NativeHandle() win.HWND {
 	return w.hWnd
 }
 
+func (w *windowImpl) message(m *Message) {
+	m.handle = uintptr(w.hWnd)
+}
+
 func (w *windowImpl) setAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
 	// Save the new parameter values
 	w.vbox.alignMain = main

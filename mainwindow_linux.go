@@ -3,8 +3,8 @@ package goey
 import (
 	"image"
 	"sync/atomic"
-
 	"github.com/gotk3/gotk3/gtk"
+	"unsafe"
 )
 
 var (
@@ -58,6 +58,11 @@ func (mw *windowImpl) close() {
 		mw.handle.Destroy()
 		mw.handle = nil
 	}
+}
+
+func (w *windowImpl) message(m *Message) {
+	m.title, m.err = w.handle.GetTitle()
+	m.handle = uintptr(unsafe.Pointer(w.handle))
 }
 
 func (w *windowImpl) setAlignment(main MainAxisAlign, cross CrossAxisAlign) error {

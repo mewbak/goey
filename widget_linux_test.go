@@ -8,10 +8,15 @@ import (
 func testingSetFocus(t *testing.T, w *Window, i int) {
 	// Check the size
 	handle := w.vbox.children[i].Handle()
+	if !handle.GetCanFocus() {
+		t.Errorf("Widget can not grab focus.")
+		return
+	}
 
 	handle.GrabFocus()
+	time.Sleep(500 * time.Millisecond )
 	if !handle.IsFocus() {
-		t.Errorf("Wedgit did not grab focus")
+		t.Errorf("Widget did not grab focus")
 	}
 
 	// Note sure why the call to sleep is required, but there may be a debounce

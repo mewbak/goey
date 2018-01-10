@@ -10,12 +10,12 @@ func (m *Message) show() error {
 	if err != nil {
 		return err
 	}
-	caption, err := syscall.UTF16PtrFromString(m.caption)
+	title, err := syscall.UTF16PtrFromString(m.title)
 	if err != nil {
 		return err
 	}
 
-	rc := win.MessageBox(win.HWND(m.handle), text, caption, uint32(m.icon))
+	rc := win.MessageBox(win.HWND(m.handle), text, title, uint32(m.icon))
 	if rc == 0 {
 		return syscall.GetLastError()
 	}

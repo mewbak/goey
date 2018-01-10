@@ -73,7 +73,7 @@ func ExampleWindow_Message() {
 		go func() {
 			// Show the error message.
 			Do(func() error {
-				return mw.Message("This is an example message.").WithTitle("Test").WithInfo().Show()
+				return mw.Message("This is an example message.").WithInfo().Show()
 			})
 
 			// Note:  No work after this call to Do, since the call to Run may be
@@ -92,6 +92,8 @@ func ExampleWindow_Message() {
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
+
+	//Output:
 }
 
 func TestWindow_SetAlignment(t *testing.T) {

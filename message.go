@@ -8,7 +8,7 @@ import (
 type Message struct {
 	handle  uintptr
 	text    string
-	caption string
+	title string
 	icon    uint
 	err     error
 }
@@ -18,7 +18,7 @@ func NewMessage(text string) *Message {
 	if text == "" {
 		return &Message{err: errors.New("Invalid argument, 'text' cannot be empty in call to NewMessage")}
 	}
-	return &Message{text: text, caption: "goey"}
+	return &Message{text: text, title: "goey"}
 }
 func (m *Message) Show() error {
 	if m.err != nil {
@@ -46,9 +46,9 @@ func (m *Message) WithInfo() *Message {
 func (m *Message) WithTitle(text string) *Message {
 	text = strings.TrimSpace(text)
 	if text == "" {
-		m.caption = "goey"
+		m.err= errors.New("Invalid argument, 'text' cannot be empty in call to NewMessage")
 	} else {
-		m.caption = text
+		m.title = text
 	}
 	return m
 }

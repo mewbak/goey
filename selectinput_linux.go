@@ -26,6 +26,7 @@ func (w *SelectInput) mount(parent NativeWidget) (MountedWidget, error) {
 		control.AppendText(v)
 	}
 	control.SetActive(w.Value)
+	control.SetCanFocus(true)
 	control.SetSensitive(!w.Disabled)
 
 	retval := &mountedSelectInput{

@@ -35,7 +35,7 @@ func (w *Window) Children() []MountedWidget {
 // show a dialog box with a message.
 func (w *Window) Message(text string) *Message {
 	ret := NewMessage(text)
-	ret.handle = uintptr(w.hWnd)
+	w.message(ret)
 	return ret
 }
 
