@@ -54,6 +54,46 @@ func ExampleNewWindow() {
 	// Down
 }
 
+func ExampleWindow_Message() {
+	// All calls that modify GUI objects need to be schedule ont he GUI thread.
+	// This callback will be used to create the top-level window.
+	createWindow := func() error {
+		// Create a top-level window.
+		mw, err := NewWindow("Test", []Widget{
+			&Button{Text: "Click me!"},
+		})
+		if err != nil {
+			// This error will be reported back up through the call to
+			// Run below.  No need to print or log it here.
+			return err
+		}
+
+		// We can start a goroutine, but note that we can't modify GUI objects
+		// directly.
+		go func() {
+			// Show the error message.
+			Do(func() error {
+				return mw.Message("This is an example message.").WithTitle("Test").WithInfo().Show()
+			})
+
+			// Note:  No work after this call to Do, since the call to Run may be
+			// terminated when the call to Do returns.
+			Do(func() error {
+				mw.Close()
+				return nil
+			})
+		}()
+
+		return nil
+	}
+
+	// Start the GUI thread.
+	err := Run(createWindow)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+}
+
 func TestWindow_SetAlignment(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping alignment tests")

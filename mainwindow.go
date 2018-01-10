@@ -31,6 +31,14 @@ func (w *Window) Children() []MountedWidget {
 	return w.getChildren()
 }
 
+// Message returns a message constructor that can be used to build and then
+// show a dialog box with a message.
+func (w *Window) Message(text string) *Message {
+	ret := NewMessage(text)
+	ret.handle = uintptr(w.hWnd)
+	return ret
+}
+
 // SetAlignment changes the vertical and horiztonal alignment properties of
 // the window.  These properties affect the layout of child widgets.  The
 // main axis for alignment is vertical, with the cross axis being horizontal.
