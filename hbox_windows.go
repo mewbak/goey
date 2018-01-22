@@ -168,7 +168,9 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 }
 
 func (w *mountedHBox) SetChildren(children []Widget) error {
-	panic("not implemented")
+	err := error(nil)
+	w.children, err = diffChildren(w.parent, w.children, children)
+	return err
 }
 
 func (w *mountedHBox) SetOrder(previous win.HWND) win.HWND {
