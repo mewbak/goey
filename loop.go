@@ -24,11 +24,13 @@ var (
 )
 
 // Run locks the OS thread to act as a GUI thread, and then iterates over the
-// event loop until there are no more instances of MainWindow open.
+// event loop until there are no more instances of Window open.
 // If the main loop is already running, this function will return an error.
 //
-// Modification of the GUI should happen only on the GUI thread.  Any
-// modifications should be schedule using a callback on the function Do.
+// Modification of the GUI should happen only on the GUI thread.  This includes
+// creating any windows or widgets.  The parameter action takes a closure that
+// can be used to initialize the GUI.  Any futher modifications also need to
+// be schedule on the GUI thread, which can be done using the function Do.
 func Run(action func() error) error {
 	// Pin the GUI message loop to a single thread
 	runtime.LockOSThread()
@@ -57,6 +59,11 @@ func Run(action func() error) error {
 // Do runs the passed function on the GUI thread.  If the event loop is not
 // running, this function will return an error.  Any error from the callback will
 // also be returned.
+//
+// Because this function involves asynronous communication with the GUI thread,
+// it can deadlock if called from the GUI thread.  It is therefore not safe to
+// use in any event callback from widgets.  However, since those callbacks are
+// executing on the GUI thread, the use of Do is also unnecessary.
 //
 // Note, this function contains a race-condition, in that the the action may be
 // scheduled while the event loop is being terminated, in which case the
