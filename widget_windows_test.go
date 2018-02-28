@@ -61,5 +61,9 @@ func testingSetFocus(t *testing.T, w *Window, i int) {
 		return
 	}
 
-	win.SetFocus(hwnd)
+	// When starting, the first control may have already been given focus
+	// by the main window.  We don't want to double up on setting the focus.
+	if win.GetFocus() != hwnd {
+		win.SetFocus(hwnd)
+	}
 }

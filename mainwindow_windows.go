@@ -188,7 +188,7 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 
 	case win.WM_SETFOCUS:
 		// The main window doesn't need focus, we want to delegate to a control
-		if hwnd == win.GetFocus() /* is this always true? */ {
+		if hwnd == win.GetFocus() { // Is this always true
 			child := win.GetWindow(hwnd, win.GW_CHILD)
 			for child != 0 {
 				if style := win.GetWindowLong(child, win.GWL_STYLE); (style & win.WS_TABSTOP) != 0 {
