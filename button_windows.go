@@ -74,7 +74,7 @@ type mountedButton struct {
 	onBlur  func()
 }
 
-func (w *mountedButton) MeasureWidth() (DIP, DIP) {
+func (w *mountedButton) MeasureWidth() (Length, Length) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 
 	hdc := win.GetDC(w.hWnd)
@@ -85,17 +85,17 @@ func (w *mountedButton) MeasureWidth() (DIP, DIP) {
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	retval := ToDIPX(int(rect.Right) + 7)
-	if retval < 75 {
-		return 75, 75
+	retval := FromPixelsX(int(rect.Right) + 7)
+	if retval < 75*DIP {
+		return 75 * DIP, 75 * DIP
 	}
 
 	return retval, retval
 }
 
-func (w *mountedButton) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedButton) MeasureHeight(width Length) (Length, Length) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23, 23
+	return 23 * DIP, 23 * DIP
 }
 
 func (w *mountedButton) updateProps(data *Button) error {

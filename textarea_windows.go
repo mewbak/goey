@@ -73,9 +73,10 @@ type mountedTextArea struct {
 	minLines int
 }
 
-func (w *mountedTextArea) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedTextArea) MeasureHeight(width Length) (Length, Length) {
+	const lineHeight = 16 * DIP
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23 + 16*DIP(w.minLines-1), 23 + 16*39
+	return 23*DIP + lineHeight.Scale(w.minLines-1, 1), 23*DIP + lineHeight.Scale(39, 1)
 }
 
 func (w *mountedTextArea) updateProps(data *TextArea) error {

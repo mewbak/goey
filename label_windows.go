@@ -55,22 +55,22 @@ type mountedLabel struct {
 	text []uint16
 }
 
-func (w *mountedLabel) MeasureWidth() (DIP, DIP) {
+func (w *mountedLabel) MeasureWidth() (Length, Length) {
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
 	}
-	rect := win.RECT{0, 0, 0xffff, 0xffff}
+	rect := win.RECT{0, 0, 0x7fffffff, 0x7fffffff}
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	retval := ToDIPX(int(rect.Right))
+	retval := FromPixelsX(int(rect.Right))
 	return retval, retval
 }
 
-func (w *mountedLabel) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedLabel) MeasureHeight(width Length) (Length, Length) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 13, 13
+	return 13 * DIP, 13 * DIP
 }
 
 func (w *mountedLabel) SetBounds(bounds image.Rectangle) {

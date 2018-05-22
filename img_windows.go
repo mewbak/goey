@@ -114,14 +114,14 @@ func (w *Img) mount(parent NativeWidget) (MountedWidget, error) {
 type mountedImg struct {
 	NativeWidget
 	imageData     []uint8
-	width, height DIP
+	width, height Length
 }
 
-func (w *mountedImg) MeasureWidth() (DIP, DIP) {
+func (w *mountedImg) MeasureWidth() (Length, Length) {
 	return w.width, w.width
 }
 
-func (w *mountedImg) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedImg) MeasureHeight(width Length) (Length, Length) {
 	return w.height, w.height
 }
 

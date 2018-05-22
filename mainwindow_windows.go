@@ -87,7 +87,7 @@ func onSizeCalcMargin(clientMinWidth int, availableWidth int, margin int) int {
 
 func (mw *windowImpl) onSize(hwnd win.HWND) {
 	// The recommended margin in device independent pixels.
-	const margin = DIP(11)
+	const margin = 11 * DIP
 
 	// Get the client rect for the main window.  This is the layout region.
 	rect := win.RECT{}
@@ -104,7 +104,7 @@ func (mw *windowImpl) onSize(hwnd win.HWND) {
 	// of the content.
 	availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin.PixelsX())
 	width := int(rect.Right-rect.Left) - 2*availableMargin
-	minHeight, _ := mw.vbox.MeasureHeight(ToDIPX(width))
+	minHeight, _ := mw.vbox.MeasureHeight(FromPixelsX(width))
 	if minHeight.PixelsY() > int(rect.Bottom-rect.Top)-2*margin.PixelsY() {
 		if !mw.scrollbarVisible {
 			// Create the scroll bar
@@ -118,7 +118,7 @@ func (mw *windowImpl) onSize(hwnd win.HWND) {
 			// the width of the scroll bar
 			availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin.PixelsX())
 			width := int(rect.Right-rect.Left) - 2*availableMargin
-			minHeight, _ = mw.vbox.MeasureHeight(ToDIPX(width))
+			minHeight, _ = mw.vbox.MeasureHeight(FromPixelsX(width))
 		}
 		si := win.SCROLLINFO{
 			FMask: win.SIF_PAGE | win.SIF_RANGE,
@@ -245,11 +245,11 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 
 			// User clicked the top arrow.
 			case win.SB_LINEUP:
-				si.NPos -= int32(DIP(13).PixelsY())
+				si.NPos -= int32(Length(13).PixelsY())
 
 			// User clicked the bottom arrow.
 			case win.SB_LINEDOWN:
-				si.NPos += int32(DIP(13).PixelsY())
+				si.NPos += int32(Length(13).PixelsY())
 
 			// User clicked the scroll bar shaft above the scroll box.
 			case win.SB_PAGEUP:
@@ -272,13 +272,13 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 
 			// If the position has changed, scroll window and update it.
 			if si.NPos != yPos {
-				const margin = DIP(11)
+				const margin = 11 * DIP
 
 				rect := win.RECT{}
 				win.GetClientRect(hwnd, &rect)
 				availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin.PixelsX())
 				width := int(rect.Right-rect.Left) - 2*availableMargin
-				minHeight, _ := mw.vbox.MeasureHeight(ToDIPX(width))
+				minHeight, _ := mw.vbox.MeasureHeight(FromPixelsX(width))
 				mw.vbox.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin.PixelsY()-int(si.NPos), int(rect.Right)-availableMargin, int(rect.Top)+margin.PixelsY()+minHeight.PixelsY()-int(si.NPos)))
 
 				// TODO:  Use ScrollWindow function to reduce flicker during scrolling

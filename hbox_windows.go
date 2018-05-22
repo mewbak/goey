@@ -12,8 +12,8 @@ type mountedHBox struct {
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
 
-	minimumWidth DIP
-	maximumWidth DIP
+	minimumWidth Length
+	maximumWidth Length
 }
 
 func (w *HBox) mount(parent NativeWidget) (MountedWidget, error) {
@@ -44,7 +44,7 @@ func (w *mountedHBox) Close() {
 	w.children = nil
 }
 
-func (w *mountedHBox) MeasureWidth() (DIP, DIP) {
+func (w *mountedHBox) MeasureWidth() (Length, Length) {
 	if len(w.children) == 0 {
 		return 0, 0
 	}
@@ -64,7 +64,7 @@ func (w *mountedHBox) MeasureWidth() (DIP, DIP) {
 	return min, max
 }
 
-func (w *mountedHBox) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedHBox) MeasureHeight(width Length) (Length, Length) {
 	if len(w.children) == 0 {
 		return 0, 0
 	}
@@ -76,7 +76,7 @@ func (w *mountedHBox) MeasureHeight(width DIP) (DIP, DIP) {
 		}
 	}
 
-	scale1, scale2 := DIP(0), DIP(1)
+	scale1, scale2 := Length(0), Length(1)
 	if width > w.minimumWidth && w.maximumWidth > w.minimumWidth {
 		scale1, scale2 = width-w.minimumWidth, w.maximumWidth-w.minimumWidth
 	}
@@ -105,7 +105,7 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 
 	posX := bounds.Min.X
 	width := bounds.Dx()
-	widthDP := ToDIPX(width)
+	widthDP := FromPixelsX(width)
 
 	if w.minimumWidth == 0 {
 		w.MeasureWidth()
@@ -149,7 +149,7 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 		width = widthDP.PixelsY()
 	}
 
-	scale1, scale2 := DIP(0), DIP(1)
+	scale1, scale2 := Length(0), Length(1)
 	if widthDP > w.minimumWidth && w.maximumWidth > w.minimumWidth {
 		scale1, scale2 = widthDP-w.minimumWidth, w.maximumWidth-w.minimumWidth
 	}

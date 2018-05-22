@@ -8,7 +8,7 @@ import (
 func TestCalculateHGap(t *testing.T) {
 	cases := []struct {
 		w1, w2   MountedWidget
-		expected DIP
+		expected Length
 	}{
 		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11}, // Space between unrelated controls
 		{(*mountedTextInput)(nil), (*mountedButton)(nil), 11},    // Space between unrelated controls
@@ -27,7 +27,7 @@ func TestCalculateHGap(t *testing.T) {
 func TestCalculateVGap(t *testing.T) {
 	cases := []struct {
 		w1, w2   MountedWidget
-		expected DIP
+		expected Length
 	}{
 		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11},   // Space between unrelated controls
 		{(*mountedTextInput)(nil), (*mountedP)(nil), 11},           // Space between unrelated controls

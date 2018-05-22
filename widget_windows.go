@@ -82,13 +82,13 @@ func (w *NativeWidget) Close() {
 // NativeMountedWidget contains platform-specific methods that all widgets
 // must support on WIN32
 type NativeMountedWidget interface {
-	MeasureWidth() (min DIP, max DIP)
-	MeasureHeight(width DIP) (min DIP, max DIP)
+	MeasureWidth() (min Length, max Length)
+	MeasureHeight(width Length) (min Length, max Length)
 	SetBounds(bounds image.Rectangle)
 	SetOrder(previous win.HWND) win.HWND
 }
 
-func calculateHGap(previous MountedWidget, current MountedWidget) DIP {
+func calculateHGap(previous MountedWidget, current MountedWidget) Length {
 	// The vertical gap between most controls is 11 relative pixels.  However,
 	// there are different rules for between a label and its associated control,
 	// or between related controls.  These relationship do not appear in the
@@ -100,15 +100,15 @@ func calculateHGap(previous MountedWidget, current MountedWidget) DIP {
 		if _, ok := current.(*mountedButton); ok {
 			// Any pair of successive buttons will be assumed to be in a
 			// related group.
-			return 7
+			return 7 * DIP
 		}
 	}
 
 	// The spacing between unrelated controls.
-	return 11
+	return 11 * DIP
 }
 
-func calculateVGap(previous MountedWidget, current MountedWidget) DIP {
+func calculateVGap(previous MountedWidget, current MountedWidget) Length {
 	// The vertical gap between most controls is 11 relative pixels.  However,
 	// there are different rules for between a label and its associated control,
 	// or between related controls.  These relationship do not appear in the
@@ -119,22 +119,22 @@ func calculateVGap(previous MountedWidget, current MountedWidget) DIP {
 	if _, ok := previous.(*mountedLabel); ok {
 		// Any label immediately preceding any other control will be assumed to
 		// be 'associated'.
-		return 5
+		return 5 * DIP
 	}
 	if _, ok := previous.(*mountedCheckbox); ok {
 		if _, ok := current.(*mountedCheckbox); ok {
 			// Any pair of successive checkboxes will be assumed to be in a
 			// related group.
-			return 7
+			return 7 * DIP
 		}
 	}
 
 	// The spacing between unrelated controls.  This is also the default space
 	// between paragraphs of text.
-	return 11
+	return 11 * DIP
 }
 
-func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight int, minHeight int, maxHeight int) (extraGap int, posY int, scale1 DIP, scale2 DIP) {
+func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight int, minHeight int, maxHeight int) (extraGap int, posY int, scale1 Length, scale2 Length) {
 	if actualHeight < minHeight {
 		panic("not implemented")
 	}
@@ -175,15 +175,15 @@ func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight int, 
 		// We are not doing an actual conversion from pixels to DIPs below.
 		// However, the two scale factors are used as a ratio, so any
 		// scaling would not affect the final result
-		scale1, scale2 = DIP(actualHeight-minHeight), DIP(maxHeight-minHeight)
+		scale1, scale2 = Length(actualHeight-minHeight), Length(maxHeight-minHeight)
 	}
 
 	return extraGap, posY, scale1, scale2
 }
 
-func setBoundsWithAlign(widget MountedWidget, bounds image.Rectangle, align CrossAxisAlign, scale1, scale2 DIP) (moveY int) {
+func setBoundsWithAlign(widget MountedWidget, bounds image.Rectangle, align CrossAxisAlign, scale1, scale2 Length) (moveY int) {
 	width := bounds.Dx()
-	widthDP := ToDIPX(width)
+	widthDP := FromPixelsX(width)
 	min, max := widget.MeasureHeight(widthDP)
 	h := (min + (max-min)*scale1/scale2).PixelsY()
 

@@ -63,7 +63,7 @@ func paragraphMeasureReflowLimits(hwnd win.HWND) {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
 	}
 	// Calculate the width of a single 'm' (find the em width)
-	rect := win.RECT{0, 0, 0xffff, 0xffff}
+	rect := win.RECT{0, 0, 0x7fffffff, 0x7fffffff}
 	caption := [...]uint16{'m'}
 	win.DrawTextEx(hdc, &caption[0], 1, &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(hwnd, hdc)
@@ -71,7 +71,7 @@ func paragraphMeasureReflowLimits(hwnd win.HWND) {
 	paragraphMaxWidth = int(rect.Right) * 80
 }
 
-func (w *mountedP) MeasureWidth() (DIP, DIP) {
+func (w *mountedP) MeasureWidth() (Length, Length) {
 	// If the printed text will be more than 80 characters wide, it will start
 	// to impact readability.  We want to force reflow in this case, so we limit
 	// the width
@@ -86,31 +86,31 @@ func (w *mountedP) MeasureWidth() (DIP, DIP) {
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
 	}
-	rect := win.RECT{0, 0, 0xffff, 0xffff}
+	rect := win.RECT{0, 0, 0x7fffffff, 0x7fffffff}
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
 	// For reflow if the text is more than 60 characters wide
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	if int(rect.Right) > paragraphMinWidth {
-		return ToDIPX(paragraphMinWidth), ToDIPX(paragraphMaxWidth)
+		return FromPixelsX(paragraphMinWidth), FromPixelsX(paragraphMaxWidth)
 	}
 
 	// Not enough text for reflow.
-	retval := ToDIPX(int(rect.Right))
+	retval := FromPixelsX(int(rect.Right))
 	return retval, retval
 }
 
-func (w *mountedP) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedP) MeasureHeight(width Length) (Length, Length) {
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
 	}
-	rect := win.RECT{0, 0, int32(width), 0xffff}
+	rect := win.RECT{0, 0, int32(width.PixelsX()), 0x7fffffff}
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	retval := ToDIPY(int(rect.Bottom))
+	retval := FromPixelsY(int(rect.Bottom))
 	return retval, retval
 }
 

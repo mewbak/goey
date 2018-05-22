@@ -11,7 +11,7 @@ type mountedColumn struct {
 	children []MountedWidget
 	counts   []int
 
-	transition DIP
+	transition Length
 }
 
 func (w *Column) mount(parent NativeWidget) (MountedWidget, error) {
@@ -47,13 +47,13 @@ func (w *mountedColumn) Close() {
 	w.children = nil
 }
 
-func (w *mountedColumn) MeasureWidth() (DIP, DIP) {
+func (w *mountedColumn) MeasureWidth() (Length, Length) {
 	if len(w.children) == 0 {
 		return 0, 0
 	}
 
 	gap := calculateHGap(nil, nil)
-	min, max := DIP(0), DIP(0)
+	min, max := Length(0), Length(0)
 
 	ndx := 0
 	for _, v := range w.counts {
@@ -69,11 +69,12 @@ func (w *mountedColumn) MeasureWidth() (DIP, DIP) {
 		}
 		max = max + tmpMax + gap
 	}
-	w.transition = min*DIP(len(w.counts)) + gap*DIP(len(w.counts)-1)
+	w.transition = min.Scale(len(w.counts), 1) + gap.Scale(len(w.counts)-1, 1)
+	println("transition", min.String(), len(w.counts), gap.String(), w.transition.String())
 	return min, max
 }
 
-func (w *mountedColumn) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedColumn) MeasureHeight(width Length) (Length, Length) {
 	if len(w.children) == 0 {
 		return 0, 0
 	}
@@ -96,7 +97,7 @@ func (w *mountedColumn) MeasureHeight(width DIP) (DIP, DIP) {
 	}
 
 	ndx := 0
-	min, max := DIP(0), DIP(0)
+	min, max := Length(0), Length(0)
 	for _, v := range w.counts {
 		vbox := mountedVBox{
 			parent:   w.parent,

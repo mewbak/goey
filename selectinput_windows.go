@@ -78,14 +78,14 @@ type mountedSelectInput struct {
 	onBlur   func()
 }
 
-func (w *mountedSelectInput) MeasureWidth() (DIP, DIP) {
+func (w *mountedSelectInput) MeasureWidth() (Length, Length) {
 	// In the future, we should calculate the width based on the length of the text.
-	return 160, 160
+	return 160*DIP, 160*DIP
 }
 
-func (w *mountedSelectInput) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedSelectInput) MeasureHeight(width Length) (Length, Length) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23, 23
+	return 23*DIP, 23*DIP
 }
 
 func (w *mountedSelectInput) updateProps(data *SelectInput) error {

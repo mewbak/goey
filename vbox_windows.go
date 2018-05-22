@@ -38,7 +38,7 @@ func (w *mountedVBox) Close() {
 	w.children = nil
 }
 
-func (w *mountedVBox) MeasureWidth() (DIP, DIP) {
+func (w *mountedVBox) MeasureWidth() (Length, Length) {
 	if len(w.children) == 0 {
 		return 0, 0
 	}
@@ -56,7 +56,7 @@ func (w *mountedVBox) MeasureWidth() (DIP, DIP) {
 	return min, max
 }
 
-func (w *mountedVBox) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedVBox) MeasureHeight(width Length) (Length, Length) {
 	if len(w.children) == 0 {
 		return 0, 0
 	}
@@ -79,7 +79,7 @@ func (w *mountedVBox) SetBounds(bounds image.Rectangle) {
 	}
 
 	width := bounds.Dx()
-	widthDP := ToDIPX(width)
+	widthDP := FromPixelsX(width)
 	minTotal, maxTotal := w.MeasureHeight(widthDP)
 
 	extraGap, deltaY, scale1, scale2 := distributeVSpace(w.alignMain, len(w.children), bounds.Dy(), minTotal.PixelsY(), maxTotal.PixelsY())

@@ -80,18 +80,18 @@ type mountedDateInput struct {
 	onBlur   func()
 }
 
-func (w *mountedDateInput) MeasureWidth() (DIP, DIP) {
+func (w *mountedDateInput) MeasureWidth() (Length, Length) {
 	if paragraphMaxWidth == 0 {
 		paragraphMeasureReflowLimits(w.hWnd)
 	}
 
 	// In the future, we should calculate the width based on the length of the text.
-	return ToDIPX(paragraphMinWidth), ToDIPX(paragraphMaxWidth)
+	return FromPixelsX(paragraphMinWidth), FromPixelsX(paragraphMaxWidth)
 }
 
-func (w *mountedDateInput) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedDateInput) MeasureHeight(width Length) (Length, Length) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23, 23
+	return 23 * DIP, 23 * DIP
 }
 
 func (w *mountedDateInput) updateProps(data *DateInput) error {

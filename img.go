@@ -17,7 +17,7 @@ var (
 // maintain the aspect ratio of the image.
 type Img struct {
 	Image         image.Image
-	Width, Height DIP
+	Width, Height Length
 }
 
 // Kind returns the concrete type for use in the Widget interface.
@@ -38,15 +38,15 @@ func (w *Img) Mount(parent NativeWidget) (MountedWidget, error) {
 	if w.Width == 0 {
 		bounds := w.Image.Bounds()
 		if w.Height == 0 {
-			w.Width = DIP(bounds.Dx()*96) / 92
-			w.Height = DIP(bounds.Dy()*96) / 92
+			w.Width = Length(bounds.Dx()*96) / 92
+			w.Height = Length(bounds.Dy()*96) / 92
 		} else {
-			w.Width = (w.Height * DIP(bounds.Dx())) / DIP(bounds.Dy())
+			w.Width = (w.Height * Length(bounds.Dx())) / Length(bounds.Dy())
 		}
 	} else {
 		if w.Height == 0 {
 			bounds := w.Image.Bounds()
-			w.Height = (w.Width * DIP(bounds.Dy())) / DIP(bounds.Dx())
+			w.Height = (w.Width * Length(bounds.Dy())) / Length(bounds.Dx())
 		}
 	}
 	// Forward to the platform-dependant code

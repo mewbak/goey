@@ -59,7 +59,7 @@ type mountedCheckbox struct {
 	onBlur   func()
 }
 
-func (w *mountedCheckbox) MeasureWidth() (DIP, DIP) {
+func (w *mountedCheckbox) MeasureWidth() (Length, Length) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 
 	hdc := win.GetDC(w.hWnd)
@@ -70,17 +70,17 @@ func (w *mountedCheckbox) MeasureWidth() (DIP, DIP) {
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	retval := ToDIPX(int(rect.Right)) + 17
-	if retval < 75 {
-		return 75, 75
+	retval := FromPixelsX(int(rect.Right) + 17)
+	if retval < 75*DIP {
+		return 75 * DIP, 75 * DIP
 	}
 
 	return retval, retval
 }
 
-func (w *mountedCheckbox) MeasureHeight(width DIP) (DIP, DIP) {
+func (w *mountedCheckbox) MeasureHeight(width Length) (Length, Length) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 17, 17
+	return 17 * DIP, 17 * DIP
 }
 
 func (w *mountedCheckbox) updateProps(data *Checkbox) error {

@@ -4,8 +4,8 @@
 package main
 
 import (
-	"fmt"
 	"bitbucket.org/rj/goey"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -100,8 +100,8 @@ func render() []goey.Widget {
 		}},
 		&goey.Img{
 			Image:  img,
-			Width:  goey.DIP(img.Bounds().Dx()),
-			Height: goey.DIP(img.Bounds().Dy()),
+			Width:  (1 * goey.DIP).Scale(img.Bounds().Dx(), 1),
+			Height: (1 * goey.DIP).Scale(img.Bounds().Dy(), 1),
 		},
 		&goey.P{Text: description},
 	}
