@@ -125,7 +125,7 @@ func (w *mountedImg) MeasureHeight(width Length) (Length, Length) {
 	return w.height, w.height
 }
 
-func (w *mountedImg) SetBounds(bounds image.Rectangle) {
+func (w *mountedImg) SetBounds(bounds Rectangle) {
 	w.NativeWidget.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't

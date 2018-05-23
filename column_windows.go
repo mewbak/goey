@@ -1,8 +1,6 @@
 package goey
 
 import (
-	"image"
-
 	"github.com/lxn/win"
 )
 
@@ -116,7 +114,7 @@ func (w *mountedColumn) MeasureHeight(width Length) (Length, Length) {
 	return min, max
 }
 
-func (w *mountedColumn) SetBounds(bounds image.Rectangle) {
+func (w *mountedColumn) SetBounds(bounds Rectangle) {
 	if len(w.children) == 0 {
 		return
 	}
@@ -126,7 +124,7 @@ func (w *mountedColumn) SetBounds(bounds image.Rectangle) {
 	}
 
 	// If now side enough, we will layout the items exactly like a VBox
-	if bounds.Dx() < w.transition.PixelsX() {
+	if bounds.Dx() < w.transition {
 		vbox := mountedVBox{
 			parent:   w.parent,
 			children: w.children,
@@ -138,7 +136,7 @@ func (w *mountedColumn) SetBounds(bounds image.Rectangle) {
 
 	ndx := 0
 	count := len(w.counts)
-	gap := calculateHGap(nil, nil).PixelsX()
+	gap := calculateHGap(nil, nil)
 	bounds.Max.X += gap
 	for i, v := range w.counts {
 		vbox := mountedVBox{
@@ -147,9 +145,9 @@ func (w *mountedColumn) SetBounds(bounds image.Rectangle) {
 		}
 		ndx += v
 
-		minx := bounds.Min.X + i*bounds.Dx()/count
-		maxx := bounds.Min.X + (i+1)*bounds.Dx()/count - gap
-		vbox.SetBounds(image.Rect(minx, bounds.Min.Y, maxx, bounds.Max.Y))
+		minx := bounds.Min.X + bounds.Dx().Scale(i, count)
+		maxx := bounds.Min.X + bounds.Dx().Scale(i+1, count) - gap
+		vbox.SetBounds(Rectangle{Point{minx, bounds.Min.Y}, Point{maxx, bounds.Max.Y}})
 	}
 }
 

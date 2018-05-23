@@ -1,8 +1,6 @@
 package goey
 
 import (
-	"image"
-
 	"github.com/lxn/win"
 )
 
@@ -98,14 +96,13 @@ func (w *mountedHBox) MeasureHeight(width Length) (Length, Length) {
 	return min, max
 }
 
-func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
+func (w *mountedHBox) SetBounds(bounds Rectangle) {
 	if len(w.children) == 0 {
 		return
 	}
 
 	posX := bounds.Min.X
 	width := bounds.Dx()
-	widthDP := FromPixelsX(width)
 
 	if w.minimumWidth == 0 {
 		w.MeasureWidth()
@@ -115,54 +112,53 @@ func (w *mountedHBox) SetBounds(bounds image.Rectangle) {
 	}
 
 	// If there is more space than necessary, then we need to distribute the extra space.
-	extraGap := 0
-	if widthDP >= w.maximumWidth {
+	extraGap := Length(0)
+	if width >= w.maximumWidth {
 		switch w.alignMain {
 		case MainStart:
 			// No need to do any adjustment.  The algorithm below will lay out
 			// controls aligned to the top.
 		case MainCenter:
 			// Adjust the starting position to align the contents.
-			posX += (width - w.maximumWidth.PixelsX()) / 2
+			posX += (width - w.maximumWidth) / 2
 
 		case MainEnd:
 			// Adjust the starting position to align the contents.
-			posX += width - w.maximumWidth.PixelsY()
+			posX += width - w.maximumWidth
 
 		case SpaceAround:
-			extraGap = (widthDP - w.maximumWidth).PixelsX() / (len(w.children) + 1)
+			extraGap = (width - w.maximumWidth).Scale(1, len(w.children)+1)
 			posX += extraGap
 
 		case SpaceBetween:
 			if len(w.children) > 1 {
-				extraGap = (widthDP - w.maximumWidth).PixelsX() / (len(w.children) - 1)
+				extraGap = (width - w.maximumWidth).Scale(1, len(w.children)-1)
 			} else {
 				// There are no controls between which to put the extra space.
 				// The following essentially convert SpaceBetween to SpaceAround
-				extraGap = (widthDP - w.maximumWidth).PixelsX() / (len(w.children) + 1)
+				extraGap = (width - w.maximumWidth).Scale(1, len(w.children)+1)
 				posX += extraGap
 			}
 		}
 
 		// Reduce available height
-		widthDP = w.maximumWidth
-		width = widthDP.PixelsY()
+		width = w.maximumWidth
 	}
 
 	scale1, scale2 := Length(0), Length(1)
-	if widthDP > w.minimumWidth && w.maximumWidth > w.minimumWidth {
-		scale1, scale2 = widthDP-w.minimumWidth, w.maximumWidth-w.minimumWidth
+	if width > w.minimumWidth && w.maximumWidth > w.minimumWidth {
+		scale1, scale2 = width-w.minimumWidth, w.maximumWidth-w.minimumWidth
 	}
 
 	previous := MountedWidget(nil)
 	for _, v := range w.children {
 		if previous != nil {
-			posX += calculateHGap(previous, v).PixelsX()
+			posX += calculateHGap(previous, v)
 		}
 		minWidth, maxWidth := v.MeasureWidth()
 		childWidth := (minWidth + (maxWidth-minWidth)*scale1/scale2)
-		v.SetBounds(image.Rect(posX, bounds.Min.Y, posX+childWidth.PixelsX(), bounds.Max.Y))
-		posX += childWidth.PixelsX() + extraGap
+		v.SetBounds(Rectangle{Point{posX, bounds.Min.Y}, Point{posX + childWidth, bounds.Max.Y}})
+		posX += childWidth + extraGap
 		previous = v
 	}
 }

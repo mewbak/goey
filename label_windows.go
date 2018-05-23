@@ -3,7 +3,6 @@ package goey
 import (
 	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
-	"image"
 	"syscall"
 	"unsafe"
 )
@@ -73,7 +72,7 @@ func (w *mountedLabel) MeasureHeight(width Length) (Length, Length) {
 	return 13 * DIP, 13 * DIP
 }
 
-func (w *mountedLabel) SetBounds(bounds image.Rectangle) {
+func (w *mountedLabel) SetBounds(bounds Rectangle) {
 	w.NativeWidget.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't

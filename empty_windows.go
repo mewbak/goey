@@ -2,7 +2,6 @@ package goey
 
 import (
 	"github.com/lxn/win"
-	"image"
 )
 
 func (w *Empty) mount(parent NativeWidget) (MountedWidget, error) {
@@ -28,7 +27,7 @@ func (w *mountedEmpty) MeasureHeight(width Length) (Length, Length) {
 	return 13 * DIP, 13 * DIP
 }
 
-func (w *mountedEmpty) SetBounds(bounds image.Rectangle) {
+func (w *mountedEmpty) SetBounds(bounds Rectangle) {
 	// Virtual control, so no resource to resize
 }
 

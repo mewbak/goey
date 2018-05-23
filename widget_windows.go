@@ -3,7 +3,6 @@ package goey
 import (
 	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
-	"image"
 	"sync/atomic"
 	"syscall"
 	"unsafe"
@@ -47,8 +46,8 @@ func (w NativeWidget) SetDisabled(value bool) {
 	win.EnableWindow(w.hWnd, !value)
 }
 
-func (w *NativeWidget) SetBounds(bounds image.Rectangle) {
-	win.MoveWindow(w.hWnd, int32(bounds.Min.X), int32(bounds.Min.Y), int32(bounds.Dx()), int32(bounds.Dy()), true)
+func (w *NativeWidget) SetBounds(bounds Rectangle) {
+	win.MoveWindow(w.hWnd, int32(bounds.Min.X.PixelsX()), int32(bounds.Min.Y.PixelsY()), int32(bounds.Dx().PixelsX()), int32(bounds.Dy().PixelsY()), true)
 }
 
 func (w *NativeWidget) SetOrder(previous win.HWND) win.HWND {
@@ -84,7 +83,7 @@ func (w *NativeWidget) Close() {
 type NativeMountedWidget interface {
 	MeasureWidth() (min Length, max Length)
 	MeasureHeight(width Length) (min Length, max Length)
-	SetBounds(bounds image.Rectangle)
+	SetBounds(bounds Rectangle)
 	SetOrder(previous win.HWND) win.HWND
 }
 
@@ -134,7 +133,7 @@ func calculateVGap(previous MountedWidget, current MountedWidget) Length {
 	return 11 * DIP
 }
 
-func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight int, minHeight int, maxHeight int) (extraGap int, posY int, scale1 Length, scale2 Length) {
+func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight Length, minHeight Length, maxHeight Length) (extraGap Length, posY Length, scale1 int, scale2 int) {
 	if actualHeight < minHeight {
 		panic("not implemented")
 	}
@@ -154,16 +153,16 @@ func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight int, 
 			posY += actualHeight - maxHeight
 
 		case SpaceAround:
-			extraGap = (actualHeight - maxHeight) / (childrenCount + 1)
+			extraGap = (actualHeight - maxHeight).Scale(1, childrenCount+1)
 			posY += extraGap
 
 		case SpaceBetween:
 			if childrenCount > 1 {
-				extraGap = (actualHeight - maxHeight) / (childrenCount - 1)
+				extraGap = (actualHeight - maxHeight).Scale(1, childrenCount-1)
 			} else {
 				// There are no controls between which to put the extra space.
 				// The following essentially convert SpaceBetween to SpaceAround
-				extraGap = (actualHeight - maxHeight) / (childrenCount + 1)
+				extraGap = (actualHeight - maxHeight).Scale(1, childrenCount+1)
 				posY += extraGap
 			}
 		}
@@ -175,44 +174,43 @@ func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight int, 
 		// We are not doing an actual conversion from pixels to DIPs below.
 		// However, the two scale factors are used as a ratio, so any
 		// scaling would not affect the final result
-		scale1, scale2 = Length(actualHeight-minHeight), Length(maxHeight-minHeight)
+		scale1, scale2 = int(actualHeight-minHeight), int(maxHeight-minHeight)
 	}
 
 	return extraGap, posY, scale1, scale2
 }
 
-func setBoundsWithAlign(widget MountedWidget, bounds image.Rectangle, align CrossAxisAlign, scale1, scale2 Length) (moveY int) {
+func setBoundsWithAlign(widget MountedWidget, bounds Rectangle, align CrossAxisAlign, scale1, scale2 int) (moveY Length) {
 	width := bounds.Dx()
-	widthDP := FromPixelsX(width)
-	min, max := widget.MeasureHeight(widthDP)
-	h := (min + (max-min)*scale1/scale2).PixelsY()
+	min, max := widget.MeasureHeight(width)
+	h := min + (max-min).Scale(scale1, scale2)
 
 	switch align {
 	case CrossStart:
 		_, maxX := widget.MeasureWidth()
-		if newWidth := maxX.PixelsX(); newWidth < width {
-			widget.SetBounds(image.Rect(bounds.Min.X, bounds.Min.Y, bounds.Min.X+newWidth, bounds.Min.Y+h))
+		if maxX < width {
+			widget.SetBounds(Rectangle{bounds.Min, Point{bounds.Min.X + maxX, bounds.Min.Y + h}})
 		} else {
-			widget.SetBounds(image.Rect(bounds.Min.X, bounds.Min.Y, bounds.Max.X, bounds.Min.Y+h))
+			widget.SetBounds(Rectangle{bounds.Min, Point{bounds.Max.X, bounds.Min.Y + h}})
 		}
 	case CrossCenter:
 		_, maxX := widget.MeasureWidth()
-		if newWidth := maxX.PixelsX(); newWidth < width {
-			x1 := (bounds.Min.X + bounds.Max.X - newWidth) / 2
-			x2 := (bounds.Min.X + bounds.Max.X + newWidth) / 2
-			widget.SetBounds(image.Rect(x1, bounds.Min.Y, x2, bounds.Min.Y+h))
+		if maxX < width {
+			x1 := (bounds.Min.X + bounds.Max.X - maxX) / 2
+			x2 := (bounds.Min.X + bounds.Max.X + maxX) / 2
+			widget.SetBounds(Rectangle{Point{x1, bounds.Min.Y}, Point{x2, bounds.Min.Y + h}})
 		} else {
-			widget.SetBounds(image.Rect(bounds.Min.X, bounds.Min.Y, bounds.Max.X, bounds.Min.Y+h))
+			widget.SetBounds(Rectangle{bounds.Min, Point{bounds.Max.X, bounds.Min.Y + h}})
 		}
 	case CrossEnd:
 		_, maxX := widget.MeasureWidth()
-		if newWidth := maxX.PixelsX(); newWidth < width {
-			widget.SetBounds(image.Rect(bounds.Max.X-newWidth, bounds.Min.Y, bounds.Max.X, bounds.Min.Y+h))
+		if maxX < width {
+			widget.SetBounds(Rectangle{Point{bounds.Max.X - maxX, bounds.Min.Y}, Point{bounds.Max.X, bounds.Min.Y + h}})
 		} else {
-			widget.SetBounds(image.Rect(bounds.Min.X, bounds.Min.Y, bounds.Max.X, bounds.Min.Y+h))
+			widget.SetBounds(Rectangle{bounds.Min, Point{bounds.Max.X, bounds.Min.Y + h}})
 		}
 	case Stretch:
-		widget.SetBounds(image.Rect(bounds.Min.X, bounds.Min.Y, bounds.Max.X, bounds.Min.Y+h))
+		widget.SetBounds(Rectangle{bounds.Min, Point{bounds.Max.X, bounds.Min.Y + h}})
 	}
 
 	return h

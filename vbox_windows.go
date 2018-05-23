@@ -1,8 +1,6 @@
 package goey
 
 import (
-	"image"
-
 	"github.com/lxn/win"
 )
 
@@ -73,23 +71,22 @@ func (w *mountedVBox) MeasureHeight(width Length) (Length, Length) {
 	return min, max
 }
 
-func (w *mountedVBox) SetBounds(bounds image.Rectangle) {
+func (w *mountedVBox) SetBounds(bounds Rectangle) {
 	if len(w.children) == 0 {
 		return
 	}
 
 	width := bounds.Dx()
-	widthDP := FromPixelsX(width)
-	minTotal, maxTotal := w.MeasureHeight(widthDP)
+	minTotal, maxTotal := w.MeasureHeight(width)
 
-	extraGap, deltaY, scale1, scale2 := distributeVSpace(w.alignMain, len(w.children), bounds.Dy(), minTotal.PixelsY(), maxTotal.PixelsY())
+	extraGap, deltaY, scale1, scale2 := distributeVSpace(w.alignMain, len(w.children), bounds.Dy(), minTotal, maxTotal)
 	bounds.Min.Y += deltaY
 
 	// Assuming that height of bounds is sufficient
 	previous := MountedWidget(nil)
 	for _, v := range w.children {
 		if previous != nil {
-			bounds.Min.Y += calculateVGap(previous, v).PixelsY() + extraGap
+			bounds.Min.Y += calculateVGap(previous, v) + extraGap
 		}
 
 		deltaY := setBoundsWithAlign(v, bounds, w.alignCross, scale1, scale2)

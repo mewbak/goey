@@ -2,7 +2,6 @@ package goey
 
 import (
 	"github.com/lxn/win"
-	"image"
 	"syscall"
 	"unsafe"
 )
@@ -82,7 +81,7 @@ func (w *mountedHR) MeasureHeight(width Length) (Length, Length) {
 	return 13 * DIP, 13 * DIP
 }
 
-func (w *mountedHR) SetBounds(bounds image.Rectangle) {
+func (w *mountedHR) SetBounds(bounds Rectangle) {
 	w.NativeWidget.SetBounds(bounds)
 }
 

@@ -133,7 +133,10 @@ func (mw *windowImpl) onSize(hwnd win.HWND) {
 		scrollPos = int(si.NPos)
 
 		// Perform layout
-		mw.vbox.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin.PixelsY()-scrollPos, int(rect.Right)-availableMargin, int(rect.Top)+margin.PixelsY()+minHeight.PixelsY()-scrollPos))
+		mw.vbox.SetBounds(Rectangle{
+			Point{FromPixelsX(int(rect.Left) + availableMargin), FromPixelsY(int(rect.Top)-scrollPos) + margin},
+			Point{FromPixelsX(int(rect.Right) - availableMargin), FromPixelsY(int(rect.Top)-scrollPos) + margin + minHeight},
+		})
 	} else {
 		if mw.scrollbarVisible {
 			// Remove the scroll bar
@@ -149,7 +152,10 @@ func (mw *windowImpl) onSize(hwnd win.HWND) {
 		}
 
 		// Perform layout
-		mw.vbox.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin.PixelsY(), int(rect.Right)-availableMargin, int(rect.Bottom)-margin.PixelsY()))
+		mw.vbox.SetBounds(Rectangle{
+			Point{FromPixelsX(int(rect.Left) + availableMargin), FromPixelsY(int(rect.Top)) + margin},
+			Point{FromPixelsX(int(rect.Right) - availableMargin), FromPixelsY(int(rect.Bottom)) - margin},
+		})
 	}
 
 	// Update the position of all of the children
@@ -279,7 +285,10 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 				availableMargin := onSizeCalcMargin(mw.clientMinWidth, int(rect.Right-rect.Left), margin.PixelsX())
 				width := int(rect.Right-rect.Left) - 2*availableMargin
 				minHeight, _ := mw.vbox.MeasureHeight(FromPixelsX(width))
-				mw.vbox.SetBounds(image.Rect(int(rect.Left)+availableMargin, int(rect.Top)+margin.PixelsY()-int(si.NPos), int(rect.Right)-availableMargin, int(rect.Top)+margin.PixelsY()+minHeight.PixelsY()-int(si.NPos)))
+				mw.vbox.SetBounds(Rectangle{
+					Point{FromPixelsX(int(rect.Left) + availableMargin), FromPixelsY(int(rect.Top)-int(si.NPos)) + margin},
+					Point{FromPixelsX(int(rect.Right) - availableMargin), FromPixelsY(int(rect.Top)-int(si.NPos)) + minHeight + margin},
+				})
 
 				// TODO:  Use ScrollWindow function to reduce flicker during scrolling
 				win.InvalidateRect(hwnd, &rect, true)
