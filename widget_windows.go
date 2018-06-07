@@ -81,9 +81,6 @@ func (w *NativeWidget) Close() {
 // NativeMountedWidget contains platform-specific methods that all widgets
 // must support on WIN32
 type NativeMountedWidget interface {
-	MeasureWidth() (min Length, max Length)
-	MeasureHeight(width Length) (min Length, max Length)
-	SetBounds(bounds Rectangle)
 	SetOrder(previous win.HWND) win.HWND
 }
 

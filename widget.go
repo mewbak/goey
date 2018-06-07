@@ -30,12 +30,20 @@ type MountedWidget interface {
 	// of platform dependent code.
 	NativeMountedWidget
 
+	// Close removes the widget from the GUI, and frees any associated resources.
+	Close()
 	// Kind returns the concrete type for the MountedWidget.
 	// Users should not need to use this method directly.
 	Kind() *WidgetKind
+	// MeasureWidth returns the minimum and maximum comfortable widths for
+	// this widget.
+	MeasureWidth() (min Length, max Length)
+	// MeasureHeight returns the minimum and maximum comfortable heights for
+	// this widget.
+	MeasureHeight(width Length) (min Length, max Length)
+	// SetBounds updates the position of the widget.
+	SetBounds(bounds Rectangle)
 	// UpdateProps will update the properties of the widget.  The Kind for
 	// the parameter data must match the Kind for the interface.
 	UpdateProps(data Widget) error
-	// Close removes the widget from the GUI, and frees any associated resources.
-	Close()
 }
