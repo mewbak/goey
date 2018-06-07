@@ -10,10 +10,10 @@ func TestCalculateHGap(t *testing.T) {
 		w1, w2   MountedWidget
 		expected Length
 	}{
-		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11}, // Space between unrelated controls
-		{(*mountedTextInput)(nil), (*mountedButton)(nil), 11},    // Space between unrelated controls
-		{(*mountedButton)(nil), (*mountedTextInput)(nil), 11},    // Space between unrelated controls
-		{(*mountedButton)(nil), (*mountedButton)(nil), 7},        // Space between adjacent buttons
+		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11 * DIP}, // Space between unrelated controls
+		{(*mountedTextInput)(nil), (*mountedButton)(nil), 11 * DIP},    // Space between unrelated controls
+		{(*mountedButton)(nil), (*mountedTextInput)(nil), 11 * DIP},    // Space between unrelated controls
+		{(*mountedButton)(nil), (*mountedButton)(nil), 7 * DIP},        // Space between adjacent buttons
 	}
 
 	for _, v := range cases {
@@ -29,14 +29,14 @@ func TestCalculateVGap(t *testing.T) {
 		w1, w2   MountedWidget
 		expected Length
 	}{
-		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11},   // Space between unrelated controls
-		{(*mountedTextInput)(nil), (*mountedP)(nil), 11},           // Space between unrelated controls
-		{(*mountedTextInput)(nil), (*mountedSelectInput)(nil), 11}, // Space between unrelated controls
-		{(*mountedLabel)(nil), (*mountedTextInput)(nil), 5},        // Space between text labels and associated fields
-		{(*mountedLabel)(nil), (*mountedSelectInput)(nil), 5},      // Space between text labels and associated fields
-		{(*mountedLabel)(nil), (*mountedTextArea)(nil), 5},         // Space between text labels and associated fields
-		{(*mountedCheckbox)(nil), (*mountedCheckbox)(nil), 7},      // Space between related controls
-		{(*mountedP)(nil), (*mountedP)(nil), 11},                   // Space between paragraphs of text
+		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11 * DIP},   // Space between unrelated controls
+		{(*mountedTextInput)(nil), (*mountedP)(nil), 11 * DIP},           // Space between unrelated controls
+		{(*mountedTextInput)(nil), (*mountedSelectInput)(nil), 11 * DIP}, // Space between unrelated controls
+		{(*mountedLabel)(nil), (*mountedTextInput)(nil), 5 * DIP},        // Space between text labels and associated fields
+		{(*mountedLabel)(nil), (*mountedSelectInput)(nil), 5 * DIP},      // Space between text labels and associated fields
+		{(*mountedLabel)(nil), (*mountedTextArea)(nil), 5 * DIP},         // Space between text labels and associated fields
+		{(*mountedCheckbox)(nil), (*mountedCheckbox)(nil), 7 * DIP},      // Space between related controls
+		{(*mountedP)(nil), (*mountedP)(nil), 11 * DIP},                   // Space between paragraphs of text
 	}
 
 	for _, v := range cases {

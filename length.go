@@ -12,6 +12,9 @@ var (
 	DPI image.Point
 )
 
+// Common lengths used when describing GUIs.  Note that the DIP is the natural
+// unit for this package.  Because of precision, the PT listed here is somewhat
+// smaller than its correct value.
 const (
 	DIP = Length(1 << 6)
 	PT  = Length((96 << 6) / 72)
@@ -27,7 +30,7 @@ func (dp Length) DIP() float64 {
 }
 
 func (dp Length) PT() float64 {
-	return float64(dp) * ((96 / 72) / 1 << 6)
+	return float64(dp) / ((96 << 6) / 72)
 }
 
 // PixelsX converts the distance measurement in DIPs to physical pixels, based
