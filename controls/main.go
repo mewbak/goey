@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"bitbucket.org/rj/goey"
+	"fmt"
 	"time"
 )
 
@@ -55,7 +55,7 @@ func renderWindow() []goey.Widget {
 			&goey.TextInput{Value: "Some input...", Placeholder: "Type some text here.  And some more.  And something really long.",
 				OnChange: func(v string) { println("text input ", v) }, OnEnterKey: func(v string) { println("t1* ", v) }},
 			&goey.Label{Text: "Password input:"},
-			&goey.PasswordInput{Value: "", Placeholder: "Don't share",
+			&goey.TextInput{Value: "", Placeholder: "Don't share", Password: true,
 				OnChange: func(v string) { println("password input ", v) }},
 			&goey.Label{Text: "Integer input:"},
 			&goey.IntInput{Value: 3, Placeholder: "Please enter a number",

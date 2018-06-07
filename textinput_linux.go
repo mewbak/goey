@@ -24,6 +24,9 @@ func (w *TextInput) mount(parent NativeWidget) (MountedWidget, error) {
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 	control.SetText(w.Value)
 	control.SetPlaceholderText(w.Placeholder)
+	if w.Password {
+		control.SetVisibility(false)
+	}
 
 	retval := &mountedTextInput{
 		handle:   control,
@@ -66,6 +69,7 @@ func (w *mountedTextInput) Handle() *gtk.Widget {
 func (w *mountedTextInput) updateProps(data *TextInput) error {
 	w.handle.SetText(data.Value)
 	w.handle.SetPlaceholderText(data.Placeholder)
+	w.handle.SetVisibility(!data.Password)
 	w.onChange = data.OnChange
 	w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "changed", textinput_onChanged, w)
 	w.onFocus.Set(&w.handle.Widget, data.OnFocus)

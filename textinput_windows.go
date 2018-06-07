@@ -27,6 +27,9 @@ func (w *TextInput) mount(parent NativeWidget) (MountedWidget, error) {
 	}
 
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | win.ES_LEFT | win.ES_AUTOHSCROLL)
+	if w.Password {
+		style = style | win.ES_PASSWORD
+	}
 	if w.OnEnterKey != nil {
 		style = style | win.ES_MULTILINE
 	}
