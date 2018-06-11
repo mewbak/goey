@@ -41,34 +41,27 @@ func updateWindow() {
 
 func render() []goey.Widget {
 	return []goey.Widget{
-		&goey.Column{
-			Children: [][]goey.Widget{
-				{
-					&goey.Label{Text: "This is the most important field:"},
-					&goey.TextArea{Value: text[0], Placeholder: "You should type something here.",
-						OnChange: func(value string) {
-							text[0] = value
-							characterCount[0] = len(value)
-							updateWindow()
-						},
-						OnFocus: onfocus(1),
-						OnBlur:  onblur(1),
+		&goey.VBox{
+			Children: []goey.Widget{
+				&goey.Label{Text: "This is the most important field:"},
+				&goey.TextArea{Value: text[0], Placeholder: "You should type something here.",
+					OnChange: func(value string) {
+						text[0] = value
+						characterCount[0] = len(value)
+						updateWindow()
 					},
+					OnFocus: onfocus(1),
+					OnBlur:  onblur(1),
 				},
-				{
-					&goey.Label{Text: "This is a secondary field:"},
-					&goey.TextArea{Value: text[1], Placeholder: "...and here.",
-						OnChange: func(value string) {
-							text[1] = value
-							characterCount[1] = len(value)
-							updateWindow()
-						},
-						OnFocus: onfocus(2),
-						OnBlur:  onblur(2),
+				&goey.Label{Text: "This is a secondary field:"},
+				&goey.TextArea{Value: text[1], Placeholder: "...and here.",
+					OnChange: func(value string) {
+						text[1] = value
+						characterCount[1] = len(value)
+						updateWindow()
 					},
-					//	},
-					//	Breaks: []goey.Break{goey.Cols(12, 5, 4, 3), goey.Cols(12, 7, 8, 9), goey.Cols(12, 5, 4, 3), goey.Cols(12, 7, 8, 9)},
-					//},
+					OnFocus: onfocus(2),
+					OnBlur:  onblur(2),
 				},
 			},
 		},

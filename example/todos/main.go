@@ -2,23 +2,28 @@ package main
 
 import (
 	"bitbucket.org/rj/goey"
+	"fmt"
 	"strconv"
 )
 
 var (
-	mainWindow *goey.MainWindow
+	mainWindow *goey.Window
 )
 
 func main() {
-	mw, err := goey.NewMainWindow("Example", render())
+	err := goey.Run(createWindow)
 	if err != nil {
-		println(err.Error())
-		return
+		fmt.Println("Error: ", err)
 	}
-	defer mw.Close()
-	mainWindow = mw
+}
 
-	goey.Run()
+func createWindow() error {
+	mw, err := goey.NewWindow("Example", render())
+	if err != nil {
+		return err
+	}
+	mainWindow = mw
+	return nil
 }
 
 func update() {
