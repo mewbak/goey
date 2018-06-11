@@ -16,7 +16,7 @@ type mountedSelectInput struct {
 	onBlur   blurSlot
 }
 
-func (w *SelectInput) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *SelectInput) mount(parent NativeWidget) (Element, error) {
 	control, err := gtk.ComboBoxTextNew()
 	if err != nil {
 		return nil, err

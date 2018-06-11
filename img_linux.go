@@ -33,7 +33,7 @@ func imageToPixbuf(prop image.Image) (*gdk.Pixbuf, []uint8, error) {
 	return pixbuf, img.Pix, nil
 }
 
-func (w *Img) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Img) mount(parent NativeWidget) (Element, error) {
 	// Create the bitmap
 	pixbuf, buffer, err := imageToPixbuf(w.Image)
 	if err != nil {

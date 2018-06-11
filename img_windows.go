@@ -85,7 +85,7 @@ func imageToBitmap(prop image.Image) (win.HBITMAP, []uint8, error) {
 	return hbitmap, img.Pix, nil
 }
 
-func (w *Img) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Img) mount(parent NativeWidget) (Element, error) {
 	// Create the bitmap
 	hbitmap, buffer, err := imageToBitmap(w.Image)
 	if err != nil {

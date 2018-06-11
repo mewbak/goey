@@ -8,12 +8,12 @@ import (
 
 type mountedVBox struct {
 	NativeWidget
-	children   []MountedWidget
+	children   []Element
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
 }
 
-func (w *VBox) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *VBox) mount(parent NativeWidget) (Element, error) {
 	control, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 11)
 	if err != nil {
 		return nil, err
@@ -21,7 +21,7 @@ func (w *VBox) mount(parent NativeWidget) (MountedWidget, error) {
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 
 	halign := w.AlignCross.HAlign()
-	children := make([]MountedWidget, 0, len(w.Children))
+	children := make([]Element, 0, len(w.Children))
 	for _, v := range w.Children {
 		mountedWidget, err := v.Mount(NativeWidget{&control.Widget})
 		if err != nil {
@@ -63,7 +63,7 @@ func vbox_onDestroy(widget *gtk.Box, mounted *mountedVBox) {
 	mounted.handle = nil
 }
 
-func vbox_crossAlign(widget MountedWidget, align gtk.Align) {
+func vbox_crossAlign(widget Element, align gtk.Align) {
 	// Label's don't stretch, and we don't want them to be centered.
 	if align == gtk.ALIGN_FILL {
 		if ptr, ok := widget.(*mountedLabel); ok {

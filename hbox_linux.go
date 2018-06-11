@@ -8,17 +8,17 @@ import (
 
 type mountedHBox struct {
 	NativeWidget
-	children []MountedWidget
+	children []Element
 }
 
-func (w *HBox) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *HBox) mount(parent NativeWidget) (Element, error) {
 	control, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 11)
 	if err != nil {
 		return nil, err
 	}
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 
-	children := make([]MountedWidget, 0, len(w.Children))
+	children := make([]Element, 0, len(w.Children))
 	for _, v := range w.Children {
 		mountedWidget, err := v.Mount(NativeWidget{&control.Container.Widget})
 		if err != nil {

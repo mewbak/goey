@@ -10,7 +10,7 @@ type mountedLabel struct {
 	handle *gtk.Label
 }
 
-func (w *Label) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Label) mount(parent NativeWidget) (Element, error) {
 	handle, err := gtk.LabelNew(w.Text)
 	if err != nil {
 		return nil, err

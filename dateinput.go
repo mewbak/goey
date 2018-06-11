@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	dateInputKind = WidgetKind{"dateinput"}
+	dateInputKind = Kind{"dateinput"}
 )
 
 // DateInput describes a widget that users input or update a single date.
@@ -20,18 +20,18 @@ type DateInput struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*DateInput) Kind() *WidgetKind {
+func (*DateInput) Kind() *Kind {
 	return &dateInputKind
 }
 
 // Mount creates a text field in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *DateInput) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *DateInput) Mount(parent NativeWidget) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*mountedDateInput) Kind() *WidgetKind {
+func (*mountedDateInput) Kind() *Kind {
 	return &dateInputKind
 }
 

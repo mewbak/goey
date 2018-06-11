@@ -1,7 +1,7 @@
 package goey
 
 var (
-	checkboxKind = WidgetKind{"checkbox"}
+	checkboxKind = Kind{"checkbox"}
 )
 
 // Checkbox describes a widget that users input or update a flag.
@@ -17,18 +17,18 @@ type Checkbox struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*Checkbox) Kind() *WidgetKind {
+func (*Checkbox) Kind() *Kind {
 	return &checkboxKind
 }
 
 // Mount creates a checkbox in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *Checkbox) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Checkbox) Mount(parent NativeWidget) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*mountedCheckbox) Kind() *WidgetKind {
+func (*mountedCheckbox) Kind() *Kind {
 	return &checkboxKind
 }
 

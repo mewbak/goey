@@ -32,7 +32,7 @@ func (w *DateInput) systemTime() win.SYSTEMTIME {
 	}
 }
 
-func (w *DateInput) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *DateInput) mount(parent NativeWidget) (Element, error) {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP)
 	hwnd := win.CreateWindowEx(0, datetimepickClassName, nil,
 		style,

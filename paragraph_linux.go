@@ -25,7 +25,7 @@ func (a TextAlignment) native() gtk.Justification {
 	panic("not reachable")
 }
 
-func (w *P) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *P) mount(parent NativeWidget) (Element, error) {
 	handle, err := gtk.LabelNew(w.Text)
 	if err != nil {
 		return nil, err

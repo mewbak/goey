@@ -20,7 +20,7 @@ func init() {
 	}
 }
 
-func (w *TextInput) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *TextInput) mount(parent NativeWidget) (Element, error) {
 	text, err := syscall.UTF16PtrFromString(w.Value)
 	if err != nil {
 		return nil, err

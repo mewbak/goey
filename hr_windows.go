@@ -37,7 +37,7 @@ func registerHRClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, error) {
 	return atom, nil
 }
 
-func (w *HR) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *HR) mount(parent NativeWidget) (Element, error) {
 	hInstance := win.GetModuleHandle(nil)
 	if hInstance == 0 {
 		return nil, syscall.GetLastError()

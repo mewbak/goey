@@ -27,7 +27,7 @@ func (w *Window) Alignment() (MainAxisAlign, CrossAxisAlign) {
 
 // Children returns the mounted children for the window.  In general, this
 // method should not be used.
-func (w *Window) Children() []MountedWidget {
+func (w *Window) Children() []Element {
 	return w.getChildren()
 }
 

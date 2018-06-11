@@ -6,14 +6,14 @@ import (
 
 type mountedColumn struct {
 	parent   NativeWidget
-	children []MountedWidget
+	children []Element
 	counts   []int
 
 	transition Length
 }
 
-func (w *Column) mount(parent NativeWidget) (MountedWidget, error) {
-	c := make([]MountedWidget, 0, len(w.Children))
+func (w *Column) mount(parent NativeWidget) (Element, error) {
+	c := make([]Element, 0, len(w.Children))
 	counts := make([]int, 0, len(w.Children))
 
 	for _, v := range w.Children {

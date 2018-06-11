@@ -19,7 +19,7 @@ func init() {
 	}
 }
 
-func (w *Button) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Button) mount(parent NativeWidget) (Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err

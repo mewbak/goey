@@ -1,7 +1,7 @@
 package goey
 
 var (
-	textInputKind = WidgetKind{"textinput"}
+	textInputKind = Kind{"textinput"}
 )
 
 // TextInput describes a widget that users input or update a single line of text.
@@ -19,18 +19,18 @@ type TextInput struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*TextInput) Kind() *WidgetKind {
+func (*TextInput) Kind() *Kind {
 	return &textInputKind
 }
 
 // Mount creates a text field in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *TextInput) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *TextInput) Mount(parent NativeWidget) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*mountedTextInput) Kind() *WidgetKind {
+func (*mountedTextInput) Kind() *Kind {
 	return &textInputKind
 }
 

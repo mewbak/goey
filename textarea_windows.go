@@ -13,7 +13,7 @@ func minlinesDefault(value int) int {
 	return value
 }
 
-func (w *TextArea) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *TextArea) mount(parent NativeWidget) (Element, error) {
 	text, err := syscall.UTF16PtrFromString(w.Value)
 	if err != nil {
 		return nil, err

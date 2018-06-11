@@ -1,7 +1,7 @@
 package goey
 
 var (
-	columnKind = WidgetKind{"column"}
+	columnKind = Kind{"column"}
 )
 
 // HBox describes a layout widget that arranges its child widgets into a horizontal row.
@@ -11,18 +11,18 @@ type Column struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*Column) Kind() *WidgetKind {
+func (*Column) Kind() *Kind {
 	return &columnKind
 }
 
 // Mount creates a horiztonal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
-func (w *Column) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Column) Mount(parent NativeWidget) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*mountedColumn) Kind() *WidgetKind {
+func (*mountedColumn) Kind() *Kind {
 	return &columnKind
 }
 

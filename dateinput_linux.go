@@ -17,7 +17,7 @@ type mountedDateInput struct {
 	onBlur   blurSlot
 }
 
-func (w *DateInput) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *DateInput) mount(parent NativeWidget) (Element, error) {
 	control, err := gtk.CalendarNew()
 	if err != nil {
 		return nil, err

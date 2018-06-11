@@ -1,7 +1,7 @@
 package goey
 
 var (
-	hrKind = WidgetKind{"hr"}
+	hrKind = Kind{"hr"}
 )
 
 // HR describes a widget that is a horiztonal separator.
@@ -10,18 +10,18 @@ type HR struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*HR) Kind() *WidgetKind {
+func (*HR) Kind() *Kind {
 	return &hrKind
 }
 
 // Mount creates a horiztonal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
-func (w *HR) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *HR) Mount(parent NativeWidget) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (_ *mountedHR) Kind() *WidgetKind {
+func (_ *mountedHR) Kind() *Kind {
 	return &hrKind
 }
 

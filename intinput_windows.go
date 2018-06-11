@@ -7,7 +7,7 @@ import (
 	"unsafe"
 )
 
-func (w *IntInput) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *IntInput) mount(parent NativeWidget) (Element, error) {
 	text, err := syscall.UTF16PtrFromString(strconv.FormatInt(w.Value, 10))
 	if err != nil {
 		return nil, err

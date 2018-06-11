@@ -84,7 +84,7 @@ type NativeMountedWidget interface {
 	SetOrder(previous win.HWND) win.HWND
 }
 
-func calculateHGap(previous MountedWidget, current MountedWidget) Length {
+func calculateHGap(previous Element, current Element) Length {
 	// The vertical gap between most controls is 11 relative pixels.  However,
 	// there are different rules for between a label and its associated control,
 	// or between related controls.  These relationship do not appear in the
@@ -104,7 +104,7 @@ func calculateHGap(previous MountedWidget, current MountedWidget) Length {
 	return 11 * DIP
 }
 
-func calculateVGap(previous MountedWidget, current MountedWidget) Length {
+func calculateVGap(previous Element, current Element) Length {
 	// The vertical gap between most controls is 11 relative pixels.  However,
 	// there are different rules for between a label and its associated control,
 	// or between related controls.  These relationship do not appear in the
@@ -177,7 +177,7 @@ func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight Lengt
 	return extraGap, posY, scale1, scale2
 }
 
-func setBoundsWithAlign(widget MountedWidget, bounds Rectangle, align CrossAxisAlign, scale1, scale2 int) (moveY Length) {
+func setBoundsWithAlign(widget Element, bounds Rectangle, align CrossAxisAlign, scale1, scale2 int) (moveY Length) {
 	width := bounds.Dx()
 	min, max := widget.MeasureHeight(width)
 	h := min + (max-min).Scale(scale1, scale2)

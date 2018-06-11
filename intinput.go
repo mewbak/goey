@@ -1,7 +1,7 @@
 package goey
 
 var (
-	intInputKind = WidgetKind{"intinput"}
+	intInputKind = Kind{"intinput"}
 )
 
 // IntInput describes a widget that users input or update a single integer value.
@@ -18,18 +18,18 @@ type IntInput struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*IntInput) Kind() *WidgetKind {
+func (*IntInput) Kind() *Kind {
 	return &intInputKind
 }
 
 // Mount creates a text field in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *IntInput) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *IntInput) Mount(parent NativeWidget) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*mountedIntInput) Kind() *WidgetKind {
+func (*mountedIntInput) Kind() *Kind {
 	return &intInputKind
 }
 

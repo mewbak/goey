@@ -1,7 +1,7 @@
 package goey
 
 var (
-	selectKind = WidgetKind{"selectinput"}
+	selectKind = Kind{"selectinput"}
 )
 
 // SelectInput describes a widget that users can click to select one from a fixed list of choices.
@@ -17,18 +17,18 @@ type SelectInput struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*SelectInput) Kind() *WidgetKind {
+func (*SelectInput) Kind() *Kind {
 	return &selectKind
 }
 
 // Mount creates a button in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *SelectInput) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *SelectInput) Mount(parent NativeWidget) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*mountedSelectInput) Kind() *WidgetKind {
+func (*mountedSelectInput) Kind() *Kind {
 	return &selectKind
 }
 

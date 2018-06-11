@@ -1,7 +1,7 @@
 package goey
 
 var (
-	vboxKind = WidgetKind{"vbox"}
+	vboxKind = Kind{"vbox"}
 )
 
 // MainAxisAlign identifies the different types of alignment that is possible
@@ -38,18 +38,18 @@ type VBox struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*VBox) Kind() *WidgetKind {
+func (*VBox) Kind() *Kind {
 	return &vboxKind
 }
 
 // Mount creates a vertical layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
-func (w *VBox) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *VBox) Mount(parent NativeWidget) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*mountedVBox) Kind() *WidgetKind {
+func (*mountedVBox) Kind() *Kind {
 	return &vboxKind
 }
 
@@ -57,7 +57,7 @@ func (w *mountedVBox) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*VBox))
 }
 
-func diffChildren(parent NativeWidget, lhs []MountedWidget, rhs []Widget) ([]MountedWidget, error) {
+func diffChildren(parent NativeWidget, lhs []Element, rhs []Widget) ([]Element, error) {
 
 	// If the new tree does not contain any children, then we can trivially
 	// match the tree by deleting the actual widgets.
@@ -71,7 +71,7 @@ func diffChildren(parent NativeWidget, lhs []MountedWidget, rhs []Widget) ([]Mou
 	// If the old tree does not contain any children, then we can trivially
 	// match the tree by mounting all of the widgets.
 	if len(lhs) == 0 && len(rhs) > 0 {
-		c := make([]MountedWidget, 0, len(rhs))
+		c := make([]Element, 0, len(rhs))
 
 		for _, v := range rhs {
 			mountedChild, err := v.Mount(parent)

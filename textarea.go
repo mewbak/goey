@@ -1,7 +1,7 @@
 package goey
 
 var (
-	textareaKind = WidgetKind{"textarea"}
+	textareaKind = Kind{"textarea"}
 )
 
 // TextArea describes a widget that users input or update a multi-line of text.
@@ -18,18 +18,18 @@ type TextArea struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*TextArea) Kind() *WidgetKind {
+func (*TextArea) Kind() *Kind {
 	return &textareaKind
 }
 
 // Mount creates a text area control in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *TextArea) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *TextArea) Mount(parent NativeWidget) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*mountedTextArea) Kind() *WidgetKind {
+func (*mountedTextArea) Kind() *Kind {
 	return &textareaKind
 }
 

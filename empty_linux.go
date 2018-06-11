@@ -10,7 +10,7 @@ type mountedEmpty struct {
 	NativeWidget
 }
 
-func (w *Empty) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Empty) mount(parent NativeWidget) (Element, error) {
 	control, err := gtk.LabelNew("  ")
 	if err != nil {
 		return nil, err

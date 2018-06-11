@@ -10,7 +10,7 @@ type mountedHR struct {
 	NativeWidget
 }
 
-func (w *HR) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *HR) mount(parent NativeWidget) (Element, error) {
 	control, err := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
 	if err != nil {
 		return nil, err

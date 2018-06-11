@@ -19,7 +19,7 @@ func init() {
 	}
 }
 
-func (w *SelectInput) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *SelectInput) mount(parent NativeWidget) (Element, error) {
 	if w.Value >= len(w.Items) {
 		w.Value = len(w.Items) - 1
 	}

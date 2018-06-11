@@ -1,7 +1,7 @@
 package goey
 
 var (
-	paragraphKind = WidgetKind{"paragraph"}
+	paragraphKind = Kind{"paragraph"}
 )
 
 // TextAlignment identifies the different types of text alignment that are possible.
@@ -22,18 +22,18 @@ type P struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*P) Kind() *WidgetKind {
+func (*P) Kind() *Kind {
 	return &paragraphKind
 }
 
 // Mount creates a paragraph in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *P) Mount(parent NativeWidget) (MountedWidget, error) {
+func (w *P) Mount(parent NativeWidget) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*mountedP) Kind() *WidgetKind {
+func (*mountedP) Kind() *Kind {
 	return &paragraphKind
 }
 

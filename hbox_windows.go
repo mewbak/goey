@@ -6,7 +6,7 @@ import (
 
 type mountedHBox struct {
 	parent     NativeWidget
-	children   []MountedWidget
+	children   []Element
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
 
@@ -14,8 +14,8 @@ type mountedHBox struct {
 	maximumWidth Length
 }
 
-func (w *HBox) mount(parent NativeWidget) (MountedWidget, error) {
-	c := make([]MountedWidget, 0, len(w.Children))
+func (w *HBox) mount(parent NativeWidget) (Element, error) {
+	c := make([]Element, 0, len(w.Children))
 
 	for _, v := range w.Children {
 		mountedChild, err := v.Mount(parent)
@@ -150,7 +150,7 @@ func (w *mountedHBox) SetBounds(bounds Rectangle) {
 		scale1, scale2 = width-w.minimumWidth, w.maximumWidth-w.minimumWidth
 	}
 
-	previous := MountedWidget(nil)
+	previous := Element(nil)
 	for _, v := range w.children {
 		if previous != nil {
 			posX += calculateHGap(previous, v)

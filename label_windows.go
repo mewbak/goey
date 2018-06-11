@@ -20,7 +20,7 @@ func init() {
 	}
 }
 
-func (w *Label) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *Label) mount(parent NativeWidget) (Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err

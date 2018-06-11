@@ -18,7 +18,7 @@ type mountedTextArea struct {
 	onBlur   blurSlot
 }
 
-func (w *TextArea) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *TextArea) mount(parent NativeWidget) (Element, error) {
 	buffer, err := gtk.TextBufferNew(nil)
 	if err != nil {
 		return nil, err

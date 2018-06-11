@@ -22,7 +22,7 @@ func (w *P) calcStyle() uint32 {
 	return style
 }
 
-func (w *P) mount(parent NativeWidget) (MountedWidget, error) {
+func (w *P) mount(parent NativeWidget) (Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err

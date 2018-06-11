@@ -6,13 +6,13 @@ import (
 
 type mountedVBox struct {
 	parent     NativeWidget
-	children   []MountedWidget
+	children   []Element
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
 }
 
-func (w *VBox) mount(parent NativeWidget) (MountedWidget, error) {
-	c := make([]MountedWidget, 0, len(w.Children))
+func (w *VBox) mount(parent NativeWidget) (Element, error) {
+	c := make([]Element, 0, len(w.Children))
 
 	for _, v := range w.Children {
 		mountedChild, err := v.Mount(parent)
@@ -83,7 +83,7 @@ func (w *mountedVBox) SetBounds(bounds Rectangle) {
 	bounds.Min.Y += deltaY
 
 	// Assuming that height of bounds is sufficient
-	previous := MountedWidget(nil)
+	previous := Element(nil)
 	for _, v := range w.children {
 		if previous != nil {
 			bounds.Min.Y += calculateVGap(previous, v) + extraGap

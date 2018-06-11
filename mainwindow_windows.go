@@ -422,7 +422,7 @@ func (w *windowImpl) getAlignment() (MainAxisAlign, CrossAxisAlign) {
 	return w.vbox.alignMain, w.vbox.alignCross
 }
 
-func (w *windowImpl) getChildren() []MountedWidget {
+func (w *windowImpl) getChildren() []Element {
 	return w.vbox.children
 }
 
