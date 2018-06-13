@@ -453,10 +453,7 @@ func (w *windowImpl) setChildren(children []Widget) error {
 	err := w.vbox.UpdateProps(&vbox)
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
-	currentHwnd := win.HWND_TOP
-	for _, v := range w.vbox.children {
-		currentHwnd = v.SetOrder(currentHwnd)
-	}
+	w.vbox.SetOrder(win.HWND_TOP)
 	// Determine the size constraints for the window
 	w.determineSizeConstraints()
 	w.onSize(w.hWnd)

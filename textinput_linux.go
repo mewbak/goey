@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -64,6 +65,21 @@ func (w *mountedTextInput) Close() {
 
 func (w *mountedTextInput) Handle() *gtk.Widget {
 	return &w.handle.Widget
+}
+
+func (w *mountedTextInput) MeasureWidth() (Length, Length) {
+	min, max := w.handle.GetPreferredWidth()
+	return FromPixelsX(min), FromPixelsX(max)
+}
+
+func (w *mountedTextInput) MeasureHeight(width Length) (Length, Length) {
+	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
+	return FromPixelsY(min), FromPixelsY(max)
+}
+
+func (w *mountedTextInput) SetBounds(bounds Rectangle) {
+	pixels := bounds.Pixels()
+	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
 func (w *mountedTextInput) updateProps(data *TextInput) error {

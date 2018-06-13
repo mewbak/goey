@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -18,6 +19,7 @@ func (w *Label) mount(parent NativeWidget) (Element, error) {
 	handle.SetSingleLineMode(false)
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(handle)
 	handle.SetJustify(gtk.JUSTIFY_LEFT)
+	handle.SetXAlign(0)
 	handle.SetLineWrap(false)
 	handle.Show()
 
@@ -40,6 +42,21 @@ func (w *mountedLabel) Close() {
 
 func (w *mountedLabel) Handle() *gtk.Widget {
 	return &w.handle.Widget
+}
+
+func (w *mountedLabel) MeasureWidth() (Length, Length) {
+	min, max := w.handle.GetPreferredWidth()
+	return FromPixelsX(min), FromPixelsY(max)
+}
+
+func (w *mountedLabel) MeasureHeight(width Length) (Length, Length) {
+	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
+	return FromPixelsY(min), FromPixelsY(max)
+}
+
+func (w *mountedLabel) SetBounds(bounds Rectangle) {
+	pixels := bounds.Pixels()
+	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
 func (w *mountedLabel) updateProps(data *Label) error {

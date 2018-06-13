@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -57,13 +58,28 @@ func (w *mountedButton) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
+func (w *mountedButton) MeasureWidth() (Length, Length) {
+	min, max := w.handle.GetPreferredWidth()
+	return FromPixelsX(min), FromPixelsY(max)
+}
+
+func (w *mountedButton) MeasureHeight(width Length) (Length, Length) {
+	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
+	return FromPixelsY(min), FromPixelsY(max)
+}
+
+func (w *mountedButton) SetBounds(bounds Rectangle) {
+	pixels := bounds.Pixels()
+	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
+}
+
 func (w *mountedButton) updateProps(data *Button) error {
-	label_, err := w.handle.GetChild()
+	label, err := w.handle.GetChild()
 	if err != nil {
 		return err
 	}
 
-	(*gtk.Label)(unsafe.Pointer(label_)).SetText(data.Text)
+	(*gtk.Label)(unsafe.Pointer(label)).SetText(data.Text)
 	w.handle.SetSensitive(!data.Disabled)
 
 	if data.Default {

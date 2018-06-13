@@ -1,8 +1,9 @@
 package goey
 
 import (
-	"golang.org/x/image/math/fixed"
 	"image"
+
+	"golang.org/x/image/math/fixed"
 )
 
 var (
@@ -87,6 +88,11 @@ func (p Point) Sub(q Point) Point {
 	return Point{p.X - q.X, p.Y - q.Y}
 }
 
+// Pixels returns the vector with the X and Y coordinates measured in pixels.
+func (p Point) Pixels() image.Point {
+	return image.Point{p.X.PixelsX(), p.Y.PixelsY()}
+}
+
 // A Rectangle contains the points with Min.X <= X < Max.X, Min.Y <= Y < Max.Y.
 // It is well-formed if Min.X <= Max.X and likewise for Y. Points are always
 // well-formed. A rectangle's methods always return well-formed outputs for
@@ -112,6 +118,11 @@ func (r Rectangle) Dx() Length {
 // Dy returns r's height.
 func (r Rectangle) Dy() Length {
 	return r.Max.Y - r.Min.Y
+}
+
+// Pixels returns the rectangle with the X and Y coordinates measured in pixels.
+func (r Rectangle) Pixels() image.Rectangle {
+	return image.Rectangle{r.Min.Pixels(), r.Max.Pixels()}
 }
 
 // Size returns r's width and height.

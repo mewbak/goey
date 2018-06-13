@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -55,6 +56,21 @@ func (w *mountedCheckbox) Close() {
 
 func (w *mountedCheckbox) Handle() *gtk.Widget {
 	return &w.handle.Widget
+}
+
+func (w *mountedCheckbox) MeasureWidth() (Length, Length) {
+	min, max := w.handle.GetPreferredWidth()
+	return FromPixelsX(min), FromPixelsY(max)
+}
+
+func (w *mountedCheckbox) MeasureHeight(width Length) (Length, Length) {
+	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
+	return FromPixelsY(min), FromPixelsY(max)
+}
+
+func (w *mountedCheckbox) SetBounds(bounds Rectangle) {
+	pixels := bounds.Pixels()
+	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
 func (w *mountedCheckbox) updateProps(data *Checkbox) error {

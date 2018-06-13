@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -12,6 +13,7 @@ type mountedTextArea struct {
 	buffer *gtk.TextBuffer
 	frame  *gtk.Frame
 
+	minLines int
 	onChange func(string)
 	shChange glib.SignalHandle
 	onFocus  focusSlot
@@ -63,6 +65,7 @@ func (w *TextArea) mount(parent NativeWidget) (Element, error) {
 		buffer:   buffer,
 		frame:    frame,
 		onChange: w.OnChange,
+		minLines: minlinesDefault(w.MinLines),
 	}
 
 	control.Connect("destroy", textarea_onDestroy, retval)
@@ -105,6 +108,32 @@ func (w *mountedTextArea) Close() {
 
 func (w *mountedTextArea) Handle() *gtk.Widget {
 	return &w.handle.Widget
+}
+
+func (w *mountedTextArea) MeasureWidth() (Length, Length) {
+	min, max := w.handle.GetPreferredWidth()
+	return FromPixelsX(min), FromPixelsY(max)
+}
+
+func (w *mountedTextArea) MeasureHeight(width Length) (Length, Length) {
+	const lineHeight = 16 * DIP
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	min, max := 23*DIP+lineHeight.Scale(w.minLines-1, 1), 23*DIP+lineHeight.Scale(39, 1)
+
+	minPx, maxPx := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
+	if tmp := FromPixelsX(minPx); tmp > min {
+		min = tmp
+	}
+	if tmp := FromPixelsX(maxPx); tmp > max {
+		max = tmp
+	}
+
+	return min, max
+}
+
+func (w *mountedTextArea) SetBounds(bounds Rectangle) {
+	pixels := bounds.Pixels()
+	syscall.SetBounds(&w.frame.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
 func (w *mountedTextArea) updateProps(data *TextArea) error {

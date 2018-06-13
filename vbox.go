@@ -53,71 +53,106 @@ func (*mountedVBox) Kind() *Kind {
 	return &vboxKind
 }
 
-func (w *mountedVBox) UpdateProps(data Widget) error {
-	return w.updateProps(data.(*VBox))
+type mountedVBox struct {
+	parent     NativeWidget
+	children   []Element
+	alignMain  MainAxisAlign
+	alignCross CrossAxisAlign
 }
 
-func diffChildren(parent NativeWidget, lhs []Element, rhs []Widget) ([]Element, error) {
+func (w *VBox) mount(parent NativeWidget) (Element, error) {
+	c := make([]Element, 0, len(w.Children))
 
-	// If the new tree does not contain any children, then we can trivially
-	// match the tree by deleting the actual widgets.
-	if len(rhs) == 0 {
-		for _, v := range lhs {
-			v.Close()
-		}
-		return nil, nil
-	}
-
-	// If the old tree does not contain any children, then we can trivially
-	// match the tree by mounting all of the widgets.
-	if len(lhs) == 0 && len(rhs) > 0 {
-		c := make([]Element, 0, len(rhs))
-
-		for _, v := range rhs {
-			mountedChild, err := v.Mount(parent)
-			if err != nil {
-				return nil, err
-			}
-			c = append(c, mountedChild)
-		}
-
-		return c, nil
-	}
-
-	// Delete excessive children
-	if len(lhs) > len(rhs) {
-		for _, v := range lhs[len(rhs):] {
-			v.Close()
-		}
-		lhs = lhs[:len(rhs)]
-	}
-
-	// Update kind (if necessary) and properties for all of the currently
-	// existing children.
-	for i := range lhs {
-		if kind1, kind2 := lhs[i].Kind(), rhs[i].Kind(); kind1 == kind2 {
-			err := lhs[i].UpdateProps(rhs[i])
-			if err != nil {
-				return lhs, err
-			}
-		} else {
-			mountedWidget, err := rhs[i].Mount(parent)
-			if err != nil {
-				return lhs, err
-			}
-			lhs[i].Close()
-			lhs[i] = mountedWidget
-		}
-	}
-
-	// Mount any remaining children.
-	for _, v := range rhs[len(lhs):] {
-		mountedWidget, err := v.Mount(parent)
+	for _, v := range w.Children {
+		mountedChild, err := v.Mount(parent)
 		if err != nil {
-			return lhs, err
+			return nil, err
 		}
-		lhs = append(lhs, mountedWidget)
+		c = append(c, mountedChild)
 	}
 
-	return lhs, nil
+	return &mountedVBox{parent: parent, children: c}, nil
+}
+
+func (w *mountedVBox) Close() {
+	// Need to free the children
+	for _, v := range w.children {
+		v.Close()
+	}
+	w.children = nil
+}
+
+func (w *mountedVBox) MeasureWidth() (Length, Length) {
+	if len(w.children) == 0 {
+		return 0, 0
+	}
+
+	min, max := w.children[0].MeasureWidth()
+	for _, v := range w.children[1:] {
+		tmpMin, tmpMax := v.MeasureWidth()
+		if tmpMin > min {
+			min = tmpMin
+		}
+		if tmpMax > max {
+			max = tmpMax
+		}
+	}
+	return min, max
+}
+
+func (w *mountedVBox) MeasureHeight(width Length) (Length, Length) {
+	if len(w.children) == 0 {
+		return 0, 0
+	}
+
+	previous := w.children[0]
+	min, max := previous.MeasureHeight(width)
+	for _, v := range w.children[1:] {
+		tmpMin, tmpMax := v.MeasureHeight(width)
+		gap := calculateVGap(previous, v)
+		min += tmpMin + gap
+		max += tmpMax + gap
+		previous = v
+	}
+	return min, max
+}
+
+func (w *mountedVBox) SetBounds(bounds Rectangle) {
+	if len(w.children) == 0 {
+		return
+	}
+
+	width := bounds.Dx()
+	minTotal, maxTotal := w.MeasureHeight(width)
+
+	extraGap, deltaY, scale1, scale2 := distributeVSpace(w.alignMain, len(w.children), bounds.Dy(), minTotal, maxTotal)
+	bounds.Min.Y += deltaY
+
+	// Assuming that height of bounds is sufficient
+	previous := Element(nil)
+	for _, v := range w.children {
+		if previous != nil {
+			bounds.Min.Y += calculateVGap(previous, v) + extraGap
+		}
+
+		deltaY := setBoundsWithAlign(v, bounds, w.alignCross, scale1, scale2)
+		bounds.Min.Y += deltaY
+		previous = v
+	}
+}
+
+func (w *mountedVBox) setChildren(children []Widget) error {
+	err := error(nil)
+	w.children, err = diffChildren(w.parent, w.children, children)
+	return err
+}
+
+func (w *mountedVBox) updateProps(data *VBox) error {
+	w.alignMain = data.AlignMain
+	w.alignCross = data.AlignCross
+	return w.setChildren(data.Children)
+}
+
+func (w *mountedVBox) UpdateProps(data Widget) error {
+	return w.updateProps(data.(*VBox))
 }

@@ -50,8 +50,8 @@ func TestButtonCreate(t *testing.T) {
 
 func TestButtonEvents(t *testing.T) {
 	testingCheckFocusAndBlur(t, []Widget{
-		&Checkbox{Text: "A"},
-		&Checkbox{Text: "B"},
-		&Checkbox{Text: "C"},
+		&Button{Text: "A"},
+		&Button{Text: "B"},
+		&Button{Text: "C"},
 	})
 }

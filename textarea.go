@@ -36,3 +36,10 @@ func (*mountedTextArea) Kind() *Kind {
 func (w *mountedTextArea) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*TextArea))
 }
+
+func minlinesDefault(value int) int {
+	if value < 1 {
+		return 3
+	}
+	return value
+}

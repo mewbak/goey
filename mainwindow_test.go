@@ -273,7 +273,7 @@ func TestNewWindow_SetIcon(t *testing.T) {
 					return mw.SetIcon(img)
 				})
 				if err != nil {
-					t.Errorf("Error calling SetTitle, %", err)
+					t.Errorf("Error calling SetTitle, %s", err)
 				}
 				time.Sleep(50 * time.Millisecond)
 			}
@@ -286,7 +286,7 @@ func TestNewWindow_SetIcon(t *testing.T) {
 				return nil
 			})
 			if err != nil {
-				t.Errorf("Error calling Close, %", err)
+				t.Errorf("Error calling Close, %s", err)
 			}
 		}()
 
@@ -334,7 +334,7 @@ func TestNewWindow_SetTitle(t *testing.T) {
 				return mw.SetTitle("Flash!")
 			})
 			if err != nil {
-				t.Errorf("Error calling SetTitle, %", err)
+				t.Errorf("Error calling SetTitle, %s", err)
 			}
 			t.Logf("Stopping alignment tests")
 
@@ -345,7 +345,7 @@ func TestNewWindow_SetTitle(t *testing.T) {
 				return nil
 			})
 			if err != nil {
-				t.Errorf("Error calling Close, %", err)
+				t.Errorf("Error calling Close, %s", err)
 			}
 		}()
 

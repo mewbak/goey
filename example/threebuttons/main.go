@@ -1,4 +1,4 @@
-// Package main for an example application using the goey package to show 
+// Package main for an example application using the goey package to show
 // three button which different event behaviours.  The top button maintains a
 // running count of how many times it has been clicked.  The middle button
 // changes the vertical alignment of the buttons.  The bottom button changes
@@ -7,8 +7,9 @@ package main
 
 import (
 	"fmt"
-	"bitbucket.org/rj/goey"
 	"strconv"
+
+	"bitbucket.org/rj/goey"
 )
 
 var (

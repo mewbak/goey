@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -59,6 +60,21 @@ func (w *mountedIntInput) Close() {
 
 func (w *mountedIntInput) Handle() *gtk.Widget {
 	return &w.handle.Widget
+}
+
+func (w *mountedIntInput) MeasureWidth() (Length, Length) {
+	min, max := w.handle.GetPreferredWidth()
+	return FromPixelsX(min), FromPixelsY(max)
+}
+
+func (w *mountedIntInput) MeasureHeight(width Length) (Length, Length) {
+	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
+	return FromPixelsY(min), FromPixelsY(max)
+}
+
+func (w *mountedIntInput) SetBounds(bounds Rectangle) {
+	pixels := bounds.Pixels()
+	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
 func (w *mountedIntInput) updateProps(data *IntInput) error {

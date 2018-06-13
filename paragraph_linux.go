@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -34,10 +35,10 @@ func (w *P) mount(parent NativeWidget) (Element, error) {
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(handle)
 	handle.SetJustify(w.Align.native())
 	handle.SetLineWrap(true)
-	handle.Show()
 
 	retval := &mountedP{handle}
 	handle.Connect("destroy", paragraph_onDestroy, retval)
+	handle.Show()
 
 	return retval, nil
 }
@@ -55,6 +56,21 @@ func (w *mountedP) Close() {
 
 func (w *mountedP) Handle() *gtk.Widget {
 	return &w.handle.Widget
+}
+
+func (w *mountedP) MeasureWidth() (Length, Length) {
+	min, max := w.handle.GetPreferredWidth()
+	return FromPixelsX(min), FromPixelsX(max)
+}
+
+func (w *mountedP) MeasureHeight(width Length) (Length, Length) {
+	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
+	return FromPixelsY(min), FromPixelsY(max)
+}
+
+func (w *mountedP) SetBounds(bounds Rectangle) {
+	pixels := bounds.Pixels()
+	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
 func (w *mountedP) updateProps(data *P) error {

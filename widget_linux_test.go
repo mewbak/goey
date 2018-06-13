@@ -3,18 +3,24 @@ package goey
 import (
 	"testing"
 	"time"
+
+	"github.com/gotk3/gotk3/gtk"
 )
+
+type Handler interface {
+	Handle() *gtk.Widget
+}
 
 func testingSetFocus(t *testing.T, w *Window, i int) {
 	// Check the size
-	handle := w.vbox.children[i].Handle()
+	handle := w.vbox.children[i].(Handler).Handle()
 	if !handle.GetCanFocus() {
 		t.Errorf("Widget can not grab focus.")
 		return
 	}
 
 	handle.GrabFocus()
-	time.Sleep(500 * time.Millisecond )
+	time.Sleep(500 * time.Millisecond)
 	if !handle.IsFocus() {
 		t.Errorf("Widget did not grab focus")
 	}

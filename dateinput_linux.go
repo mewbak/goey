@@ -4,6 +4,7 @@ import (
 	"time"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -60,11 +61,26 @@ func (w *mountedDateInput) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
+func (w *mountedDateInput) MeasureWidth() (Length, Length) {
+	min, max := w.handle.GetPreferredWidth()
+	return FromPixelsX(min), FromPixelsY(max)
+}
+
+func (w *mountedDateInput) MeasureHeight(width Length) (Length, Length) {
+	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
+	return FromPixelsY(min), FromPixelsY(max)
+}
+
+func (w *mountedDateInput) SetBounds(bounds Rectangle) {
+	pixels := bounds.Pixels()
+	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
+}
+
 func (w *mountedDateInput) updateProps(data *DateInput) error {
 	w.handle.SelectMonth(uint(data.Value.Month())-1, uint(data.Value.Year()))
 	w.handle.SelectDay(uint(data.Value.Day()))
 	w.onChange = data.OnChange
-	w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "value-changed", intinput_onChanged, w)
+	//w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "value-changed", intinput_onChanged, w)
 	w.onFocus.Set(&w.handle.Widget, data.OnFocus)
 	w.onBlur.Set(&w.handle.Widget, data.OnBlur)
 

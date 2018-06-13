@@ -1,17 +1,11 @@
 package goey
 
 import (
-	"github.com/lxn/win"
 	"syscall"
 	"unsafe"
-)
 
-func minlinesDefault(value int) int {
-	if value < 1 {
-		return 3
-	}
-	return value
-}
+	"github.com/lxn/win"
+)
 
 func (w *TextArea) mount(parent NativeWidget) (Element, error) {
 	text, err := syscall.UTF16PtrFromString(w.Value)

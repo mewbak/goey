@@ -5,8 +5,9 @@ package main
 
 import (
 	"fmt"
-	"bitbucket.org/rj/goey"
 	"strconv"
+
+	"bitbucket.org/rj/goey"
 )
 
 var (

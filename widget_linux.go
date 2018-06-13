@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -14,6 +15,21 @@ func (w *NativeWidget) Handle() *gtk.Widget {
 	return w.handle
 }
 
+func (w *NativeWidget) MeasureWidth() (Length, Length) {
+	min, max := w.handle.GetPreferredWidth()
+	return FromPixelsX(min), FromPixelsY(max)
+}
+
+func (w *NativeWidget) MeasureHeight(width Length) (Length, Length) {
+	min, max := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
+	return FromPixelsY(min), FromPixelsY(max)
+}
+
+func (w *NativeWidget) SetBounds(bounds Rectangle) {
+	pixels := bounds.Pixels()
+	syscall.SetBounds(w.handle, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
+}
+
 func (w *NativeWidget) Close() {
 	if w.handle != nil {
 		w.handle.Destroy()
@@ -22,7 +38,6 @@ func (w *NativeWidget) Close() {
 }
 
 type NativeMountedWidget interface {
-	Handle() *gtk.Widget
 }
 
 func setSignalHandler(control *gtk.Widget, sh glib.SignalHandle, ok bool, name string, thunk interface{}, userData interface{}) glib.SignalHandle {
