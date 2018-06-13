@@ -44,7 +44,7 @@ func (*VBox) Kind() *Kind {
 
 // Mount creates a vertical layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
-func (w *VBox) Mount(parent NativeWidget) (Element, error) {
+func (w *VBox) Mount(parent Control) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
@@ -54,13 +54,13 @@ func (*mountedVBox) Kind() *Kind {
 }
 
 type mountedVBox struct {
-	parent     NativeWidget
+	parent     Control
 	children   []Element
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
 }
 
-func (w *VBox) mount(parent NativeWidget) (Element, error) {
+func (w *VBox) mount(parent Control) (Element, error) {
 	c := make([]Element, 0, len(w.Children))
 
 	for _, v := range w.Children {
@@ -143,7 +143,7 @@ func (w *mountedVBox) SetBounds(bounds Rectangle) {
 
 func (w *mountedVBox) setChildren(children []Widget) error {
 	err := error(nil)
-	w.children, err = diffChildren(w.parent, w.children, children)
+	w.children, err = DiffChildren(w.parent, w.children, children)
 	return err
 }
 

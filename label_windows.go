@@ -20,7 +20,7 @@ func init() {
 	}
 }
 
-func (w *Label) mount(parent NativeWidget) (Element, error) {
+func (w *Label) mount(parent Control) (Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -43,14 +43,14 @@ func (w *Label) mount(parent NativeWidget) (Element, error) {
 		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
 	}
 
-	retval := &mountedLabel{NativeWidget: NativeWidget{hwnd}, text: text}
+	retval := &mountedLabel{Control: Control{hwnd}, text: text}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
 type mountedLabel struct {
-	NativeWidget
+	Control
 	text []uint16
 }
 
@@ -73,7 +73,7 @@ func (w *mountedLabel) MeasureHeight(width Length) (Length, Length) {
 }
 
 func (w *mountedLabel) SetBounds(bounds Rectangle) {
-	w.NativeWidget.SetBounds(bounds)
+	w.Control.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't
 	// repaint when resized.  This forces a repaint.

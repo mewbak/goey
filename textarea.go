@@ -24,7 +24,7 @@ func (*TextArea) Kind() *Kind {
 
 // Mount creates a text area control in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *TextArea) Mount(parent NativeWidget) (Element, error) {
+func (w *TextArea) Mount(parent Control) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }

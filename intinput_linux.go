@@ -17,7 +17,7 @@ type mountedIntInput struct {
 	onBlur   blurSlot
 }
 
-func (w *IntInput) mount(parent NativeWidget) (Element, error) {
+func (w *IntInput) mount(parent Control) (Element, error) {
 	control, err := gtk.SpinButtonNew(nil, 1, 0)
 	if err != nil {
 		return nil, err

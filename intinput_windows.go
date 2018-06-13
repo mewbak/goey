@@ -7,7 +7,7 @@ import (
 	"unsafe"
 )
 
-func (w *IntInput) mount(parent NativeWidget) (Element, error) {
+func (w *IntInput) mount(parent Control) (Element, error) {
 	text, err := syscall.UTF16PtrFromString(strconv.FormatInt(w.Value, 10))
 	if err != nil {
 		return nil, err
@@ -53,11 +53,11 @@ func (w *IntInput) mount(parent NativeWidget) (Element, error) {
 	}
 
 	retval := &mountedIntInput{mountedTextInputBase{
-		NativeWidget: NativeWidget{hwnd},
-		onChange:     w.wrapOnChange(),
-		onFocus:      w.OnFocus,
-		onBlur:       w.OnBlur,
-		onEnterKey:   w.OnEnterKey,
+		Control:    Control{hwnd},
+		onChange:   w.wrapOnChange(),
+		onFocus:    w.OnFocus,
+		onBlur:     w.OnBlur,
+		onEnterKey: w.OnEnterKey,
 	}}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 

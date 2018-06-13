@@ -32,7 +32,7 @@ func (w *DateInput) systemTime() win.SYSTEMTIME {
 	}
 }
 
-func (w *DateInput) mount(parent NativeWidget) (Element, error) {
+func (w *DateInput) mount(parent Control) (Element, error) {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP)
 	hwnd := win.CreateWindowEx(0, datetimepickClassName, nil,
 		style,
@@ -63,7 +63,7 @@ func (w *DateInput) mount(parent NativeWidget) (Element, error) {
 	subclassWindowProcedure(hwnd, &oldDateTimePickWindowProc, syscall.NewCallback(dateinputWindowProc))
 
 	retval := &mountedDateInput{
-		NativeWidget: NativeWidget{hwnd},
+		Control: Control{hwnd},
 		onChange:     w.OnChange,
 		onFocus:      w.OnFocus,
 		onBlur:       w.OnBlur,
@@ -74,7 +74,7 @@ func (w *DateInput) mount(parent NativeWidget) (Element, error) {
 }
 
 type mountedDateInput struct {
-	NativeWidget
+	Control
 	onChange func(value time.Time)
 	onFocus  func()
 	onBlur   func()

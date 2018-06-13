@@ -37,7 +37,7 @@ func registerHRClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, error) {
 	return atom, nil
 }
 
-func (w *HR) mount(parent NativeWidget) (Element, error) {
+func (w *HR) mount(parent Control) (Element, error) {
 	hInstance := win.GetModuleHandle(nil)
 	if hInstance == 0 {
 		return nil, syscall.GetLastError()
@@ -61,14 +61,14 @@ func (w *HR) mount(parent NativeWidget) (Element, error) {
 		return nil, err
 	}
 
-	retval := &mountedHR{NativeWidget: NativeWidget{hwnd}}
+	retval := &mountedHR{Control: Control{hwnd}}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
 type mountedHR struct {
-	NativeWidget
+	Control
 }
 
 func (w *mountedHR) MeasureWidth() (Length, Length) {
@@ -79,10 +79,6 @@ func (w *mountedHR) MeasureHeight(width Length) (Length, Length) {
 	// Same as static text
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 13 * DIP, 13 * DIP
-}
-
-func (w *mountedHR) SetBounds(bounds Rectangle) {
-	w.NativeWidget.SetBounds(bounds)
 }
 
 func hrWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (result uintptr) {

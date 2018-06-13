@@ -382,7 +382,7 @@ func newWindow(title string, children []Widget) (*Window, error) {
 	win.ReleaseDC(hwnd, hdc)
 
 	vbox := VBox{children, MainStart, Stretch}
-	mounted, err := vbox.Mount(NativeWidget{hwnd})
+	mounted, err := vbox.Mount(Control{hwnd})
 	if err != nil {
 		win.DestroyWindow(hwnd)
 		return nil, err
@@ -470,7 +470,7 @@ func (w *windowImpl) setIcon(img image.Image) error {
 }
 
 func (w *windowImpl) setTitle(value string) error {
-	return NativeWidget{w.hWnd}.SetText(value)
+	return Control{w.hWnd}.SetText(value)
 }
 
 func (w *windowImpl) updateGlobalDPI() {

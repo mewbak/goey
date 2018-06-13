@@ -23,7 +23,7 @@ func (*SelectInput) Kind() *Kind {
 
 // Mount creates a button in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *SelectInput) Mount(parent NativeWidget) (Element, error) {
+func (w *SelectInput) Mount(parent Control) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }

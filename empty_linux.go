@@ -7,10 +7,10 @@ import (
 )
 
 type mountedEmpty struct {
-	NativeWidget
+	Control
 }
 
-func (w *Empty) mount(parent NativeWidget) (Element, error) {
+func (w *Empty) mount(parent Control) (Element, error) {
 	control, err := gtk.LabelNew("  ")
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func (w *Empty) mount(parent NativeWidget) (Element, error) {
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 
 	retval := &mountedEmpty{
-		NativeWidget: NativeWidget{&control.Widget},
+		Control: Control{&control.Widget},
 	}
 
 	control.Connect("destroy", empty_onDestroy, retval)

@@ -19,7 +19,7 @@ func init() {
 	}
 }
 
-func (w *Button) mount(parent NativeWidget) (Element, error) {
+func (w *Button) mount(parent Control) (Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -54,11 +54,11 @@ func (w *Button) mount(parent NativeWidget) (Element, error) {
 	subclassWindowProcedure(hwnd, &oldButtonWindowProc, syscall.NewCallback(buttonWindowProc))
 
 	retval := &mountedButton{
-		NativeWidget: NativeWidget{hwnd},
-		text:         text,
-		onClick:      w.OnClick,
-		onFocus:      w.OnFocus,
-		onBlur:       w.OnBlur,
+		Control: Control{hwnd},
+		text:    text,
+		onClick: w.OnClick,
+		onFocus: w.OnFocus,
+		onBlur:  w.OnBlur,
 	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
@@ -66,7 +66,7 @@ func (w *Button) mount(parent NativeWidget) (Element, error) {
 }
 
 type mountedButton struct {
-	NativeWidget
+	Control
 	text []uint16
 
 	onClick func()

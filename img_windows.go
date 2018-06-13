@@ -85,7 +85,7 @@ func imageToBitmap(prop image.Image) (win.HBITMAP, []uint8, error) {
 	return hbitmap, img.Pix, nil
 }
 
-func (w *Img) mount(parent NativeWidget) (Element, error) {
+func (w *Img) mount(parent Control) (Element, error) {
 	// Create the bitmap
 	hbitmap, buffer, err := imageToBitmap(w.Image)
 	if err != nil {
@@ -105,14 +105,14 @@ func (w *Img) mount(parent NativeWidget) (Element, error) {
 	}
 	win.SendMessage(hwnd, win2.STM_SETIMAGE, win.IMAGE_BITMAP, uintptr(hbitmap))
 
-	retval := &mountedImg{NativeWidget: NativeWidget{hwnd}, imageData: buffer, width: w.Width, height: w.Height}
+	retval := &mountedImg{Control: Control{hwnd}, imageData: buffer, width: w.Width, height: w.Height}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
 type mountedImg struct {
-	NativeWidget
+	Control
 	imageData     []uint8
 	width, height Length
 }
@@ -126,7 +126,7 @@ func (w *mountedImg) MeasureHeight(width Length) (Length, Length) {
 }
 
 func (w *mountedImg) SetBounds(bounds Rectangle) {
-	w.NativeWidget.SetBounds(bounds)
+	w.Control.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't
 	// repaint when resized.  This forces a repaint.

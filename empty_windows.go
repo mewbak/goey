@@ -4,7 +4,7 @@ import (
 	"github.com/lxn/win"
 )
 
-func (w *Empty) mount(parent NativeWidget) (Element, error) {
+func (w *Empty) mount(parent Control) (Element, error) {
 	retval := &mountedEmpty{}
 
 	return retval, nil

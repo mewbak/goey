@@ -19,7 +19,7 @@ func (*HBox) Kind() *Kind {
 
 // Mount creates a horiztonal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
-func (w *HBox) Mount(parent NativeWidget) (Element, error) {
+func (w *HBox) Mount(parent Control) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
@@ -29,7 +29,7 @@ func (*mountedHBox) Kind() *Kind {
 }
 
 type mountedHBox struct {
-	parent     NativeWidget
+	parent     Control
 	children   []Element
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
@@ -38,7 +38,7 @@ type mountedHBox struct {
 	maximumWidth Length
 }
 
-func (w *HBox) mount(parent NativeWidget) (Element, error) {
+func (w *HBox) mount(parent Control) (Element, error) {
 	c := make([]Element, 0, len(w.Children))
 
 	for _, v := range w.Children {
@@ -189,7 +189,7 @@ func (w *mountedHBox) SetBounds(bounds Rectangle) {
 
 func (w *mountedHBox) setChildren(children []Widget) error {
 	err := error(nil)
-	w.children, err = diffChildren(w.parent, w.children, children)
+	w.children, err = DiffChildren(w.parent, w.children, children)
 	return err
 }
 

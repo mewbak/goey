@@ -17,7 +17,7 @@ type mountedTextInput struct {
 	onBlur   blurSlot
 }
 
-func (w *TextInput) mount(parent NativeWidget) (Element, error) {
+func (w *TextInput) mount(parent Control) (Element, error) {
 	control, err := gtk.EntryNew()
 	if err != nil {
 		return nil, err

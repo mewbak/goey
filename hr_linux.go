@@ -7,10 +7,10 @@ import (
 )
 
 type mountedHR struct {
-	NativeWidget
+	Control
 }
 
-func (w *HR) mount(parent NativeWidget) (Element, error) {
+func (w *HR) mount(parent Control) (Element, error) {
 	control, err := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func (w *HR) mount(parent NativeWidget) (Element, error) {
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 
 	retval := &mountedHR{
-		NativeWidget: NativeWidget{&control.Widget},
+		Control: Control{&control.Widget},
 	}
 
 	control.Connect("destroy", hr_onDestroy, retval)

@@ -17,7 +17,7 @@ type mountedCheckbox struct {
 	onBlur   blurSlot
 }
 
-func (w *Checkbox) mount(parent NativeWidget) (Element, error) {
+func (w *Checkbox) mount(parent Control) (Element, error) {
 	control, err := gtk.CheckButtonNewWithLabel(w.Text)
 	if err != nil {
 		return nil, err

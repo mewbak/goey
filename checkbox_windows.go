@@ -6,7 +6,7 @@ import (
 	"unsafe"
 )
 
-func (w *Checkbox) mount(parent NativeWidget) (Element, error) {
+func (w *Checkbox) mount(parent Control) (Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -40,11 +40,11 @@ func (w *Checkbox) mount(parent NativeWidget) (Element, error) {
 	subclassWindowProcedure(hwnd, &oldButtonWindowProc, syscall.NewCallback(checkboxWindowProc))
 
 	retval := &mountedCheckbox{
-		NativeWidget: NativeWidget{hwnd},
-		text:         text,
-		onChange:     w.OnChange,
-		onFocus:      w.OnFocus,
-		onBlur:       w.OnBlur,
+		Control:  Control{hwnd},
+		text:     text,
+		onChange: w.OnChange,
+		onFocus:  w.OnFocus,
+		onBlur:   w.OnBlur,
 	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
@@ -52,7 +52,7 @@ func (w *Checkbox) mount(parent NativeWidget) (Element, error) {
 }
 
 type mountedCheckbox struct {
-	NativeWidget
+	Control
 	text     []uint16
 	onChange func(value bool)
 	onFocus  func()

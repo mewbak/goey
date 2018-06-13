@@ -20,7 +20,7 @@ func init() {
 	}
 }
 
-func (w *TextInput) mount(parent NativeWidget) (Element, error) {
+func (w *TextInput) mount(parent Control) (Element, error) {
 	text, err := syscall.UTF16PtrFromString(w.Value)
 	if err != nil {
 		return nil, err
@@ -69,11 +69,11 @@ func (w *TextInput) mount(parent NativeWidget) (Element, error) {
 	}
 
 	retval := &mountedTextInput{mountedTextInputBase{
-		NativeWidget: NativeWidget{hwnd},
-		onChange:     w.OnChange,
-		onFocus:      w.OnFocus,
-		onBlur:       w.OnBlur,
-		onEnterKey:   w.OnEnterKey,
+		Control:    Control{hwnd},
+		onChange:   w.OnChange,
+		onFocus:    w.OnFocus,
+		onBlur:     w.OnBlur,
+		onEnterKey: w.OnEnterKey,
 	}}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
@@ -81,7 +81,7 @@ func (w *TextInput) mount(parent NativeWidget) (Element, error) {
 }
 
 type mountedTextInputBase struct {
-	NativeWidget
+	Control
 	onChange   func(value string)
 	onFocus    func()
 	onBlur     func()

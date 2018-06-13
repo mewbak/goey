@@ -1,6 +1,8 @@
 package goey
 
-func diffChildren(parent NativeWidget, lhs []Element, rhs []Widget) ([]Element, error) {
+// DiffChildren adds and removed controls to a GUI to reconcile differences
+// between the desired and current GUI state.
+func DiffChildren(parent Control, lhs []Element, rhs []Widget) ([]Element, error) {
 	// If the new tree does not contain any children, then we can trivially
 	// match the tree by deleting the actual widgets.
 	if len(rhs) == 0 {

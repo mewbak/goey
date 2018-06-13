@@ -28,7 +28,7 @@ func (*Img) Kind() *Kind {
 
 // Mount creates a horiztonal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
-func (w *Img) Mount(parent NativeWidget) (Element, error) {
+func (w *Img) Mount(parent Control) (Element, error) {
 	// It is an error use to a null image
 	if w.Image == nil {
 		return nil, ErrInvalidImage

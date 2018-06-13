@@ -19,7 +19,7 @@ func init() {
 	}
 }
 
-func (w *SelectInput) mount(parent NativeWidget) (Element, error) {
+func (w *SelectInput) mount(parent Control) (Element, error) {
 	if w.Value >= len(w.Items) {
 		w.Value = len(w.Items) - 1
 	}
@@ -61,7 +61,7 @@ func (w *SelectInput) mount(parent NativeWidget) (Element, error) {
 	subclassWindowProcedure(hwnd, &oldComboboxWindowProc, syscall.NewCallback(comboboxWindowProc))
 
 	retval := &mountedSelectInput{
-		NativeWidget: NativeWidget{hwnd},
+		Control: Control{hwnd},
 		onChange:     w.OnChange,
 		onFocus:      w.OnFocus,
 		onBlur:       w.OnBlur,
@@ -72,7 +72,7 @@ func (w *SelectInput) mount(parent NativeWidget) (Element, error) {
 }
 
 type mountedSelectInput struct {
-	NativeWidget
+	Control
 	onChange func(value int)
 	onFocus  func()
 	onBlur   func()

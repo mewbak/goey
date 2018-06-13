@@ -28,7 +28,7 @@ func (*P) Kind() *Kind {
 
 // Mount creates a paragraph in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *P) Mount(parent NativeWidget) (Element, error) {
+func (w *P) Mount(parent Control) (Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }

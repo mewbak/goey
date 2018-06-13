@@ -11,7 +11,7 @@ type mountedLabel struct {
 	handle *gtk.Label
 }
 
-func (w *Label) mount(parent NativeWidget) (Element, error) {
+func (w *Label) mount(parent Control) (Element, error) {
 	handle, err := gtk.LabelNew(w.Text)
 	if err != nil {
 		return nil, err

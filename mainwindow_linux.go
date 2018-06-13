@@ -52,7 +52,7 @@ func newWindow(title string, children []Widget) (*Window, error) {
 	app.ShowAll()
 
 	tmpVBox := VBox{Children: children, AlignMain: MainStart, AlignCross: Stretch}
-	vbox, err := tmpVBox.Mount(NativeWidget{&layout.Widget})
+	vbox, err := tmpVBox.Mount(Control{&layout.Widget})
 	if err != nil {
 		app.Destroy()
 		return nil, err

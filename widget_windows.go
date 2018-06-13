@@ -32,26 +32,28 @@ func nextControlID() uint32 {
 	return atomic.AddUint32(&currentControlID, 1)
 }
 
-// NativeWidget is an opaque type used as a platform-specific handle to a
-// window or widget for WIN32 builds.
-type NativeWidget struct {
+// Control is an opaque type used as a platform-specific handle to a
+// control created using the platform GUI.
+//
+// Any method's on this type will be platform specific.
+type Control struct {
 	hWnd win.HWND
 }
 
 // Text copies text of the underlying window
-func (w NativeWidget) Text() string {
+func (w Control) Text() string {
 	return win2.GetWindowText(w.hWnd)
 }
 
-func (w NativeWidget) SetDisabled(value bool) {
+func (w Control) SetDisabled(value bool) {
 	win.EnableWindow(w.hWnd, !value)
 }
 
-func (w *NativeWidget) SetBounds(bounds Rectangle) {
+func (w *Control) SetBounds(bounds Rectangle) {
 	win.MoveWindow(w.hWnd, int32(bounds.Min.X.PixelsX()), int32(bounds.Min.Y.PixelsY()), int32(bounds.Dx().PixelsX()), int32(bounds.Dy().PixelsY()), true)
 }
 
-func (w *NativeWidget) SetOrder(previous win.HWND) win.HWND {
+func (w *Control) SetOrder(previous win.HWND) win.HWND {
 	// Note, the argument previous may be 0 when setting the first child.
 	// Fortunately, this corresponds to HWND_TOP, which sets the window
 	// to top of the z-order.
@@ -59,7 +61,7 @@ func (w *NativeWidget) SetOrder(previous win.HWND) win.HWND {
 	return w.hWnd
 }
 
-func (w NativeWidget) SetText(value string) error {
+func (w Control) SetText(value string) error {
 	utf16, err := syscall.UTF16PtrFromString(value)
 	if err != nil {
 		return err
@@ -72,16 +74,16 @@ func (w NativeWidget) SetText(value string) error {
 	return nil
 }
 
-func (w *NativeWidget) Close() {
+func (w *Control) Close() {
 	if w.hWnd != 0 {
 		win.DestroyWindow(w.hWnd)
 		w.hWnd = 0
 	}
 }
 
-// NativeMountedWidget contains platform-specific methods that all widgets
+// NativeElement contains platform-specific methods that all widgets
 // must support on WIN32
-type NativeMountedWidget interface {
+type NativeElement interface {
 	SetOrder(previous win.HWND) win.HWND
 }
 

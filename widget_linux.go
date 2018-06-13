@@ -7,37 +7,43 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type NativeWidget struct {
+// Control is an opaque type used as a platform-specific handle to a
+// control created using the platform GUI.
+//
+// Any method's on this type will be platform specific.
+type Control struct {
 	handle *gtk.Widget
 }
 
-func (w *NativeWidget) Handle() *gtk.Widget {
+func (w *Control) Handle() *gtk.Widget {
 	return w.handle
 }
 
-func (w *NativeWidget) MeasureWidth() (Length, Length) {
+func (w *Control) MeasureWidth() (Length, Length) {
 	min, max := w.handle.GetPreferredWidth()
 	return FromPixelsX(min), FromPixelsY(max)
 }
 
-func (w *NativeWidget) MeasureHeight(width Length) (Length, Length) {
+func (w *Control) MeasureHeight(width Length) (Length, Length) {
 	min, max := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
 	return FromPixelsY(min), FromPixelsY(max)
 }
 
-func (w *NativeWidget) SetBounds(bounds Rectangle) {
+func (w *Control) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(w.handle, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
-func (w *NativeWidget) Close() {
+func (w *Control) Close() {
 	if w.handle != nil {
 		w.handle.Destroy()
 		w.handle = nil
 	}
 }
 
-type NativeMountedWidget interface {
+// NativeElement contains platform-specific methods that all widgets
+// must support on GTK.
+type NativeElement interface {
 }
 
 func setSignalHandler(control *gtk.Widget, sh glib.SignalHandle, ok bool, name string, thunk interface{}, userData interface{}) glib.SignalHandle {

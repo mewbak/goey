@@ -9,8 +9,8 @@ type Kind struct {
 	name string
 }
 
-// Widget is an interface that wraps any type describing a GUI widget or control.
-// A Widget can be 'mounted' to instantiate a widget or control in the GUI.
+// Widget is an interface that wraps any type describing part of a GUI.
+// A widget can be 'mounted' to create controls using the platform GUI.
 type Widget interface {
 	// Kind returns the concrete type's Kind.  The returned value should
 	// be constant, and the same for all instances of a concrete type.
@@ -19,16 +19,16 @@ type Widget interface {
 	// Mount creates a widget or control in the GUI.  The newly created widget
 	// will be a child of the widget specified by parent.  If non-nil, the returned
 	// Element must have a matching kind.
-	Mount(parent NativeWidget) (Element, error)
+	Mount(parent Control) (Element, error)
 }
 
-// Element is an interface that wrap any type representing an existing
-// widget or control in the GUI.
+// Element is an interface that wrap any type representing a control, or group
+// of controls, created using the platform GUI.
 type Element interface {
-	// NativeMountedWidget provides platform dependent methods.  These should
+	// NativeElement provides platform dependent methods.  These should
 	// not be used by client libraries, but exist for the internal implementation
 	// of platform dependent code.
-	NativeMountedWidget
+	NativeElement
 
 	// Close removes the widget from the GUI, and frees any associated resources.
 	Close()

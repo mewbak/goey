@@ -7,7 +7,7 @@ import (
 	"github.com/lxn/win"
 )
 
-func (w *TextArea) mount(parent NativeWidget) (Element, error) {
+func (w *TextArea) mount(parent Control) (Element, error) {
 	text, err := syscall.UTF16PtrFromString(w.Value)
 	if err != nil {
 		return nil, err
@@ -50,10 +50,10 @@ func (w *TextArea) mount(parent NativeWidget) (Element, error) {
 	}
 
 	retval := &mountedTextArea{mountedTextInputBase{
-		NativeWidget: NativeWidget{hwnd},
-		onChange:     w.OnChange,
-		onFocus:      w.OnFocus,
-		onBlur:       w.OnBlur,
+		Control:  Control{hwnd},
+		onChange: w.OnChange,
+		onFocus:  w.OnFocus,
+		onBlur:   w.OnBlur,
 	},
 		minlinesDefault(w.MinLines),
 	}
