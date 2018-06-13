@@ -20,7 +20,7 @@ func run() error {
 
 func do(action func() error) error {
 	err := make(chan error, 1)
-	win.PostMessage(win.HWND(atomic.LoadUintptr(&activeWindow)), win.WM_USER, uintptr(unsafe.Pointer(&action)), uintptr(unsafe.Pointer(&err)))
+	win.PostMessage(win.HWND(atomic.LoadUintptr(&activeWindow)), win.WM_APP, uintptr(unsafe.Pointer(&action)), uintptr(unsafe.Pointer(&err)))
 	return <-err
 }
 
@@ -37,7 +37,7 @@ func Loop(blocking bool) error {
 	if msg.Message == win.WM_QUIT {
 		return ErrQuit
 	}
-	if msg.Message == win.WM_USER {
+	if msg.Message == win.WM_APP {
 		err := (*(*func() error)(unsafe.Pointer(msg.WParam)))()
 		(*(*chan error)(unsafe.Pointer(msg.LParam))) <- err
 		return nil

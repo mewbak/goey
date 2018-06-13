@@ -392,7 +392,6 @@ func newWindow(title string, children []Widget) (*Window, error) {
 
 	win.ShowWindow(hwnd, win.SW_SHOW /* info.wShowWindow */)
 	win.UpdateWindow(hwnd)
-	win.SetFocus(hwnd)
 
 	return retval, nil
 }
