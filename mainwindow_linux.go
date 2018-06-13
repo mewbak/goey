@@ -2,6 +2,7 @@ package goey
 
 import (
 	"image"
+	"os"
 	"sync/atomic"
 	"unsafe"
 
@@ -61,7 +62,9 @@ func newWindow(title string, children []Widget) (*Window, error) {
 	if len(retval.vbox.children) != len(children) {
 		panic("Error in mounting children while creating window.")
 	}
-	syscall.WindowSetInteractiveDebugging(true)
+	if len(os.Getenv("GOEY_DEBUGGING")) > 0 {
+		syscall.WindowSetInteractiveDebugging(true)
+	}
 
 	return retval, nil
 }
