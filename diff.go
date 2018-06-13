@@ -1,5 +1,37 @@
 package goey
 
+func DiffChild(parent Control, lhs Element, rhs Widget) (Element, error) {
+	// If the rhs is empty, then make sure we delete the lhs if necessary
+	if rhs == nil {
+		if lhs != nil {
+			lhs.Close()
+		}
+		return nil, nil
+	}
+
+	// if the lhs is empty, then create a new element
+	if lhs == nil {
+		return rhs.Mount(parent)
+	}
+
+	// Can we propagate properties rather than mounting a new element?
+	if kind1, kind2 := lhs.Kind(), rhs.Kind(); kind1 == kind2 {
+		err := lhs.UpdateProps(rhs)
+		if err != nil {
+			return lhs, err
+		}
+
+		return lhs, nil
+	}
+
+	newChild, err := rhs.Mount(parent)
+	if err != nil {
+		return lhs, err
+	}
+	lhs.Close()
+	return newChild, nil
+}
+
 // DiffChildren adds and removed controls to a GUI to reconcile differences
 // between the desired and current GUI state.
 func DiffChildren(parent Control, lhs []Element, rhs []Widget) ([]Element, error) {
