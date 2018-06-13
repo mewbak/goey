@@ -37,7 +37,7 @@ func fromBool(value bool) C.gboolean {
 	return C.FALSE
 }
 
-// PixbufNewFromBytes is a wrapper around gdk_pixbuf_new_from_data().
+// PixbufNewFromBytes is a wrapper around gdk_pixbuf_new_from_data.
 func PixbufNewFromBytes(bytes []uint8, colorspace gdk.Colorspace, hasAlpha bool, bitsPerSample int,
 	width int, height int, rowStride int) *gdk.Pixbuf {
 
@@ -47,6 +47,7 @@ func PixbufNewFromBytes(bytes []uint8, colorspace gdk.Colorspace, hasAlpha bool,
 	return &gdk.Pixbuf{glib.Take(unsafe.Pointer(ret))}
 }
 
+// LayoutGetVAdjustment is a wrapper around gtk_layout_get_vadjustment.
 func LayoutGetVAdjustment(widget *gtk.Layout) *gtk.Adjustment {
 	p := unsafe.Pointer(widget.GObject)
 	a := C.gtk_layout_get_vadjustment((*C.GtkLayout)(p))
@@ -54,6 +55,7 @@ func LayoutGetVAdjustment(widget *gtk.Layout) *gtk.Adjustment {
 	return &gtk.Adjustment{glib.InitiallyUnowned{obj}}
 }
 
+// WidgetGetAllocation is a wrapper around gtk_widget_get_allocation.
 func WidgetGetAllocation(widget *gtk.Widget) (int, int, int, int) {
 	var a C.GtkAllocation
 	p := unsafe.Pointer(widget.GObject)
@@ -61,6 +63,7 @@ func WidgetGetAllocation(widget *gtk.Widget) (int, int, int, int) {
 	return int(a.x), int(a.y), int(a.width), int(a.height)
 }
 
+// WidgetGetPreferredHeightForWidth is a wrapper around gtk_widget_get_preferred_height_for_width.
 func WidgetGetPreferredHeightForWidth(widget *gtk.Widget, width int) (int, int) {
 	var minimum, natural C.gint
 	p := unsafe.Pointer(widget.GObject)
@@ -68,10 +71,14 @@ func WidgetGetPreferredHeightForWidth(widget *gtk.Widget, width int) (int, int) 
 	return int(minimum), int(natural)
 }
 
+// WindowSetInteractiveDebugging is a wrapper around gtk_window_set_interactive_debugging.
 func WindowSetInteractiveDebugging(enable bool) {
 	C.gtk_window_set_interactive_debugging(fromBool(enable))
 }
 
+// SetBounds is a specialized wrapper around gtk_widget_size_allocate.  However,
+// this function also assumes that the parent is a GtkLayout, and so also
+// moves the widget using gtk_layout_move.
 func SetBounds(widget *gtk.Widget, x, y, width, height int) {
 	p := unsafe.Pointer(widget.GObject)
 	C.goey_set_bounds((*C.GtkWidget)(p), C.gint(x), C.gint(y), C.gint(width), C.gint(height))
