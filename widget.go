@@ -5,8 +5,17 @@ package goey
 // to describe the widget when unmounted.  Second, there is a type with a handle
 // to the windowing system when mounted.  Automatic reconciliation of two widget
 // trees relies on Kind to match the unmounted and mounted widgets.
+//
+// Note that comparison of kinds is done by address, and not done using the value of any fields.
+// Any internal state is simply to help with debugging.
 type Kind struct {
 	name string
+}
+
+// NewKind creates a new kind.  The name should identify the type used for the widget,
+// but is currently unused.
+func NewKind(name string) Kind {
+	return Kind{name}
 }
 
 // Widget is an interface that wraps any type describing part of a GUI.
