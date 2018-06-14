@@ -20,8 +20,21 @@ func (*HBox) Kind() *Kind {
 // Mount creates a horiztonal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
 func (w *HBox) Mount(parent Control) (Element, error) {
-	// Forward to the platform-dependant code
-	return w.mount(parent)
+	c := make([]Element, 0, len(w.Children))
+
+	for _, v := range w.Children {
+		mountedChild, err := v.Mount(parent)
+		if err != nil {
+			CloseElements(c)
+			return nil, err
+		}
+		c = append(c, mountedChild)
+	}
+
+	return &mountedHBox{parent: parent, children: c,
+		alignMain:  w.AlignMain,
+		alignCross: w.AlignCross,
+	}, nil
 }
 
 func (*mountedHBox) Kind() *Kind {
@@ -38,31 +51,8 @@ type mountedHBox struct {
 	maximumWidth Length
 }
 
-func (w *HBox) mount(parent Control) (Element, error) {
-	c := make([]Element, 0, len(w.Children))
-
-	for _, v := range w.Children {
-		mountedChild, err := v.Mount(parent)
-		if err != nil {
-			return nil, err
-		}
-		c = append(c, mountedChild)
-	}
-
-	return &mountedHBox{parent: parent, children: c,
-		alignMain:  w.AlignMain,
-		alignCross: w.AlignCross,
-	}, nil
-}
-
 func (w *mountedHBox) Close() {
-	// On this platform, the mountedHBox handles layout, but does not actually
-	// have an HWND, so there are no direct resources to release.
-
-	// However, still need to free the children
-	for _, v := range w.children {
-		v.Close()
-	}
+	CloseElements(w.children)
 	w.children = nil
 }
 

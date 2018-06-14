@@ -1,5 +1,16 @@
 package goey
 
+// CloseElements closes all of the elements contained in a slice.
+// This is a utility function to help containers close their children
+// when required.
+func CloseElements(children []Element) {
+	for _, v := range children {
+		v.Close()
+	}
+}
+
+// DiffChild adds and removes controls in a GUI to reconcile differences
+// between the desired and current GUI state.
 func DiffChild(parent Control, lhs Element, rhs Widget) (Element, error) {
 	// If the rhs is empty, then make sure we delete the lhs if necessary
 	if rhs == nil {
@@ -32,7 +43,7 @@ func DiffChild(parent Control, lhs Element, rhs Widget) (Element, error) {
 	return newChild, nil
 }
 
-// DiffChildren adds and removed controls to a GUI to reconcile differences
+// DiffChildren adds and removed controls in a GUI to reconcile differences
 // between the desired and current GUI state.
 func DiffChildren(parent Control, lhs []Element, rhs []Widget) ([]Element, error) {
 	// If the new tree does not contain any children, then we can trivially
