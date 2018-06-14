@@ -98,7 +98,7 @@ func (w *mountedTextInputBase) MeasureWidth() (Length, Length) {
 	}
 
 	// In the future, we should calculate the width based on the length of the text.
-	return FromPixelsX(paragraphMinWidth), FromPixelsX(paragraphMaxWidth)
+	return FromPixelsX(paragraphMinWidth) / 2, FromPixelsX(paragraphMaxWidth)
 }
 
 func (w *mountedTextInputBase) MeasureHeight(width Length) (Length, Length) {
