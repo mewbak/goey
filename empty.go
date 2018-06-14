@@ -1,7 +1,7 @@
 package goey
 
 var (
-	emptyKind = Kind{"empty"}
+	emptyKind = Kind{"bitbucket.org/rj/goey.Empty"}
 )
 
 // Empty describes a widget that is either a horizontal or vertical gap.

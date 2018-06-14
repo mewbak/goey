@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	decorationKind = Kind{"decoration"}
+	decorationKind = Kind{"bitbucket.org/rj/goey.Decoration"}
 )
 
 // Padding describes the interior padding for a decoration widget.

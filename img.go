@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	imgKind         = Kind{"img"}
+	imgKind         = Kind{"bitbucket.org/rj/goey.Img"}
 	ErrInvalidImage = errors.New("invalid image property")
 )
 

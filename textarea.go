@@ -1,7 +1,7 @@
 package goey
 
 var (
-	textareaKind = Kind{"textarea"}
+	textareaKind = Kind{"bitbucket.org/rj/goey.TextArea"}
 )
 
 // TextArea describes a widget that users input or update a multi-line of text.

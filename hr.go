@@ -1,7 +1,7 @@
 package goey
 
 var (
-	hrKind = Kind{"hr"}
+	hrKind = Kind{"bitbucket.org/rj/goey.HR"}
 )
 
 // HR describes a widget that is a horiztonal separator.

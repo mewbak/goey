@@ -1,7 +1,7 @@
 package goey
 
 var (
-	selectKind = Kind{"selectinput"}
+	selectKind = Kind{"bitbucket.org/rj/goey.SelectInput"}
 )
 
 // SelectInput describes a widget that users can click to select one from a fixed list of choices.

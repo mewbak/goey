@@ -1,7 +1,7 @@
 package goey
 
 var (
-	checkboxKind = Kind{"checkbox"}
+	checkboxKind = Kind{"bitbucket.org/rj/goey.Checkbox"}
 )
 
 // Checkbox describes a widget that users input or update a flag.

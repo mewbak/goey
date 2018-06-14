@@ -1,7 +1,7 @@
 package goey
 
 var (
-	paragraphKind = Kind{"paragraph"}
+	paragraphKind = Kind{"bitbucket.org/rj/goey.Paragraph"}
 )
 
 // TextAlignment identifies the different types of text alignment that are possible.

@@ -1,7 +1,7 @@
 package goey
 
 var (
-	labelKind = Kind{"label"}
+	labelKind = Kind{"bitbucket.org/rj/goey.Label"}
 )
 
 // Label describes a widget that provides a descriptive label for other fields.

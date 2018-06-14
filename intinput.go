@@ -1,7 +1,7 @@
 package goey
 
 var (
-	intInputKind = Kind{"intinput"}
+	intInputKind = Kind{"bitbucket.org/rj/goey.IntInput"}
 )
 
 // IntInput describes a widget that users input or update a single integer value.

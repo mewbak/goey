@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	dateInputKind = Kind{"dateinput"}
+	dateInputKind = Kind{"bitbucket.org/rj/goey.DateInput"}
 )
 
 // DateInput describes a widget that users input or update a single date.

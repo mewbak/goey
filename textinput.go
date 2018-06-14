@@ -1,7 +1,7 @@
 package goey
 
 var (
-	textInputKind = Kind{"textinput"}
+	textInputKind = Kind{"bitbucket.org/rj/goey.TextInput"}
 )
 
 // TextInput describes a widget that users input or update a single line of text.

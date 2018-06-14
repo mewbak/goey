@@ -1,7 +1,7 @@
 package goey
 
 var (
-	hboxKind = Kind{"hbox"}
+	hboxKind = Kind{"bitbucket.org/rj/goey.HBox"}
 )
 
 // HBox describes a layout widget that arranges its child widgets into a horizontal row.

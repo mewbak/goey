@@ -1,7 +1,7 @@
 package goey
 
 var (
-	buttonKind = Kind{"button"}
+	buttonKind = Kind{"bitbucket.org/rj/goey.Button"}
 )
 
 // Button describes a widget that users can click to initiate an action.

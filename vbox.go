@@ -1,7 +1,7 @@
 package goey
 
 var (
-	vboxKind = Kind{"vbox"}
+	vboxKind = Kind{"bitbucket.org/rj/goey.VBox"}
 )
 
 // MainAxisAlign identifies the different types of alignment that is possible
