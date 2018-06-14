@@ -28,6 +28,9 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 	if w.Password {
 		control.SetVisibility(false)
 	}
+	if w.ReadOnly {
+		control.SetEditable(false)
+	}
 
 	retval := &mountedTextInput{
 		handle:   control,
@@ -84,6 +87,7 @@ func (w *mountedTextInput) SetBounds(bounds Rectangle) {
 
 func (w *mountedTextInput) updateProps(data *TextInput) error {
 	w.handle.SetText(data.Value)
+	w.handle.SetEditable(!data.ReadOnly)
 	w.handle.SetPlaceholderText(data.Placeholder)
 	w.handle.SetVisibility(!data.Password)
 	w.onChange = data.OnChange

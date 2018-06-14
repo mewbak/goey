@@ -30,6 +30,9 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 	if w.Password {
 		style = style | win.ES_PASSWORD
 	}
+	if w.ReadOnly {
+		style = style | win.ES_READONLY
+	}
 	if w.OnEnterKey != nil {
 		style = style | win.ES_MULTILINE
 	}
@@ -106,10 +109,19 @@ func (w *mountedTextInputBase) MeasureHeight(width Length) (Length, Length) {
 	return 23 * DIP, 23 * DIP
 }
 
+func fromBool(value bool) win.BOOL {
+	if value {
+		return win.TRUE
+	}
+	return win.FALSE
+}
+
 func (w *mountedTextInputBase) updateProps(data *TextInput) error {
 	if data.Value != w.Text() {
 		w.SetText(data.Value)
 	}
+	w.SetDisabled(data.Disabled)
+	win.SendMessage(w.hWnd, win.EM_SETREADONLY, uintptr(fromBool(data.ReadOnly)), 0)
 
 	if data.Placeholder != "" {
 		textPlaceholder, err := syscall.UTF16PtrFromString(data.Placeholder)

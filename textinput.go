@@ -11,6 +11,7 @@ type TextInput struct {
 	Placeholder string             // Placeholder is a descriptive text that can be displayed when the field is empty
 	Disabled    bool               // Disabled is a flag indicating that the user cannot interact with this field
 	Password    bool               // Password is a flag indicating that the characters should be hidden
+	ReadOnly    bool               // ReadOnly is a flag indicate that the contents cannot be modified by the user
 	OnChange    func(value string) // OnChange will be called whenever the user changes the value for this field
 	OnFocus     func()             // OnFocus will be called whenever the field receives the keyboard focus
 	OnBlur      func()             // OnBlur will be called whenever the field loses the keyboard focus
