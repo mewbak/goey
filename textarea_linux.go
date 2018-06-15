@@ -84,6 +84,10 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 }
 
 func textarea_onChanged(buffer *gtk.TextBuffer, mounted *mountedTextArea) {
+	if mounted.onChange == nil {
+		return
+	}
+
 	text, err := buffer.GetText(buffer.GetStartIter(), buffer.GetEndIter(), true)
 	if err != nil {
 		// TODO:  What is the correct reporting here
@@ -149,6 +153,7 @@ func (w *mountedTextArea) updateProps(data *TextArea) error {
 		return err
 	}
 	if data.Value != oldText {
+		w.onChange = nil // temporarily break OnChange to prevent event
 		buffer.SetText(data.Value)
 	}
 

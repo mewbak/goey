@@ -45,6 +45,10 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 }
 
 func selectinput_onChanged(widget *gtk.ComboBoxText, mounted *mountedSelectInput) {
+	if mounted.onChange == nil {
+		return
+	}
+
 	mounted.onChange(widget.GetActive())
 }
 
@@ -79,6 +83,7 @@ func (w *mountedSelectInput) SetBounds(bounds Rectangle) {
 }
 
 func (w *mountedSelectInput) updateProps(data *SelectInput) error {
+	w.onChange = nil // temporarily break OnChange to prevent event
 	// Todo, can we avoid rebuilding the list?
 	w.handle.RemoveAll()
 	for _, v := range data.Items {

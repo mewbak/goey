@@ -42,6 +42,10 @@ func (w *DateInput) mount(parent Control) (Element, error) {
 }
 
 func dateinput_onChanged(widget *gtk.Calendar, mounted *mountedDateInput) {
+	if mounted.onChange == nil {
+		return
+	}
+
 	y, m, d := widget.GetDate()
 	mounted.onChange(time.Date(int(y), time.Month(m+1), int(d), 0, 0, 0, 0, time.Local))
 }
@@ -77,6 +81,7 @@ func (w *mountedDateInput) SetBounds(bounds Rectangle) {
 }
 
 func (w *mountedDateInput) updateProps(data *DateInput) error {
+	w.onChange = nil // temporarily break OnChange to prevent event
 	w.handle.SelectMonth(uint(data.Value.Month())-1, uint(data.Value.Year()))
 	w.handle.SelectDay(uint(data.Value.Day()))
 	w.onChange = data.OnChange

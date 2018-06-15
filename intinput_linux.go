@@ -43,6 +43,10 @@ func (w *IntInput) mount(parent Control) (Element, error) {
 }
 
 func intinput_onChanged(widget *gtk.SpinButton, mounted *mountedIntInput) {
+	if mounted.onChange == nil {
+		return
+	}
+
 	text := widget.GetValue()
 	mounted.onChange(int64(text))
 }
@@ -78,6 +82,7 @@ func (w *mountedIntInput) SetBounds(bounds Rectangle) {
 }
 
 func (w *mountedIntInput) updateProps(data *IntInput) error {
+	w.onChange = nil // break OnChange to prevent event
 	w.handle.SetValue(float64(data.Value))
 	w.handle.SetPlaceholderText(data.Placeholder)
 	w.onChange = data.OnChange

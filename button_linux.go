@@ -55,13 +55,9 @@ func (w *mountedButton) Close() {
 }
 
 func (w *mountedButton) Props() Widget {
-	label, err := w.handle.GetChild()
+	text, err := w.handle.GetLabel()
 	if err != nil {
-		panic("Could not get child: " + err.Error())
-	}
-	text, err := (*gtk.Label)(unsafe.Pointer(label)).GetText()
-	if err != nil {
-		panic("Could not get text: " + err.Error())
+		panic("Could not get label: " + err.Error())
 	}
 
 	return &Button{
@@ -94,14 +90,8 @@ func (w *mountedButton) SetBounds(bounds Rectangle) {
 }
 
 func (w *mountedButton) updateProps(data *Button) error {
-	label, err := w.handle.GetChild()
-	if err != nil {
-		return err
-	}
-
-	(*gtk.Label)(unsafe.Pointer(label)).SetText(data.Text)
+	w.handle.SetLabel(data.Text)
 	w.handle.SetSensitive(!data.Disabled)
-
 	if data.Default {
 		w.handle.GrabDefault()
 	}

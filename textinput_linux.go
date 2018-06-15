@@ -64,6 +64,10 @@ func textinput_onActivate(obj *glib.Object, mounted *mountedTextInput) {
 }
 
 func textinput_onChanged(widget *gtk.Entry, mounted *mountedTextInput) {
+	if mounted.onChange == nil {
+		return
+	}
+
 	text, err := widget.GetText()
 	if err != nil {
 		// TODO:  What is the correct reporting here
@@ -103,6 +107,7 @@ func (w *mountedTextInput) SetBounds(bounds Rectangle) {
 }
 
 func (w *mountedTextInput) updateProps(data *TextInput) error {
+	w.onChange = nil // temporarily break OnChange to prevent event
 	w.handle.SetText(data.Value)
 	w.handle.SetEditable(!data.ReadOnly)
 	w.handle.SetPlaceholderText(data.Placeholder)
