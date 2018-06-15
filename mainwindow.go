@@ -1,7 +1,17 @@
 package goey
 
 import (
+	"errors"
 	"image"
+	"sync/atomic"
+)
+
+var (
+	// ErrSetChildrenNotReentrant is returned if a reentrant call to
+	// the method SetChildren is called.
+	ErrSetChildrenNotReentrant = errors.New("method SetChildren is not reentrant")
+
+	insideSetChildren uintptr
 )
 
 // Window represents a top-level window that contain other widgets.
@@ -52,6 +62,22 @@ func (w *Window) SetAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
 // position of contained widgets will be updated to match the new layout
 // properties.
 func (w *Window) SetChildren(children []Widget) error {
+	// One source of bugs in widgets is when the fire an event when being
+	// updated.  This can lead to reentrant calls to SetChildren, typically
+	// with incorrect information since the GUI is in an inconsistent state
+	// when the event fires.  In short, this method is not reentrant.
+	// The following will block changes to different windows, although
+	// that shouldn't be susceptible to the same bugs.  Users in that
+	// case should use Do to delay updates to other windows, but it shouldn't
+	// happen in practice.
+	if !atomic.CompareAndSwapUintptr(&insideSetChildren, 0, 1) {
+		return ErrSetChildrenNotReentrant
+	}
+	defer func() {
+		atomic.StoreUintptr(&insideSetChildren, 0)
+	}()
+
+	// Defer to the platform-specific code
 	return w.setChildren(children)
 }
 
