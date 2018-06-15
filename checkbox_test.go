@@ -18,3 +18,13 @@ func TestCheckboxEvents(t *testing.T) {
 		&Checkbox{Text: "C"},
 	})
 }
+
+func TestCheckboxUpdateProps(t *testing.T) {
+	testingUpdateWidgets(t, []Widget{
+		&Checkbox{Value: false, Text: "A"},
+		&Checkbox{Value: true, Text: "B", Disabled: true},
+	}, []Widget{
+		&Checkbox{Value: true, Text: "A--", Disabled: true},
+		&Checkbox{Value: false, Text: "B--", Disabled: false},
+	})
+}

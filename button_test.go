@@ -45,6 +45,7 @@ func TestButtonCreate(t *testing.T) {
 	testingRenderWidgets(t, []Widget{
 		&Button{Text: "A"},
 		&Button{Text: "D", Disabled: true},
+		&Button{Text: "E", Default: true},
 	})
 }
 
@@ -53,5 +54,17 @@ func TestButtonEvents(t *testing.T) {
 		&Button{Text: "A"},
 		&Button{Text: "B"},
 		&Button{Text: "C"},
+	})
+}
+
+func TestButtonUpdateProps(t *testing.T) {
+	testingUpdateWidgets(t, []Widget{
+		&Button{Text: "A"},
+		&Button{Text: "D", Disabled: true},
+		&Button{Text: "E", Default: true},
+	}, []Widget{
+		&Button{Text: "AB"},
+		&Button{Text: "DB", Disabled: false},
+		&Button{Text: "EB", Disabled: true, Default: true},
 	})
 }

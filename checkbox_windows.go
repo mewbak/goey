@@ -12,7 +12,7 @@ func (w *Checkbox) mount(parent Control) (Element, error) {
 		return nil, err
 	}
 
-	hwnd := win.CreateWindowEx(0, buttonClassName, &text[0],
+	hwnd := win.CreateWindowEx(0, button.className, &text[0],
 		win.WS_CHILD|win.WS_VISIBLE|win.WS_TABSTOP|win.BS_CHECKBOX|win.BS_TEXT|win.BS_NOTIFY,
 		10, 10, 100, 100,
 		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
@@ -37,7 +37,7 @@ func (w *Checkbox) mount(parent Control) (Element, error) {
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &oldButtonWindowProc, syscall.NewCallback(checkboxWindowProc))
+	subclassWindowProcedure(hwnd, &button.oldWindowProc, syscall.NewCallback(checkboxWindowProc))
 
 	retval := &mountedCheckbox{
 		Control:  Control{hwnd},
@@ -57,6 +57,17 @@ type mountedCheckbox struct {
 	onChange func(value bool)
 	onFocus  func()
 	onBlur   func()
+}
+
+func (w *mountedCheckbox) Props() Widget {
+	return &Checkbox{
+		Text:     w.Control.Text(),
+		Value:    win.SendMessage(w.hWnd, win.BM_GETCHECK, 0, 0) == win.BST_CHECKED,
+		Disabled: !win.IsWindowEnabled(w.hWnd),
+		OnChange: w.onChange,
+		OnFocus:  w.onFocus,
+		OnBlur:   w.onBlur,
+	}
 }
 
 func (w *mountedCheckbox) MeasureWidth() (Length, Length) {
@@ -147,5 +158,5 @@ func checkboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 		return 0
 	}
 
-	return win.CallWindowProc(oldButtonWindowProc, hwnd, msg, wParam, lParam)
+	return win.CallWindowProc(button.oldWindowProc, hwnd, msg, wParam, lParam)
 }

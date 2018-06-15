@@ -7,13 +7,15 @@ import (
 )
 
 var (
-	buttonClassName     *uint16
-	oldButtonWindowProc uintptr
+	button struct {
+		className     *uint16
+		oldWindowProc uintptr
+	}
 )
 
 func init() {
 	var err error
-	buttonClassName, err = syscall.UTF16PtrFromString("BUTTON")
+	button.className, err = syscall.UTF16PtrFromString("BUTTON")
 	if err != nil {
 		panic(err)
 	}
@@ -30,7 +32,7 @@ func (w *Button) mount(parent Control) (Element, error) {
 		style = style | win.BS_DEFPUSHBUTTON
 	}
 
-	hwnd := win.CreateWindowEx(0, buttonClassName, &text[0], style,
+	hwnd := win.CreateWindowEx(0, button.className, &text[0], style,
 		10, 10, 100, 100,
 		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
@@ -51,7 +53,7 @@ func (w *Button) mount(parent Control) (Element, error) {
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &oldButtonWindowProc, syscall.NewCallback(buttonWindowProc))
+	subclassWindowProcedure(hwnd, &button.oldWindowProc, syscall.NewCallback(buttonWindowProc))
 
 	retval := &mountedButton{
 		Control: Control{hwnd},
@@ -72,6 +74,17 @@ type mountedButton struct {
 	onClick func()
 	onFocus func()
 	onBlur  func()
+}
+
+func (w *mountedButton) Props() Widget {
+	return &Button{
+		Text:     w.Control.Text(),
+		Disabled: !win.IsWindowEnabled(w.hWnd),
+		Default:  (win.GetWindowLong(w.hWnd, win.GWL_STYLE) & win.BS_DEFPUSHBUTTON) != 0,
+		OnClick:  w.onClick,
+		OnFocus:  w.onFocus,
+		OnBlur:   w.onBlur,
+	}
 }
 
 func (w *mountedButton) MeasureWidth() (Length, Length) {
@@ -158,5 +171,5 @@ func buttonWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 		return 0
 	}
 
-	return win.CallWindowProc(oldButtonWindowProc, hwnd, msg, wParam, lParam)
+	return win.CallWindowProc(button.oldWindowProc, hwnd, msg, wParam, lParam)
 }
