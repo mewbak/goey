@@ -24,6 +24,7 @@ func (w *Checkbox) mount(parent Control) (Element, error) {
 	}
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 	control.SetActive(w.Value)
+	control.SetSensitive(!w.Disabled)
 
 	retval := &mountedCheckbox{
 		handle:   control,
@@ -54,6 +55,26 @@ func (w *mountedCheckbox) Close() {
 	}
 }
 
+func (w *mountedCheckbox) Props() Widget {
+	label, err := w.handle.GetChild()
+	if err != nil {
+		panic("Could not get child: " + err.Error())
+	}
+	text, err := (*gtk.Label)(unsafe.Pointer(label)).GetText()
+	if err != nil {
+		panic("Could not get text: " + err.Error())
+	}
+
+	return &Checkbox{
+		Value:    w.handle.GetActive(),
+		Text:     text,
+		Disabled: !w.handle.GetSensitive(),
+		OnChange: w.onChange,
+		OnFocus:  w.onFocus.callback,
+		OnBlur:   w.onBlur.callback,
+	}
+}
+
 func (w *mountedCheckbox) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
@@ -74,12 +95,12 @@ func (w *mountedCheckbox) SetBounds(bounds Rectangle) {
 }
 
 func (w *mountedCheckbox) updateProps(data *Checkbox) error {
-	label_, err := w.handle.GetChild()
+	label, err := w.handle.GetChild()
 	if err != nil {
 		return err
 	}
 
-	(*gtk.Label)(unsafe.Pointer(label_)).SetText(data.Text)
+	(*gtk.Label)(unsafe.Pointer(label)).SetText(data.Text)
 	w.handle.SetActive(data.Value)
 	w.handle.SetSensitive(!data.Disabled)
 

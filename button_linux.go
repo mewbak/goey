@@ -54,6 +54,26 @@ func (w *mountedButton) Close() {
 	}
 }
 
+func (w *mountedButton) Props() Widget {
+	label, err := w.handle.GetChild()
+	if err != nil {
+		panic("Could not get child: " + err.Error())
+	}
+	text, err := (*gtk.Label)(unsafe.Pointer(label)).GetText()
+	if err != nil {
+		panic("Could not get text: " + err.Error())
+	}
+
+	return &Button{
+		Text:     text,
+		Disabled: !w.handle.GetSensitive(),
+		Default:  w.handle.HasDefault(),
+		OnClick:  w.onClick.callback,
+		OnFocus:  w.onFocus.callback,
+		OnBlur:   w.onBlur.callback,
+	}
+}
+
 func (w *mountedButton) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
