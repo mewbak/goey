@@ -45,14 +45,18 @@ func (w Control) Text() string {
 	return win2.GetWindowText(w.hWnd)
 }
 
+// SetDisabled is a wrapper around the WIN32 call to EnableWindow.
 func (w Control) SetDisabled(value bool) {
 	win.EnableWindow(w.hWnd, !value)
 }
 
+// SetBounds is a wrapper around the WIN32 call to MoveWindow.
 func (w *Control) SetBounds(bounds Rectangle) {
 	win.MoveWindow(w.hWnd, int32(bounds.Min.X.PixelsX()), int32(bounds.Min.Y.PixelsY()), int32(bounds.Dx().PixelsX()), int32(bounds.Dy().PixelsY()), true)
 }
 
+// SetOrder is a call around SetWindowPos used to ensure that a window appears
+// in the correct order.
 func (w *Control) SetOrder(previous win.HWND) win.HWND {
 	// Note, the argument previous may be 0 when setting the first child.
 	// Fortunately, this corresponds to HWND_TOP, which sets the window
@@ -61,6 +65,7 @@ func (w *Control) SetOrder(previous win.HWND) win.HWND {
 	return w.hWnd
 }
 
+// SetText is a wrapper around the WIN32 call to SetWindowText.
 func (w Control) SetText(value string) error {
 	utf16, err := syscall.UTF16PtrFromString(value)
 	if err != nil {
@@ -74,6 +79,7 @@ func (w Control) SetText(value string) error {
 	return nil
 }
 
+// Close is a wrapper around the WIN32 call to DestroyWindow.
 func (w *Control) Close() {
 	if w.hWnd != 0 {
 		win.DestroyWindow(w.hWnd)

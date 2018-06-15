@@ -21,7 +21,7 @@ func (w *HR) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (_ *mountedHR) Kind() *Kind {
+func (*mountedHR) Kind() *Kind {
 	return &hrKind
 }
 

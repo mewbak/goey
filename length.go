@@ -26,10 +26,12 @@ const (
 // pixel for both CSS and on Windows.
 type Length fixed.Int26_6
 
+// DIP returns a float64 with the length measured in device independent pixels.
 func (dp Length) DIP() float64 {
 	return float64(dp) / (1 << 6)
 }
 
+// PT returns a float64 with the length measured in points.
 func (dp Length) PT() float64 {
 	return float64(dp) / ((96 << 6) / 72)
 }

@@ -5,7 +5,7 @@ import (
 )
 
 func (m *Message) show() error {
-	dlg := gtk.MessageDialogNew(nil,gtk.DIALOG_MODAL,gtk.MessageType(m.icon),gtk.BUTTONS_OK,m.text)
+	dlg := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL, gtk.MessageType(m.icon), gtk.BUTTONS_OK, m.text)
 	dlg.SetTitle(m.title)
 	dlg.Run()
 	return nil

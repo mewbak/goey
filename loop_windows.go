@@ -24,7 +24,7 @@ func do(action func() error) error {
 	return <-err
 }
 
-func Loop(blocking bool) error {
+func loop(blocking bool) error {
 	// Obtain a copy of the next message from the queue.
 	var msg win.MSG
 	if blocking {

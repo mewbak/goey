@@ -82,3 +82,12 @@ func Do(action func() error) error {
 	// Defer to platform-specific code.
 	return do(action)
 }
+
+// Loop run one interation of the event loop.  This function's use by user code
+// should be very rare.
+//
+// This function is only safe to call on the GUI thread.
+func Loop(blocking bool) error {
+	// Defer to platform-specific code.
+	return loop(blocking)
+}

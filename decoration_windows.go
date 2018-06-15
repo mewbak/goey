@@ -95,18 +95,24 @@ func createBrush(clr color.RGBA) win.HBRUSH {
 	// CreateBrushIndirect.
 
 	if clr.A == 0 {
+		// Transparent brush
 		return win.HBRUSH(win.GetStockObject(win.NULL_BRUSH))
 	} else if clr.R == 0 && clr.G == 0 && clr.B == 0 {
+		// Pure black brush
+		// TODO:  Implement transparency when clr.A < 0xFF
 		return win.HBRUSH(win.GetStockObject(win.BLACK_BRUSH))
 	} else if clr.R == 0xff && clr.G == 0xff && clr.B == 0xff {
+		// Pure white brush
+		// TODO:  Implement transparency when clr.A < 0xFF
 		return win.HBRUSH(win.GetStockObject(win.WHITE_BRUSH))
-	} else {
-		lb := win.LOGBRUSH{
-			LbStyle: win.BS_SOLID,
-			LbColor: win.COLORREF(uint32(clr.B)<<16 | uint32(clr.G)<<8 | uint32(clr.R)),
-		}
-		return win.CreateBrushIndirect(&lb)
 	}
+
+	// There is not stock brush with the correct color.  Create a custom brush.
+	lb := win.LOGBRUSH{
+		LbStyle: win.BS_SOLID,
+		LbColor: win.COLORREF(uint32(clr.B)<<16 | uint32(clr.G)<<8 | uint32(clr.R)),
+	}
+	return win.CreateBrushIndirect(&lb)
 }
 
 func createPen(clr color.RGBA) win.HPEN {
@@ -118,18 +124,23 @@ func createPen(clr color.RGBA) win.HPEN {
 	// CreateBrushIndirect.
 
 	if clr.A == 0 {
+		// Transparent pen
 		return win.HPEN(win.GetStockObject(win.NULL_PEN))
 	} else if clr.R == 0 && clr.G == 0 && clr.B == 0 {
+		// Pure black pen
+		// TODO:  Implement transparency when clr.A < 0xFF
 		return win.HPEN(win.GetStockObject(win.BLACK_PEN))
 	} else if clr.R == 0xff && clr.G == 0xff && clr.B == 0xff {
+		// Pure white pen
+		// TODO:  Implement transparency when clr.A < 0xFF
 		return win.HPEN(win.GetStockObject(win.WHITE_PEN))
-	} else {
-		lb := win.LOGBRUSH{
-			LbStyle: win.BS_SOLID,
-			LbColor: win.COLORREF(uint32(clr.B)<<16 | uint32(clr.G)<<8 | uint32(clr.R)),
-		}
-		return win.ExtCreatePen(win.PS_COSMETIC|win.PS_SOLID, 1, &lb, 0, nil)
 	}
+
+	lb := win.LOGBRUSH{
+		LbStyle: win.BS_SOLID,
+		LbColor: win.COLORREF(uint32(clr.B)<<16 | uint32(clr.G)<<8 | uint32(clr.R)),
+	}
+	return win.ExtCreatePen(win.PS_COSMETIC|win.PS_SOLID, 1, &lb, 0, nil)
 }
 
 func (w *mountedDecoration) Close() {

@@ -21,7 +21,7 @@ func (w *Empty) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (_ *mountedEmpty) Kind() *Kind {
+func (*mountedEmpty) Kind() *Kind {
 	return &emptyKind
 }
 

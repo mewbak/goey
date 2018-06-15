@@ -4,7 +4,9 @@ var (
 	columnKind = Kind{"column"}
 )
 
-// HBox describes a layout widget that arranges its child widgets into a horizontal row.
+// Column describes a layout widget that arranges its child widgets into a several columns.
+// If there is sufficient width, the columns will be arranged side-by-side.  Otherwise, the
+// columns will be arranged vertically.
 type Column struct {
 	Children [][]Widget
 }
@@ -182,7 +184,10 @@ func (w *mountedColumn) SetChildren(children [][]Widget) error {
 	return err
 }
 
-func (w *mountedColumn) UpdateProps(data_ Widget) error {
-	data := data_.(*Column)
+func (w *mountedColumn) updateProps(data *Column) error {
 	return w.SetChildren(data.Children)
+}
+
+func (w *mountedColumn) UpdateProps(data Widget) error {
+	return w.updateProps(data.(*Column))
 }

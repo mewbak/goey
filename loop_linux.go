@@ -22,7 +22,7 @@ func do(action func() error) error {
 	return <-err
 }
 
-func Loop(blocking bool) error {
+func loop(blocking bool) error {
 	rc := gtk.MainIterationDo(blocking)
 	if rc {
 		return ErrQuit
