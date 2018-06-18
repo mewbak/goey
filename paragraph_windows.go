@@ -18,6 +18,8 @@ func (w *P) calcStyle() uint32 {
 		style = style | win.SS_CENTER
 	} else if w.Align == Right {
 		style = style | win.SS_RIGHT
+	} else if w.Align == Justify {
+		style = style | win.SS_RIGHTJUST
 	}
 	return style
 }
@@ -111,6 +113,23 @@ func (w *mountedP) MeasureHeight(width Length) (Length, Length) {
 
 	retval := FromPixelsY(int(rect.Bottom))
 	return retval, retval
+}
+
+func (w *mountedP) Props() Widget {
+
+	align := Left
+	if style := win.GetWindowLong(w.hWnd, win.GWL_STYLE); style&win.SS_CENTER == win.SS_CENTER {
+		align = Center
+	} else if style&win.SS_RIGHT == win.SS_RIGHT {
+		align = Right
+	} else if style&win.SS_RIGHTJUST == win.SS_RIGHTJUST {
+		align = Justify
+	}
+
+	return &P{
+		Text:  w.Control.Text(),
+		Align: align,
+	}
 }
 
 func (w *mountedP) SetBounds(bounds Rectangle) {

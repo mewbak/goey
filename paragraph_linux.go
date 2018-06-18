@@ -68,6 +68,28 @@ func (w *mountedP) MeasureHeight(width Length) (Length, Length) {
 	return FromPixelsY(min), FromPixelsY(max)
 }
 
+func (w *mountedP) Props() Widget {
+	text, err := w.handle.GetText()
+	if err != nil {
+		panic("Could not get text, " + err.Error())
+	}
+
+	align := Left
+	switch w.handle.GetJustify() {
+	case gtk.JUSTIFY_CENTER:
+		align = Center
+	case gtk.JUSTIFY_RIGHT:
+		align = Right
+	case gtk.JUSTIFY_FILL:
+		align = Jusfity
+	}
+
+	return &P{
+		Text:  text,
+		Align: align,
+	}
+}
+
 func (w *mountedP) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
