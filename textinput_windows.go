@@ -95,6 +95,22 @@ type mountedTextInput struct {
 	mountedTextInputBase
 }
 
+func (w *mountedTextInput) Props() Widget {
+	// TODO:  Determine the current placeholder.  This should be possible using
+	// the EM_GETCUEBANNER message.
+
+	return &TextInput{
+		Value:      w.Control.Text(),
+		Disabled:   !win.IsWindowEnabled(w.hWnd),
+		Password:   win.SendMessage(w.hWnd, win.EM_GETPASSWORDCHAR, 0, 0) != 0,
+		ReadOnly:   (win.GetWindowLong(w.hWnd, win.GWL_STYLE) & win.ES_READONLY) != 0,
+		OnChange:   w.onChange,
+		OnFocus:    w.onFocus,
+		OnBlur:     w.onBlur,
+		OnEnterKey: w.onEnterKey,
+	}
+}
+
 func (w *mountedTextInputBase) MeasureWidth() (Length, Length) {
 	if paragraphMaxWidth == 0 {
 		paragraphMeasureReflowLimits(w.hWnd)
@@ -109,19 +125,12 @@ func (w *mountedTextInputBase) MeasureHeight(width Length) (Length, Length) {
 	return 23 * DIP, 23 * DIP
 }
 
-func fromBool(value bool) win.BOOL {
-	if value {
-		return win.TRUE
-	}
-	return win.FALSE
-}
-
 func (w *mountedTextInputBase) updateProps(data *TextInput) error {
 	if data.Value != w.Text() {
 		w.SetText(data.Value)
 	}
 	w.SetDisabled(data.Disabled)
-	win.SendMessage(w.hWnd, win.EM_SETREADONLY, uintptr(fromBool(data.ReadOnly)), 0)
+	win.SendMessage(w.hWnd, win.EM_SETREADONLY, uintptr(win.BoolToBOOL(data.ReadOnly)), 0)
 
 	if data.Placeholder != "" {
 		textPlaceholder, err := syscall.UTF16PtrFromString(data.Placeholder)
@@ -133,6 +142,12 @@ func (w *mountedTextInputBase) updateProps(data *TextInput) error {
 	} else {
 		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, 0)
 	}
+	if data.Password {
+		// TODO:  ???
+	} else {
+		win.SendMessage(w.hWnd, win.EM_SETPASSWORDCHAR, 0, 0)
+	}
+	win.SendMessage(w.hWnd, win.EM_SETREADONLY, uintptr(win.BoolToBOOL(data.ReadOnly)), 0)
 
 	w.onChange = data.OnChange
 	w.onFocus = data.OnFocus

@@ -57,3 +57,15 @@ func TestTextInputEvents(t *testing.T) {
 		&TextInput{},
 	})
 }
+
+func TestTextInputProps(t *testing.T) {
+	testingUpdateWidgets(t, []Widget{
+		&TextInput{Value: "A"},
+		&TextInput{Value: "B", Placeholder: "..."},
+		&TextInput{Value: "C", Disabled: true},
+	}, []Widget{
+		&TextInput{Value: "AA"},
+		&TextInput{Value: "BA", Disabled: true},
+		&TextInput{Value: "CA", Placeholder: "***", Disabled: false},
+	})
+}
