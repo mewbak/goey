@@ -27,12 +27,9 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 	control.SetText(w.Value)
 	control.SetPlaceholderText(w.Placeholder)
-	if w.Password {
-		control.SetVisibility(false)
-	}
-	if w.ReadOnly {
-		control.SetEditable(false)
-	}
+	control.SetSensitive(!w.Disabled)
+	control.SetVisibility(!w.Password)
+	control.SetEditable(!w.ReadOnly)
 
 	retval := &mountedTextInput{
 		handle:     control,
@@ -101,6 +98,29 @@ func (w *mountedTextInput) MeasureHeight(width Length) (Length, Length) {
 	return FromPixelsY(min), FromPixelsY(max)
 }
 
+func (w *mountedTextInput) Props() Widget {
+	value, err := w.handle.GetText()
+	if err != nil {
+		panic("could not get text, " + err.Error())
+	}
+	placeholder, err := w.handle.GetPlaceholderText()
+	if err != nil {
+		panic("could not get placeholder text, " + err.Error())
+	}
+
+	return &TextInput{
+		Value:       value,
+		Disabled:    !w.handle.GetSensitive(),
+		Placeholder: placeholder,
+		Password:    !w.handle.GetVisibility(),
+		ReadOnly:    !w.handle.GetEditable(),
+		OnChange:    w.onChange,
+		OnFocus:     w.onFocus.callback,
+		OnBlur:      w.onBlur.callback,
+		OnEnterKey:  w.onEnterKey,
+	}
+}
+
 func (w *mountedTextInput) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
@@ -111,6 +131,7 @@ func (w *mountedTextInput) updateProps(data *TextInput) error {
 	w.handle.SetText(data.Value)
 	w.handle.SetEditable(!data.ReadOnly)
 	w.handle.SetPlaceholderText(data.Placeholder)
+	w.handle.SetSensitive(!data.Disabled)
 	w.handle.SetVisibility(!data.Password)
 	w.onChange = data.OnChange
 	w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "changed", textinput_onChanged, w)
