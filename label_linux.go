@@ -54,6 +54,17 @@ func (w *mountedLabel) MeasureHeight(width Length) (Length, Length) {
 	return FromPixelsY(min), FromPixelsY(max)
 }
 
+func (w *mountedLabel) Props() Widget {
+	text, err := w.handle.GetText()
+	if err != nil {
+		panic("Could not get text, " + err.Error())
+	}
+
+	return &Label{
+		Text: text,
+	}
+}
+
 func (w *mountedLabel) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())

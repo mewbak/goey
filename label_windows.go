@@ -72,6 +72,12 @@ func (w *mountedLabel) MeasureHeight(width Length) (Length, Length) {
 	return 13 * DIP, 13 * DIP
 }
 
+func (w *mountedLabel) Props() Widget {
+	return &Label{
+		Text: w.Control.Text(),
+	}
+}
+
 func (w *mountedLabel) SetBounds(bounds Rectangle) {
 	w.Control.SetBounds(bounds)
 

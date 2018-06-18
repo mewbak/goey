@@ -17,7 +17,7 @@ func (w *IntInput) mount(parent Control) (Element, error) {
 	if w.OnEnterKey != nil {
 		style = style | win.ES_MULTILINE
 	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, editClassName, text,
+	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, edit.className, text,
 		style,
 		10, 10, 100, 100,
 		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
@@ -39,7 +39,7 @@ func (w *IntInput) mount(parent Control) (Element, error) {
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &oldEditWindowProc, syscall.NewCallback(textinputWindowProc))
+	subclassWindowProcedure(hwnd, &edit.oldWindowProc, syscall.NewCallback(textinputWindowProc))
 
 	// Create placeholder, if required.
 	if w.Placeholder != "" {

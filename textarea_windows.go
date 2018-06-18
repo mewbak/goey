@@ -14,7 +14,7 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 	}
 
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | win.ES_LEFT | win.ES_MULTILINE | win.ES_WANTRETURN | win.ES_AUTOVSCROLL)
-	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, editClassName, text,
+	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, edit.className, text,
 		style,
 		10, 10, 100, 100,
 		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
@@ -36,7 +36,7 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &oldEditWindowProc, syscall.NewCallback(textinputWindowProc))
+	subclassWindowProcedure(hwnd, &edit.oldWindowProc, syscall.NewCallback(textinputWindowProc))
 
 	// Create placeholder, if required.
 	if w.Value == "" && w.Placeholder != "" {

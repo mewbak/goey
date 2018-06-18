@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestIntnput(t *testing.T) {
+func TestIntInput(t *testing.T) {
 	testingRenderWidgets(t, []Widget{
 		&IntInput{Value: 1},
 		&IntInput{Value: 2, Placeholder: "..."},

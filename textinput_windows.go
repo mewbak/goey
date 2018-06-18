@@ -8,13 +8,16 @@ import (
 )
 
 var (
-	editClassName     *uint16
-	oldEditWindowProc uintptr
+	edit struct {
+		className     *uint16
+		oldWindowProc uintptr
+		emptyString   uint16
+	}
 )
 
 func init() {
 	var err error
-	editClassName, err = syscall.UTF16PtrFromString("EDIT")
+	edit.className, err = syscall.UTF16PtrFromString("EDIT")
 	if err != nil {
 		panic(err)
 	}
@@ -36,7 +39,7 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 	if w.OnEnterKey != nil {
 		style = style | win.ES_MULTILINE
 	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, editClassName, text,
+	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, edit.className, text,
 		style,
 		10, 10, 100, 100,
 		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
@@ -58,7 +61,7 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &oldEditWindowProc, syscall.NewCallback(textinputWindowProc))
+	subclassWindowProcedure(hwnd, &edit.oldWindowProc, syscall.NewCallback(textinputWindowProc))
 
 	// Create placeholder, if required.
 	if w.Placeholder != "" {
@@ -96,18 +99,27 @@ type mountedTextInput struct {
 }
 
 func (w *mountedTextInput) Props() Widget {
-	// TODO:  Determine the current placeholder.  This should be possible using
-	// the EM_GETCUEBANNER message.
+	var buffer [80]uint16
+	win.SendMessage(w.hWnd, win.EM_GETCUEBANNER, uintptr(unsafe.Pointer(&buffer[0])), 80)
+	ndx := 0
+	for i, v := range buffer {
+		if v == 0 {
+			ndx = i
+			break
+		}
+	}
+	placeholder := syscall.UTF16ToString(buffer[:ndx])
 
 	return &TextInput{
-		Value:      w.Control.Text(),
-		Disabled:   !win.IsWindowEnabled(w.hWnd),
-		Password:   win.SendMessage(w.hWnd, win.EM_GETPASSWORDCHAR, 0, 0) != 0,
-		ReadOnly:   (win.GetWindowLong(w.hWnd, win.GWL_STYLE) & win.ES_READONLY) != 0,
-		OnChange:   w.onChange,
-		OnFocus:    w.onFocus,
-		OnBlur:     w.onBlur,
-		OnEnterKey: w.onEnterKey,
+		Value:       w.Control.Text(),
+		Placeholder: placeholder,
+		Disabled:    !win.IsWindowEnabled(w.hWnd),
+		Password:    win.SendMessage(w.hWnd, win.EM_GETPASSWORDCHAR, 0, 0) != 0,
+		ReadOnly:    (win.GetWindowLong(w.hWnd, win.GWL_STYLE) & win.ES_READONLY) != 0,
+		OnChange:    w.onChange,
+		OnFocus:     w.onFocus,
+		OnBlur:      w.onBlur,
+		OnEnterKey:  w.onEnterKey,
 	}
 }
 
@@ -140,7 +152,7 @@ func (w *mountedTextInputBase) updateProps(data *TextInput) error {
 
 		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
 	} else {
-		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, 0)
+		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(&edit.emptyString)))
 	}
 	if data.Password {
 		// TODO:  ???
@@ -213,5 +225,5 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 
 	}
 
-	return win.CallWindowProc(oldEditWindowProc, hwnd, msg, wParam, lParam)
+	return win.CallWindowProc(edit.oldWindowProc, hwnd, msg, wParam, lParam)
 }

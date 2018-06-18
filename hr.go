@@ -25,6 +25,10 @@ func (*mountedHR) Kind() *Kind {
 	return &hrKind
 }
 
+func (w *mountedHR) Props() Widget {
+	return &HR{}
+}
+
 func (w *mountedHR) UpdateProps(data Widget) error {
 	// This widget does not have any properties, so there cannot be anything
 	// to update.
