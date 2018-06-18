@@ -17,8 +17,16 @@ func (*Empty) Kind() *Kind {
 // Mount creates a horiztonal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
 func (w *Empty) Mount(parent Control) (Element, error) {
-	// Forward to the platform-dependant code
-	return w.mount(parent)
+	retval := &mountedEmpty{}
+
+	return retval, nil
+}
+
+type mountedEmpty struct {
+}
+
+func (w *mountedEmpty) Close() {
+	// Virtual control, so no resources to release
 }
 
 func (*mountedEmpty) Kind() *Kind {
@@ -33,6 +41,14 @@ func (w *mountedEmpty) MeasureHeight(width Length) (Length, Length) {
 	// Same as static text
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 13 * DIP, 13 * DIP
+}
+
+func (w *mountedEmpty) Props() Widget {
+	return &Empty{}
+}
+
+func (w *mountedEmpty) SetBounds(bounds Rectangle) {
+	// Virtual control, so no resource to resize
 }
 
 func (w *mountedEmpty) UpdateProps(data Widget) error {
