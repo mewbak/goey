@@ -81,7 +81,7 @@ func (w *mountedP) Props() Widget {
 	case gtk.JUSTIFY_RIGHT:
 		align = Right
 	case gtk.JUSTIFY_FILL:
-		align = Jusfity
+		align = Justify
 	}
 
 	return &P{
