@@ -118,15 +118,15 @@ func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight Lengt
 			// controls aligned to the top.
 		case MainCenter:
 			// Adjust the starting position to align the contents.
-			posY += (actualHeight - maxHeight) / 2
+			posY = (actualHeight - maxHeight) / 2
 
 		case MainEnd:
 			// Adjust the starting position to align the contents.
-			posY += actualHeight - maxHeight
+			posY = actualHeight - maxHeight
 
 		case SpaceAround:
 			extraGap = (actualHeight - maxHeight).Scale(1, childrenCount+1)
-			posY += extraGap
+			posY = extraGap
 
 		case SpaceBetween:
 			if childrenCount > 1 {
@@ -135,7 +135,7 @@ func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight Lengt
 				// There are no controls between which to put the extra space.
 				// The following essentially convert SpaceBetween to SpaceAround
 				extraGap = (actualHeight - maxHeight).Scale(1, childrenCount+1)
-				posY += extraGap
+				posY = extraGap
 			}
 		}
 	}
@@ -186,4 +186,18 @@ func setBoundsWithAlign(widget Element, bounds Rectangle, align CrossAxisAlign, 
 	}
 
 	return h
+}
+
+func verifyLengthRange(min, max Length) {
+	if min < 0 {
+		panic("verify length range, min < 0 ")
+	}
+	if max < 0 {
+		panic("verify length range, max < 0 ")
+
+	}
+	if max < min {
+		panic("verify length range, max < min ")
+
+	}
 }
