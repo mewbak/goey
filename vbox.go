@@ -31,9 +31,9 @@ const (
 // the top towards the bottom.  The main axis for alignment is therefore vertical,
 // with the cross axis for alignment horiztonal.
 type VBox struct {
-	Children   []Widget
 	AlignMain  MainAxisAlign
 	AlignCross CrossAxisAlign
+	Children   []Widget
 }
 
 // Kind returns the concrete type for use in the Widget interface.
@@ -81,8 +81,10 @@ func (w *mountedVBox) MeasureWidth() (Length, Length) {
 	}
 
 	min, max := w.children[0].MeasureWidth()
+	verifyLengthRange(min, max)
 	for _, v := range w.children[1:] {
 		tmpMin, tmpMax := v.MeasureWidth()
+		verifyLengthRange(tmpMin, tmpMax)
 		if tmpMin > min {
 			min = tmpMin
 		}
@@ -100,8 +102,10 @@ func (w *mountedVBox) MeasureHeight(width Length) (Length, Length) {
 
 	previous := w.children[0]
 	min, max := previous.MeasureHeight(width)
+	verifyLengthRange(min, max)
 	for _, v := range w.children[1:] {
 		tmpMin, tmpMax := v.MeasureHeight(width)
+		verifyLengthRange(tmpMin, tmpMax)
 		gap := calculateVGap(previous, v)
 		min += tmpMin + gap
 		max += tmpMax + gap

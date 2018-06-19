@@ -381,7 +381,7 @@ func newWindow(title string, children []Widget) (*Window, error) {
 	retval.dpi.Y = int(win.GetDeviceCaps(hdc, win.LOGPIXELSY))
 	win.ReleaseDC(hwnd, hdc)
 
-	vbox := VBox{children, MainStart, Stretch}
+	vbox := VBox{MainStart, Stretch, children}
 	mounted, err := vbox.Mount(Control{hwnd})
 	if err != nil {
 		win.DestroyWindow(hwnd)
@@ -448,7 +448,7 @@ func (w *windowImpl) setAlignment(main MainAxisAlign, cross CrossAxisAlign) erro
 
 func (w *windowImpl) setChildren(children []Widget) error {
 	// Defer to the vertical box holding the children.
-	vbox := VBox{children, w.vbox.alignMain, w.vbox.alignCross}
+	vbox := VBox{w.vbox.alignMain, w.vbox.alignCross, children}
 	err := w.vbox.UpdateProps(&vbox)
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.

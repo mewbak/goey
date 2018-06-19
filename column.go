@@ -89,7 +89,6 @@ func (w *mountedColumn) MeasureWidth() (Length, Length) {
 		max = max + tmpMax + gap
 	}
 	w.transition = min.Scale(len(w.counts), 1) + gap.Scale(len(w.counts)-1, 1)
-	println("transition", min.String(), len(w.counts), gap.String(), w.transition.String())
 	return min, max
 }
 
@@ -144,7 +143,7 @@ func (w *mountedColumn) SetBounds(bounds Rectangle) {
 		panic("internal error")
 	}
 
-	// If now side enough, we will layout the items exactly like a VBox
+	// If not wide enough, we will layout the items exactly like a VBox
 	if bounds.Dx() < w.transition {
 		vbox := mountedVBox{
 			parent:   w.parent,

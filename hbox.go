@@ -63,10 +63,12 @@ func (w *mountedHBox) MeasureWidth() (Length, Length) {
 
 	previous := w.children[0]
 	min, max := previous.MeasureWidth()
+	verifyLengthRange(min, max)
 	for _, v := range w.children[1:] {
 		gap := calculateHGap(previous, v)
 		previous = v
-		tmpMin, tmpMax := previous.MeasureWidth()
+		tmpMin, tmpMax := v.MeasureWidth()
+		verifyLengthRange(tmpMin, tmpMax)
 
 		min = min + tmpMin + gap
 		max = max + tmpMax + gap
@@ -88,18 +90,21 @@ func (w *mountedHBox) MeasureHeight(width Length) (Length, Length) {
 		}
 	}
 
-	scale1, scale2 := Length(0), Length(1)
+	scale1, scale2 := 0, 1
 	if width > w.minimumWidth && w.maximumWidth > w.minimumWidth {
-		scale1, scale2 = width-w.minimumWidth, w.maximumWidth-w.minimumWidth
+		scale1, scale2 = int(width-w.minimumWidth), int(w.maximumWidth-w.minimumWidth)
 	}
 
 	minWidth, maxWidth := w.children[0].MeasureWidth()
-	childWidth := (minWidth + (maxWidth-minWidth)*scale1/scale2)
+	childWidth := minWidth + (maxWidth-minWidth).Scale(scale1, scale2)
 	min, max := w.children[0].MeasureHeight(childWidth)
+	verifyLengthRange(min, max)
 	for _, v := range w.children[1:] {
 		minWidth, maxWidth = v.MeasureWidth()
-		childWidth := (minWidth + (maxWidth-minWidth)*scale1/scale2)
+		verifyLengthRange(minWidth, maxWidth)
+		childWidth := minWidth + (maxWidth-minWidth).Scale(scale1, scale2)
 		tmpMin, tmpMax := v.MeasureHeight(childWidth)
+		verifyLengthRange(tmpMin, tmpMax)
 		if tmpMin > min {
 			min = tmpMin
 		}
@@ -107,16 +112,16 @@ func (w *mountedHBox) MeasureHeight(width Length) (Length, Length) {
 			max = tmpMax
 		}
 	}
+	println("hbox", "MeasureHeight", min.String(), max.String())
 	return min, max
 }
 
 func (w *mountedHBox) SetBounds(bounds Rectangle) {
+	println("hbox", "SetBounds", bounds.String())
+
 	if len(w.children) == 0 {
 		return
 	}
-
-	posX := bounds.Min.X
-	width := bounds.Dx()
 
 	if w.minimumWidth == 0 {
 		w.MeasureWidth()
@@ -125,54 +130,19 @@ func (w *mountedHBox) SetBounds(bounds Rectangle) {
 		}
 	}
 
-	// If there is more space than necessary, then we need to distribute the extra space.
-	extraGap := Length(0)
-	if width >= w.maximumWidth {
-		switch w.alignMain {
-		case MainStart:
-			// No need to do any adjustment.  The algorithm below will lay out
-			// controls aligned to the top.
-		case MainCenter:
-			// Adjust the starting position to align the contents.
-			posX += (width - w.maximumWidth) / 2
-
-		case MainEnd:
-			// Adjust the starting position to align the contents.
-			posX += width - w.maximumWidth
-
-		case SpaceAround:
-			extraGap = (width - w.maximumWidth).Scale(1, len(w.children)+1)
-			posX += extraGap
-
-		case SpaceBetween:
-			if len(w.children) > 1 {
-				extraGap = (width - w.maximumWidth).Scale(1, len(w.children)-1)
-			} else {
-				// There are no controls between which to put the extra space.
-				// The following essentially convert SpaceBetween to SpaceAround
-				extraGap = (width - w.maximumWidth).Scale(1, len(w.children)+1)
-				posX += extraGap
-			}
-		}
-
-		// Reduce available height
-		width = w.maximumWidth
-	}
-
-	scale1, scale2 := Length(0), Length(1)
-	if width > w.minimumWidth && w.maximumWidth > w.minimumWidth {
-		scale1, scale2 = width-w.minimumWidth, w.maximumWidth-w.minimumWidth
-	}
+	extraGap, deltaX, scale1, scale2 := distributeVSpace(w.alignMain, len(w.children), bounds.Dx(), w.minimumWidth, w.maximumWidth)
+	bounds.Min.X += deltaX
 
 	previous := Element(nil)
 	for _, v := range w.children {
 		if previous != nil {
-			posX += calculateHGap(previous, v)
+			bounds.Min.X += calculateHGap(previous, v) + extraGap
 		}
+
 		minWidth, maxWidth := v.MeasureWidth()
-		childWidth := (minWidth + (maxWidth-minWidth)*scale1/scale2)
-		v.SetBounds(Rectangle{Point{posX, bounds.Min.Y}, Point{posX + childWidth, bounds.Max.Y}})
-		posX += childWidth + extraGap
+		childWidth := minWidth + (maxWidth-minWidth).Scale(scale1, scale2)
+		v.SetBounds(Rectangle{bounds.Min, Point{bounds.Min.X + childWidth, bounds.Max.Y}})
+		bounds.Min.X += childWidth
 		previous = v
 	}
 }

@@ -72,7 +72,7 @@ type mountedHR struct {
 }
 
 func (w *mountedHR) MeasureWidth() (Length, Length) {
-	return 1, 0x7fffffff
+	return 1, 10000 * DIP
 }
 
 func (w *mountedHR) MeasureHeight(width Length) (Length, Length) {

@@ -107,7 +107,7 @@ func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight Lengt
 	if actualHeight < minHeight {
 		println("actualHeight:", actualHeight.String())
 		println("minHeight:", minHeight.String())
-		panic("not implemented")
+		actualHeight = minHeight
 	}
 
 	// If there is more space than necessary, then we need to distribute the extra space.
