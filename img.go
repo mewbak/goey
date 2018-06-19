@@ -35,26 +35,31 @@ func (w *Img) Mount(parent Control) (Element, error) {
 	}
 
 	// Fill in the height and width if they are left at zero.
-	if w.Width == 0 {
-		bounds := w.Image.Bounds()
-		if w.Height == 0 {
-			w.Width = Length(bounds.Dx()*96) / 92
-			w.Height = Length(bounds.Dy()*96) / 92
-		} else {
-			w.Width = (w.Height * Length(bounds.Dx())) / Length(bounds.Dy())
-		}
-	} else {
-		if w.Height == 0 {
-			bounds := w.Image.Bounds()
-			w.Height = (w.Width * Length(bounds.Dy())) / Length(bounds.Dx())
-		}
-	}
+	w.UpdateDimensions()
+
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
 func (_ *mountedImg) Kind() *Kind {
 	return &imgKind
+}
+
+// UpdateDimensions calculates default values for Width and Height if either
+// or zero based on the image dimensions.  The member Image cannot be nil.
+func (w *Img) UpdateDimensions() {
+	if w.Width == 0 && w.Height == 0 {
+		bounds := w.Image.Bounds()
+		// Assume that images are at 92 pixels per inch
+		w.Width = ((1 * DIP) * 92 / 96).Scale(bounds.Dx(), 1)
+		w.Height = ((1 * DIP) * 92 / 96).Scale(bounds.Dy(), 1)
+	} else if w.Width == 0 {
+		bounds := w.Image.Bounds()
+		w.Width = w.Height.Scale(bounds.Dx(), bounds.Dy())
+	} else if w.Height == 0 {
+		bounds := w.Image.Bounds()
+		w.Height = w.Width.Scale(bounds.Dy(), bounds.Dx())
+	}
 }
 
 func (w *mountedImg) UpdateProps(data Widget) error {
