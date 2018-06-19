@@ -137,15 +137,9 @@ func (w *mountedTextInputBase) MeasureHeight(width Length) (Length, Length) {
 	return 23 * DIP, 23 * DIP
 }
 
-func (w *mountedTextInputBase) updateProps(data *TextInput) error {
-	if data.Value != w.Text() {
-		w.SetText(data.Value)
-	}
-	w.SetDisabled(data.Disabled)
-	win.SendMessage(w.hWnd, win.EM_SETREADONLY, uintptr(win.BoolToBOOL(data.ReadOnly)), 0)
-
-	if data.Placeholder != "" {
-		textPlaceholder, err := syscall.UTF16PtrFromString(data.Placeholder)
+func (w *mountedTextInputBase) updatePlaceholder(text string) error {
+	if text != "" {
+		textPlaceholder, err := syscall.UTF16PtrFromString(text)
 		if err != nil {
 			return err
 		}
@@ -154,6 +148,19 @@ func (w *mountedTextInputBase) updateProps(data *TextInput) error {
 	} else {
 		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(&edit.emptyString)))
 	}
+
+	return nil
+}
+
+func (w *mountedTextInputBase) updateProps(data *TextInput) error {
+	if data.Value != w.Text() {
+		w.SetText(data.Value)
+	}
+	err := w.updatePlaceholder(data.Placeholder)
+	if err != nil {
+		return err
+	}
+	w.SetDisabled(data.Disabled)
 	if data.Password {
 		// TODO:  ???
 	} else {

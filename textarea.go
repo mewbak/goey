@@ -10,6 +10,7 @@ type TextArea struct {
 	Value       string             // Values is the current string for the field
 	Placeholder string             // Placeholder is a descriptive text that can be displayed when the field is empty
 	Disabled    bool               // Disabled is a flag indicating that the user cannot interact with this field
+	ReadOnly    bool               // ReadOnly is a flag indicate that the contents cannot be modified by the user
 	MinLines    int                // MinLines describes the minimum number of lines that should be visible for layout
 	OnChange    func(value string) // OnChange will be called whenever the user changes the value for this field
 	OnFocus     func()             // OnFocus will be called whenever the field receives the keyboard focus

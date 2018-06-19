@@ -14,6 +14,9 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 	}
 
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | win.ES_LEFT | win.ES_MULTILINE | win.ES_WANTRETURN | win.ES_AUTOVSCROLL)
+	if w.ReadOnly {
+		style = style | win.ES_READONLY
+	}
 	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, edit.className, text,
 		style,
 		10, 10, 100, 100,
@@ -73,21 +76,40 @@ func (w *mountedTextArea) MeasureHeight(width Length) (Length, Length) {
 	return 23*DIP + lineHeight.Scale(w.minLines-1, 1), 23*DIP + lineHeight.Scale(39, 1)
 }
 
+func (w *mountedTextArea) Props() Widget {
+	var buffer [80]uint16
+	win.SendMessage(w.hWnd, win.EM_GETCUEBANNER, uintptr(unsafe.Pointer(&buffer[0])), 80)
+	ndx := 0
+	for i, v := range buffer {
+		if v == 0 {
+			ndx = i
+			break
+		}
+	}
+	placeholder := syscall.UTF16ToString(buffer[:ndx])
+
+	return &TextArea{
+		Value:       w.Control.Text(),
+		Placeholder: placeholder,
+		Disabled:    !win.IsWindowEnabled(w.hWnd),
+		ReadOnly:    (win.GetWindowLong(w.hWnd, win.GWL_STYLE) & win.ES_READONLY) != 0,
+		MinLines:    w.minLines,
+		OnChange:    w.onChange,
+		OnFocus:     w.onFocus,
+		OnBlur:      w.onBlur,
+	}
+}
+
 func (w *mountedTextArea) updateProps(data *TextArea) error {
 	if data.Value != w.Text() {
 		w.SetText(data.Value)
 	}
-
-	if data.Placeholder != "" {
-		textPlaceholder, err := syscall.UTF16PtrFromString(data.Placeholder)
-		if err != nil {
-			return err
-		}
-
-		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
-	} else {
-		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, 0)
+	err := w.updatePlaceholder(data.Placeholder)
+	if err != nil {
+		return err
 	}
+	w.SetDisabled(data.Disabled)
+	win.SendMessage(w.hWnd, win.EM_SETREADONLY, uintptr(win.BoolToBOOL(data.ReadOnly)), 0)
 
 	w.minLines = minlinesDefault(data.MinLines)
 	w.onChange = data.OnChange
