@@ -54,13 +54,13 @@ func main() {
 	err := error(nil)
 	gopher, err = loadImage("gopher.png")
 	if err != nil {
-		println(err.Error())
+		fmt.Println("Error: ", err)
 		return
 	}
 
 	err = goey.Run(createWindow)
 	if err != nil {
-		fmt.Println("Error: ", err.Error())
+		fmt.Println("Error: ", err)
 	}
 }
 

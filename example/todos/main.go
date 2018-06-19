@@ -29,7 +29,7 @@ func createWindow() error {
 func update() {
 	err := mainWindow.SetChildren(render())
 	if err != nil {
-		println("Error: ", err.Error())
+		fmt.Println("Error: ", err)
 	}
 }
 
