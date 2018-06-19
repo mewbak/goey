@@ -39,7 +39,6 @@ func (w *DateInput) mount(parent Control) (Element, error) {
 		10, 10, 100, 100,
 		parent.hWnd, 0, 0, nil)
 	if hwnd == 0 {
-		println("...")
 		err := syscall.GetLastError()
 		if err == nil {
 			return nil, syscall.EINVAL
@@ -63,10 +62,10 @@ func (w *DateInput) mount(parent Control) (Element, error) {
 	subclassWindowProcedure(hwnd, &oldDateTimePickWindowProc, syscall.NewCallback(dateinputWindowProc))
 
 	retval := &mountedDateInput{
-		Control: Control{hwnd},
-		onChange:     w.OnChange,
-		onFocus:      w.OnFocus,
-		onBlur:       w.OnBlur,
+		Control:  Control{hwnd},
+		onChange: w.OnChange,
+		onFocus:  w.OnFocus,
+		onBlur:   w.OnBlur,
 	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
