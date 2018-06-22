@@ -5,7 +5,7 @@
 // as their C API counterpart.
 //
 // This package is intended for internal use.
-package goey
+package syscall
 
 import (
 	"github.com/lxn/win"

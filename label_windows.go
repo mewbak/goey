@@ -54,7 +54,7 @@ type mountedLabel struct {
 	text []uint16
 }
 
-func (w *mountedLabel) MeasureWidth() (Length, Length) {
+func (w *mountedLabel) preferredWidth() Length {
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
@@ -64,18 +64,27 @@ func (w *mountedLabel) MeasureWidth() (Length, Length) {
 	win.ReleaseDC(w.hWnd, hdc)
 
 	retval := FromPixelsX(int(rect.Right))
-	return retval, retval
-}
-
-func (w *mountedLabel) MeasureHeight(width Length) (Length, Length) {
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 13 * DIP, 13 * DIP
+	return retval
 }
 
 func (w *mountedLabel) Props() Widget {
 	return &Label{
 		Text: w.Control.Text(),
 	}
+}
+
+func (w *mountedLabel) Layout(bc Box) Size {
+	// Determine ideal width.
+	width := w.preferredWidth()
+	height := 13 * DIP
+	return bc.Constrain(Size{width, height})
+}
+
+func (w *mountedLabel) MinimumSize() Size {
+	// Determine ideal width.
+	width := w.preferredWidth()
+	height := 13 * DIP
+	return Size{width, height}
 }
 
 func (w *mountedLabel) SetBounds(bounds Rectangle) {

@@ -28,20 +28,22 @@ func createWindow() error {
 	if err != nil {
 		return err
 	}
+	mw.SetScroll(false,true)
 	mainWindow = mw
 	return nil
 }
 
 func updateWindow() {
-	err := mainWindow.SetChildren(render())
+	err := mainWindow.SetChild(render())
 	if err != nil {
 		fmt.Println("Error: ", err.Error())
 	}
 }
 
-func render() []goey.Widget {
-	return []goey.Widget{
-		&goey.VBox{
+func render() goey.Widget {
+	return &goey.Padding{
+		Insets: goey.DefaultInsets(),
+		Child: &goey.VBox{
 			Children: []goey.Widget{
 				&goey.Label{Text: "This is the most important field:"},
 				&goey.TextArea{Value: text[0], Placeholder: "You should type something here.",
@@ -63,10 +65,10 @@ func render() []goey.Widget {
 					OnFocus: onfocus(2),
 					OnBlur:  onblur(2),
 				},
+				&goey.HR{},
+				&goey.Label{Text: "The total character count is:  " + strconv.Itoa(characterCount[0]+characterCount[1])},
 			},
 		},
-		&goey.HR{},
-		&goey.Label{Text: "The total character count is:  " + strconv.Itoa(characterCount[0]+characterCount[1])},
 	}
 }
 

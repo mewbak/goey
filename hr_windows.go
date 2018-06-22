@@ -71,14 +71,11 @@ type mountedHR struct {
 	Control
 }
 
-func (w *mountedHR) MeasureWidth() (Length, Length) {
-	return 1, 10000 * DIP
-}
-
-func (w *mountedHR) MeasureHeight(width Length) (Length, Length) {
-	// Same as static text
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 13 * DIP, 13 * DIP
+func (*mountedHR) Layout(bc Box) Size {
+	if bc.HasBoundedWidth() {
+		return bc.Constrain(Size{bc.Max.Width, 13 * DIP})
+	}
+	return bc.Constrain(Size{bc.Min.Width, 13 * DIP})
 }
 
 func hrWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (result uintptr) {

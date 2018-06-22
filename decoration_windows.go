@@ -51,11 +51,11 @@ func (w *Decoration) mount(parent Control) (Element, error) {
 		return nil, err
 	}
 
-	retval := &mountedDecoration{
+	retval := &decorationElement{
 		Control: Control{hwnd},
 		fill:    w.Fill,
 		stroke:  w.Stroke,
-		padding: w.Padding,
+		insets:  w.Insets,
 		radius:  w.Radius,
 		hBrush:  createBrush(w.Fill),
 		hPen:    createPen(w.Stroke),
@@ -74,16 +74,17 @@ func (w *Decoration) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-type mountedDecoration struct {
+type decorationElement struct {
 	Control
-	fill    color.RGBA
-	stroke  color.RGBA
-	padding Padding
-	radius  Length
-	hBrush  win.HBRUSH
-	hPen    win.HPEN
+	fill   color.RGBA
+	stroke color.RGBA
+	insets Insets
+	radius Length
+	hBrush win.HBRUSH
+	hPen   win.HPEN
 
-	child Element
+	child     Element
+	childSize Size
 }
 
 func createBrush(clr color.RGBA) win.HBRUSH {
@@ -143,57 +144,32 @@ func createPen(clr color.RGBA) win.HPEN {
 	return win.ExtCreatePen(win.PS_COSMETIC|win.PS_SOLID, 1, &lb, 0, nil)
 }
 
-func (w *mountedDecoration) Close() {
+func (w *decorationElement) Close() {
 	w.child.Close()
 	w.Control.Close()
 }
 
-func (w *mountedDecoration) MeasureWidth() (Length, Length) {
-	if w.child != nil {
-		px := FromPixelsX(1)
-		min, max := w.child.MeasureWidth()
-		min += 2*px + w.padding.Left + w.padding.Right
-		max += 2*px + w.padding.Left + w.padding.Right
-		return min, max
-	}
-
-	return 13 * DIP, 13 * DIP
-}
-
-func (w *mountedDecoration) MeasureHeight(width Length) (Length, Length) {
-	if w.child != nil {
-		px := FromPixelsX(1)
-		py := FromPixelsY(1)
-		min, max := w.child.MeasureHeight(width - 2*px)
-		min += 2*py + w.padding.Top + w.padding.Bottom
-		max += 2*py + w.padding.Top + w.padding.Bottom
-		return min, max
-	}
-
-	return 13 * DIP, 13 * DIP
-}
-
-func (w *mountedDecoration) SetBounds(bounds Rectangle) {
+func (w *decorationElement) SetBounds(bounds Rectangle) {
 	// Update background control position
 	w.Control.SetBounds(bounds)
 
 	px := FromPixelsX(1)
 	py := FromPixelsY(1)
 	position := bounds.Min
-	bounds.Min.X += px + w.padding.Left - position.X
-	bounds.Min.Y += py + w.padding.Top - position.Y
-	bounds.Max.X -= px + w.padding.Right + position.X
-	bounds.Max.Y -= py + w.padding.Bottom + position.Y
+	bounds.Min.X += px + w.insets.Left - position.X
+	bounds.Min.Y += py + w.insets.Top - position.Y
+	bounds.Max.X -= px + w.insets.Right + position.X
+	bounds.Max.Y -= py + w.insets.Bottom + position.Y
 	w.child.SetBounds(bounds)
 }
 
-func (w *mountedDecoration) SetOrder(previous win.HWND) win.HWND {
+func (w *decorationElement) SetOrder(previous win.HWND) win.HWND {
 	previous = w.Control.SetOrder(previous)
 	previous = w.child.SetOrder(previous)
 	return previous
 }
 
-func (w *mountedDecoration) updateProps(data *Decoration) error {
+func (w *decorationElement) updateProps(data *Decoration) error {
 	if w.fill != data.Fill {
 		// Free the old brush
 		if w.hBrush != 0 {
@@ -220,7 +196,7 @@ func (w *mountedDecoration) updateProps(data *Decoration) error {
 		w.stroke = data.Stroke
 	}
 
-	w.padding = data.Padding
+	w.insets = data.Insets
 	w.radius = data.Radius
 
 	child, err := DiffChild(Control{w.hWnd}, w.child, data.Child)
@@ -237,7 +213,7 @@ func wndprocDecoration(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr
 	case win.WM_PAINT:
 		// Fill with the proper background color
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedDecoration)(unsafe.Pointer(w))
+			ptr := (*decorationElement)(unsafe.Pointer(w))
 
 			ps := win.PAINTSTRUCT{}
 			cr := win.RECT{}

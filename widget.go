@@ -44,12 +44,10 @@ type Element interface {
 	// Kind returns the concrete type for the Element.
 	// Users should not need to use this method directly.
 	Kind() *Kind
-	// MeasureWidth returns the minimum and maximum comfortable widths for
-	// this widget.
-	MeasureWidth() (min Length, max Length)
-	// MeasureHeight returns the minimum and maximum comfortable heights for
-	// this widget.
-	MeasureHeight(width Length) (min Length, max Length)
+	// Layout determines the best size for an element that sastisfies the constraints.
+	Layout(Box) Size
+	// MinimumSize reports the minimum dimensions for an element that will comfortably fit its contents.
+	MinimumSize() Size
 	// SetBounds updates the position of the widget.
 	SetBounds(bounds Rectangle)
 	// UpdateProps will update the properties of the widget.  The Kind for
@@ -90,20 +88,20 @@ func calculateVGap(previous Element, current Element) Length {
 		// be 'associated'.
 		return 5 * DIP
 	}
-	if _, ok := previous.(*mountedCheckbox); ok {
+	/*if _, ok := previous.(*mountedCheckbox); ok {
 		if _, ok := current.(*mountedCheckbox); ok {
 			// Any pair of successive checkboxes will be assumed to be in a
 			// related group.
 			return 7 * DIP
 		}
-	}
+	}*/
 
 	// The spacing between unrelated controls.  This is also the default space
 	// between paragraphs of text.
 	return 11 * DIP
 }
 
-func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight Length, minHeight Length, maxHeight Length) (extraGap Length, posY Length, scale1 int, scale2 int) {
+/*func distributeVSpace(align MainAxisAlign, childrenCount int, actualHeight Length, minHeight Length, maxHeight Length) (extraGap Length, posY Length, scale1 int, scale2 int) {
 	if actualHeight < minHeight {
 		println("actualHeight:", actualHeight.String())
 		println("minHeight:", minHeight.String())
@@ -200,4 +198,4 @@ func verifyLengthRange(min, max Length) {
 		panic("verify length range, max < min ")
 
 	}
-}
+}*/

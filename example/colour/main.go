@@ -70,7 +70,7 @@ func createWindow() error {
 	if err != nil {
 		return err
 	}
-	mw.SetAlignment(goey.MainCenter, goey.CrossCenter)
+	mw.SetScroll(false, true)
 	mainWindow = mw
 
 	// Set the icon
@@ -81,7 +81,7 @@ func createWindow() error {
 }
 
 func update() {
-	err := mainWindow.SetChildren(render())
+	err := mainWindow.SetChild(render())
 	if err != nil {
 		fmt.Println("Error: ", err.Error())
 	}
@@ -90,19 +90,23 @@ func update() {
 	mainWindow.SetIcon(img)
 }
 
-func render() []goey.Widget {
+func render() goey.Widget {
 	img, description := selectImage(clickCount)
 
-	return []goey.Widget{
-		&goey.Button{Text: "Change the colour", OnClick: func() {
-			clickCount++
-			update()
-		}},
-		&goey.Img{
-			Image:  img,
-			Width:  (1 * goey.DIP).Scale(img.Bounds().Dx(), 1),
-			Height: (1 * goey.DIP).Scale(img.Bounds().Dy(), 1),
+	return &goey.VBox{
+		AlignMain:  goey.MainCenter,
+		AlignCross: goey.CrossCenter,
+		Children: []goey.Widget{
+			&goey.Button{Text: "Change the colour", OnClick: func() {
+				clickCount++
+				update()
+			}},
+			&goey.Img{
+				Image:  img,
+				Width:  (1 * goey.DIP).Scale(img.Bounds().Dx(), 1),
+				Height: (1 * goey.DIP).Scale(img.Bounds().Dy(), 1),
+			},
+			&goey.P{Text: description},
 		},
-		&goey.P{Text: description},
 	}
 }

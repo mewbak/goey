@@ -31,14 +31,13 @@ func createWindow() error {
 	if err != nil {
 		return err
 	}
-	mw.SetAlignment(alignMain, alignCross)
 	mainWindow = mw
 
 	return nil
 }
 
 func updateWindow() {
-	err := mainWindow.SetChildren(render())
+	err := mainWindow.SetChild(render())
 	if err != nil {
 		fmt.Println("Error: ", err.Error())
 	}
@@ -49,7 +48,6 @@ func cycleMainAxisAlign() {
 	if alignMain > goey.SpaceBetween {
 		alignMain = goey.MainStart
 	}
-	mainWindow.SetAlignment(alignMain, alignCross)
 	updateWindow()
 }
 
@@ -58,7 +56,6 @@ func cycleCrossAxisAlign() {
 	if alignCross > goey.CrossEnd {
 		alignCross = goey.Stretch
 	}
-	mainWindow.SetAlignment(alignMain, alignCross)
 	updateWindow()
 }
 
@@ -74,30 +71,37 @@ func onblur(ndx int) func() {
 	}
 }
 
-func render() []goey.Widget {
+func render() goey.Widget {
 	text := "Click me!"
 	if clickCount > 0 {
 		text = text + "  (" + strconv.Itoa(clickCount) + ")"
 	}
-	return []goey.Widget{
-		&goey.Button{Text: text,
-			Default: true,
-			OnClick: func() {
-				clickCount++
-				updateWindow()
+	return &goey.Padding{
+		Insets: goey.DefaultInsets(),
+		Child: &goey.VBox{
+			AlignMain:  alignMain,
+			AlignCross: alignCross,
+			Children: []goey.Widget{
+				&goey.Button{Text: text,
+					Default: true,
+					OnClick: func() {
+						clickCount++
+						updateWindow()
+					},
+					OnFocus: onfocus(1),
+					OnBlur:  onblur(1),
+				},
+				&goey.Button{Text: "Extra button",
+					OnClick: cycleMainAxisAlign,
+					OnFocus: onfocus(2),
+					OnBlur:  onblur(2),
+				},
+				&goey.Button{Text: "Cycle cross axis align",
+					OnClick: cycleCrossAxisAlign,
+					OnFocus: onfocus(3),
+					OnBlur:  onblur(3),
+				},
 			},
-			OnFocus: onfocus(1),
-			OnBlur:  onblur(1),
-		},
-		&goey.Button{Text: "Extra button",
-			OnClick: cycleMainAxisAlign,
-			OnFocus: onfocus(2),
-			OnBlur:  onblur(2),
-		},
-		&goey.Button{Text: "Cycle cross axis align",
-			OnClick: cycleCrossAxisAlign,
-			OnFocus: onfocus(3),
-			OnBlur:  onblur(3),
 		},
 	}
 }

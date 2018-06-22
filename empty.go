@@ -33,18 +33,19 @@ func (*mountedEmpty) Kind() *Kind {
 	return &emptyKind
 }
 
-func (w *mountedEmpty) MeasureWidth() (Length, Length) {
-	return 13 * DIP, 13 * DIP
-}
-
-func (w *mountedEmpty) MeasureHeight(width Length) (Length, Length) {
-	// Same as static text
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 13 * DIP, 13 * DIP
-}
-
 func (w *mountedEmpty) Props() Widget {
 	return &Empty{}
+}
+
+func (w *mountedEmpty) Layout(bc Box) Size {
+	// Determine ideal width.
+	return bc.Constrain(Size{13 * DIP, 13 * DIP})
+}
+
+func (w *mountedEmpty) MinimumSize() Size {
+	// Same as static text
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	return Size{13 * DIP, 13 * DIP}
 }
 
 func (w *mountedEmpty) SetBounds(bounds Rectangle) {

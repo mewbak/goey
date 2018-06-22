@@ -29,6 +29,14 @@ func (w *mountedHR) Props() Widget {
 	return &HR{}
 }
 
+func (w *mountedHR) MinimumSize() Size {
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+
+	width := 13 * DIP
+	height := 13 * DIP
+	return Size{width, height}
+}
+
 func (w *mountedHR) UpdateProps(data Widget) error {
 	// This widget does not have any properties, so there cannot be anything
 	// to update.

@@ -105,7 +105,12 @@ func (w *Img) mount(parent Control) (Element, error) {
 	}
 	win.SendMessage(hwnd, win2.STM_SETIMAGE, win.IMAGE_BITMAP, uintptr(hbitmap))
 
-	retval := &mountedImg{Control: Control{hwnd}, imageData: buffer, width: w.Width, height: w.Height}
+	retval := &mountedImg{
+		Control:   Control{hwnd},
+		imageData: buffer,
+		width:     w.Width,
+		height:    w.Height,
+	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
@@ -113,16 +118,19 @@ func (w *Img) mount(parent Control) (Element, error) {
 
 type mountedImg struct {
 	Control
-	imageData     []uint8
-	width, height Length
+	imageData []uint8
+	width     Length
+	height    Length
 }
 
-func (w *mountedImg) MeasureWidth() (Length, Length) {
-	return w.width, w.width
+func (w *mountedImg) Layout(bc Box) Size {
+	// Determine ideal width.
+	return bc.ConstrainAndAttemptToPreserveAspectRatio(Size{w.width, w.height})
 }
 
-func (w *mountedImg) MeasureHeight(width Length) (Length, Length) {
-	return w.height, w.height
+func (w *mountedImg) MinimumSize() Size {
+	// Determine ideal width.
+	return Size{w.width, w.height}
 }
 
 func (w *mountedImg) SetBounds(bounds Rectangle) {

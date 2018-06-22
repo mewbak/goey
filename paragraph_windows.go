@@ -8,17 +8,17 @@ import (
 )
 
 var (
-	paragraphMinWidth int
-	paragraphMaxWidth int
+	paragraphMinWidth Length
+	paragraphMaxWidth Length
 )
 
 func (w *P) calcStyle() uint32 {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.SS_LEFT)
-	if w.Align == Center {
+	if w.Align == JustifyCenter {
 		style = style | win.SS_CENTER
-	} else if w.Align == Right {
+	} else if w.Align == JustifyRight {
 		style = style | win.SS_RIGHT
-	} else if w.Align == Justify {
+	} else if w.Align == JustifyFull {
 		style = style | win.SS_RIGHTJUST
 	}
 	return style
@@ -68,41 +68,11 @@ func paragraphMeasureReflowLimits(hwnd win.HWND) {
 	caption := [...]uint16{'m'}
 	win.DrawTextEx(hdc, &caption[0], 1, &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(hwnd, hdc)
-	paragraphMinWidth = int(rect.Right) * 20
-	paragraphMaxWidth = int(rect.Right) * 80
+	paragraphMinWidth = FromPixelsX(int(rect.Right)) * 20
+	paragraphMaxWidth = FromPixelsY(int(rect.Right)) * 80
 }
 
-func (w *mountedP) MeasureWidth() (Length, Length) {
-	// If the printed text will be more than 80 characters wide, it will start
-	// to impact readability.  We want to force reflow in this case, so we limit
-	// the width
-	//
-	// See the following for the conversion from characters to relative pixels.
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	if paragraphMaxWidth == 0 {
-		paragraphMeasureReflowLimits(w.hWnd)
-	}
-
-	hdc := win.GetDC(w.hWnd)
-	if hMessageFont != 0 {
-		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
-	}
-	rect := win.RECT{0, 0, 0x7fffffff, 0x7fffffff}
-	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
-	win.ReleaseDC(w.hWnd, hdc)
-
-	// For reflow if the text is more than 60 characters wide
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	if int(rect.Right) > paragraphMinWidth {
-		return FromPixelsX(paragraphMinWidth), FromPixelsX(paragraphMaxWidth)
-	}
-
-	// Not enough text for reflow.
-	retval := FromPixelsX(int(rect.Right))
-	return retval, retval
-}
-
-func (w *mountedP) MeasureHeight(width Length) (Length, Length) {
+func (w *mountedP) measureHeight(width Length) Length {
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
@@ -111,25 +81,57 @@ func (w *mountedP) MeasureHeight(width Length) (Length, Length) {
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	retval := FromPixelsY(int(rect.Bottom))
-	return retval, retval
+	return FromPixelsY(int(rect.Bottom))
 }
 
 func (w *mountedP) Props() Widget {
-
-	align := Left
+	align := JustifyLeft
 	if style := win.GetWindowLong(w.hWnd, win.GWL_STYLE); style&win.SS_CENTER == win.SS_CENTER {
-		align = Center
+		align = JustifyCenter
 	} else if style&win.SS_RIGHT == win.SS_RIGHT {
-		align = Right
+		align = JustifyRight
 	} else if style&win.SS_RIGHTJUST == win.SS_RIGHTJUST {
-		align = Justify
+		align = JustifyFull
 	}
 
 	return &P{
 		Text:  w.Control.Text(),
 		Align: align,
 	}
+}
+
+func (w *mountedP) Layout(bc Box) Size {
+	if bc.HasBoundedWidth() {
+		width := bc.ConstrainWidth(paragraphMaxWidth)
+		height := w.measureHeight(width)
+		return Size{width, bc.ConstrainHeight(height)}
+	}
+
+	if bc.HasBoundedHeight() {
+		panic("not implemented")
+	}
+
+	// The correct strategy for other cases is not yet clear.
+	if bc.Min.Width > 0 {
+		width := bc.ConstrainWidth(bc.Min.Width)
+		height := w.measureHeight(width)
+		return Size{width, bc.ConstrainHeight(height)}
+
+	}
+
+	panic("not implemented")
+}
+
+func (w *mountedP) MinimumSize() Size {
+	// As the width is narrowed, the paragraph will get higher.  Unlike other
+	// widgets, a single minimum size does not really work very well.
+	if paragraphMaxWidth == 0 {
+		paragraphMeasureReflowLimits(w.hWnd)
+	}
+
+	width := paragraphMaxWidth
+	height := w.measureHeight(paragraphMinWidth)
+	return Size{width, height}
 }
 
 func (w *mountedP) SetBounds(bounds Rectangle) {

@@ -35,33 +35,37 @@ func createWindow() error {
 	if err != nil {
 		return err
 	}
-	mw.SetAlignment(goey.MainCenter, goey.CrossCenter)
+	mw.SetScroll(true, true)
 	mainWindow = mw
 
 	return nil
 }
 
 func updateWindow() {
-	err := mainWindow.SetChildren(render())
+	err := mainWindow.SetChild(render())
 	if err != nil {
 		fmt.Println("Error: ", err.Error())
 	}
 }
 
-func render() []goey.Widget {
+func render() goey.Widget {
 	text := "Click me!"
 	if clickCount > 0 {
 		text = text + "  (" + strconv.Itoa(clickCount) + ")"
 	}
-	return []goey.Widget{
-		&goey.Decoration{
-			Fill:    colors[clickCount%4],
-			Padding: goey.EvenPadding(96 * goey.DIP),
-			Radius:  goey.Length(clickCount%16) * (2 * goey.DIP),
-			Child: &goey.Button{Text: text, OnClick: func() {
-				clickCount++
-				updateWindow()
-			}},
+	return &goey.VBox{
+		AlignMain:  goey.MainCenter,
+		AlignCross: goey.CrossCenter,
+		Children: []goey.Widget{
+			&goey.Decoration{
+				Fill:   colors[clickCount%4],
+				Insets: goey.UniformInset(0.5 * 96 * goey.DIP),
+				Radius: goey.Length(clickCount%16) * (2 * goey.DIP),
+				Child: &goey.Button{Text: text, OnClick: func() {
+					clickCount++
+					updateWindow()
+				}},
+			},
 		},
 	}
 }

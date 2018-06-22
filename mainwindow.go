@@ -20,8 +20,8 @@ type Window struct {
 }
 
 // NewWindow create a new top-level window for the application.
-func NewWindow(title string, children []Widget) (*Window, error) {
-	return newWindow(title, children)
+func NewWindow(title string, child Widget) (*Window, error) {
+	return newWindow(title, child)
 }
 
 // Close destroys the window, and releases all associated resources.
@@ -29,16 +29,23 @@ func (w *Window) Close() {
 	w.close()
 }
 
-// Alignment returns the vertical and horiztonal alignment properties of
-// the window.
-func (w *Window) Alignment() (MainAxisAlign, CrossAxisAlign) {
-	return w.getAlignment()
+// Child returns the mounted child for the window.  In general, this
+// method should not be used.
+func (w *Window) Child() Element {
+	return w.getChild()
 }
 
-// Children returns the mounted children for the window.  In general, this
-// method should not be used.
-func (w *Window) Children() []Element {
-	return w.getChildren()
+func (w *Window) children() []Element {
+	child := w.getChild()
+	if child == nil {
+		return nil
+	}
+
+	if vbox, ok := child.(*mountedVBox); ok {
+		return vbox.children
+	}
+
+	return nil
 }
 
 // Message returns a message constructor that can be used to build and then
@@ -49,11 +56,8 @@ func (w *Window) Message(text string) *Message {
 	return ret
 }
 
-// SetAlignment changes the vertical and horiztonal alignment properties of
-// the window.  These properties affect the layout of child widgets.  The
-// main axis for alignment is vertical, with the cross axis being horizontal.
-func (w *Window) SetAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
-	return w.setAlignment(main, cross)
+func (w *Window) Scroll() (horizontal, vertical bool) {
+	return w.horizontalScroll, w.verticalScroll
 }
 
 // SetChildren changes the child windows and widgets of the window.  As
@@ -61,7 +65,7 @@ func (w *Window) SetAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
 // match the widgets described by the parameter children.  The
 // position of contained widgets will be updated to match the new layout
 // properties.
-func (w *Window) SetChildren(children []Widget) error {
+func (w *Window) SetChild(child Widget) error {
 	// One source of bugs in widgets is when the fire an event when being
 	// updated.  This can lead to reentrant calls to SetChildren, typically
 	// with incorrect information since the GUI is in an inconsistent state
@@ -78,12 +82,17 @@ func (w *Window) SetChildren(children []Widget) error {
 	}()
 
 	// Defer to the platform-specific code
-	return w.setChildren(children)
+	return w.setChild(child)
 }
 
 // SetIcon changes the icon associated with the window.
 func (w *Window) SetIcon(img image.Image) error {
 	return w.setIcon(img)
+}
+
+// SetScroll sets whether scrolling is allowed in the horizontal and vertical directions
+func (w *Window) SetScroll(horizontal, vertical bool) {
+	w.setScroll(horizontal, vertical)
 }
 
 // SetTitle changes the caption in the title bar for the main window.

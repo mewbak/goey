@@ -87,9 +87,8 @@ func (w *mountedButton) Props() Widget {
 	}
 }
 
-func (w *mountedButton) MeasureWidth() (Length, Length) {
+func (w *mountedButton) preferredWidth() Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
@@ -100,15 +99,24 @@ func (w *mountedButton) MeasureWidth() (Length, Length) {
 
 	retval := FromPixelsX(int(rect.Right) + 7)
 	if retval < 75*DIP {
-		return 75 * DIP, 75 * DIP
+		return 75 * DIP
 	}
 
-	return retval, retval
+	return retval
 }
 
-func (w *mountedButton) MeasureHeight(width Length) (Length, Length) {
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23 * DIP, 23 * DIP
+func (w *mountedButton) Layout(bc Box) Size {
+	// Determine ideal width.
+	width := w.preferredWidth()
+	height := 23 * DIP
+	return bc.Constrain(Size{width, height})
+}
+
+func (w *mountedButton) MinimumSize() Size {
+	// Determine ideal width.
+	width := w.preferredWidth()
+	height := 23 * DIP
+	return Size{width, height}
 }
 
 func (w *mountedButton) updateProps(data *Button) error {

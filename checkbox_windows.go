@@ -70,7 +70,7 @@ func (w *mountedCheckbox) Props() Widget {
 	}
 }
 
-func (w *mountedCheckbox) MeasureWidth() (Length, Length) {
+func (w *mountedCheckbox) preferredWidth() Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 
 	hdc := win.GetDC(w.hWnd)
@@ -81,17 +81,21 @@ func (w *mountedCheckbox) MeasureWidth() (Length, Length) {
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	retval := FromPixelsX(int(rect.Right) + 17)
-	if retval < 75*DIP {
-		return 75 * DIP, 75 * DIP
-	}
-
-	return retval, retval
+	return FromPixelsX(int(rect.Right)) + 17
 }
 
-func (w *mountedCheckbox) MeasureHeight(width Length) (Length, Length) {
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 17 * DIP, 17 * DIP
+func (w *mountedCheckbox) Layout(bc Box) Size {
+	// Determine ideal width.
+	width := w.preferredWidth()
+	height := 17 * DIP
+	return bc.Constrain(Size{width, height})
+}
+
+func (w *mountedCheckbox) MinimumSize() Size {
+	// Determine ideal width.
+	width := w.preferredWidth()
+	height := 17 * DIP
+	return Size{width, height}
 }
 
 func (w *mountedCheckbox) updateProps(data *Checkbox) error {

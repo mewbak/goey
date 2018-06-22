@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"time"
+	//"time"
+	"image/color"
 
 	"bitbucket.org/rj/goey"
 )
@@ -26,17 +27,18 @@ func createWindow() error {
 	if err != nil {
 		return err
 	}
+	w.SetScroll(false, true)
 	window = w
 	return nil
 }
 
 func updateWindow() {
-	window.SetChildren(renderWindow())
+	window.SetChild(renderWindow())
 }
 
-func renderWindow() []goey.Widget {
+func renderWindow() goey.Widget {
 	// Fixed part at top
-	ret := []goey.Widget{
+	widgets := []goey.Widget{
 		&goey.Checkbox{Text: "Show text of lorem ipsum.", Value: showLorem, OnChange: func(ok bool) {
 			showLorem = ok
 			updateWindow()
@@ -46,12 +48,12 @@ func renderWindow() []goey.Widget {
 
 	// Depends
 	if showLorem {
-		ret = append(ret,
+		widgets = append(widgets,
 			&goey.P{Text: lorem},
 		)
 	} else {
-		ret = append(ret,
-			&goey.P{Text: "This is a paragraph, but without much text.", Align: goey.Center},
+		widgets = append(widgets,
+			/*&goey.P{Text: "This is a paragraph, but without much text.", Align: goey.JustifyCenter},
 			&goey.Label{Text: "Text input:"},
 			&goey.TextInput{Value: "Some input...", Placeholder: "Type some text here.  And some more.  And something really long.",
 				OnChange: func(v string) { println("text input ", v) }, OnEnterKey: func(v string) { println("t1* ", v) }},
@@ -64,7 +66,7 @@ func renderWindow() []goey.Widget {
 			&goey.Label{Text: "Date input:"},
 			&goey.DateInput{Value: time.Now().Add(24 * time.Hour),
 				OnChange: func(v time.Time) { println("date input: ", v.String()) }},
-			&goey.HR{},
+			&goey.HR{},*/
 			&goey.HBox{Children: []goey.Widget{
 				&goey.Button{Text: "C1", Default: true},
 				&goey.Button{Text: "C2"},
@@ -76,13 +78,16 @@ func renderWindow() []goey.Widget {
 			},
 				AlignMain: goey.MainEnd,
 			},
-			&goey.HR{},
+			/*&goey.HR{},
 			&goey.SelectInput{Items: []string{"Choice 1", "Choice 2", "Choice 3"},
 				OnChange: func(v int) { println("select input: ", v) }},
 			&goey.TextArea{Value: "", Placeholder: "Room to write",
-				OnChange: func(v string) { println("text area: ", v) }},
+				OnChange: func(v string) { println("text area: ", v) }},*/
 		)
 	}
 
-	return ret
+	return &goey.Padding{
+		Insets: goey.DefaultInsets(),
+		Child:  &goey.Decoration{Stroke: color.RGBA{255, 0, 0, 255}, Child: &goey.VBox{Children: widgets}},
+	}
 }

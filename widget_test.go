@@ -18,7 +18,7 @@ func testingRenderWidgets(t *testing.T, widgets []Widget) {
 		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
 		}
-		window, err := NewWindow(t.Name(), widgets)
+		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
 		if err != nil {
 			t.Errorf("Failed to create window, %s", err)
 			return nil
@@ -33,7 +33,7 @@ func testingRenderWidgets(t *testing.T, widgets []Widget) {
 		}
 
 		// Check that the controls that were mounted match with the list
-		if children := window.Children(); children != nil {
+		if children := window.children(); children != nil {
 			if len(children) != len(widgets) {
 				t.Errorf("Wanted len(children) == len(widgets), got %d and %d", len(children), len(widgets))
 			} else {
@@ -94,7 +94,7 @@ func testingCheckFocusAndBlur(t *testing.T, widgets []Widget) {
 	}
 
 	init := func() error {
-		window, err := NewWindow(t.Name(), widgets)
+		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
 		if err != nil {
 			t.Errorf("Failed to create window, %s", err)
 		}
@@ -140,7 +140,7 @@ func testingUpdateWidgets(t *testing.T, widgets []Widget, update []Widget) {
 		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
 		}
-		window, err := NewWindow(t.Name(), widgets)
+		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
 		if err != nil {
 			t.Errorf("Failed to create window, %s", err)
 			return nil
@@ -155,18 +155,18 @@ func testingUpdateWidgets(t *testing.T, widgets []Widget, update []Widget) {
 		}
 
 		// Check that the controls that were mounted match with the list
-		if len(window.Children()) != len(widgets) {
+		if len(window.children()) != len(widgets) {
 			t.Errorf("Want len(window.Children())!=nil")
 		}
 
-		err = window.SetChildren(update)
+		err = window.SetChild(&VBox{Children: update})
 		if err != nil {
 			t.Errorf("Failed to set children, %s", err)
 			return nil
 		}
 
 		// Check that the controls that were mounted match with the list
-		if children := window.Children(); children != nil {
+		if children := window.children(); children != nil {
 			if len(children) != len(update) {
 				t.Errorf("Wanted len(children) == len(widgets), got %d and %d", len(children), len(widgets))
 			} else {

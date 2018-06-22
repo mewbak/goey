@@ -13,11 +13,11 @@ func ExampleButton() {
 	var mainWindow *Window
 	// These functions are used to update the GUI.  See below
 	var update func()
-	var render func() []Widget
+	var render func() Widget
 
 	// Update function
 	update = func() {
-		err := mainWindow.SetChildren(render())
+		err := mainWindow.SetChild(render())
 		if err != nil {
 			panic(err)
 		}
@@ -25,19 +25,22 @@ func ExampleButton() {
 
 	// Render function generates a tree of Widgets to describe the desired
 	// state of the GUI.
-	render = func() []Widget {
+	render = func() Widget {
 		// Prep - text for the button
 		text := "Click me!"
 		if clickCount > 0 {
 			text = text + "  (" + strconv.Itoa(clickCount) + ")"
 		}
 		// The GUI contains a single widget, this button.
-		return []Widget{
-			&Button{Text: text, OnClick: func() {
-				clickCount++
-				update()
-			}},
-		}
+		return &VBox{
+			AlignMain:  MainCenter,
+			AlignCross: CrossCenter,
+			Children: []Widget{
+				&Button{Text: text, OnClick: func() {
+					clickCount++
+					update()
+				}},
+			}}
 	}
 }
 

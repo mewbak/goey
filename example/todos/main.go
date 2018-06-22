@@ -22,18 +22,19 @@ func createWindow() error {
 	if err != nil {
 		return err
 	}
+	mw.SetScroll(false, false)
 	mainWindow = mw
 	return nil
 }
 
 func update() {
-	err := mainWindow.SetChildren(render())
+	err := mainWindow.SetChild(render())
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 }
 
-func render() []goey.Widget {
+func render() goey.Widget {
 	labelText := "What needs to be done?"
 	if len(Model) > 0 {
 		labelText = labelText + "  (" + strconv.Itoa(len(Model)) + ")"
@@ -72,10 +73,13 @@ func render() []goey.Widget {
 		}
 	}
 
-	return widgets
+	return &goey.Padding{
+		Insets: goey.DefaultInsets(),
+		Child:  &goey.VBox{Children: widgets},
+	}
 }
 
 func onNewTodoItem(value string) {
 	Model = append(Model, TodoItem{Text: value})
-	mainWindow.SetChildren(render())
+	update()
 }

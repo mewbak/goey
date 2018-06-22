@@ -6,9 +6,9 @@ var (
 
 // HBox describes a layout widget that arranges its child widgets into a horizontal row.
 type HBox struct {
-	Children   []Widget
 	AlignMain  MainAxisAlign
 	AlignCross CrossAxisAlign
+	Children   []Widget
 }
 
 // Kind returns the concrete type for use in the Widget interface.
@@ -31,9 +31,12 @@ func (w *HBox) Mount(parent Control) (Element, error) {
 		c = append(c, mountedChild)
 	}
 
-	return &mountedHBox{parent: parent, children: c,
-		alignMain:  w.AlignMain,
-		alignCross: w.AlignCross,
+	return &mountedHBox{
+		parent:       parent,
+		children:     c,
+		alignMain:    w.AlignMain,
+		alignCross:   w.AlignCross,
+		childrenSize: make([]Size, len(c)),
 	}, nil
 }
 
@@ -47,8 +50,9 @@ type mountedHBox struct {
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
 
-	minimumWidth Length
-	maximumWidth Length
+	childrenSize []Size
+	totalWidth   Length
+	minimumSize  Size
 }
 
 func (w *mountedHBox) Close() {
@@ -56,107 +60,161 @@ func (w *mountedHBox) Close() {
 	w.children = nil
 }
 
-func (w *mountedHBox) MeasureWidth() (Length, Length) {
-	if len(w.children) == 0 {
-		return 0, 0
+func (w *mountedHBox) Layout(bc Box) Size {
+	if w.children == nil {
+		w.totalWidth = 0
+		return Size{}
 	}
 
-	previous := w.children[0]
-	min, max := previous.MeasureWidth()
-	verifyLengthRange(min, max)
-	for _, v := range w.children[1:] {
-		gap := calculateHGap(previous, v)
-		previous = v
-		tmpMin, tmpMax := v.MeasureWidth()
-		verifyLengthRange(tmpMin, tmpMax)
-
-		min = min + tmpMin + gap
-		max = max + tmpMax + gap
+	// Determine the constraints for layout of child elements.
+	cbc := bc.LoosenWidth()
+	if w.alignCross == Stretch {
+		if cbc.HasBoundedHeight() {
+			cbc = cbc.TightenHeight(cbc.Max.Height)
+		} else {
+			size := w.MinimumSize()
+			cbc = cbc.TightenHeight(max(cbc.Min.Height, size.Height))
+		}
+	} else {
+		cbc = cbc.LoosenHeight()
 	}
-	w.minimumWidth = min
-	w.maximumWidth = max
-	return min, max
+
+	width := Length(0)
+	minHeight := Length(0)
+	previous := Element(nil)
+	for i, v := range w.children {
+		if i > 0 {
+			if w.alignMain.IsPacked() {
+				width += calculateHGap(previous, v)
+			}
+			previous = v
+		}
+		w.childrenSize[i] = v.Layout(cbc)
+		minHeight = max(minHeight, w.childrenSize[i].Height)
+		width += w.childrenSize[i].Width
+	}
+	w.totalWidth = width
+
+	if w.alignCross == Stretch {
+		return bc.Constrain(Size{width, cbc.Min.Height})
+	}
+	return bc.Constrain(Size{width, minHeight})
 }
 
-func (w *mountedHBox) MeasureHeight(width Length) (Length, Length) {
-	if len(w.children) == 0 {
-		return 0, 0
+func (w *mountedHBox) MinimumSize() Size {
+	if w.children == nil {
+		return Size{}
 	}
 
-	if w.minimumWidth == 0 {
-		w.MeasureWidth()
-		if w.minimumWidth == 0 {
-			return 0, 0
+	if !w.minimumSize.IsZero() {
+		return w.minimumSize
+	}
+
+	size := w.children[0].MinimumSize()
+	if w.alignMain.IsPacked() {
+		previous := w.children[0]
+		for _, v := range w.children[1:] {
+			// Add the preferred gap between this pair of widgets
+			size.Width += calculateHGap(previous, v)
+			// Find minimum size for this widget, and update
+			tmp := v.MinimumSize()
+			size.Height = max(size.Height, tmp.Height)
+			size.Width += tmp.Width
+		}
+	} else {
+		for _, v := range w.children[1:] {
+			// Find minimum size for this widget, and update
+			tmp := v.MinimumSize()
+			size.Height = max(size.Height, tmp.Height)
+			size.Width += tmp.Width
+		}
+
+		// Add a minimum gap between the controls.
+		if w.alignMain == SpaceBetween {
+			size.Width += calculateHGap(nil, nil).Scale(len(w.children)-1, 1)
+		} else {
+			size.Width += calculateHGap(nil, nil).Scale(len(w.children)+1, 1)
 		}
 	}
 
-	scale1, scale2 := 0, 1
-	if width > w.minimumWidth && w.maximumWidth > w.minimumWidth {
-		scale1, scale2 = int(width-w.minimumWidth), int(w.maximumWidth-w.minimumWidth)
-	}
-
-	minWidth, maxWidth := w.children[0].MeasureWidth()
-	childWidth := minWidth + (maxWidth-minWidth).Scale(scale1, scale2)
-	min, max := w.children[0].MeasureHeight(childWidth)
-	verifyLengthRange(min, max)
-	for _, v := range w.children[1:] {
-		minWidth, maxWidth = v.MeasureWidth()
-		verifyLengthRange(minWidth, maxWidth)
-		childWidth := minWidth + (maxWidth-minWidth).Scale(scale1, scale2)
-		tmpMin, tmpMax := v.MeasureHeight(childWidth)
-		verifyLengthRange(tmpMin, tmpMax)
-		if tmpMin > min {
-			min = tmpMin
-		}
-		if tmpMax > max {
-			max = tmpMax
-		}
-	}
-	println("hbox", "MeasureHeight", min.String(), max.String())
-	return min, max
+	w.minimumSize = size
+	return size
 }
 
 func (w *mountedHBox) SetBounds(bounds Rectangle) {
-	println("hbox", "SetBounds", bounds.String())
-
-	if len(w.children) == 0 {
-		return
-	}
-
-	if w.minimumWidth == 0 {
-		w.MeasureWidth()
-		if w.minimumWidth == 0 {
-			return
+	// Adjust the bounds so that the minimum Y handles vertical alignment
+	// of the controls.  We also calculate 'extraGap' which will adjust
+	// spacing of the controls for non-packed alignments.
+	extraGap := Length(0)
+	switch w.alignMain {
+	case MainStart:
+		// Do nothing
+	case MainCenter:
+		bounds.Min.X += (bounds.Dx() - w.totalWidth) / 2
+	case MainEnd:
+		bounds.Min.X = bounds.Max.X - w.totalWidth
+	case SpaceAround:
+		extraGap = (bounds.Dx() - w.totalWidth).Scale(1, len(w.children)+1)
+		bounds.Min.X += extraGap
+	case SpaceBetween:
+		if len(w.children) > 1 {
+			extraGap = (bounds.Dx() - w.totalWidth).Scale(1, len(w.children)-1)
+		} else {
+			// There are no controls between which to put the extra space.
+			// The following essentially convert SpaceBetween to SpaceAround
+			bounds.Min.X += (bounds.Dx() - w.totalWidth) / 2
 		}
 	}
 
-	extraGap, deltaX, scale1, scale2 := distributeVSpace(w.alignMain, len(w.children), bounds.Dx(), w.minimumWidth, w.maximumWidth)
-	bounds.Min.X += deltaX
-
+	// Position all of the child controls.
+	posX := bounds.Min.X
 	previous := Element(nil)
-	for _, v := range w.children {
-		if previous != nil {
-			bounds.Min.X += calculateHGap(previous, v) + extraGap
+	for i, v := range w.children {
+		if w.alignMain.IsPacked() {
+			if i > 0 {
+				posX += calculateHGap(previous, v)
+			}
+			previous = v
 		}
 
-		minWidth, maxWidth := v.MeasureWidth()
-		childWidth := minWidth + (maxWidth-minWidth).Scale(scale1, scale2)
-		v.SetBounds(Rectangle{bounds.Min, Point{bounds.Min.X + childWidth, bounds.Max.Y}})
-		bounds.Min.X += childWidth
-		previous = v
+		dx := w.childrenSize[i].Width
+		dy := w.childrenSize[i].Height
+		switch w.alignCross {
+		case CrossStart:
+			v.SetBounds(Rectangle{
+				Point{posX, bounds.Min.Y},
+				Point{posX + dx, bounds.Min.Y + dy},
+			})
+		case CrossCenter:
+			v.SetBounds(Rectangle{
+				Point{posX, bounds.Min.Y + (bounds.Dy()-dy)/2},
+				Point{posX + dx, bounds.Min.Y + (bounds.Dy()+dy)/2},
+			})
+		case CrossEnd:
+			v.SetBounds(Rectangle{
+				Point{posX, bounds.Max.Y - dy},
+				Point{posX + dx, bounds.Max.Y},
+			})
+		case Stretch:
+			v.SetBounds(Rectangle{
+				Point{posX, bounds.Min.Y},
+				Point{posX + dx, bounds.Max.Y},
+			})
+		}
+		posX += dx + extraGap
 	}
 }
 
-func (w *mountedHBox) setChildren(children []Widget) error {
-	err := error(nil)
-	w.children, err = DiffChildren(w.parent, w.children, children)
-	return err
-}
-
-func (w *mountedHBox) updateProps(data *HBox) error {
+func (w *mountedHBox) updateProps(data *HBox) (err error) {
+	// Update properties
 	w.alignMain = data.AlignMain
 	w.alignCross = data.AlignCross
-	return w.setChildren(data.Children)
+	w.children, err = DiffChildren(w.parent, w.children, data.Children)
+	// Clear cached values
+	w.childrenSize = make([]Size, len(w.children))
+	w.totalWidth = 0
+	w.minimumSize = Size{}
+	return err
 }
 
 func (w *mountedHBox) UpdateProps(data Widget) error {

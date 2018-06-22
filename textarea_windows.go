@@ -70,10 +70,22 @@ type mountedTextArea struct {
 	minLines int
 }
 
-func (w *mountedTextArea) MeasureHeight(width Length) (Length, Length) {
+func (w *mountedTextArea) Layout(bc Box) Size {
 	const lineHeight = 16 * DIP
+
+	width := w.preferredWidth()
+	height := 23*DIP + lineHeight.Scale(w.minLines-1, 1)
+	return bc.Constrain(Size{width, height})
+}
+
+func (w *mountedTextArea) MinimumSize() Size {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23*DIP + lineHeight.Scale(w.minLines-1, 1), 23*DIP + lineHeight.Scale(39, 1)
+
+	const lineHeight = 16 * DIP
+
+	width := w.preferredWidth()
+	height := 23*DIP + lineHeight.Scale(w.minLines-1, 1)
+	return Size{width, height}
 }
 
 func (w *mountedTextArea) Props() Widget {

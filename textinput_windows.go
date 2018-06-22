@@ -123,21 +123,28 @@ func (w *mountedTextInput) Props() Widget {
 	}
 }
 
-func (w *mountedTextInputBase) MeasureWidth() (Length, Length) {
-	if paragraphMaxWidth == 0 {
-		paragraphMeasureReflowLimits(w.hWnd)
-	}
-
-	// In the future, we should calculate the width based on the length of the text.
-	return FromPixelsX(paragraphMinWidth) / 2, FromPixelsX(paragraphMaxWidth)
+func (w *mountedTextInputBase) preferredWidth() Length {
+	// TODO
+	return 75 * DIP
 }
 
-func (w *mountedTextInputBase) MeasureHeight(width Length) (Length, Length) {
+func (w *mountedTextInputBase) Layout(bc Box) Size {
+	// Determine ideal width.
+	width := w.preferredWidth()
+	height := 23 * DIP
+	return bc.Constrain(Size{width, height})
+}
+
+func (w *mountedTextInputBase) MinimumSize() Size {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23 * DIP, 23 * DIP
+
+	width := w.preferredWidth()
+	height := 23 * DIP
+	return Size{width, height}
 }
 
 func (w *mountedTextInputBase) updatePlaceholder(text string) error {
+	// Update the control
 	if text != "" {
 		textPlaceholder, err := syscall.UTF16PtrFromString(text)
 		if err != nil {

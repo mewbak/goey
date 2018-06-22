@@ -45,6 +45,7 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 	}
 
 	// Add items to the control
+	longestString := ""
 	for _, v := range w.Items {
 		text, err := syscall.UTF16PtrFromString(v)
 		if err != nil {
@@ -52,6 +53,10 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 			return nil, err
 		}
 		win.SendMessage(hwnd, win.CB_ADDSTRING, 0, uintptr(unsafe.Pointer(text)))
+
+		if len(v) > len(longestString) {
+			longestString = v
+		}
 	}
 	if !w.Unset {
 		win.SendMessage(hwnd, win.CB_SETCURSEL, uintptr(w.Value), 0)
@@ -61,10 +66,11 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 	subclassWindowProcedure(hwnd, &oldComboboxWindowProc, syscall.NewCallback(comboboxWindowProc))
 
 	retval := &mountedSelectInput{
-		Control: Control{hwnd},
-		onChange:     w.OnChange,
-		onFocus:      w.OnFocus,
-		onBlur:       w.OnBlur,
+		Control:       Control{hwnd},
+		onChange:      w.OnChange,
+		onFocus:       w.OnFocus,
+		onBlur:        w.OnBlur,
+		longestString: longestString,
 	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
@@ -76,16 +82,36 @@ type mountedSelectInput struct {
 	onChange func(value int)
 	onFocus  func()
 	onBlur   func()
+
+	longestString  string
+	preferredWidth Length
 }
 
-func (w *mountedSelectInput) MeasureWidth() (Length, Length) {
-	// In the future, we should calculate the width based on the length of the text.
-	return 160*DIP, 160*DIP
+func (w *mountedSelectInput) Layout(bc Box) Size {
+	return bc.Constrain(w.MinimumSize())
 }
 
-func (w *mountedSelectInput) MeasureHeight(width Length) (Length, Length) {
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 23*DIP, 23*DIP
+func (w *mountedSelectInput) MinimumSize() Size {
+	if w.preferredWidth == 0 {
+		text, err := syscall.UTF16FromString(w.longestString)
+		if err != nil {
+			w.preferredWidth = 75 * DIP
+		} else {
+			hdc := win.GetDC(w.hWnd)
+			if hMessageFont != 0 {
+				win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
+			}
+			rect := win.RECT{0, 0, 0x7fffffff, 0x7fffffff}
+			win.DrawTextEx(hdc, &text[0], int32(len(text)), &rect, win.DT_CALCRECT, nil)
+			win.ReleaseDC(w.hWnd, hdc)
+
+			w.preferredWidth = FromPixelsX(int(rect.Right)).Scale(13, 10)
+		}
+	}
+
+	width := w.preferredWidth
+	height := 14 * DIP
+	return Size{width, height}
 }
 
 func (w *mountedSelectInput) updateProps(data *SelectInput) error {
@@ -94,10 +120,12 @@ func (w *mountedSelectInput) updateProps(data *SelectInput) error {
 	// TODO:  Update the selection based on Unset.
 
 	w.SetDisabled(data.Disabled)
-	// TODO:  Update property .Default
 	w.onChange = data.OnChange
 	w.onFocus = data.OnFocus
 	w.onBlur = data.OnBlur
+
+	// Clear cache
+	w.preferredWidth = 0
 
 	return nil
 }
