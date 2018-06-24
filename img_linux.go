@@ -70,16 +70,6 @@ func (w *mountedImg) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
-func (w *mountedImg) MeasureWidth() (Length, Length) {
-	min, max := w.handle.GetPreferredWidth()
-	return FromPixelsX(min), FromPixelsY(max)
-}
-
-func (w *mountedImg) MeasureHeight(width Length) (Length, Length) {
-	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
-	return FromPixelsY(min), FromPixelsY(max)
-}
-
 func (w *mountedImg) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())

@@ -19,16 +19,6 @@ func (w *Control) Handle() *gtk.Widget {
 	return w.handle
 }
 
-func (w *Control) MeasureWidth() (Length, Length) {
-	min, max := w.handle.GetPreferredWidth()
-	return FromPixelsX(min), FromPixelsY(max)
-}
-
-func (w *Control) MeasureHeight(width Length) (Length, Length) {
-	min, max := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
-	return FromPixelsY(min), FromPixelsY(max)
-}
-
 func (w *Control) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(w.handle, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
