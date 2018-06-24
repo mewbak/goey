@@ -4,6 +4,45 @@ import (
 	"testing"
 )
 
+func TestBox(t *testing.T) {
+	cases := []struct {
+		in                                                                                                 Box
+		isNormalized, isTight, hasTightWidth, hasTightHeight, isBounded, hasBoundedWidth, hasBoundedHeight bool
+	}{
+		{Expand(), true, true, true, true, false, false, false},
+		{ExpandWidth(10 * DIP), true, true, true, true, false, true, false},
+		{ExpandHeight(10 * DIP), true, true, true, true, false, false, true},
+		{Loose(Size{10 * DIP, 15 * DIP}), true, false, false, false, true, true, true},
+		{Tight(Size{10 * DIP, 15 * DIP}), true, true, true, true, true, true, true},
+		{TightWidth(10 * DIP), true, false, true, false, false, true, false},
+		{TightHeight(10 * DIP), true, false, false, true, false, false, true},
+	}
+
+	for i, v := range cases {
+		if out := v.in.IsNormalized(); v.isNormalized != out {
+			t.Errorf("Failed on case %d for IsNormalized, want %v, got %v", i, v.isNormalized, out)
+		}
+		if out := v.in.IsTight(); v.isTight != out {
+			t.Errorf("Failed on case %d for IsTight, want %v, got %v", i, v.isTight, out)
+		}
+		if out := v.in.HasTightWidth(); v.hasTightWidth != out {
+			t.Errorf("Failed on case %d for HasTightWidth, want %v, got %v", i, v.hasTightWidth, out)
+		}
+		if out := v.in.HasTightHeight(); v.hasTightHeight != out {
+			t.Errorf("Failed on case %d for HasTightHeight, want %v, got %v", i, v.hasTightHeight, out)
+		}
+		if out := v.in.IsBounded(); v.isBounded != out {
+			t.Errorf("Failed on case %d for IsBounded, want %v, got %v", i, v.isBounded, out)
+		}
+		if out := v.in.HasBoundedWidth(); v.hasBoundedWidth != out {
+			t.Errorf("Failed on case %d for HasBoundedWidth, want %v, got %v", i, v.hasBoundedWidth, out)
+		}
+		if out := v.in.HasBoundedHeight(); v.hasBoundedHeight != out {
+			t.Errorf("Failed on case %d for HasBoundedHeight, want %v, got %v", i, v.hasBoundedHeight, out)
+		}
+	}
+}
+
 func TestBox_Deflate(t *testing.T) {
 	cases := []struct {
 		in      Box

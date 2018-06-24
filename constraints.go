@@ -69,7 +69,7 @@ func TightWidth(width Length) Box {
 }
 
 func TightHeight(height Length) Box {
-	return Box{Size{0, height}, Size{0, height}}
+	return Box{Size{0, height}, Size{Inf, height}}
 }
 
 func (bc Box) Constrain(size Size) Size {
@@ -180,6 +180,10 @@ func (bc Box) Inset(padding Length) Box {
 	}
 
 	return Box{Size{minWidth, minHeight}, Size{maxWidth, maxHeight}}
+}
+
+func (bc Box) IsBounded() bool {
+	return bc.HasBoundedWidth() && bc.HasBoundedHeight()
 }
 
 func (bc Box) IsNormalized() bool {
