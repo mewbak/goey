@@ -3,12 +3,11 @@ package goey
 import (
 	"unsafe"
 
-	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 type mountedP struct {
-	handle *gtk.Label
+	Control
 }
 
 func (a TextAlignment) native() gtk.Justification {
@@ -36,7 +35,7 @@ func (w *P) mount(parent Control) (Element, error) {
 	handle.SetJustify(w.Align.native())
 	handle.SetLineWrap(true)
 
-	retval := &mountedP{handle}
+	retval := &mountedP{Control{&handle.Widget}}
 	handle.Connect("destroy", paragraph_onDestroy, retval)
 	handle.Show()
 
@@ -47,37 +46,19 @@ func paragraph_onDestroy(widget *gtk.Label, mounted *mountedP) {
 	mounted.handle = nil
 }
 
-func (w *mountedP) Close() {
-	if w.handle != nil {
-		w.handle.Destroy()
-		w.handle = nil
-	}
-}
-
-func (w *mountedP) Handle() *gtk.Widget {
-	return &w.handle.Widget
-}
-
-func (w *mountedP) Layout(bc Box) Size {
-	_, width := w.handle.GetPreferredWidth()
-	_, height := w.handle.GetPreferredHeight()
-	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
-}
-
-func (w *mountedP) MinimumSize() Size {
-	width, _ := w.handle.GetPreferredWidth()
-	height, _ := w.handle.GetPreferredHeight()
-	return Size{FromPixelsX(width), FromPixelsY(height)}
+func (w *mountedP) label() *gtk.Label {
+	return (*gtk.Label)(unsafe.Pointer(w.handle))
 }
 
 func (w *mountedP) Props() Widget {
-	text, err := w.handle.GetText()
+	label := w.label()
+	text, err := label.GetText()
 	if err != nil {
 		panic("Could not get text, " + err.Error())
 	}
 
 	align := JustifyLeft
-	switch w.handle.GetJustify() {
+	switch label.GetJustify() {
 	case gtk.JUSTIFY_CENTER:
 		align = JustifyCenter
 	case gtk.JUSTIFY_RIGHT:
@@ -92,13 +73,9 @@ func (w *mountedP) Props() Widget {
 	}
 }
 
-func (w *mountedP) SetBounds(bounds Rectangle) {
-	pixels := bounds.Pixels()
-	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
-}
-
 func (w *mountedP) updateProps(data *P) error {
-	w.handle.SetText(data.Text)
-	w.handle.SetJustify(data.Align.native())
+	label := w.label()
+	label.SetText(data.Text)
+	label.SetJustify(data.Align.native())
 	return nil
 }

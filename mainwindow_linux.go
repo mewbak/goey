@@ -18,6 +18,13 @@ func init() {
 	gtk.Init(nil)
 }
 
+func boolToPolicy(value bool) gtk.PolicyType {
+	if value {
+		return gtk.POLICY_AUTOMATIC
+	}
+	return gtk.POLICY_NEVER
+}
+
 type windowImpl struct {
 	handle           *gtk.Window
 	scroll           *gtk.ScrolledWindow
@@ -39,6 +46,7 @@ func newWindow(title string, child Widget) (*Window, error) {
 	if err != nil {
 		return nil, err
 	}
+	scroll.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_NEVER)
 	app.Add(scroll)
 
 	layout, err := gtk.LayoutNew(nil, nil)
@@ -130,6 +138,7 @@ func (w *windowImpl) setChild(child Widget) (err error) {
 func (mw *windowImpl) setScroll(horz, vert bool) {
 	mw.horizontalScroll = horz
 	mw.verticalScroll = vert
+	mw.scroll.SetPolicy(boolToPolicy(horz), boolToPolicy(vert))
 }
 
 func (mw *windowImpl) setIcon(img image.Image) error {

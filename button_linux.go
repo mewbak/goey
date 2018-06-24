@@ -3,13 +3,12 @@ package goey
 import (
 	"unsafe"
 
-	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 type mountedButton struct {
-	handle *gtk.Button
+	Control
 
 	onClick clickSlot
 	onFocus focusSlot
@@ -30,9 +29,7 @@ func (w *Button) mount(parent Control) (Element, error) {
 		control.GrabDefault()
 	}
 
-	retval := &mountedButton{
-		handle: control,
-	}
+	retval := &mountedButton{Control: Control{&control.Widget}}
 
 	control.Connect("destroy", button_onDestroy, retval)
 	retval.onClick.Set(&control.Widget, w.OnClick)
@@ -47,59 +44,37 @@ func button_onDestroy(widget *gtk.Button, mounted *mountedButton) {
 	mounted.handle = nil
 }
 
-func (w *mountedButton) Close() {
-	if w.handle != nil {
-		w.handle.Destroy()
-		w.handle = nil
-	}
+func (w *mountedButton) button() *gtk.Button {
+	return (*gtk.Button)(unsafe.Pointer(w.handle))
 }
 
 func (w *mountedButton) Props() Widget {
-	text, err := w.handle.GetLabel()
+	button := w.button()
+	text, err := button.GetLabel()
 	if err != nil {
 		panic("Could not get label: " + err.Error())
 	}
 
 	return &Button{
 		Text:     text,
-		Disabled: !w.handle.GetSensitive(),
-		Default:  w.handle.HasDefault(),
+		Disabled: !button.GetSensitive(),
+		Default:  button.HasDefault(),
 		OnClick:  w.onClick.callback,
 		OnFocus:  w.onFocus.callback,
 		OnBlur:   w.onBlur.callback,
 	}
 }
 
-func (w *mountedButton) Handle() *gtk.Widget {
-	return &w.handle.Widget
-}
-
-func (w *mountedButton) Layout(bc Box) Size {
-	_, width := w.handle.GetPreferredWidth()
-	_, height := w.handle.GetPreferredHeight()
-	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
-}
-
-func (w *mountedButton) MinimumSize() Size {
-	width, _ := w.handle.GetPreferredWidth()
-	height, _ := w.handle.GetPreferredHeight()
-	return Size{FromPixelsX(width), FromPixelsY(height)}
-}
-
-func (w *mountedButton) SetBounds(bounds Rectangle) {
-	pixels := bounds.Pixels()
-	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
-}
-
 func (w *mountedButton) updateProps(data *Button) error {
-	w.handle.SetLabel(data.Text)
-	w.handle.SetSensitive(!data.Disabled)
+	button := w.button()
+	button.SetLabel(data.Text)
+	button.SetSensitive(!data.Disabled)
 	if data.Default {
-		w.handle.GrabDefault()
+		button.GrabDefault()
 	}
-	w.onClick.Set(&w.handle.Widget, data.OnClick)
-	w.onFocus.Set(&w.handle.Widget, data.OnFocus)
-	w.onBlur.Set(&w.handle.Widget, data.OnBlur)
+	w.onClick.Set(w.handle, data.OnClick)
+	w.onFocus.Set(w.handle, data.OnFocus)
+	w.onBlur.Set(w.handle, data.OnBlur)
 
 	return nil
 }

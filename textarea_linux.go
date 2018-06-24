@@ -115,14 +115,20 @@ func (w *mountedTextArea) Handle() *gtk.Widget {
 }
 
 func (w *mountedTextArea) Layout(bc Box) Size {
-	_, width := w.handle.GetPreferredWidth()
-	_, height := w.handle.GetPreferredHeight()
-	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
+	if !bc.HasBoundedWidth() {
+		_, width := w.handle.GetPreferredWidth()
+		_, height := w.handle.GetPreferredHeight()
+		return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
+	}
+
+	width := bc.Max.Width
+	_, height := syscall.WidgetGetPreferredHeightForWidth(&w.frame.Widget, width.PixelsX())
+	return bc.Constrain(Size{width, FromPixelsX(height)})
 }
 
 func (w *mountedTextArea) MinimumSize() Size {
-	width, _ := w.handle.GetPreferredWidth()
-	height, _ := w.handle.GetPreferredHeight()
+	width, _ := w.frame.GetPreferredWidth()
+	height, _ := w.frame.GetPreferredHeight()
 	return Size{FromPixelsX(width), FromPixelsY(height)}
 }
 

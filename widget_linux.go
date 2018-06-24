@@ -15,20 +15,45 @@ type Control struct {
 	handle *gtk.Widget
 }
 
-func (w *Control) Handle() *gtk.Widget {
-	return w.handle
-}
-
-func (w *Control) SetBounds(bounds Rectangle) {
-	pixels := bounds.Pixels()
-	syscall.SetBounds(w.handle, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
-}
-
 func (w *Control) Close() {
 	if w.handle != nil {
 		w.handle.Destroy()
 		w.handle = nil
 	}
+}
+
+func (w *Control) Handle() *gtk.Widget {
+	return w.handle
+}
+
+func (w *Control) Layout(bc Box) Size {
+	if !bc.HasBoundedWidth() && !bc.HasBoundedHeight() {
+		_, width := w.handle.GetPreferredWidth()
+		_, height := w.handle.GetPreferredHeight()
+		return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
+	}
+	if bc.HasBoundedHeight() {
+		// Does GTK provide a better approach when the height is bounded,
+		// but not the width?
+		_, width := w.handle.GetPreferredWidth()
+		_, height := w.handle.GetPreferredHeight()
+		return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
+	}
+
+	width := bc.Max.Width
+	_, height := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
+	return bc.Constrain(Size{width, FromPixelsX(height)})
+}
+
+func (w *Control) MinimumSize() Size {
+	width, _ := w.handle.GetPreferredWidth()
+	height, _ := w.handle.GetPreferredHeight()
+	return Size{FromPixelsX(width), FromPixelsY(height)}
+}
+
+func (w *Control) SetBounds(bounds Rectangle) {
+	pixels := bounds.Pixels()
+	syscall.SetBounds(w.handle, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
 // NativeElement contains platform-specific methods that all widgets

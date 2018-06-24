@@ -51,6 +51,14 @@ func LayoutGetVAdjustment(widget *gtk.Layout) *gtk.Adjustment {
 	return &gtk.Adjustment{glib.InitiallyUnowned{obj}}
 }
 
+// WidgetGetPreferredHeightForWidth is a wrapper around gtk_widget_get_preferred_height_for_width.
+func WidgetGetPreferredHeightForWidth(widget *gtk.Widget, width int) (int, int) {
+	var minimum, natural C.gint
+	p := unsafe.Pointer(widget.GObject)
+	C.gtk_widget_get_preferred_height_for_width((*C.GtkWidget)(p), C.gint(width), &minimum, &natural)
+	return int(minimum), int(natural)
+}
+
 // WindowSetInteractiveDebugging is a wrapper around gtk_window_set_interactive_debugging.
 func WindowSetInteractiveDebugging(enable bool) {
 	C.gtk_window_set_interactive_debugging(fromBool(enable))
