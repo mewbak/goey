@@ -27,6 +27,17 @@ func ExampleLength_String() {
 	// Converting:  1pt is equal to 1.33dip
 }
 
+func ExampleRectangle() {
+	r := Rectangle{Point{10 * DIP, 20 * DIP}, Point{90 * DIP, 80 * DIP}}
+
+	fmt.Printf("Rectangle %s has dimensions %.0fdip by %.0fdip.",
+		r, r.Dx().DIP(), r.Dy().DIP(),
+	)
+
+	// Output:
+	// Rectangle (10:00,20:00)-(90:00,80:00) has dimensions 80dip by 60dip.
+}
+
 func TestLength(t *testing.T) {
 	t.Logf("Constants DIP: %d", 1*DIP)
 	t.Logf("Constants PT:  %d", 1*PT)
