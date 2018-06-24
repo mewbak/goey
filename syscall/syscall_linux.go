@@ -51,14 +51,6 @@ func LayoutGetVAdjustment(widget *gtk.Layout) *gtk.Adjustment {
 	return &gtk.Adjustment{glib.InitiallyUnowned{obj}}
 }
 
-// WidgetGetAllocation is a wrapper around gtk_widget_get_allocation.
-func WidgetGetAllocation(widget *gtk.Widget) (int, int, int, int) {
-	var a C.GtkAllocation
-	p := unsafe.Pointer(widget.GObject)
-	C.gtk_widget_get_allocation((*C.GtkWidget)(p), &a)
-	return int(a.x), int(a.y), int(a.width), int(a.height)
-}
-
 // WindowSetInteractiveDebugging is a wrapper around gtk_window_set_interactive_debugging.
 func WindowSetInteractiveDebugging(enable bool) {
 	C.gtk_window_set_interactive_debugging(fromBool(enable))
