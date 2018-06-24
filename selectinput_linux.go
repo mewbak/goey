@@ -67,14 +67,16 @@ func (w *mountedSelectInput) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
-func (w *mountedSelectInput) MeasureWidth() (Length, Length) {
-	min, max := w.handle.GetPreferredWidth()
-	return FromPixelsX(min), FromPixelsY(max)
+func (w *mountedSelectInput) Layout(bc Box) Size {
+	_, width := w.handle.GetPreferredWidth()
+	_, height := w.handle.GetPreferredHeight()
+	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
 }
 
-func (w *mountedSelectInput) MeasureHeight(width Length) (Length, Length) {
-	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
-	return FromPixelsY(min), FromPixelsY(max)
+func (w *mountedSelectInput) MinimumSize() Size {
+	width, _ := w.handle.GetPreferredWidth()
+	height, _ := w.handle.GetPreferredHeight()
+	return Size{FromPixelsX(width), FromPixelsY(height)}
 }
 
 func (w *mountedSelectInput) SetBounds(bounds Rectangle) {

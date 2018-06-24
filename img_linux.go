@@ -13,6 +13,8 @@ import (
 type mountedImg struct {
 	handle    *gtk.Image
 	imageData []uint8
+	width     Length
+	height    Length
 }
 
 func imageToPixbuf(prop image.Image) (*gdk.Pixbuf, []uint8, error) {
@@ -47,7 +49,7 @@ func (w *Img) mount(parent Control) (Element, error) {
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(handle)
 	handle.Show()
 
-	retval := &mountedImg{handle, buffer}
+	retval := &mountedImg{handle, buffer, w.Width, w.Height}
 	handle.Connect("destroy", img_onDestroy, retval)
 
 	return retval, nil
@@ -84,6 +86,8 @@ func (w *mountedImg) SetBounds(bounds Rectangle) {
 }
 
 func (w *mountedImg) updateProps(data *Img) error {
+	w.width, w.height = data.Width, data.Height
+
 	// Create the bitmap
 	pixbuf, buffer, err := imageToPixbuf(data.Image)
 	if err != nil {

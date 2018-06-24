@@ -19,13 +19,16 @@ func init() {
 }
 
 type windowImpl struct {
-	handle *gtk.Window
-	scroll *gtk.ScrolledWindow
-	layout *gtk.Layout
-	vbox   mountedVBox
+	handle           *gtk.Window
+	scroll           *gtk.ScrolledWindow
+	layout           *gtk.Layout
+	child            Element
+	childMinSize     Size
+	horizontalScroll bool
+	verticalScroll   bool
 }
 
-func newWindow(title string, children []Widget) (*Window, error) {
+func newWindow(title string, child Widget) (*Window, error) {
 	app, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
 		return nil, err
@@ -44,7 +47,11 @@ func newWindow(title string, children []Widget) (*Window, error) {
 	}
 	scroll.Add(layout)
 
-	retval := &Window{windowImpl{app, scroll, layout, mountedVBox{}}}
+	retval := &Window{windowImpl{
+		handle: app,
+		scroll: scroll,
+		layout: layout,
+	}}
 	app.SetTitle(title)
 	app.SetBorderWidth(0)
 	app.Connect("destroy", mainwindow_onDestroy, retval)
@@ -52,15 +59,10 @@ func newWindow(title string, children []Widget) (*Window, error) {
 	app.SetDefaultSize(400, 400)
 	app.ShowAll()
 
-	tmpVBox := VBox{Children: children, AlignMain: MainStart, AlignCross: Stretch}
-	vbox, err := tmpVBox.Mount(Control{&layout.Widget})
+	retval.child, err = DiffChild(Control{&layout.Widget}, nil, child)
 	if err != nil {
 		app.Destroy()
 		return nil, err
-	}
-	retval.vbox = *vbox.(*mountedVBox)
-	if len(retval.vbox.children) != len(children) {
-		panic("Error in mounting children while creating window.")
 	}
 	if len(os.Getenv("GOEY_DEBUGGING")) > 0 {
 		syscall.WindowSetInteractiveDebugging(true)
@@ -70,44 +72,24 @@ func newWindow(title string, children []Widget) (*Window, error) {
 }
 
 func (w *windowImpl) doLayout() {
+	if w.child == nil {
+		return
+	}
+
+	// Update the global DPI
 	DPI.X, DPI.Y = 96, 96
 
-	_, _, width, height := syscall.WidgetGetAllocation(&w.scroll.Widget)
-
-	a, _ := w.vbox.MeasureWidth()
-	if w := a.PixelsX(); w > width {
-		width = w
-	} else {
-		a = FromPixelsX(width)
-	}
-	b, _ := w.vbox.MeasureHeight(a)
-	if h := b.PixelsY(); h > height {
-		height = h
-		width = width - 24
-		a = FromPixelsX(width)
-		b, _ = w.vbox.MeasureHeight(a)
-		height = b.PixelsY()
-	} else {
-		b = FromPixelsY(height)
-	}
-	w.layout.SetSize(uint(width), uint(height))
-
+	width, height := w.handle.GetSize()
+	size := w.layoutChild(Size{FromPixelsX(width), FromPixelsY(height)})
+	w.layout.SetSize(uint(size.Width.PixelsX()), uint(size.Height.PixelsY()))
 	bounds := Rectangle{
-		Point{},
-		Point{
-			a,
-			b,
-		},
+		Point{}, Point{size.Width, size.Height},
 	}
-	w.vbox.SetBounds(bounds)
+	w.child.SetBounds(bounds)
 }
 
-func (w *windowImpl) getAlignment() (MainAxisAlign, CrossAxisAlign) {
-	return w.vbox.alignMain, w.vbox.alignCross
-}
-
-func (w *windowImpl) getChildren() []Element {
-	return w.vbox.children
+func (w *windowImpl) getChild() Element {
+	return w.child
 }
 
 func (mw *windowImpl) close() {
@@ -122,20 +104,32 @@ func (w *windowImpl) message(m *Message) {
 	m.handle = uintptr(unsafe.Pointer(w.handle))
 }
 
-func (w *windowImpl) setAlignment(main MainAxisAlign, cross CrossAxisAlign) error {
-	w.vbox.alignMain = main
-	w.vbox.alignCross = cross
-	w.doLayout()
-	return nil
-}
-
-func (mw *windowImpl) setChildren(children []Widget) error {
-	// Defer to the vertical box holding the children.
-	err := mw.vbox.setChildren(children)
-	// Properties may have changed sizes, so we need to do layout.
-	mw.doLayout()
+func (w *windowImpl) setChild(child Widget) (err error) {
+	// Update the child element
+	w.child, err = DiffChild(Control{&w.layout.Widget}, w.child, child)
+	// Whether or not an error has occured, redo the layout so the children
+	// are placed.
+	if w.child != nil {
+		// Constrain window size
+		minSize := w.child.MinimumSize()
+		w.childMinSize = minSize
+		if w.horizontalScroll && minSize.Width > 120*DIP {
+			minSize.Width = 120 * DIP
+		}
+		if w.verticalScroll && minSize.Height > 120*DIP {
+			minSize.Height = 120 * DIP
+		}
+		w.handle.SetSizeRequest(minSize.Width.PixelsX(), minSize.Height.PixelsY())
+		// Properties may have changed sizes, so we need to do layout.
+		w.doLayout()
+	}
 	// ... and we're done
 	return err
+}
+
+func (mw *windowImpl) setScroll(horz, vert bool) {
+	mw.horizontalScroll = horz
+	mw.verticalScroll = vert
 }
 
 func (mw *windowImpl) setIcon(img image.Image) error {

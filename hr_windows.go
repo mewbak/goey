@@ -1,9 +1,10 @@
 package goey
 
 import (
-	"github.com/lxn/win"
 	"syscall"
 	"unsafe"
+
+	"github.com/lxn/win"
 )
 
 var (
@@ -69,13 +70,6 @@ func (w *HR) mount(parent Control) (Element, error) {
 
 type mountedHR struct {
 	Control
-}
-
-func (*mountedHR) Layout(bc Box) Size {
-	if bc.HasBoundedWidth() {
-		return bc.Constrain(Size{bc.Max.Width, 13 * DIP})
-	}
-	return bc.Constrain(Size{bc.Min.Width, 13 * DIP})
 }
 
 func hrWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (result uintptr) {

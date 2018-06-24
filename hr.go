@@ -29,6 +29,13 @@ func (w *mountedHR) Props() Widget {
 	return &HR{}
 }
 
+func (*mountedHR) Layout(bc Box) Size {
+	if bc.HasBoundedWidth() {
+		return bc.Constrain(Size{bc.Max.Width, 13 * DIP})
+	}
+	return bc.Constrain(Size{bc.Min.Width, 13 * DIP})
+}
+
 func (w *mountedHR) MinimumSize() Size {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 

@@ -114,25 +114,16 @@ func (w *mountedTextArea) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
-func (w *mountedTextArea) MeasureWidth() (Length, Length) {
-	min, max := w.handle.GetPreferredWidth()
-	return FromPixelsX(min), FromPixelsY(max)
+func (w *mountedTextArea) Layout(bc Box) Size {
+	_, width := w.handle.GetPreferredWidth()
+	_, height := w.handle.GetPreferredHeight()
+	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
 }
 
-func (w *mountedTextArea) MeasureHeight(width Length) (Length, Length) {
-	const lineHeight = 16 * DIP
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	min, max := 23*DIP+lineHeight.Scale(w.minLines-1, 1), 23*DIP+lineHeight.Scale(39, 1)
-
-	minPx, maxPx := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
-	if tmp := FromPixelsX(minPx); tmp > min {
-		min = tmp
-	}
-	if tmp := FromPixelsX(maxPx); tmp > max {
-		max = tmp
-	}
-
-	return min, max
+func (w *mountedTextArea) MinimumSize() Size {
+	width, _ := w.handle.GetPreferredWidth()
+	height, _ := w.handle.GetPreferredHeight()
+	return Size{FromPixelsX(width), FromPixelsY(height)}
 }
 
 func (w *mountedTextArea) SetBounds(bounds Rectangle) {

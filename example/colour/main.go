@@ -4,13 +4,14 @@
 package main
 
 import (
-	"bitbucket.org/rj/goey"
 	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	_ "image/png"
 	"os"
+
+	"bitbucket.org/rj/goey"
 )
 
 var (
@@ -93,20 +94,23 @@ func update() {
 func render() goey.Widget {
 	img, description := selectImage(clickCount)
 
-	return &goey.VBox{
-		AlignMain:  goey.MainCenter,
-		AlignCross: goey.CrossCenter,
-		Children: []goey.Widget{
-			&goey.Button{Text: "Change the colour", OnClick: func() {
-				clickCount++
-				update()
-			}},
-			&goey.Img{
-				Image:  img,
-				Width:  (1 * goey.DIP).Scale(img.Bounds().Dx(), 1),
-				Height: (1 * goey.DIP).Scale(img.Bounds().Dy(), 1),
+	return &goey.Padding{
+		Insets: goey.DefaultInsets(),
+		Child: &goey.VBox{
+			AlignMain:  goey.MainCenter,
+			AlignCross: goey.CrossCenter,
+			Children: []goey.Widget{
+				&goey.Button{Text: "Change the colour", OnClick: func() {
+					clickCount++
+					update()
+				}},
+				&goey.Img{
+					Image:  img,
+					Width:  (1 * goey.DIP).Scale(img.Bounds().Dx(), 1),
+					Height: (1 * goey.DIP).Scale(img.Bounds().Dy(), 1),
+				},
+				&goey.P{Text: description},
 			},
-			&goey.P{Text: description},
 		},
 	}
 }

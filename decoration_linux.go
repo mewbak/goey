@@ -2,6 +2,7 @@ package goey
 
 import (
 	"image/color"
+	"math"
 	"unsafe"
 
 	"bitbucket.org/rj/goey/syscall"
@@ -16,10 +17,11 @@ func (w *Decoration) mount(parent Control) (Element, error) {
 	}
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 
-	retval := &mountedDecoration{
-		handle:  control,
-		fill:    w.Fill,
-		padding: w.Padding,
+	retval := &decorationElement{
+		handle: control,
+		fill:   w.Fill,
+		insets: w.Insets,
+		radius: w.Radius,
 	}
 
 	control.Connect("destroy", decoration_onDestroy, retval)
@@ -36,31 +38,49 @@ func (w *Decoration) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-type mountedDecoration struct {
-	handle  *gtk.DrawingArea
-	fill    color.RGBA
-	padding Padding
-	radius  Length
-	child   Element
+type decorationElement struct {
+	handle *gtk.DrawingArea
+	fill   color.RGBA
+	insets Insets
+	radius Length
+
+	child     Element
+	childSize Size
 }
 
-func decoration_onDestroy(widget *gtk.DrawingArea, mounted *mountedDecoration) {
+func decoration_onDestroy(widget *gtk.DrawingArea, mounted *decorationElement) {
 	mounted.handle = nil
 }
 
-func decoration_onDraw(widget *gtk.DrawingArea, cr *cairo.Context, mounted *mountedDecoration) bool {
+func decoration_onDraw(widget *gtk.DrawingArea, cr *cairo.Context, mounted *decorationElement) bool {
 	a := mounted.handle.GetAllocation()
 	if mounted.radius > 0 {
-		panic("")
+		radius := float64(mounted.radius.PixelsX())
+		w, h := float64(a.GetWidth()), float64(a.GetHeight())
+		if 2*radius > w {
+			radius = w / 2
+		}
+		if 2*radius > h {
+			radius = h / 2
+		}
+		cr.MoveTo(0, radius)
+		cr.Arc(radius, radius, radius, math.Pi, 3*math.Pi/2)
+		cr.LineTo(w-radius, 0)
+		cr.Arc(w-radius, radius, radius, 3*math.Pi/2, 2*math.Pi)
+		cr.LineTo(w, h-radius)
+		cr.Arc(w-radius, h-radius, radius, 0, math.Pi/2)
+		cr.LineTo(radius, h)
+		cr.Arc(radius, h-radius, radius, math.Pi/2, math.Pi)
+		cr.ClosePath()
 	} else {
 		cr.Rectangle(0, 0, float64(a.GetWidth()), float64(a.GetHeight()))
-		cr.SetSourceRGB(float64(mounted.fill.R)/0xFF, float64(mounted.fill.G)/0xFF, float64(mounted.fill.B)/0xFF)
-		cr.Fill()
 	}
+	cr.SetSourceRGB(float64(mounted.fill.R)/0xFF, float64(mounted.fill.G)/0xFF, float64(mounted.fill.B)/0xFF)
+	cr.Fill()
 	return false
 }
 
-func (w *mountedDecoration) Close() {
+func (w *decorationElement) Close() {
 	if w.handle != nil {
 		w.child.Close()
 		w.child = nil
@@ -69,44 +89,20 @@ func (w *mountedDecoration) Close() {
 	}
 }
 
-func (w *mountedDecoration) MeasureWidth() (Length, Length) {
-	if w.child != nil {
-		px := FromPixelsX(1)
-		min, max := w.child.MeasureWidth()
-		min += 2*px + w.padding.Left + w.padding.Right
-		max += 2*px + w.padding.Left + w.padding.Right
-		return min, max
-	}
-
-	return 13 * DIP, 13 * DIP
-}
-
-func (w *mountedDecoration) MeasureHeight(width Length) (Length, Length) {
-	if w.child != nil {
-		px := FromPixelsX(1)
-		py := FromPixelsY(1)
-		min, max := w.child.MeasureHeight(width - 2*px)
-		min += 2*py + w.padding.Top + w.padding.Bottom
-		max += 2*py + w.padding.Top + w.padding.Bottom
-		return min, max
-	}
-
-	return 13 * DIP, 13 * DIP
-}
-
-func (w *mountedDecoration) SetBounds(bounds Rectangle) {
+func (w *decorationElement) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 
-	bounds.Min.X += w.padding.Left
-	bounds.Min.Y += w.padding.Top
-	bounds.Max.X -= w.padding.Right
-	bounds.Max.Y -= w.padding.Bottom
+	bounds.Min.X += w.insets.Left
+	bounds.Min.Y += w.insets.Top
+	bounds.Max.X -= w.insets.Right
+	bounds.Max.Y -= w.insets.Bottom
 	w.child.SetBounds(bounds)
 }
 
-func (w *mountedDecoration) updateProps(data *Decoration) error {
+func (w *decorationElement) updateProps(data *Decoration) error {
 	w.fill = data.Fill
+	w.radius = data.Radius
 
 	parent, err := w.handle.GetParent()
 	if err != nil {

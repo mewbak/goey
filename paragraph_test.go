@@ -6,23 +6,23 @@ import (
 
 func TestParagraph(t *testing.T) {
 	testingRenderWidgets(t, []Widget{
-		&P{Text: "A", Align: Left},
-		&P{Text: "B", Align: Right},
-		&P{Text: "C", Align: Center},
-		&P{Text: "D", Align: Justify},
+		&P{Text: "A", Align: JustifyLeft},
+		&P{Text: "B", Align: JustifyRight},
+		&P{Text: "C", Align: JustifyCenter},
+		&P{Text: "D", Align: JustifyFull},
 	})
 }
 
 func TestParagraphProps(t *testing.T) {
 	testingUpdateWidgets(t, []Widget{
-		&P{Text: "A", Align: Left},
-		&P{Text: "B", Align: Right},
-		&P{Text: "C", Align: Center},
-		&P{Text: "D", Align: Justify},
+		&P{Text: "A", Align: JustifyLeft},
+		&P{Text: "B", Align: JustifyRight},
+		&P{Text: "C", Align: JustifyCenter},
+		&P{Text: "D", Align: JustifyFull},
 	}, []Widget{
-		&P{Text: "AAA", Align: Right},
-		&P{Text: "BAA", Align: Center},
-		&P{Text: "CAA", Align: Justify},
-		&P{Text: "DAA", Align: Left},
+		&P{Text: "AAA", Align: JustifyRight},
+		&P{Text: "BAA", Align: JustifyCenter},
+		&P{Text: "CAA", Align: JustifyFull},
+		&P{Text: "DAA", Align: JustifyLeft},
 	})
 }

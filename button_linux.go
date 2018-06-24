@@ -74,14 +74,16 @@ func (w *mountedButton) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
-func (w *mountedButton) MeasureWidth() (Length, Length) {
-	min, max := w.handle.GetPreferredWidth()
-	return FromPixelsX(min), FromPixelsY(max)
+func (w *mountedButton) Layout(bc Box) Size {
+	_, width := w.handle.GetPreferredWidth()
+	_, height := w.handle.GetPreferredHeight()
+	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
 }
 
-func (w *mountedButton) MeasureHeight(width Length) (Length, Length) {
-	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
-	return FromPixelsY(min), FromPixelsY(max)
+func (w *mountedButton) MinimumSize() Size {
+	width, _ := w.handle.GetPreferredWidth()
+	height, _ := w.handle.GetPreferredHeight()
+	return Size{FromPixelsX(width), FromPixelsY(height)}
 }
 
 func (w *mountedButton) SetBounds(bounds Rectangle) {

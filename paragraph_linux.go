@@ -13,13 +13,13 @@ type mountedP struct {
 
 func (a TextAlignment) native() gtk.Justification {
 	switch a {
-	case Left:
+	case JustifyLeft:
 		return gtk.JUSTIFY_LEFT
-	case Center:
+	case JustifyCenter:
 		return gtk.JUSTIFY_CENTER
-	case Right:
+	case JustifyRight:
 		return gtk.JUSTIFY_RIGHT
-	case Justify:
+	case JustifyFull:
 		return gtk.JUSTIFY_FILL
 	}
 
@@ -58,14 +58,16 @@ func (w *mountedP) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
-func (w *mountedP) MeasureWidth() (Length, Length) {
-	min, max := w.handle.GetPreferredWidth()
-	return FromPixelsX(min), FromPixelsX(max)
+func (w *mountedP) Layout(bc Box) Size {
+	_, width := w.handle.GetPreferredWidth()
+	_, height := w.handle.GetPreferredHeight()
+	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
 }
 
-func (w *mountedP) MeasureHeight(width Length) (Length, Length) {
-	min, max := syscall.WidgetGetPreferredHeightForWidth(&w.handle.Widget, width.PixelsX())
-	return FromPixelsY(min), FromPixelsY(max)
+func (w *mountedP) MinimumSize() Size {
+	width, _ := w.handle.GetPreferredWidth()
+	height, _ := w.handle.GetPreferredHeight()
+	return Size{FromPixelsX(width), FromPixelsY(height)}
 }
 
 func (w *mountedP) Props() Widget {
@@ -74,14 +76,14 @@ func (w *mountedP) Props() Widget {
 		panic("Could not get text, " + err.Error())
 	}
 
-	align := Left
+	align := JustifyLeft
 	switch w.handle.GetJustify() {
 	case gtk.JUSTIFY_CENTER:
-		align = Center
+		align = JustifyCenter
 	case gtk.JUSTIFY_RIGHT:
-		align = Right
+		align = JustifyRight
 	case gtk.JUSTIFY_FILL:
-		align = Justify
+		align = JustifyFull
 	}
 
 	return &P{

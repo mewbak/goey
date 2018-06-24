@@ -1,7 +1,6 @@
 package goey
 
 import (
-	"fmt"
 	"image"
 	"sync/atomic"
 	"syscall"
@@ -92,11 +91,18 @@ func (mw *windowImpl) onSize(hwnd win.HWND) {
 	// Get the client rect for the main window.  This is the layout region.
 	rect := win.RECT{}
 	win.GetClientRect(hwnd, &rect)
-	size := mw.layoutChild(rect)
+	size := mw.layoutChild(Size{
+		FromPixelsX(rect.Right - rect.Left),
+		FromPixelsY(rect.Bottom - rect.Top),
+	})
 	for mw.showScroll(size, rect) {
 		win.GetClientRect(hwnd, &rect)
-		size = mw.layoutChild(rect)
+		size = mw.layoutChild(Size{
+			FromPixelsX(rect.Right - rect.Left),
+			FromPixelsY(rect.Bottom - rect.Top),
+		})
 	}
+	mw.childSize = size
 
 	// Position the child element.
 	mw.child.SetBounds(Rectangle{
@@ -314,30 +320,6 @@ func (w *windowImpl) close() {
 
 func (w *windowImpl) getChild() Element {
 	return w.child
-}
-
-func (w *windowImpl) layoutChild(rect win.RECT) Size {
-	// Create the constraints
-	constraints := Tight(Size{
-		FromPixelsX(int(rect.Right)),
-		FromPixelsY(int(rect.Bottom)),
-	})
-
-	// Relax maximum size when scolling is allowed
-	if w.horizontalScroll {
-		constraints.Max.Width = Inf
-	}
-	if w.verticalScroll {
-		constraints.Max.Height = Inf
-	}
-
-	// Perform layout
-	size := w.child.Layout(constraints)
-	if !constraints.IsSatisfiedBy(size) {
-		fmt.Println("constraints not satisfied")
-	}
-	w.childSize = size
-	return size
 }
 
 // NativeHandle returns the handle to the platform-specific window handle

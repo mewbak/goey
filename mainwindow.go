@@ -2,6 +2,7 @@ package goey
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"sync/atomic"
 )
@@ -35,6 +36,8 @@ func (w *Window) Child() Element {
 	return w.getChild()
 }
 
+// children assumes that the direct child of the window is a VBox, and then
+// returns the children of that element.  It is used for testing.
 func (w *Window) children() []Element {
 	child := w.getChild()
 	if child == nil {
@@ -46,6 +49,26 @@ func (w *Window) children() []Element {
 	}
 
 	return nil
+}
+
+func (w *windowImpl) layoutChild(windowSize Size) Size {
+	// Create the constraints
+	constraints := Tight(windowSize)
+
+	// Relax maximum size when scolling is allowed
+	if w.horizontalScroll {
+		constraints.Max.Width = Inf
+	}
+	if w.verticalScroll {
+		constraints.Max.Height = Inf
+	}
+
+	// Perform layout
+	size := w.child.Layout(constraints)
+	if !constraints.IsSatisfiedBy(size) {
+		fmt.Println("constraints not satisfied")
+	}
+	return size
 }
 
 // Message returns a message constructor that can be used to build and then

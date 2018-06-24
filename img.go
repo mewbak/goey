@@ -45,6 +45,16 @@ func (_ *mountedImg) Kind() *Kind {
 	return &imgKind
 }
 
+func (w *mountedImg) Layout(bc Box) Size {
+	// Determine ideal width.
+	return bc.ConstrainAndAttemptToPreserveAspectRatio(Size{w.width, w.height})
+}
+
+func (w *mountedImg) MinimumSize() Size {
+	// Determine ideal width.
+	return Size{w.width, w.height}
+}
+
 // UpdateDimensions calculates default values for Width and Height if either
 // or zero based on the image dimensions.  The member Image cannot be nil.
 func (w *Img) UpdateDimensions() {

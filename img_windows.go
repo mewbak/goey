@@ -1,11 +1,12 @@
 package goey
 
 import (
-	win2 "bitbucket.org/rj/goey/syscall"
 	"image"
 	"image/draw"
 	"syscall"
 	"unsafe"
+
+	win2 "bitbucket.org/rj/goey/syscall"
 
 	"github.com/lxn/win"
 )
@@ -121,16 +122,6 @@ type mountedImg struct {
 	imageData []uint8
 	width     Length
 	height    Length
-}
-
-func (w *mountedImg) Layout(bc Box) Size {
-	// Determine ideal width.
-	return bc.ConstrainAndAttemptToPreserveAspectRatio(Size{w.width, w.height})
-}
-
-func (w *mountedImg) MinimumSize() Size {
-	// Determine ideal width.
-	return Size{w.width, w.height}
 }
 
 func (w *mountedImg) SetBounds(bounds Rectangle) {

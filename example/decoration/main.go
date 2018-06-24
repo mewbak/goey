@@ -6,6 +6,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"os"
 	"strconv"
 
 	"bitbucket.org/rj/goey"
@@ -31,11 +32,13 @@ func main() {
 }
 
 func createWindow() error {
+	setscroll := os.Getenv("GOEY_SETSCROLL") != ""
+
 	mw, err := goey.NewWindow("One Button", render())
 	if err != nil {
 		return err
 	}
-	mw.SetScroll(true, true)
+	mw.SetScroll(setscroll, setscroll)
 	mainWindow = mw
 
 	return nil
