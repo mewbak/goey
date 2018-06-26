@@ -4,16 +4,6 @@ const (
 	Inf Length = 0x7fffffff
 )
 
-func clamp(min, value, max Length) Length {
-	if value > max {
-		value = max
-	}
-	if value < min {
-		value = min
-	}
-	return value
-}
-
 func guardInf(a, b Length) Length {
 	if a == Inf {
 		return Inf
@@ -74,8 +64,8 @@ func TightHeight(height Length) Box {
 
 func (bc Box) Constrain(size Size) Size {
 	return Size{
-		Width:  clamp(bc.Min.Width, size.Width, bc.Max.Width),
-		Height: clamp(bc.Min.Height, size.Height, bc.Max.Height),
+		Width:  size.Width.Clamp(bc.Min.Width, bc.Max.Width),
+		Height: size.Height.Clamp(bc.Min.Height, bc.Max.Height),
 	}
 }
 
@@ -111,11 +101,11 @@ func (bc Box) ConstrainAndAttemptToPreserveAspectRatio(size Size) Size {
 }
 
 func (bc Box) ConstrainHeight(height Length) Length {
-	return clamp(bc.Min.Height, height, bc.Max.Height)
+	return height.Clamp(bc.Min.Height, bc.Max.Height)
 }
 
 func (bc Box) ConstrainWidth(width Length) Length {
-	return clamp(bc.Min.Width, width, bc.Max.Width)
+	return width.Clamp(bc.Min.Width, bc.Max.Width)
 }
 
 func (bc Box) Deflate(width Length, height Length) Box {
@@ -132,10 +122,10 @@ func (bc Box) Deflate(width Length, height Length) Box {
 }
 
 func (bc Box) Enforce(constraints Box) Box {
-	minWidth := clamp(constraints.Min.Width, bc.Min.Width, constraints.Max.Width)
-	maxWidth := clamp(constraints.Min.Width, bc.Max.Width, constraints.Max.Width)
-	minHeight := clamp(constraints.Min.Height, bc.Min.Height, constraints.Max.Height)
-	maxHeight := clamp(constraints.Min.Height, bc.Max.Height, constraints.Max.Height)
+	minWidth := bc.Min.Width.Clamp(constraints.Min.Width, constraints.Max.Width)
+	maxWidth := bc.Max.Width.Clamp(constraints.Min.Width, constraints.Max.Width)
+	minHeight := bc.Min.Height.Clamp(constraints.Min.Height, constraints.Max.Height)
+	maxHeight := bc.Max.Height.Clamp(constraints.Min.Height, constraints.Max.Height)
 	return Box{Size{minWidth, minHeight}, Size{maxWidth, maxHeight}}
 }
 
@@ -221,21 +211,21 @@ func (bc Box) LoosenWidth() Box {
 }
 
 func (bc Box) Tighten(size Size) Box {
-	bc.Min.Width = clamp(bc.Min.Width, size.Width, bc.Max.Width)
+	bc.Min.Width = size.Width.Clamp(bc.Min.Width, bc.Max.Width)
 	bc.Max.Width = bc.Min.Width
-	bc.Min.Height = clamp(bc.Min.Height, size.Height, bc.Max.Height)
+	bc.Min.Height = size.Height.Clamp(bc.Min.Height, bc.Max.Height)
 	bc.Max.Height = bc.Min.Height
 	return bc
 }
 
 func (bc Box) TightenHeight(height Length) Box {
-	bc.Min.Height = clamp(bc.Min.Height, height, bc.Max.Height)
+	bc.Min.Height = height.Clamp(bc.Min.Height, bc.Max.Height)
 	bc.Max.Height = bc.Min.Height
 	return bc
 }
 
 func (bc Box) TightenWidth(width Length) Box {
-	bc.Min.Width = clamp(bc.Min.Width, width, bc.Max.Width)
+	bc.Min.Width = width.Clamp(bc.Min.Width, bc.Max.Width)
 	bc.Max.Width = bc.Min.Width
 	return bc
 }

@@ -51,3 +51,27 @@ func TestLength(t *testing.T) {
 		t.Errorf("Unexpected ratio between DIP and PT, %v =/= %v", rt, 96*(1<<6)/72)
 	}
 }
+
+func TestLength_Clamp(t *testing.T) {
+	cases := []struct {
+		in       Length
+		min, max Length
+		out      Length
+	}{
+		{10 * DIP, 0 * DIP, 20 * DIP, 10 * DIP},
+		{30 * DIP, 0 * DIP, 20 * DIP, 20 * DIP},
+		{-10 * DIP, 0 * DIP, 20 * DIP, 0 * DIP},
+		{10 * DIP, 10 * DIP, 10 * DIP, 10 * DIP},
+		{30 * DIP, 10 * DIP, 10 * DIP, 10 * DIP},
+		{-10 * DIP, 10 * DIP, 10 * DIP, 10 * DIP},
+		{10 * DIP, 20 * DIP, 0 * DIP, 20 * DIP},
+		{30 * DIP, 20 * DIP, 0 * DIP, 20 * DIP},
+		{-10 * DIP, 20 * DIP, 0 * DIP, 20 * DIP},
+	}
+
+	for i, v := range cases {
+		if out := v.in.Clamp(v.min, v.max); out != v.out {
+			t.Errorf("Error in case %d, want %s, got %s", i, v.out, out)
+		}
+	}
+}

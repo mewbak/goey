@@ -27,6 +27,19 @@ const (
 // pixel for both CSS and on Windows.
 type Length fixed.Int26_6
 
+// Clamp ensures that the length is between the minimum and maximum values
+// specified.  Normally, min should be less than max.  If that is not the
+// case, then the returned will preferentially respect min.
+func (v Length) Clamp(min, max Length) Length {
+	if v > max {
+		v = max
+	}
+	if v < min {
+		v = min
+	}
+	return v
+}
+
 // DIP returns a float64 with the length measured in device independent pixels.
 func (dp Length) DIP() float64 {
 	return float64(dp) / (1 << 6)
