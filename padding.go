@@ -4,10 +4,6 @@ var (
 	paddingKind = Kind{"bitbucket.org/rj/goey.Padding"}
 )
 
-const (
-	DefaultPadding = 11 * DIP
-)
-
 type Insets struct {
 	Top    Length
 	Right  Length
@@ -16,7 +12,8 @@ type Insets struct {
 }
 
 func DefaultInsets() Insets {
-	return Insets{11 * DIP, 11 * DIP, 11 * DIP, 11 * DIP}
+	const padding = 11 * DIP
+	return Insets{padding, padding, padding, padding}
 }
 
 func UniformInset(l Length) Insets {

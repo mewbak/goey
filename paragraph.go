@@ -7,6 +7,7 @@ var (
 // TextAlignment identifies the different types of text alignment that are possible.
 type TextAlignment uint8
 
+// Possibly alignments for text in paragraphs.
 const (
 	JustifyLeft   = TextAlignment(iota) // Text aligned to the left (ragged right)
 	JustifyCenter                       // Center alignment

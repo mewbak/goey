@@ -13,12 +13,13 @@ var (
 	DPI image.Point
 )
 
-// Common lengths used when describing GUIs.  Note that the DIP is the natural
-// unit for this package.  Because of precision, the PT listed here is somewhat
-// smaller than its correct value.
+// Common lengths used when describing GUIs.
+// Note that the DIP (device-independent pixel) is the natural unit for this
+// package.  Because of limited precision, the PT listed here is somewhat smaller
+// than its correct value.
 const (
-	DIP = Length(1 << 6)
-	PT  = Length((96 << 6) / 72)
+	DIP = Length(1 << 6)         // Device-independenant pixel (1/96 inch)
+	PT  = Length((96 << 6) / 72) // Point (1/72 inch)
 )
 
 // Length is a distance measured in device-independent pixels.  There are nominally

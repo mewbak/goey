@@ -8,15 +8,18 @@ var (
 // along the main axis for a vertical box or horizontal box layout.
 type MainAxisAlign uint8
 
+// Possible values for alignment of the main axis in a vertical box (VBox) or
+// horizontal box (HBox).
 const (
-	MainStart    = MainAxisAlign(iota) // Children will be packed at the top or left of the box
+	MainStart    = MainAxisAlign(iota) // Children will be packed together at the top or left of the box
 	MainCenter                         // Children will be packed together and centered in the box.
 	MainEnd                            // Children will be packed together at the bottom or right of the box
 	SpaceAround                        // Children will be spaced apart
 	SpaceBetween                       // Children will be spaced apart, but the first and last children will but the ends of the box.
 )
 
-// IsPacked returns true if the main axis alignment is a one where children will be packed.
+// IsPacked returns true if the main axis alignment is a one where children
+// will be packed together.
 func (a MainAxisAlign) IsPacked() bool {
 	return a <= MainEnd
 }
@@ -25,6 +28,8 @@ func (a MainAxisAlign) IsPacked() bool {
 // along the cross axis for vertical box and horizontal box layouts.
 type CrossAxisAlign uint8
 
+// Possible values for alignment of the cross axis in a vertical box (VBox) or
+// horizontal box (HBox).
 const (
 	Stretch     = CrossAxisAlign(iota) // Children will be stretched so that the extend across box
 	CrossStart                         // Children will be aligned to the left or top of the box
