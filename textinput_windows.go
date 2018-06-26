@@ -128,7 +128,7 @@ func (w *mountedTextInputBase) preferredWidth() Length {
 	return 75 * DIP
 }
 
-func (w *mountedTextInputBase) Layout(bc Box) Size {
+func (w *mountedTextInputBase) Layout(bc Constraint) Size {
 	// Determine ideal width.
 	width := w.preferredWidth()
 	height := 23 * DIP

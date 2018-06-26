@@ -84,7 +84,7 @@ func (w *mountedCheckbox) preferredWidth() Length {
 	return FromPixelsX(int(rect.Right)) + 17
 }
 
-func (w *mountedCheckbox) Layout(bc Box) Size {
+func (w *mountedCheckbox) Layout(bc Constraint) Size {
 	// Determine ideal width.
 	width := w.preferredWidth()
 	height := 17 * DIP

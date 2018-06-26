@@ -44,7 +44,7 @@ func (w *mountedLabel) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
-func (w *mountedLabel) Layout(bc Box) Size {
+func (w *mountedLabel) Layout(bc Constraint) Size {
 	_, width := w.handle.GetPreferredWidth()
 	_, height := w.handle.GetPreferredHeight()
 	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})

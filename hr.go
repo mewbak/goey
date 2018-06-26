@@ -29,7 +29,7 @@ func (w *mountedHR) Props() Widget {
 	return &HR{}
 }
 
-func (*mountedHR) Layout(bc Box) Size {
+func (*mountedHR) Layout(bc Constraint) Size {
 	if bc.HasBoundedWidth() {
 		return bc.Constrain(Size{bc.Max.Width, 13 * DIP})
 	}

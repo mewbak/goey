@@ -105,7 +105,7 @@ func (w *mountedButton) preferredWidth() Length {
 	return retval
 }
 
-func (w *mountedButton) Layout(bc Box) Size {
+func (w *mountedButton) Layout(bc Constraint) Size {
 	// Determine ideal width.
 	width := w.preferredWidth()
 	height := 23 * DIP

@@ -70,7 +70,7 @@ type mountedTextArea struct {
 	minLines int
 }
 
-func (w *mountedTextArea) Layout(bc Box) Size {
+func (w *mountedTextArea) Layout(bc Constraint) Size {
 	const lineHeight = 16 * DIP
 
 	width := w.preferredWidth()

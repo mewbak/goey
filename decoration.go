@@ -30,7 +30,7 @@ func (w *Decoration) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (w *decorationElement) Layout(bc Box) Size {
+func (w *decorationElement) Layout(bc Constraint) Size {
 	hinset := w.insets.Left + w.insets.Right
 	vinset := w.insets.Top + w.insets.Bottom
 
@@ -38,7 +38,7 @@ func (w *decorationElement) Layout(bc Box) Size {
 		return bc.Constrain(Size{hinset, vinset})
 	}
 
-	innerConstraints := bc.Deflate(hinset, vinset)
+	innerConstraints := bc.Inset(hinset, vinset)
 	w.childSize = w.child.Layout(innerConstraints)
 	return Size{
 		w.childSize.Width + hinset,

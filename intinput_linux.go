@@ -66,7 +66,7 @@ func (w *mountedIntInput) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
-func (w *mountedIntInput) Layout(bc Box) Size {
+func (w *mountedIntInput) Layout(bc Constraint) Size {
 	_, width := w.handle.GetPreferredWidth()
 	_, height := w.handle.GetPreferredHeight()
 	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})

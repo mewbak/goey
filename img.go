@@ -45,7 +45,7 @@ func (_ *mountedImg) Kind() *Kind {
 	return &imgKind
 }
 
-func (w *mountedImg) Layout(bc Box) Size {
+func (w *mountedImg) Layout(bc Constraint) Size {
 	// Determine ideal width.
 	return bc.ConstrainAndAttemptToPreserveAspectRatio(Size{w.width, w.height})
 }

@@ -95,7 +95,7 @@ func (w *mountedVBox) Close() {
 	w.children = nil
 }
 
-func (w *mountedVBox) Layout(bc Box) Size {
+func (w *mountedVBox) Layout(bc Constraint) Size {
 	if len(w.children) == 0 {
 		w.totalHeight = 0
 		return Size{}

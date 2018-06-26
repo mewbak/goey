@@ -37,7 +37,7 @@ func (w *mountedEmpty) Props() Widget {
 	return &Empty{}
 }
 
-func (w *mountedEmpty) Layout(bc Box) Size {
+func (w *mountedEmpty) Layout(bc Constraint) Size {
 	// Determine ideal width.
 	return bc.Constrain(Size{13 * DIP, 13 * DIP})
 }

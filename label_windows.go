@@ -73,7 +73,7 @@ func (w *mountedLabel) Props() Widget {
 	}
 }
 
-func (w *mountedLabel) Layout(bc Box) Size {
+func (w *mountedLabel) Layout(bc Constraint) Size {
 	// Determine ideal width.
 	width := w.preferredWidth()
 	height := 13 * DIP

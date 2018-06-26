@@ -87,7 +87,7 @@ type mountedSelectInput struct {
 	preferredWidth Length
 }
 
-func (w *mountedSelectInput) Layout(bc Box) Size {
+func (w *mountedSelectInput) Layout(bc Constraint) Size {
 	return bc.Constrain(w.MinimumSize())
 }
 

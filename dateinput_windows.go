@@ -79,7 +79,7 @@ type mountedDateInput struct {
 	onBlur   func()
 }
 
-func (w *mountedDateInput) Layout(bc Box) Size {
+func (w *mountedDateInput) Layout(bc Constraint) Size {
 	// Determine ideal width.
 	width := 75 * DIP
 	height := 23 * DIP

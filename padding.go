@@ -64,7 +64,7 @@ func (*paddingElement) Kind() *Kind {
 	return &paddingKind
 }
 
-func (w *paddingElement) Layout(bc Box) Size {
+func (w *paddingElement) Layout(bc Constraint) Size {
 	hinset := w.insets.Left + w.insets.Right
 	vinset := w.insets.Top + w.insets.Bottom
 
@@ -72,7 +72,7 @@ func (w *paddingElement) Layout(bc Box) Size {
 		return bc.Constrain(Size{hinset, vinset})
 	}
 
-	innerConstraints := bc.Deflate(hinset, vinset)
+	innerConstraints := bc.Inset(hinset, vinset)
 	w.childSize = w.child.Layout(innerConstraints)
 	return Size{
 		w.childSize.Width + hinset,

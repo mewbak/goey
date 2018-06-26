@@ -45,7 +45,7 @@ type Element interface {
 	// Users should not need to use this method directly.
 	Kind() *Kind
 	// Layout determines the best size for an element that sastisfies the constraints.
-	Layout(Box) Size
+	Layout(Constraint) Size
 	// MinimumSize reports the minimum dimensions for an element that will comfortably fit its contents.
 	MinimumSize() Size
 	// SetBounds updates the position of the widget.

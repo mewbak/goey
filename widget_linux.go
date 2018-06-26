@@ -26,7 +26,7 @@ func (w *Control) Handle() *gtk.Widget {
 	return w.handle
 }
 
-func (w *Control) Layout(bc Box) Size {
+func (w *Control) Layout(bc Constraint) Size {
 	if !bc.HasBoundedWidth() && !bc.HasBoundedHeight() {
 		_, width := w.handle.GetPreferredWidth()
 		_, height := w.handle.GetPreferredHeight()

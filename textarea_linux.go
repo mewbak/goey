@@ -114,7 +114,7 @@ func (w *mountedTextArea) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
-func (w *mountedTextArea) Layout(bc Box) Size {
+func (w *mountedTextArea) Layout(bc Constraint) Size {
 	if !bc.HasBoundedWidth() {
 		_, width := w.handle.GetPreferredWidth()
 		_, height := w.handle.GetPreferredHeight()

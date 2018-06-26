@@ -6,12 +6,13 @@ import (
 
 func TestBox(t *testing.T) {
 	cases := []struct {
-		in                                                                                                 Box
-		isNormalized, isTight, hasTightWidth, hasTightHeight, isBounded, hasBoundedWidth, hasBoundedHeight bool
+		in                                                   Constraint
+		isNormalized, isTight, hasTightWidth, hasTightHeight bool
+		isBounded, hasBoundedWidth, hasBoundedHeight         bool
 	}{
 		{Expand(), true, true, true, true, false, false, false},
-		{ExpandWidth(10 * DIP), true, true, true, true, false, true, false},
-		{ExpandHeight(10 * DIP), true, true, true, true, false, false, true},
+		{ExpandHeight(10 * DIP), true, true, true, true, false, true, false},
+		{ExpandWidth(10 * DIP), true, true, true, true, false, false, true},
 		{Loose(Size{10 * DIP, 15 * DIP}), true, false, false, false, true, true, true},
 		{Tight(Size{10 * DIP, 15 * DIP}), true, true, true, true, true, true, true},
 		{TightWidth(10 * DIP), true, false, true, false, false, true, false},
@@ -43,11 +44,11 @@ func TestBox(t *testing.T) {
 	}
 }
 
-func TestBox_Deflate(t *testing.T) {
+func TestBox_Inset(t *testing.T) {
 	cases := []struct {
-		in      Box
+		in      Constraint
 		deflate Length
-		out     Box
+		out     Constraint
 	}{
 		{Tight(Size{}), 1 * DIP, Tight(Size{})},
 		{Tight(Size{2 * DIP, 2 * DIP}), 10 * DIP, Tight(Size{})},
@@ -65,7 +66,7 @@ func TestBox_Deflate(t *testing.T) {
 	}
 
 	for i, v := range cases {
-		out := v.in.Deflate(v.deflate, v.deflate)
+		out := v.in.Inset(v.deflate, v.deflate)
 		if v.out != out {
 			t.Errorf("Failed on case %d, want %v, got %v", i, v.out, out)
 		}

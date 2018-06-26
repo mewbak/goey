@@ -100,7 +100,7 @@ func (w *mountedP) Props() Widget {
 	}
 }
 
-func (w *mountedP) Layout(bc Box) Size {
+func (w *mountedP) Layout(bc Constraint) Size {
 	if bc.HasBoundedWidth() {
 		width := bc.ConstrainWidth(paragraphMaxWidth)
 		height := w.measureHeight(width)

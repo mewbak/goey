@@ -51,7 +51,7 @@ func (*alignElement) Kind() *Kind {
 	return &alignKind
 }
 
-func (w *alignElement) Layout(bc Box) Size {
+func (w *alignElement) Layout(bc Constraint) Size {
 	shrinkWrapWidth := w.widthFactor > 0 || !bc.HasBoundedWidth()
 	shrinkWrapHeight := w.heightFactor > 0 || !bc.HasBoundedHeight()
 
