@@ -61,7 +61,7 @@ func (w *mountedHBox) Close() {
 }
 
 func (w *mountedHBox) Layout(bc Box) Size {
-	if w.children == nil {
+	if len(w.children) == 0 {
 		w.totalWidth = 0
 		return Size{}
 	}
@@ -102,7 +102,7 @@ func (w *mountedHBox) Layout(bc Box) Size {
 }
 
 func (w *mountedHBox) MinimumSize() Size {
-	if w.children == nil {
+	if len(w.children) == 0 {
 		return Size{}
 	}
 

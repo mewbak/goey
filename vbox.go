@@ -96,7 +96,7 @@ func (w *mountedVBox) Close() {
 }
 
 func (w *mountedVBox) Layout(bc Box) Size {
-	if w.children == nil {
+	if len(w.children) == 0 {
 		w.totalHeight = 0
 		return Size{}
 	}
@@ -137,7 +137,7 @@ func (w *mountedVBox) Layout(bc Box) Size {
 }
 
 func (w *mountedVBox) MinimumSize() Size {
-	if w.children == nil {
+	if len(w.children) == 0 {
 		return Size{}
 	}
 
