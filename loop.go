@@ -28,9 +28,12 @@ var (
 // If the main loop is already running, this function will return an error.
 //
 // Modification of the GUI should happen only on the GUI thread.  This includes
-// creating any windows or widgets.  The parameter action takes a closure that
-// can be used to initialize the GUI.  Any futher modifications also need to
-// be schedule on the GUI thread, which can be done using the function Do.
+// creating any windows, mounting any widgets, or updating the properties of any
+// elements.
+//
+// The parameter action takes a closure that can be used to initialize the GUI.
+// Any futher modifications to the GUI also need to be schedule on the GUI
+// thread, which can be done using the function Do.
 func Run(action func() error) error {
 	// Pin the GUI message loop to a single thread
 	runtime.LockOSThread()

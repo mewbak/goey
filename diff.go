@@ -1,7 +1,7 @@
 package goey
 
 // CloseElements closes all of the elements contained in a slice.
-// This is a utility function to help containers close their children
+// This is a utility function to help containers close all of their children
 // when required.
 func CloseElements(children []Element) {
 	for _, v := range children {
@@ -10,7 +10,13 @@ func CloseElements(children []Element) {
 }
 
 // DiffChild adds and removes controls in a GUI to reconcile differences
-// between the desired and current GUI state.
+// between the desired and current GUI state.  Depending on the kind for both
+// lhs and rhs, the current element may either be updated or replaced.
+//
+// The element lhs should be considered as 'sunk' by this function, and will be
+// closed if necessary.  On the other hand, the caller will be responsible
+// for the returned element.  Note that the returned element may be non-nil
+// even in the presence of an error.
 func DiffChild(parent Control, lhs Element, rhs Widget) (Element, error) {
 	// If the rhs is empty, then make sure we delete the lhs if necessary
 	if rhs == nil {
@@ -35,6 +41,7 @@ func DiffChild(parent Control, lhs Element, rhs Widget) (Element, error) {
 		return lhs, nil
 	}
 
+	// Need to replace the element.
 	newChild, err := rhs.Mount(parent)
 	if err != nil {
 		return lhs, err
@@ -45,6 +52,11 @@ func DiffChild(parent Control, lhs Element, rhs Widget) (Element, error) {
 
 // DiffChildren adds and removed controls in a GUI to reconcile differences
 // between the desired and current GUI state.
+//
+// The elements contained in lhs should be considered as 'sunk' by this function,
+// and will be closed if necessary.  On the other hand, the caller will be
+// responsible for all of the returned elements.  Note that the returned slice
+// of elements may be non-nil even in the presence of an error.
 func DiffChildren(parent Control, lhs []Element, rhs []Widget) ([]Element, error) {
 	// If the new tree does not contain any children, then we can trivially
 	// match the tree by deleting the actual widgets.
