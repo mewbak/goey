@@ -92,14 +92,14 @@ func (mw *windowImpl) onSize(hwnd win.HWND) {
 	rect := win.RECT{}
 	win.GetClientRect(hwnd, &rect)
 	size := mw.layoutChild(Size{
-		FromPixelsX(rect.Right - rect.Left),
-		FromPixelsY(rect.Bottom - rect.Top),
+		FromPixelsX(int(rect.Right - rect.Left)),
+		FromPixelsY(int(rect.Bottom - rect.Top)),
 	})
 	for mw.showScroll(size, rect) {
 		win.GetClientRect(hwnd, &rect)
 		size = mw.layoutChild(Size{
-			FromPixelsX(rect.Right - rect.Left),
-			FromPixelsY(rect.Bottom - rect.Top),
+			FromPixelsX(int(rect.Right - rect.Left)),
+			FromPixelsY(int(rect.Bottom - rect.Top)),
 		})
 	}
 	mw.childSize = size
