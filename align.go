@@ -4,22 +4,34 @@ var (
 	alignKind = Kind{"bitbucket.org/rj/goey.Align"}
 )
 
-// Alignment represents the position of a widget along one dimension.
+// Alignment represents the position of a child widget along one dimension.
+// Some common values for alignment, such as AlignStart, AlignCenter, and AlignEnd,
+// are given constants, but other values are possible.  For example, to align
+// a child with an position of 25%, use (AlignStart + AlignCenter) / 2.
 type Alignment int16
 
-// Possible values of alignment.
+// Common values for alignment, representing the position of child widget.
 const (
 	AlignStart  = Alignment(-32768) // Widget is aligned at the start (left or top).
 	AlignCenter = Alignment(0)      // Widget is aligned at the center.
 	AlignEnd    = Alignment(0x7fff) // Widget is aligned at the end (right or bottom).
 )
 
-// Align describes a widget that aligns its child within its borders.
+// Align describes a widget that aligns a single child widget within its borders.
+//
+// The default position is for the child widget to be centered.  To change the
+// position of the child, the horizontal and vertical alignment (HAlign and
+// VAlign) should be adjusted.
+//
+// The size of the control depends on the WidthFactor and HeightFactor.  If zero,
+// the widget will try to be as large as possible or match the child, depending
+// on whether the box constraints are bound or not.  If greater than zero, then
+// the widget will try to size itself to be that much larger than the child widget.
 type Align struct {
-	WidthFactor  float64   // If greater than zero, ratio of container width to child width.
-	HeightFactor float64   // If greater than zero, ratio of container height to child height.
 	HAlign       Alignment // Horizontal alignment of child widget.
 	VAlign       Alignment // Vertical alignment of child widget.
+	WidthFactor  float64   // If greater than zero, ratio of container width to child width.
+	HeightFactor float64   // If greater than zero, ratio of container height to child height.
 	Child        Widget    // Child widget.
 }
 

@@ -5,6 +5,9 @@ var (
 )
 
 // Empty describes a widget that is either a horizontal or vertical gap.
+//
+// The size of the control will be a (perhaps platform dependent) spacing
+// between controls.  This applies to both the width and height.
 type Empty struct {
 }
 

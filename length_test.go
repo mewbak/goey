@@ -6,16 +6,19 @@ import (
 )
 
 func ExampleLength() {
-	// Since there are 96 device-independent pixels per inch, and 72 points
+	// Since there are 96 device-independent pixels per inch, and 6 picas
 	// per inch, the following two lengths should be equal.
 	length1 := 96 * DIP
-	length2 := 72 * DIP
+	length2 := 6 * PC
 
 	if length1 == length2 {
 		fmt.Printf("All is OK with the world.")
 	} else {
-		fmt.Printf("This should not happen, unless there is a bad rounding error.")
+		fmt.Printf("This should not happen, unless there is a rounding error.")
 	}
+
+	// Output:
+	// All is OK with the world.
 }
 
 func ExampleLength_String() {

@@ -8,7 +8,7 @@ var (
 // along the main axis for a vertical box or horizontal box layout.
 type MainAxisAlign uint8
 
-// Possible values for alignment of the main axis in a vertical box (VBox) or
+// Allowed values for alignment of the main axis in a vertical box (VBox) or
 // horizontal box (HBox).
 const (
 	MainStart    = MainAxisAlign(iota) // Children will be packed together at the top or left of the box
@@ -28,7 +28,7 @@ func (a MainAxisAlign) IsPacked() bool {
 // along the cross axis for vertical box and horizontal box layouts.
 type CrossAxisAlign uint8
 
-// Possible values for alignment of the cross axis in a vertical box (VBox) or
+// Allowed values for alignment of the cross axis in a vertical box (VBox) or
 // horizontal box (HBox).
 const (
 	Stretch     = CrossAxisAlign(iota) // Children will be stretched so that the extend across box
@@ -37,9 +37,14 @@ const (
 	CrossEnd                           // Children will be aligned to the right or bottom of the box
 )
 
-// VBox describes a vertical layout.  Children are positioned in order from
-// the top towards the bottom.  The main axis for alignment is therefore vertical,
-// with the cross axis for alignment horiztonal.
+// VBox describes a layout widget that arranges its child widgets into a column.
+// Children are positioned in order from the top towards the bottom.  The main
+// axis for alignment is therefore vertical, with the cross axis for alignment is horiztonal.
+//
+// The size of the box will try to set a width sufficient to contain all of its
+// children.  Extra space will be distributed according to the value of
+// AlignMain.  Subject to the box constraints during layout, the height should
+// match the largest minimum height of the child widgets.
 type VBox struct {
 	AlignMain  MainAxisAlign
 	AlignCross CrossAxisAlign

@@ -4,11 +4,18 @@ var (
 	hboxKind = Kind{"bitbucket.org/rj/goey.HBox"}
 )
 
-// HBox describes a layout widget that arranges its child widgets into a horizontal row.
+// HBox describes a layout widget that arranges its child widgets into a row.
+// Children are positioned in order from the left towards the right.  The main
+// axis for alignment is therefore horizontal, with the cross axis for alignment is vertical.
+//
+// The size of the box will try to set a width sufficient to contain all of its
+// children.  Extra space will be distributed according to the value of
+// AlignMain.  Subject to the box constraints during layout, the height should
+// match the largest minimum height of the child widgets.
 type HBox struct {
-	AlignMain  MainAxisAlign
-	AlignCross CrossAxisAlign
-	Children   []Widget
+	AlignMain  MainAxisAlign  // Control distribution of excess horizontal space when positioning children.
+	AlignCross CrossAxisAlign // Control distribution of excess vertical space when positioning children.
+	Children   []Widget       // Children.
 }
 
 // Kind returns the concrete type for use in the Widget interface.

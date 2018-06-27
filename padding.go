@@ -4,6 +4,7 @@ var (
 	paddingKind = Kind{"bitbucket.org/rj/goey.Padding"}
 )
 
+// Insets describe padding that should ba added around a widget.
 type Insets struct {
 	Top    Length
 	Right  Length
@@ -11,15 +12,24 @@ type Insets struct {
 	Left   Length
 }
 
+// DefaultInsets returns the (perhaps platform-dependent) default insets for
+// widgets inside of a top-level window.
 func DefaultInsets() Insets {
 	const padding = 11 * DIP
 	return Insets{padding, padding, padding, padding}
 }
 
+// UniformInsets returns a padding description where the padding is equal on
+// all four sides.
 func UniformInset(l Length) Insets {
 	return Insets{l, l, l, l}
 }
 
+// Padding describes a adds some space around a single child widget.
+//
+// The size of the control will match the size of the child element, although
+// padding will be added between the border of the padding and the child
+// element as specified by the field Insets.
 type Padding struct {
 	Insets Insets
 	Child  Widget

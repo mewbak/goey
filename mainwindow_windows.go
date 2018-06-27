@@ -346,7 +346,6 @@ func (w *windowImpl) setChild(child Widget) (err error) {
 	// are placed.
 	if w.child != nil {
 		w.child.SetOrder(win.HWND_TOP)
-		w.childSize = Size{}
 		w.updateGlobalDPI()
 		w.minimumSize = w.child.MinimumSize()
 

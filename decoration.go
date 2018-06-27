@@ -8,13 +8,18 @@ var (
 	decorationKind = Kind{"bitbucket.org/rj/goey.Decoration"}
 )
 
-// Decoration describes a widget that provides a border and background.
+// Decoration describes a widget that provides a border and background, and
+// possibly containing a single child widget.
+//
+// The size of the control will match the size of the child element, although
+// padding will be added between the border of the decoration and the child
+// element as specified by the field Insets.
 type Decoration struct {
-	Fill   color.RGBA
-	Stroke color.RGBA
-	Insets Insets
-	Radius Length
-	Child  Widget
+	Fill   color.RGBA // Background colour used to fill interior.
+	Stroke color.RGBA // Stroke colour used to draw outline.
+	Insets Insets     // Space between border of the decoration and the child element.
+	Radius Length     // Radius of the widgets corners.
+	Child  Widget     // Child.
 }
 
 // Kind returns the concrete type for use in the Widget interface.

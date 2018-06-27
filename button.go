@@ -7,11 +7,11 @@ var (
 // Button describes a widget that users can click to initiate an action.
 type Button struct {
 	Text     string // Text is a caption for the button.
-	Disabled bool   // Disabled is a flag indicating that the user cannot interact with this button
-	Default  bool   // Default is a flag indicating that the button represents the default action for the interface
-	OnClick  func() // OnClick will be called whenever the user presses the button
-	OnFocus  func() // OnFocus will be called whenever the button receives the keyboard focus
-	OnBlur   func() // OnBlur will be called whenever the button loses the keyboard focus
+	Disabled bool   // Disabled is a flag indicating that the user cannot interact with this button.
+	Default  bool   // Default is a flag indicating that the button represents the default action for the interface.
+	OnClick  func() // OnClick will be called whenever the user presses the button.
+	OnFocus  func() // OnFocus will be called whenever the button receives the keyboard focus.
+	OnBlur   func() // OnBlur will be called whenever the button loses the keyboard focus.
 }
 
 // Kind returns the concrete type for use in the Widget interface.

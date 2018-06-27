@@ -44,9 +44,12 @@ type Element interface {
 	// Kind returns the concrete type for the Element.
 	// Users should not need to use this method directly.
 	Kind() *Kind
-	// Layout determines the best size for an element that sastisfies the constraints.
+	// Layout determines the best size for an element that sastisfies the
+	// constraints.
 	Layout(Constraint) Size
-	// MinimumSize reports the minimum dimensions for an element that will comfortably fit its contents.
+	// MinimumSize reports the minimum dimensions for an element that will
+	// comfortably fit its contents.  The minimum size is not well-defined for
+	// all types of elements.
 	MinimumSize() Size
 	// SetBounds updates the position of the widget.
 	SetBounds(bounds Rectangle)
@@ -88,13 +91,13 @@ func calculateVGap(previous Element, current Element) Length {
 		// be 'associated'.
 		return 5 * DIP
 	}
-	/*if _, ok := previous.(*mountedCheckbox); ok {
+	if _, ok := previous.(*mountedCheckbox); ok {
 		if _, ok := current.(*mountedCheckbox); ok {
 			// Any pair of successive checkboxes will be assumed to be in a
 			// related group.
 			return 7 * DIP
 		}
-	}*/
+	}
 
 	// The spacing between unrelated controls.  This is also the default space
 	// between paragraphs of text.

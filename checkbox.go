@@ -7,12 +7,12 @@ var (
 // Checkbox describes a widget that users input or update a flag.
 // The model for the value is a boolean value.
 type Checkbox struct {
-	Text     string
-	Value    bool
-	Disabled bool
-	OnChange func(value bool)
-	OnFocus  func()
-	OnBlur   func()
+	Text     string           // Text is a caption for the checkbox.
+	Value    bool             // Is the checkbox checked?
+	Disabled bool             // Disabled is a flag indicating that the user cannot interact with this checkbox.
+	OnChange func(value bool) // OnChange will be called whenever the value (checked or unchcked) changes.
+	OnFocus  func()           // OnFocus will be called whenever the checkbox receives the keyboard focus.
+	OnBlur   func()           // OnBlur will be called whenever the checkbox loses the keyboard focus.
 }
 
 // Kind returns the concrete type for use in the Widget interface.
