@@ -20,6 +20,7 @@ var (
 const (
 	DIP = Length(1 << 6)         // Device-independenant pixel (1/96 inch)
 	PT  = Length((96 << 6) / 72) // Point (1/72 inch)
+	PC  = Length((96 << 6) / 6)  // Pica (1/6 inch or 12 points)
 )
 
 // Length is a distance measured in device-independent pixels.  There are nominally
@@ -48,6 +49,11 @@ func (dp Length) DIP() float64 {
 // PT returns a float64 with the length measured in points.
 func (dp Length) PT() float64 {
 	return float64(dp) / ((96 << 6) / 72)
+}
+
+// PC returns a float64 with the length measured in picas.
+func (dp Length) PC() float64 {
+	return float64(dp) / ((96 << 6) / 6)
 }
 
 // PixelsX converts the distance measurement in DIPs to physical pixels, based

@@ -21,10 +21,12 @@ func ExampleLength() {
 func ExampleLength_String() {
 	fmt.Printf("Converting:  1pt is equal to %sdip\n", 1*PT)
 	fmt.Printf("Converting:  1pt is equal to %1.2fdip\n", (1 * PT).DIP())
+	fmt.Printf("Converting:  1pc is equal to %1.1fdip\n", (1 * PC).DIP())
 
 	// Output:
 	// Converting:  1pt is equal to 1:21dip
 	// Converting:  1pt is equal to 1.33dip
+	// Converting:  1pc is equal to 16.0dip
 }
 
 func ExampleRectangle() {
@@ -41,14 +43,21 @@ func ExampleRectangle() {
 func TestLength(t *testing.T) {
 	t.Logf("Constants DIP: %d", 1*DIP)
 	t.Logf("Constants PT:  %d", 1*PT)
+	t.Logf("Constants PC:  %d", 1*PC)
 	if rt := (1 * DIP).DIP(); rt != 1 {
 		t.Errorf("Unexpected round-trim for Length, %v =/= %v", rt, 1)
 	}
 	if rt := (1 * PT).PT(); rt != 1 {
 		t.Errorf("Unexpected round-trim for PT,  %v =/= %v", rt, 1)
 	}
+	if rt := (1 * PC).PC(); rt != 1 {
+		t.Errorf("Unexpected round-trim for PT,  %v =/= %v", rt, 1)
+	}
 	if rt := (1 * PT) * (1 << 6) / (1 * DIP); rt != 96*(1<<6)/72 {
 		t.Errorf("Unexpected ratio between DIP and PT, %v =/= %v", rt, 96*(1<<6)/72)
+	}
+	if rt := (1 * PC) * (1 << 6) / (1 * DIP); rt != 96*(1<<6)/6 {
+		t.Errorf("Unexpected ratio between DIP and PC, %v =/= %v", rt, 96*(1<<6)/72)
 	}
 }
 
