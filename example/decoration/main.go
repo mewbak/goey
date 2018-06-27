@@ -57,9 +57,15 @@ func render() goey.Widget {
 		text = text + "  (" + strconv.Itoa(clickCount) + ")"
 	}
 	return &goey.VBox{
-		AlignMain:  goey.MainCenter,
+		AlignMain:  goey.SpaceAround,
 		AlignCross: goey.CrossCenter,
 		Children: []goey.Widget{
+			&goey.Padding{
+				Insets: goey.DefaultInsets(),
+				Child: &goey.P{
+					Text: "This is a demonstration of the use of a Decoration widget.  Clicking the button will cycle through different background colours, as well as change the border radius.",
+				},
+			},
 			&goey.Decoration{
 				Fill:   colors[clickCount%4],
 				Insets: goey.UniformInset(0.5 * 96 * goey.DIP),
