@@ -178,10 +178,10 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 			dx := (windowRect.Right - windowRect.Left) - (clientRect.Right - clientRect.Left)
 			dy := (windowRect.Bottom - windowRect.Top) - (clientRect.Bottom - clientRect.Top)
 			if mw.verticalScroll {
-				dx += FromPixelsX(int(win.GetSystemMetrics(win.SM_CXVSCROLL)))
+				dx += win.GetSystemMetrics(win.SM_CXVSCROLL)
 			}
 			if mw.horizontalScroll {
-				dy += FromPixelsY(int(win.GetSystemMetrics(win.SM_CYHSCROLL)))
+				dy += win.GetSystemMetrics(win.SM_CYHSCROLL)
 			}
 
 			// Update tracking information based on our minimum size

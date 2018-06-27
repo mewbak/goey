@@ -108,18 +108,19 @@ func (w *mountedP) Layout(bc Constraint) Size {
 	}
 
 	if bc.HasBoundedHeight() {
+		// The correct strategy for other cases is not yet clear.
 		panic("not implemented")
 	}
 
-	// The correct strategy for other cases is not yet clear.
 	if bc.Min.Width > 0 {
-		width := bc.ConstrainWidth(bc.Min.Width)
+		width := bc.Min.Width
 		height := w.measureHeight(width)
 		return Size{width, bc.ConstrainHeight(height)}
-
 	}
 
-	panic("not implemented")
+	width := bc.ConstrainWidth(paragraphMaxWidth)
+	height := w.measureHeight(width)
+	return Size{width, bc.ConstrainHeight(height)}
 }
 
 func (w *mountedP) MinimumSize() Size {
@@ -129,8 +130,22 @@ func (w *mountedP) MinimumSize() Size {
 		paragraphMeasureReflowLimits(w.hWnd)
 	}
 
-	width := paragraphMaxWidth
-	height := w.measureHeight(paragraphMinWidth)
+	// Get the unconstrained width of the paragraph
+	hdc := win.GetDC(w.hWnd)
+	if hMessageFont != 0 {
+		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
+	}
+	rect := win.RECT{0, 0, 0x7fffffff, 0x7fffffff}
+	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
+	win.ReleaseDC(w.hWnd, hdc)
+
+	width := FromPixelsX(int(rect.Right))
+	if width > paragraphMinWidth {
+		width = paragraphMinWidth
+	}
+
+	height := w.measureHeight(paragraphMaxWidth)
+
 	return Size{width, height}
 }
 

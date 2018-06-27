@@ -109,7 +109,7 @@ func render() goey.Widget {
 					Width:  (1 * goey.DIP).Scale(img.Bounds().Dx(), 1),
 					Height: (1 * goey.DIP).Scale(img.Bounds().Dy(), 1),
 				},
-				&goey.P{Text: description},
+				&goey.P{Text: description, Align: goey.JustifyCenter},
 			},
 		},
 	}
