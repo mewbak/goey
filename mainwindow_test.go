@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"strconv"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -159,7 +160,7 @@ func ExampleWindow_Message() {
 	}
 }*/
 
-/*func TestNewWindow_SetChildren(t *testing.T) {
+func TestNewWindow_SetChild(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping alignment tests")
 	}
@@ -170,7 +171,7 @@ func ExampleWindow_Message() {
 		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
 		}
-		mw, err := NewWindow("Test", widgets)
+		mw, err := NewWindow("Test", nil)
 		if err != nil {
 			t.Fatalf("Failed to create window, %s", err)
 		}
@@ -180,7 +181,6 @@ func ExampleWindow_Message() {
 		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
 			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
 		}
-		mw.SetAlignment(SpaceBetween, CrossCenter)
 
 		go func() {
 			t.Logf("Starting set children tests")
@@ -188,7 +188,11 @@ func ExampleWindow_Message() {
 				time.Sleep(50 * time.Millisecond)
 				widgets = append(widgets, &Button{Text: "Button " + strconv.Itoa(i)})
 				err := Do(func() error {
-					return mw.SetChildren(widgets)
+					return mw.SetChild(&VBox{
+						AlignMain:  SpaceBetween,
+						AlignCross: CrossCenter,
+						Children:   widgets,
+					})
 				})
 				if err != nil {
 					t.Logf("Error setting children, %s", err)
@@ -198,7 +202,11 @@ func ExampleWindow_Message() {
 				time.Sleep(50 * time.Millisecond)
 				widgets = widgets[:i-1]
 				err := Do(func() error {
-					return mw.SetChildren(widgets)
+					return mw.SetChild(&VBox{
+						AlignMain:  SpaceBetween,
+						AlignCross: CrossCenter,
+						Children:   widgets,
+					})
 				})
 				if err != nil {
 					t.Logf("Error setting children, %s", err)
@@ -225,7 +233,7 @@ func ExampleWindow_Message() {
 	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 		t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
 	}
-}*/
+}
 
 func makeImage(t *testing.T, index int) image.Image {
 	colors := [3]color.RGBA{
