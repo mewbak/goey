@@ -12,6 +12,7 @@ import (
 
 var (
 	mainWindowCount int32 = 0
+	vscrollbarWidth Length
 )
 
 func init() {
@@ -67,7 +68,7 @@ func newWindow(title string, child Widget) (*Window, error) {
 	app.SetDefaultSize(400, 400)
 	app.ShowAll()
 
-	retval.child, err = DiffChild(Control{&layout.Widget}, nil, child)
+	err = retval.setChild(child)
 	if err != nil {
 		app.Destroy()
 		return nil, err
@@ -112,12 +113,40 @@ func (w *windowImpl) message(m *Message) {
 	m.handle = uintptr(unsafe.Pointer(w.handle))
 }
 
+func get_vscrollbar_width(window *gtk.Window) (Length, error) {
+	if vscrollbarWidth != 0 {
+		return vscrollbarWidth, nil
+	}
+
+	oldChild, err := window.GetChild()
+	if err != nil {
+		return 0, err
+	}
+	window.Remove(oldChild)
+
+	sb, err := gtk.ScrollbarNew(gtk.ORIENTATION_VERTICAL, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	window.Add(sb)
+	sb.Show()
+	_, retval := sb.GetPreferredWidth()
+	sb.Destroy()
+	window.Add(oldChild)
+	vscrollbarWidth = FromPixelsX(retval)
+	return vscrollbarWidth, nil
+}
+
 func (w *windowImpl) setChild(child Widget) (err error) {
 	// Update the child element
 	w.child, err = DiffChild(Control{&w.layout.Widget}, w.child, child)
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
 	if w.child != nil {
+		// Update the global DPI
+		DPI.X, DPI.Y = 96, 96
+
 		// Constrain window size
 		minSize := w.child.MinimumSize()
 		w.childMinSize = minSize
