@@ -18,14 +18,17 @@ func max(a, b Length) Length {
 	return b
 }
 
+// Size represents the size of a rectangular element.
 type Size struct {
 	Width, Height Length
 }
 
+// IsZero returns true if the constrain is the zero value.
 func (s *Size) IsZero() bool {
 	return s.Width == 0 && s.Height == 0
 }
 
+// String returns a string representation of the size.
 func (s *Size) String() string {
 	return "(" + s.Width.String() + "x" + s.Height.String() + ")"
 }
