@@ -46,7 +46,7 @@ func render() goey.Widget {
 	}
 	return &goey.Padding{
 		Insets: goey.UniformInset(36 * goey.DIP),
-		Child: &goey.Center{
+		Child: &goey.Align{
 			Child: &goey.Button{Text: text, OnClick: func() {
 				clickCount++
 				updateWindow()

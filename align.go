@@ -4,21 +4,34 @@ var (
 	alignKind = Kind{"bitbucket.org/rj/goey.Align"}
 )
 
-type Center struct {
-	WidthFactor  float64
-	HeightFactor float64
-	Child        Widget
+// Alignment represents the position of a widget along one dimension.
+type Alignment int16
+
+// Possible values of alignment.
+const (
+	AlignStart  = Alignment(-32768) // Widget is aligned at the start (left or top).
+	AlignCenter = Alignment(0)      // Widget is aligned at the center.
+	AlignEnd    = Alignment(0x7fff) // Widget is aligned at the end (right or bottom).
+)
+
+// Align describes a widget that aligns its child within its borders.
+type Align struct {
+	WidthFactor  float64   // If greater than zero, ratio of container width to child width.
+	HeightFactor float64   // If greater than zero, ratio of container height to child height.
+	HAlign       Alignment // Horizontal alignment of child widget.
+	VAlign       Alignment // Vertical alignment of child widget.
+	Child        Widget    // Child widget.
 }
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*Center) Kind() *Kind {
+func (*Align) Kind() *Kind {
 	return &alignKind
 }
 
 // Mount creates a button in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *Center) Mount(parent Control) (Element, error) {
+func (w *Align) Mount(parent Control) (Element, error) {
 	child, err := w.Child.Mount(parent)
 	if err != nil {
 		return nil, err
@@ -29,6 +42,8 @@ func (w *Center) Mount(parent Control) (Element, error) {
 		child:        child,
 		widthFactor:  w.WidthFactor,
 		heightFactor: w.HeightFactor,
+		halign:       w.HAlign,
+		valign:       w.VAlign,
 	}, nil
 }
 
@@ -36,6 +51,8 @@ type alignElement struct {
 	parent       Control
 	child        Element
 	childSize    Size
+	halign       Alignment
+	valign       Alignment
 	widthFactor  float64
 	heightFactor float64
 }
@@ -91,18 +108,22 @@ func (w *alignElement) SetBounds(bounds Rectangle) {
 		return
 	}
 
-	x := bounds.Min.X + (bounds.Dx()-w.childSize.Width)/2
-	y := bounds.Min.Y + (bounds.Dy()-w.childSize.Height)/2
+	x := bounds.Min.X.Scale(int(w.halign)-int(AlignEnd), int(AlignStart)-int(AlignEnd)) +
+		(bounds.Max.X-w.childSize.Width).Scale(int(w.halign)-int(AlignStart), int(AlignEnd)-int(AlignStart))
+	y := bounds.Min.Y.Scale(int(w.valign)-int(AlignEnd), int(AlignStart)-int(AlignEnd)) +
+		(bounds.Max.Y-w.childSize.Height).Scale(int(w.valign)-int(AlignStart), int(AlignEnd)-int(AlignStart))
 	w.child.SetBounds(Rectangle{Point{x, y}, Point{x + w.childSize.Width, y + w.childSize.Height}})
 }
 
-func (w *alignElement) updateProps(data *Center) (err error) {
+func (w *alignElement) updateProps(data *Align) (err error) {
 	w.child, err = DiffChild(w.parent, w.child, data.Child)
 	w.widthFactor = data.WidthFactor
 	w.heightFactor = data.HeightFactor
+	w.halign = data.HAlign
+	w.valign = data.VAlign
 	return err
 }
 
 func (w *alignElement) UpdateProps(data Widget) error {
-	return w.updateProps(data.(*Center))
+	return w.updateProps(data.(*Align))
 }
