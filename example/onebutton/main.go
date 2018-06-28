@@ -45,7 +45,7 @@ func render() goey.Widget {
 		text = text + "  (" + strconv.Itoa(clickCount) + ")"
 	}
 	return &goey.Padding{
-		Insets: goey.UniformInset(36 * goey.DIP),
+		Insets: goey.UniformInsets(36 * goey.DIP),
 		Child: &goey.Align{
 			Child: &goey.Button{Text: text, OnClick: func() {
 				clickCount++

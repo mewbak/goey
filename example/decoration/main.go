@@ -73,7 +73,7 @@ func render() goey.Widget {
 			&goey.Decoration{
 				Fill:   colors[clickCount%4],
 				Stroke: stroke,
-				Insets: goey.UniformInset(0.5 * 96 * goey.DIP),
+				Insets: goey.UniformInsets(0.5 * 96 * goey.DIP),
 				Radius: goey.Length(clickCount%16) * (2 * goey.DIP),
 				Child: &goey.Button{Text: text, OnClick: func() {
 					clickCount++

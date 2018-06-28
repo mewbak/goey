@@ -2,6 +2,7 @@ package goey
 
 import (
 	"fmt"
+	"image"
 	"testing"
 )
 
@@ -83,6 +84,24 @@ func TestLength_Clamp(t *testing.T) {
 
 	for i, v := range cases {
 		if out := v.in.Clamp(v.min, v.max); out != v.out {
+			t.Errorf("Error in case %d, want %s, got %s", i, v.out, out)
+		}
+	}
+}
+
+func TestLength_Pixels(t *testing.T) {
+	cases := []struct {
+		in  Point
+		dpi image.Point
+		out image.Point
+	}{
+		{Point{1 * DIP, 2 * DIP}, image.Point{96, 96}, image.Point{1, 2}},
+		{Point{1 * DIP, 2 * DIP}, image.Point{2 * 96, 3 * 96}, image.Point{2, 6}},
+	}
+
+	for i, v := range cases {
+		DPI = v.dpi
+		if out := v.in.Pixels(); out != v.out {
 			t.Errorf("Error in case %d, want %s, got %s", i, v.out, out)
 		}
 	}

@@ -21,7 +21,7 @@ func DefaultInsets() Insets {
 
 // UniformInsets returns a padding description where the padding is equal on
 // all four sides.
-func UniformInset(l Length) Insets {
+func UniformInsets(l Length) Insets {
 	return Insets{l, l, l, l}
 }
 
