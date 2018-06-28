@@ -75,6 +75,14 @@ func (w *mountedHBox) Layout(bc Constraint) Size {
 
 	// Determine the constraints for layout of child elements.
 	cbc := bc.LoosenWidth()
+	if w.alignMain == Homogeneous {
+		if count := len(w.children); count > 1 {
+			gap := calculateHGap(nil, nil)
+			cbc.TightenWidth(cbc.Max.Width.Scale(1, count) - gap.Scale(1, count-1))
+		} else {
+			cbc.TightenWidth(cbc.Max.Width.Scale(1, count))
+		}
+	}
 	if w.alignCross == Stretch {
 		if cbc.HasBoundedHeight() {
 			cbc = cbc.TightenHeight(cbc.Max.Height)
@@ -93,6 +101,8 @@ func (w *mountedHBox) Layout(bc Constraint) Size {
 		if i > 0 {
 			if w.alignMain.IsPacked() {
 				width += calculateHGap(previous, v)
+			} else {
+				width += calculateHGap(nil, nil)
 			}
 			previous = v
 		}
@@ -128,6 +138,16 @@ func (w *mountedHBox) MinimumSize() Size {
 			size.Height = max(size.Height, tmp.Height)
 			size.Width += tmp.Width
 		}
+	} else if w.alignMain == Homogeneous {
+		for _, v := range w.children[1:] {
+			// Find minimum size for this widget, and update
+			tmp := v.MinimumSize()
+			size.Height = max(size.Height, tmp.Height)
+			size.Width = max(size.Width, tmp.Width)
+		}
+
+		// Add a minimum gap between the controls.
+		size.Width = size.Width.Scale(len(w.children), 1) + calculateHGap(nil, nil).Scale(len(w.children)-1, 1)
 	} else {
 		for _, v := range w.children[1:] {
 			// Find minimum size for this widget, and update
@@ -149,6 +169,23 @@ func (w *mountedHBox) MinimumSize() Size {
 }
 
 func (w *mountedHBox) SetBounds(bounds Rectangle) {
+	if len(w.children) == 0 {
+		return
+	}
+
+	if w.alignMain == Homogeneous {
+		gap := calculateHGap(nil, nil)
+		dx := bounds.Dx() + gap
+		count := len(w.children)
+
+		for i, v := range w.children {
+			x1 := bounds.Min.X + dx.Scale(i, count)
+			x2 := bounds.Min.X + dx.Scale(i+1, count) - gap
+			w.setBoundsForChild(i, v, x1, bounds.Min.Y, x2, bounds.Max.Y)
+		}
+		return
+	}
+
 	// Adjust the bounds so that the minimum Y handles vertical alignment
 	// of the controls.  We also calculate 'extraGap' which will adjust
 	// spacing of the controls for non-packed alignments.
@@ -185,30 +222,34 @@ func (w *mountedHBox) SetBounds(bounds Rectangle) {
 		}
 
 		dx := w.childrenSize[i].Width
-		dy := w.childrenSize[i].Height
-		switch w.alignCross {
-		case CrossStart:
-			v.SetBounds(Rectangle{
-				Point{posX, bounds.Min.Y},
-				Point{posX + dx, bounds.Min.Y + dy},
-			})
-		case CrossCenter:
-			v.SetBounds(Rectangle{
-				Point{posX, bounds.Min.Y + (bounds.Dy()-dy)/2},
-				Point{posX + dx, bounds.Min.Y + (bounds.Dy()+dy)/2},
-			})
-		case CrossEnd:
-			v.SetBounds(Rectangle{
-				Point{posX, bounds.Max.Y - dy},
-				Point{posX + dx, bounds.Max.Y},
-			})
-		case Stretch:
-			v.SetBounds(Rectangle{
-				Point{posX, bounds.Min.Y},
-				Point{posX + dx, bounds.Max.Y},
-			})
-		}
+		w.setBoundsForChild(i, v, posX, bounds.Min.Y, posX, bounds.Max.Y)
 		posX += dx + extraGap
+	}
+}
+
+func (w *mountedHBox) setBoundsForChild(i int, v Element, posX, posY, posX2, posY2 Length) {
+	dy := w.childrenSize[i].Height
+	switch w.alignCross {
+	case CrossStart:
+		v.SetBounds(Rectangle{
+			Point{posX, posY},
+			Point{posX2, posY + dy},
+		})
+	case CrossCenter:
+		v.SetBounds(Rectangle{
+			Point{posX, posY + (posY2-posY-dy)/2},
+			Point{posX2, posY + (posY2-posY+dy)/2},
+		})
+	case CrossEnd:
+		v.SetBounds(Rectangle{
+			Point{posX, posY2 - dy},
+			Point{posX2, posY2},
+		})
+	case Stretch:
+		v.SetBounds(Rectangle{
+			Point{posX, posY},
+			Point{posX2, posY2},
+		})
 	}
 }
 

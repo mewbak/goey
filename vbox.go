@@ -16,6 +16,7 @@ const (
 	MainEnd                            // Children will be packed together at the bottom or right of the box
 	SpaceAround                        // Children will be spaced apart
 	SpaceBetween                       // Children will be spaced apart, but the first and last children will but the ends of the box.
+	Homogeneous                        // Children will be allocated equal space.
 )
 
 // IsPacked returns true if the main axis alignment is a one where children
@@ -108,6 +109,14 @@ func (w *mountedVBox) Layout(bc Constraint) Size {
 
 	// Determine the constraints for layout of child elements.
 	cbc := bc.LoosenHeight()
+	if w.alignMain == Homogeneous {
+		if count := len(w.children); count > 1 {
+			gap := calculateVGap(nil, nil)
+			cbc.TightenHeight(cbc.Max.Height.Scale(1, count) - gap.Scale(1, count-1))
+		} else {
+			cbc.TightenHeight(cbc.Max.Height.Scale(1, count))
+		}
+	}
 	if w.alignCross == Stretch {
 		if cbc.HasBoundedWidth() {
 			cbc = cbc.TightenWidth(cbc.Max.Width)
@@ -161,6 +170,16 @@ func (w *mountedVBox) MinimumSize() Size {
 			size.Width = max(size.Width, tmp.Width)
 			size.Height += tmp.Height
 		}
+	} else if w.alignMain == Homogeneous {
+		for _, v := range w.children[1:] {
+			// Find minimum size for this widget, and update
+			tmp := v.MinimumSize()
+			size.Height = max(size.Height, tmp.Height)
+			size.Width = max(size.Width, tmp.Width)
+		}
+
+		// Add a minimum gap between the controls.
+		size.Height = size.Height.Scale(len(w.children), 1) + calculateVGap(nil, nil).Scale(len(w.children)-1, 1)
 	} else {
 		for _, v := range w.children[1:] {
 			// Find minimum size for this widget, and update
@@ -182,6 +201,23 @@ func (w *mountedVBox) MinimumSize() Size {
 }
 
 func (w *mountedVBox) SetBounds(bounds Rectangle) {
+	if len(w.children) == 0 {
+		return
+	}
+
+	if w.alignMain == Homogeneous {
+		gap := calculateVGap(nil, nil)
+		dy := bounds.Dy() + gap
+		count := len(w.children)
+
+		for i, v := range w.children {
+			y1 := bounds.Min.Y + dy.Scale(i, count)
+			y2 := bounds.Min.Y + dy.Scale(i+1, count) - gap
+			w.setBoundsForChild(i, v, bounds.Min.X, y1, bounds.Max.X, y2)
+		}
+		return
+	}
+
 	// Adjust the bounds so that the minimum Y handles vertical alignment
 	// of the controls.  We also calculate 'extraGap' which will adjust
 	// spacing of the controls for non-packed alignments.
@@ -217,31 +253,35 @@ func (w *mountedVBox) SetBounds(bounds Rectangle) {
 			previous = v
 		}
 
-		dx := w.childrenSize[i].Width
 		dy := w.childrenSize[i].Height
-		switch w.alignCross {
-		case CrossStart:
-			v.SetBounds(Rectangle{
-				Point{bounds.Min.X, posY},
-				Point{bounds.Min.X + dx, posY + dy},
-			})
-		case CrossCenter:
-			v.SetBounds(Rectangle{
-				Point{bounds.Min.X + (bounds.Dx()-dx)/2, posY},
-				Point{bounds.Min.X + (bounds.Dx()+dx)/2, posY + dy},
-			})
-		case CrossEnd:
-			v.SetBounds(Rectangle{
-				Point{bounds.Max.X - dx, posY},
-				Point{bounds.Max.X, posY + dy},
-			})
-		case Stretch:
-			v.SetBounds(Rectangle{
-				Point{bounds.Min.X, posY},
-				Point{bounds.Max.X, posY + dy},
-			})
-		}
+		w.setBoundsForChild(i, v, bounds.Min.X, posY, bounds.Max.X, posY+dy)
 		posY += dy + extraGap
+	}
+}
+
+func (w *mountedVBox) setBoundsForChild(i int, v Element, posX, posY, posX2, posY2 Length) {
+	dx := w.childrenSize[i].Width
+	switch w.alignCross {
+	case CrossStart:
+		v.SetBounds(Rectangle{
+			Point{posX, posY},
+			Point{posX + dx, posY2},
+		})
+	case CrossCenter:
+		v.SetBounds(Rectangle{
+			Point{posX + (posX2-posX-dx)/2, posY},
+			Point{posX + (posX2-posX+dx)/2, posY2},
+		})
+	case CrossEnd:
+		v.SetBounds(Rectangle{
+			Point{posX2 - dx, posY},
+			Point{posX2, posY2},
+		})
+	case Stretch:
+		v.SetBounds(Rectangle{
+			Point{posX, posY},
+			Point{posX2, posY2},
+		})
 	}
 }
 

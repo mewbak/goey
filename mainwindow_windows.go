@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"fmt"
 	"image"
 	"sync/atomic"
 	"syscall"
@@ -40,10 +41,10 @@ func init() {
 		ncm.LfMessageFont.LfWidth = int32(float64(ncm.LfMessageFont.LfWidth) * Scale)
 		hMessageFont = win.CreateFontIndirect(&ncm.LfMessageFont)
 		if hMessageFont == 0 {
-			println("failed CreateFontIndirect")
+			fmt.Println("Error: failed CreateFontIndirect")
 		}
 	} else {
-		println("failed SystemParametersInfo")
+		fmt.Println("Error: failed SystemParametersInfo")
 	}
 }
 
