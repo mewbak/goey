@@ -93,10 +93,25 @@ func (w *mountedDateInput) MinimumSize() Size {
 	return Size{75 * DIP, 23 * DIP}
 }
 
+func (w *mountedDateInput) Props() Widget {
+	st := win.SYSTEMTIME{}
+	win.SendMessage(w.hWnd, win.DTM_GETSYSTEMTIME, 0, uintptr(unsafe.Pointer(&st)))
+
+	return &DateInput{
+		Value: time.Date(int(st.WYear), time.Month(st.WMonth), int(st.WDay),
+			int(st.WHour), int(st.WMinute), int(st.WSecond), 0, time.Local),
+		Disabled: !win.IsWindowEnabled(w.hWnd),
+		OnChange: w.onChange,
+		OnFocus:  w.onFocus,
+		OnBlur:   w.onBlur,
+	}
+}
+
 func (w *mountedDateInput) updateProps(data *DateInput) error {
 	st := data.systemTime()
 	win.SendMessage(w.hWnd, win.DTM_SETSYSTEMTIME, win.GDT_VALID, uintptr(unsafe.Pointer(&st)))
 
+	w.SetDisabled(data.Disabled)
 	w.onChange = data.OnChange
 	w.onFocus = data.OnFocus
 	w.onBlur = data.OnBlur
@@ -151,7 +166,7 @@ func dateinputGetPtr(hwnd win.HWND) *mountedDateInput {
 	}
 
 	ptr := (*mountedDateInput)(unsafe.Pointer(gwl))
-	if ptr.hWnd != hwnd {
+	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}
 
