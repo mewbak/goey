@@ -128,8 +128,9 @@ func testingCheckFocusAndBlur(t *testing.T, widgets []Widget) {
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
 	}
-	if s := log.String(); s != "fabafbbbfcbc" {
-		t.Errorf("Incorrect log string, got log==%s", s)
+	const want = "fabafbbbfcbc"
+	if s := log.String(); s != want {
+		t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
 	}
 }
 
