@@ -11,3 +11,10 @@ func TestHR(t *testing.T) {
 		&HR{},
 	})
 }
+
+func TestHRClose(t *testing.T) {
+	testingCloseWidgets(t, []Widget{
+		&HR{},
+		&HR{},
+	})
+}

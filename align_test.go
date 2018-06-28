@@ -5,13 +5,17 @@ import (
 )
 
 func (w *alignElement) Props() Widget {
-	child, _ := w.child.(Proper)
+	child := Widget(nil)
+	if w.child != nil {
+		child = w.child.(Proper).Props()
+	}
+
 	return &Align{
 		HAlign:       w.halign,
 		VAlign:       w.valign,
 		WidthFactor:  w.widthFactor,
 		HeightFactor: w.heightFactor,
-		Child:        child.Props(),
+		Child:        child,
 	}
 }
 
@@ -22,6 +26,14 @@ func TestAlignCreate(t *testing.T) {
 		&Align{HAlign: AlignEnd, Child: &Button{Text: "C"}},
 		&Align{HAlign: AlignCenter, Child: &Button{Text: "C"}},
 		&Align{HeightFactor: 2, WidthFactor: 2.5, Child: &Button{Text: "C"}},
+		&Align{},
+	})
+}
+
+func TestAlignClose(t *testing.T) {
+	testingCloseWidgets(t, []Widget{
+		&Align{Child: &Button{Text: "A"}},
+		&Align{},
 	})
 }
 
@@ -32,11 +44,13 @@ func TestAlignUpdateProps(t *testing.T) {
 		&Align{HAlign: AlignEnd, Child: &Button{Text: "C"}},
 		&Align{HAlign: AlignCenter, Child: &Button{Text: "C"}},
 		&Align{HeightFactor: 2, WidthFactor: 2.5, Child: &Button{Text: "C"}},
+		&Align{},
 	}, []Widget{
 		&Align{Child: &Button{Text: "AB"}},
 		&Align{HAlign: AlignCenter, Child: &Button{Text: "BC"}},
 		&Align{HAlign: AlignStart, Child: &Button{Text: "CD"}},
 		&Align{HAlign: AlignEnd, Child: &Button{Text: "CE"}},
-		&Align{HeightFactor: 4, WidthFactor: 3, Child: &Button{Text: "CF"}},
+		&Align{HeightFactor: 4, WidthFactor: 3},
+		&Align{Child: &Label{Text: "CF"}},
 	})
 }

@@ -13,6 +13,15 @@ func TestParagraph(t *testing.T) {
 	})
 }
 
+func TestParagraphClose(t *testing.T) {
+	testingCloseWidgets(t, []Widget{
+		&P{Text: "A", Align: JustifyLeft},
+		&P{Text: "B", Align: JustifyRight},
+		&P{Text: "C", Align: JustifyCenter},
+		&P{Text: "D", Align: JustifyFull},
+	})
+}
+
 func TestParagraphProps(t *testing.T) {
 	testingUpdateWidgets(t, []Widget{
 		&P{Text: "A", Align: JustifyLeft},

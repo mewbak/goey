@@ -172,7 +172,7 @@ func selectinputGetPtr(hwnd win.HWND) *mountedSelectInput {
 	}
 
 	ptr := (*mountedSelectInput)(unsafe.Pointer(gwl))
-	if ptr.hWnd != hwnd {
+	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}
 

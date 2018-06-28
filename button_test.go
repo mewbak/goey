@@ -52,6 +52,14 @@ func TestButtonCreate(t *testing.T) {
 	})
 }
 
+func TestButtonClose(t *testing.T) {
+	testingCloseWidgets(t, []Widget{
+		&Button{Text: "A"},
+		&Button{Text: "D", Disabled: true},
+		&Button{Text: "E", Default: true},
+	})
+}
+
 func TestButtonEvents(t *testing.T) {
 	testingCheckFocusAndBlur(t, []Widget{
 		&Button{Text: "A"},

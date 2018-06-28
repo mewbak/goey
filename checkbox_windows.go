@@ -163,7 +163,7 @@ func checkboxGetPtr(hwnd win.HWND) *mountedCheckbox {
 	}
 
 	ptr := (*mountedCheckbox)(unsafe.Pointer(gwl))
-	if ptr.hWnd != hwnd {
+	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}
 

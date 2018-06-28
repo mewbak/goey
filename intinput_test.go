@@ -12,6 +12,14 @@ func TestIntInput(t *testing.T) {
 	})
 }
 
+func TestIntInputClose(t *testing.T) {
+	testingCloseWidgets(t, []Widget{
+		&IntInput{Value: 1},
+		&IntInput{Value: 2, Placeholder: "..."},
+		&IntInput{Value: 3, Disabled: true},
+	})
+}
+
 func TestIntInputEvents(t *testing.T) {
 	testingCheckFocusAndBlur(t, []Widget{
 		&IntInput{},

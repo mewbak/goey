@@ -11,6 +11,13 @@ func TestCheckboxCreate(t *testing.T) {
 	})
 }
 
+func TestCheckboxClose(t *testing.T) {
+	testingCloseWidgets(t, []Widget{
+		&Checkbox{Value: false, Text: "A"},
+		&Checkbox{Value: true, Text: "B", Disabled: true},
+	})
+}
+
 func TestCheckboxEvents(t *testing.T) {
 	testingCheckFocusAndBlur(t, []Widget{
 		&Checkbox{Text: "A"},

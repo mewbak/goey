@@ -145,7 +145,10 @@ func createPen(clr color.RGBA) win.HPEN {
 }
 
 func (w *decorationElement) Close() {
-	w.child.Close()
+	if w.child != nil {
+		w.child.Close()
+		w.child = nil
+	}
 	w.Control.Close()
 }
 
@@ -153,19 +156,23 @@ func (w *decorationElement) SetBounds(bounds Rectangle) {
 	// Update background control position
 	w.Control.SetBounds(bounds)
 
-	px := FromPixelsX(1)
-	py := FromPixelsY(1)
-	position := bounds.Min
-	bounds.Min.X += px + w.insets.Left - position.X
-	bounds.Min.Y += py + w.insets.Top - position.Y
-	bounds.Max.X -= px + w.insets.Right + position.X
-	bounds.Max.Y -= py + w.insets.Bottom + position.Y
-	w.child.SetBounds(bounds)
+	if w.child != nil {
+		px := FromPixelsX(1)
+		py := FromPixelsY(1)
+		position := bounds.Min
+		bounds.Min.X += px + w.insets.Left - position.X
+		bounds.Min.Y += py + w.insets.Top - position.Y
+		bounds.Max.X -= px + w.insets.Right + position.X
+		bounds.Max.Y -= py + w.insets.Bottom + position.Y
+		w.child.SetBounds(bounds)
+	}
 }
 
 func (w *decorationElement) SetOrder(previous win.HWND) win.HWND {
 	previous = w.Control.SetOrder(previous)
-	previous = w.child.SetOrder(previous)
+	if w.child != nil {
+		previous = w.child.SetOrder(previous)
+	}
 	return previous
 }
 
@@ -254,7 +261,7 @@ func decorationGetPtr(hwnd win.HWND) *decorationElement {
 	}
 
 	ptr := (*decorationElement)(unsafe.Pointer(gwl))
-	if ptr.hWnd != hwnd {
+	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}
 

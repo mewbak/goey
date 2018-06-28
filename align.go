@@ -41,10 +41,18 @@ func (*Align) Kind() *Kind {
 	return &alignKind
 }
 
+func mountIfNotNil(parent Control, child Widget) (Element, error) {
+	if child == nil {
+		return nil, nil
+	}
+	return child.Mount(parent)
+}
+
 // Mount creates a button in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
 func (w *Align) Mount(parent Control) (Element, error) {
-	child, err := w.Child.Mount(parent)
+	// Mount the child
+	child, err := mountIfNotNil(parent, w.Child)
 	if err != nil {
 		return nil, err
 	}

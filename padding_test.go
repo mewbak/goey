@@ -5,10 +5,14 @@ import (
 )
 
 func (w *paddingElement) Props() Widget {
-	child, _ := w.child.(Proper)
+	child := Widget(nil)
+	if w.child != nil {
+		child = w.child.(Proper).Props()
+	}
+
 	return &Padding{
 		Insets: w.insets,
-		Child:  child.Props(),
+		Child:  child,
 	}
 }
 
@@ -17,6 +21,16 @@ func TestPaddingCreate(t *testing.T) {
 		&Padding{Child: &Button{Text: "A"}},
 		&Padding{Insets: DefaultInsets(), Child: &Button{Text: "B"}},
 		&Padding{Insets: UniformInsets(48 * DIP), Child: &Button{Text: "C"}},
+		&Padding{},
+	})
+}
+
+func TestPaddingClose(t *testing.T) {
+	testingCloseWidgets(t, []Widget{
+		&Padding{Child: &Button{Text: "A"}},
+		&Padding{Insets: DefaultInsets(), Child: &Button{Text: "B"}},
+		&Padding{Insets: UniformInsets(48 * DIP), Child: &Button{Text: "C"}},
+		&Padding{},
 	})
 }
 
@@ -25,9 +39,11 @@ func TestPaddingUpdateProps(t *testing.T) {
 		&Padding{Child: &Button{Text: "A"}},
 		&Padding{Insets: DefaultInsets(), Child: &Button{Text: "B"}},
 		&Padding{Insets: UniformInsets(48 * DIP), Child: &Button{Text: "C"}},
+		&Padding{},
 	}, []Widget{
 		&Padding{Insets: DefaultInsets(), Child: &Button{Text: "AB"}},
 		&Padding{Insets: UniformInsets(48 * DIP), Child: &Button{Text: "BC"}},
+		&Padding{},
 		&Padding{Child: &Button{Text: "CD"}},
 	})
 }

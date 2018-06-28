@@ -79,6 +79,63 @@ func testingRenderWidgets(t *testing.T, widgets []Widget) {
 	}
 }
 
+func testingCloseWidgets(t *testing.T, widgets []Widget) {
+	init := func() error {
+		// Create the window.  Some of the tests here are not expected in
+		// production code, but we can be a little paranoid here.
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
+		}
+		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
+		if err != nil {
+			t.Errorf("Failed to create window, %s", err)
+			return nil
+		}
+		if window == nil {
+			t.Errorf("Unexpected nil for window")
+			return nil
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
+			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
+			return nil
+		}
+
+		// Check that the controls that were mounted match with the list
+		if len(window.children()) != len(widgets) {
+			t.Errorf("Want len(window.Children())!=nil")
+		}
+
+		err = window.SetChild(&VBox{Children: nil})
+		if err != nil {
+			t.Errorf("Failed to set children, %s", err)
+			return nil
+		}
+		if len(window.children()) != 0 {
+			t.Errorf("Want len(window.Children())!=0")
+		}
+
+		go func(window *Window) {
+			err := Do(func() error {
+				window.Close()
+				return nil
+			})
+			if err != nil {
+				t.Errorf("Error in Do, %s", err)
+			}
+		}(window)
+
+		return nil
+	}
+
+	err := Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
+	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+	}
+}
+
 func testingCheckFocusAndBlur(t *testing.T, widgets []Widget) {
 	log := bytes.NewBuffer(nil)
 

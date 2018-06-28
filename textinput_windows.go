@@ -234,7 +234,7 @@ func textinputGetPtr(hwnd win.HWND) *mountedTextInputBase {
 	}
 
 	ptr := (*mountedTextInputBase)(unsafe.Pointer(gwl))
-	if ptr.hWnd != hwnd {
+	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}
 
