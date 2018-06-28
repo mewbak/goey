@@ -108,40 +108,28 @@ func dateinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 	case win.WM_DESTROY:
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedDateInput)(unsafe.Pointer(w))
-			ptr.hWnd = 0
-		}
+		dateinputGetPtr(hwnd).hWnd = 0
 		// Defer to the old window proc
 
 	case win.WM_SETFOCUS:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedDateInput)(unsafe.Pointer(w))
-			if ptr.onFocus != nil {
-				ptr.onFocus()
-			}
+		if w := dateinputGetPtr(hwnd); w.onFocus != nil {
+			w.onFocus()
 		}
 		// Defer to the old window proc
 
 	case win.WM_KILLFOCUS:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedDateInput)(unsafe.Pointer(w))
-			if ptr.onBlur != nil {
-				ptr.onBlur()
-			}
+		if w := dateinputGetPtr(hwnd); w.onBlur != nil {
+			w.onBlur()
 		}
 		// Defer to the old window proc
 
 	case win.WM_NOTIFY:
 		switch code := (*win.NMHDR)(unsafe.Pointer(lParam)).Code; code {
 		case win.DTN_DATETIMECHANGE:
-			nmhdr := (*win.NMDATETIMECHANGE)(unsafe.Pointer(lParam))
-			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*mountedDateInput)(unsafe.Pointer(w))
-				if ptr.onChange != nil {
-					st := time.Date(int(nmhdr.St.WYear), time.Month(nmhdr.St.WMonth), int(nmhdr.St.WDay), int(nmhdr.St.WHour), int(nmhdr.St.WMinute), int(nmhdr.St.WSecond), 0, time.Local)
-					ptr.onChange(st)
-				}
+			if w := dateinputGetPtr(hwnd); w.onChange != nil {
+				nmhdr := (*win.NMDATETIMECHANGE)(unsafe.Pointer(lParam))
+				st := time.Date(int(nmhdr.St.WYear), time.Month(nmhdr.St.WMonth), int(nmhdr.St.WDay), int(nmhdr.St.WHour), int(nmhdr.St.WMinute), int(nmhdr.St.WSecond), 0, time.Local)
+				w.onChange(st)
 			}
 
 		case win2.MCN_SELECT:
@@ -154,4 +142,18 @@ func dateinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 	}
 
 	return win.CallWindowProc(oldDateTimePickWindowProc, hwnd, msg, wParam, lParam)
+}
+
+func dateinputGetPtr(hwnd win.HWND) *mountedDateInput {
+	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
+	if gwl == 0 {
+		panic("Internal error.")
+	}
+
+	ptr := (*mountedDateInput)(unsafe.Pointer(gwl))
+	if ptr.hWnd != hwnd {
+		panic("Internal error.")
+	}
+
+	return ptr
 }
