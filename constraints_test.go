@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestBox(t *testing.T) {
+func TestConstraint(t *testing.T) {
 	cases := []struct {
 		in                                                   Constraint
 		isNormalized, isTight, hasTightWidth, hasTightHeight bool
@@ -41,10 +41,14 @@ func TestBox(t *testing.T) {
 		if out := v.in.HasBoundedHeight(); v.hasBoundedHeight != out {
 			t.Errorf("Failed on case %d for HasBoundedHeight, want %v, got %v", i, v.hasBoundedHeight, out)
 		}
+
+		if out := v.in.IsZero(); out {
+			t.Errorf("Failed on case %d for IsZero, want %v, got %v", i, false, out)
+		}
 	}
 }
 
-func TestBox_Inset(t *testing.T) {
+func TestConstraint_Inset(t *testing.T) {
 	cases := []struct {
 		in      Constraint
 		deflate Length
@@ -68,6 +72,29 @@ func TestBox_Inset(t *testing.T) {
 	for i, v := range cases {
 		out := v.in.Inset(v.deflate, v.deflate)
 		if v.out != out {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.out, out)
+		}
+	}
+}
+
+func TestConstraint_Tighten(t *testing.T) {
+	cases := []struct {
+		in   Constraint
+		size Size
+		out  Constraint
+	}{
+		{Expand(), Size{10 * DIP, 10 * DIP}, Expand()},
+		{ExpandHeight(10 * DIP), Size{10 * DIP, 10 * DIP}, Constraint{Size{10 * DIP, Inf}, Size{10 * DIP, Inf}}},
+		{ExpandWidth(10 * DIP), Size{10 * DIP, 10 * DIP}, Constraint{Size{Inf, 10 * DIP}, Size{Inf, 10 * DIP}}},
+		{Loose(Size{20 * DIP, 25 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 10 * DIP})},
+		{Loose(Size{20 * DIP, 25 * DIP}), Size{30 * DIP, 30 * DIP}, Tight(Size{20 * DIP, 25 * DIP})},
+		{Tight(Size{10 * DIP, 15 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP})},
+		{TightWidth(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{15 * DIP, 10 * DIP})},
+		{TightHeight(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP})},
+	}
+
+	for i, v := range cases {
+		if out := v.in.Tighten(v.size); out != v.out {
 			t.Errorf("Failed on case %d, want %v, got %v", i, v.out, out)
 		}
 	}
