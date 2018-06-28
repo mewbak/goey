@@ -27,7 +27,7 @@ func (w *Decoration) mount(parent Control) (Element, error) {
 		var wc win.WNDCLASSEX
 		wc.CbSize = uint32(unsafe.Sizeof(wc))
 		wc.HInstance = win.GetModuleHandle(nil)
-		wc.LpfnWndProc = syscall.NewCallback(wndprocDecoration)
+		wc.LpfnWndProc = syscall.NewCallback(decorationWindowProc)
 		wc.HCursor = win.LoadCursor(0, (*uint16)(unsafe.Pointer(uintptr(win.IDC_ARROW))))
 		wc.HbrBackground = win.GetSysColorBrush(win.COLOR_3DFACE)
 		wc.LpszClassName = decoration.className
@@ -208,29 +208,33 @@ func (w *decorationElement) updateProps(data *Decoration) error {
 	return nil
 }
 
-func wndprocDecoration(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (result uintptr) {
+func decorationWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (result uintptr) {
 	switch msg {
+	case win.WM_DESTROY:
+		// Make sure that the data structure on the Go-side does not point to a non-existent
+		// window.
+		decorationGetPtr(hwnd).hWnd = 0
+		// Defer to the old window proc
+
 	case win.WM_PAINT:
 		// Fill with the proper background color
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*decorationElement)(unsafe.Pointer(w))
+		w := decorationGetPtr(hwnd)
 
-			ps := win.PAINTSTRUCT{}
-			cr := win.RECT{}
-			win.GetClientRect(hwnd, &cr)
-			hdc := win.BeginPaint(hwnd, &ps)
-			win.SelectObject(hdc, win.HGDIOBJ(ptr.hBrush))
-			win.SelectObject(hdc, win.HGDIOBJ(ptr.hPen))
-			if ptr.radius > 0 {
-				rx := ptr.radius.PixelsX()
-				ry := ptr.radius.PixelsY()
-				win.RoundRect(hdc, cr.Left, cr.Top, cr.Right, cr.Bottom, int32(rx), int32(ry))
-			} else {
-				win.Rectangle_(hdc, cr.Left, cr.Top, cr.Right, cr.Bottom)
-			}
-			win.EndPaint(hwnd, &ps)
-			return 0
+		ps := win.PAINTSTRUCT{}
+		cr := win.RECT{}
+		win.GetClientRect(hwnd, &cr)
+		hdc := win.BeginPaint(hwnd, &ps)
+		win.SelectObject(hdc, win.HGDIOBJ(w.hBrush))
+		win.SelectObject(hdc, win.HGDIOBJ(w.hPen))
+		if w.radius > 0 {
+			rx := w.radius.PixelsX()
+			ry := w.radius.PixelsY()
+			win.RoundRect(hdc, cr.Left, cr.Top, cr.Right, cr.Bottom, int32(rx), int32(ry))
+		} else {
+			win.Rectangle_(hdc, cr.Left, cr.Top, cr.Right, cr.Bottom)
 		}
+		win.EndPaint(hwnd, &ps)
+		return 0
 
 	case win.WM_COMMAND:
 		if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE {
@@ -241,4 +245,18 @@ func wndprocDecoration(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr
 
 	// Let the default window proc handle all other messages
 	return win.DefWindowProc(hwnd, msg, wParam, lParam)
+}
+
+func decorationGetPtr(hwnd win.HWND) *decorationElement {
+	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
+	if gwl == 0 {
+		panic("Internal error.")
+	}
+
+	ptr := (*decorationElement)(unsafe.Pointer(gwl))
+	if ptr.hWnd != hwnd {
+		panic("Internal error.")
+	}
+
+	return ptr
 }

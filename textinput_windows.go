@@ -188,38 +188,26 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 	case win.WM_DESTROY:
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedTextInputBase)(unsafe.Pointer(w))
-			ptr.hWnd = 0
-		}
+		textinputGetPtr(hwnd).hWnd = 0
 		// Defer to the old window proc
 
 	case win.WM_SETFOCUS:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedTextInputBase)(unsafe.Pointer(w))
-			if ptr.onFocus != nil {
-				ptr.onFocus()
-			}
+		if w := textinputGetPtr(hwnd); w.onFocus != nil {
+			w.onFocus()
 		}
 		// Defer to the old window proc
 
 	case win.WM_KILLFOCUS:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedTextInputBase)(unsafe.Pointer(w))
-			if ptr.onBlur != nil {
-				ptr.onBlur()
-			}
+		if w := textinputGetPtr(hwnd); w.onBlur != nil {
+			w.onBlur()
 		}
 		// Defer to the old window proc
 
 	case win.WM_KEYDOWN:
 		if wParam == win.VK_RETURN {
-			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*mountedTextInputBase)(unsafe.Pointer(w))
-				if ptr.onEnterKey != nil {
-					ptr.onEnterKey(win2.GetWindowText(hwnd))
-					return 0
-				}
+			if w := textinputGetPtr(hwnd); w.onEnterKey != nil {
+				w.onEnterKey(win2.GetWindowText(hwnd))
+				return 0
 			}
 		}
 		// Defer to the old window proc
@@ -228,11 +216,8 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 		notification := win.HIWORD(uint32(wParam))
 		switch notification {
 		case win.EN_UPDATE:
-			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*mountedTextInputBase)(unsafe.Pointer(w))
-				if ptr.onChange != nil {
-					ptr.onChange(win2.GetWindowText(hwnd))
-				}
+			if w := textinputGetPtr(hwnd); w.onChange != nil {
+				w.onChange(win2.GetWindowText(hwnd))
 			}
 		}
 		return 0
@@ -240,4 +225,18 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 	}
 
 	return win.CallWindowProc(edit.oldWindowProc, hwnd, msg, wParam, lParam)
+}
+
+func textinputGetPtr(hwnd win.HWND) *mountedTextInputBase {
+	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
+	if gwl == 0 {
+		panic("Internal error.")
+	}
+
+	ptr := (*mountedTextInputBase)(unsafe.Pointer(gwl))
+	if ptr.hWnd != hwnd {
+		panic("Internal error.")
+	}
+
+	return ptr
 }

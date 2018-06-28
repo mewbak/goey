@@ -1,6 +1,7 @@
 package goey
 
 const (
+	// Inf is a sentinal value indicating an unbounded width or height.
 	Inf Length = 0x7fffffff
 )
 

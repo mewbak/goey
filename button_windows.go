@@ -141,27 +141,18 @@ func buttonWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 	case win.WM_DESTROY:
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedButton)(unsafe.Pointer(w))
-			ptr.hWnd = 0
-		}
+		buttonGetPtr(hwnd).hWnd = 0
 		// Defer to the old window proc
 
 	case win.WM_SETFOCUS:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedButton)(unsafe.Pointer(w))
-			if ptr.onFocus != nil {
-				ptr.onFocus()
-			}
+		if w := buttonGetPtr(hwnd); w.onFocus != nil {
+			w.onFocus()
 		}
 		// Defer to the old window proc
 
 	case win.WM_KILLFOCUS:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedButton)(unsafe.Pointer(w))
-			if ptr.onBlur != nil {
-				ptr.onBlur()
-			}
+		if w := buttonGetPtr(hwnd); w.onBlur != nil {
+			w.onBlur()
 		}
 		// Defer to the old window proc
 
@@ -169,15 +160,26 @@ func buttonWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 		notification := win.HIWORD(uint32(wParam))
 		switch notification {
 		case win.BN_CLICKED:
-			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*mountedButton)(unsafe.Pointer(w))
-				if ptr.onClick != nil {
-					ptr.onClick()
-				}
+			if w := buttonGetPtr(hwnd); w.onClick != nil {
+				w.onClick()
 			}
 		}
 		return 0
 	}
 
 	return win.CallWindowProc(button.oldWindowProc, hwnd, msg, wParam, lParam)
+}
+
+func buttonGetPtr(hwnd win.HWND) *mountedButton {
+	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
+	if gwl == 0 {
+		panic("Internal error.")
+	}
+
+	ptr := (*mountedButton)(unsafe.Pointer(gwl))
+	if ptr.hWnd != hwnd {
+		panic("Internal error.")
+	}
+
+	return ptr
 }

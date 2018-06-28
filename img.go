@@ -43,7 +43,7 @@ func (w *Img) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (_ *mountedImg) Kind() *Kind {
+func (*mountedImg) Kind() *Kind {
 	return &imgKind
 }
 

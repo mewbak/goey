@@ -135,27 +135,18 @@ func comboboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 	case win.WM_DESTROY:
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedSelectInput)(unsafe.Pointer(w))
-			ptr.hWnd = 0
-		}
+		selectinputGetPtr(hwnd).hWnd = 0
 		// Defer to the old window proc
 
 	case win.WM_SETFOCUS:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedSelectInput)(unsafe.Pointer(w))
-			if ptr.onFocus != nil {
-				ptr.onFocus()
-			}
+		if w := selectinputGetPtr(hwnd); w.onFocus != nil {
+			w.onFocus()
 		}
 		// Defer to the old window proc
 
 	case win.WM_KILLFOCUS:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedSelectInput)(unsafe.Pointer(w))
-			if ptr.onBlur != nil {
-				ptr.onBlur()
-			}
+		if w := selectinputGetPtr(hwnd); w.onBlur != nil {
+			w.onBlur()
 		}
 		// Defer to the old window proc
 
@@ -163,16 +154,27 @@ func comboboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 		notification := win.HIWORD(uint32(wParam))
 		switch notification {
 		case win.CBN_SELCHANGE:
-			if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-				ptr := (*mountedSelectInput)(unsafe.Pointer(w))
-				if ptr.onChange != nil {
-					cursel := win.SendMessage(hwnd, win.CB_GETCURSEL, 0, 0)
-					ptr.onChange(int(cursel))
-				}
+			if w := selectinputGetPtr(hwnd); w.onChange != nil {
+				cursel := win.SendMessage(hwnd, win.CB_GETCURSEL, 0, 0)
+				w.onChange(int(cursel))
 			}
 		}
 		// defer to old window proc
 	}
 
 	return win.CallWindowProc(oldComboboxWindowProc, hwnd, msg, wParam, lParam)
+}
+
+func selectinputGetPtr(hwnd win.HWND) *mountedSelectInput {
+	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
+	if gwl == 0 {
+		panic("Internal error.")
+	}
+
+	ptr := (*mountedSelectInput)(unsafe.Pointer(gwl))
+	if ptr.hWnd != hwnd {
+		panic("Internal error.")
+	}
+
+	return ptr
 }

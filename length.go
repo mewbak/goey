@@ -42,40 +42,40 @@ func (v Length) Clamp(min, max Length) Length {
 }
 
 // DIP returns a float64 with the length measured in device independent pixels.
-func (dp Length) DIP() float64 {
-	return float64(dp) / (1 << 6)
+func (v Length) DIP() float64 {
+	return float64(v) / (1 << 6)
 }
 
 // PT returns a float64 with the length measured in points.
-func (dp Length) PT() float64 {
-	return float64(dp) / ((96 << 6) / 72)
+func (v Length) PT() float64 {
+	return float64(v) / ((96 << 6) / 72)
 }
 
 // PC returns a float64 with the length measured in picas.
-func (dp Length) PC() float64 {
-	return float64(dp) / ((96 << 6) / 6)
+func (v Length) PC() float64 {
+	return float64(v) / ((96 << 6) / 6)
 }
 
 // PixelsX converts the distance measurement in DIPs to physical pixels, based
 // on the current DPI settings for horizontal scaling.
-func (dp Length) PixelsX() int {
-	return fixed.Int26_6(dp.Scale(DPI.X, 96)).Round()
+func (v Length) PixelsX() int {
+	return fixed.Int26_6(v.Scale(DPI.X, 96)).Round()
 }
 
 // PixelsY converts the distance measurement in DIPs to physical pixels, based
 // on the current DPI settings for vertical scaling.
-func (dp Length) PixelsY() int {
-	return fixed.Int26_6(dp.Scale(DPI.Y, 96)).Round()
+func (v Length) PixelsY() int {
+	return fixed.Int26_6(v.Scale(DPI.Y, 96)).Round()
 }
 
 // Scale scales the distance by the ratio of num:den.
-func (dp Length) Scale(num, den int) Length {
-	return Length(int64(dp) * int64(num) / int64(den))
+func (v Length) Scale(num, den int) Length {
+	return Length(int64(v) * int64(num) / int64(den))
 }
 
 // String returns a human readable distance.
-func (dp Length) String() string {
-	return fixed.Int26_6(dp).String()
+func (v Length) String() string {
+	return fixed.Int26_6(v).String()
 }
 
 // FromPixelsX converts a distance measurement in physical pixels to DIPs, based on

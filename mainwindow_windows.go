@@ -16,7 +16,7 @@ var (
 		atom      win.ATOM
 	}
 
-	mainWindowCount int32 = 0
+	mainWindowCount int32
 	hMessageFont    win.HFONT
 	activeWindow    uintptr
 )
@@ -115,103 +115,6 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 	win.InvalidateRect(hwnd, &rect, true)
 }
 
-func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr {
-
-	switch msg {
-	case win.WM_CREATE:
-		// Maintain count of open windows.
-		atomic.AddInt32(&mainWindowCount, 1)
-		// Defer to default window proc
-
-	case win.WM_DESTROY:
-		// Make sure that the data structure on the Go-side does not point to a non-existent
-		// window.
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*windowImpl)(unsafe.Pointer(w))
-			ptr.hWnd = 0
-		}
-		// Make sure we are no longer linked to as the active window
-		atomic.CompareAndSwapUintptr(&activeWindow, uintptr(hwnd), 0)
-		// If this is the last main window visible, post the quit message so that the
-		// message loop terminates.
-		if newval := atomic.AddInt32(&mainWindowCount, -1); newval == 0 {
-			win.PostQuitMessage(0)
-		}
-		// Defer to the default window proc
-
-	case win.WM_ACTIVATE:
-		if wParam != 0 {
-			atomic.StoreUintptr(&activeWindow, uintptr(hwnd))
-		}
-		// Defer to the default window proc
-
-	case win.WM_SETFOCUS:
-		// The main window doesn't need focus, we want to delegate to a control
-		if hwnd == win.GetFocus() { // Is this always true
-			child := win.GetWindow(hwnd, win.GW_CHILD)
-			for child != 0 {
-				if style := win.GetWindowLong(child, win.GWL_STYLE); (style & win.WS_TABSTOP) != 0 {
-					win.SetFocus(child)
-					break
-				}
-				child = win.GetWindow(child, win.GW_HWNDNEXT)
-			}
-		}
-		// Defer to the default window proc
-
-	case win.WM_SIZE:
-		w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
-		mw := (*windowImpl)(unsafe.Pointer(w))
-		mw.onSize(hwnd)
-		// Defer to the default window proc
-
-	case win.WM_GETMINMAXINFO:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			mw := (*windowImpl)(unsafe.Pointer(w))
-
-			// Update tracking information based on our minimum size
-			mmi := (*win.MINMAXINFO)(unsafe.Pointer(lParam))
-			if limit := int32(mw.windowMinSize.X); mmi.PtMinTrackSize.X < limit {
-				mmi.PtMinTrackSize.X = limit
-			}
-			if limit := int32(mw.windowMinSize.Y); mmi.PtMinTrackSize.Y < limit {
-				mmi.PtMinTrackSize.Y = limit
-			}
-		}
-		return 0
-
-	case win.WM_HSCROLL:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			mw := (*windowImpl)(unsafe.Pointer(w))
-			mw.setScrollPos(win.SB_HORZ, wParam)
-			return 0
-		}
-
-	case win.WM_VSCROLL:
-		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			mw := (*windowImpl)(unsafe.Pointer(w))
-			mw.setScrollPos(win.SB_VERT, wParam)
-			return 0
-		}
-
-	case win.WM_COMMAND:
-		if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE {
-			return win.SendDlgItemMessage(hwnd, int32(win.LOWORD(uint32(wParam))), msg, wParam, lParam)
-		}
-		// Defer to the default window proc
-
-	case win.WM_NOTIFY:
-		if n := (*win.NMHDR)(unsafe.Pointer(lParam)); true {
-			return win.SendMessage(n.HwndFrom, win.WM_NOTIFY, wParam, lParam)
-		}
-		// Defer to the default window proc
-
-	}
-
-	// Let the default window proc handle all other messages
-	return win.DefWindowProc(hwnd, msg, wParam, lParam)
-}
-
 func newWindow(title string, child Widget) (*Window, error) {
 	const Width = 640
 	const Height = 480
@@ -225,7 +128,7 @@ func newWindow(title string, child Widget) (*Window, error) {
 		return nil, syscall.GetLastError()
 	}
 	if mainWindow.atom == 0 {
-		atom, err := registerMainWindowClass(hInstance, syscall.NewCallback(wndproc))
+		atom, err := registerMainWindowClass(hInstance, syscall.NewCallback(windowWindowProc))
 		if err != nil {
 			return nil, err
 		}
@@ -340,6 +243,14 @@ func (w *windowImpl) setChild(child Widget) (err error) {
 		w.child.SetOrder(win.HWND_TOP)
 		// Perform layout
 		w.onSize(w.hWnd)
+	} else {
+		// Ensure that the scrollbars are hidden.
+		win2.ShowScrollBar(w.hWnd, win.SB_HORZ, win.FALSE)
+		w.horizontalScrollPos = 0
+		w.horizontalScrollVisible = false
+		win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.FALSE)
+		w.verticalScrollPos = 0
+		w.verticalScrollVisible = false
 	}
 	// ... and we're done
 	return err
@@ -488,7 +399,6 @@ func (w *windowImpl) showScroll(size Size, rect win.RECT) bool {
 			win.GetScrollInfo(w.hWnd, win.SB_VERT, &si)
 			w.verticalScrollPos = FromPixelsY(int(si.NPos))
 		} else if w.verticalScrollVisible {
-			// Remove the scroll bar
 			win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.FALSE)
 			w.verticalScrollPos = 0
 			w.verticalScrollVisible = false
@@ -557,4 +467,105 @@ func (w *windowImpl) updateWindowMinSize() {
 	if limit := (120 * DIP).PixelsY(); w.verticalScroll && w.windowMinSize.Y > limit {
 		w.windowMinSize.Y = limit
 	}
+}
+
+func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr {
+
+	switch msg {
+	case win.WM_CREATE:
+		// Maintain count of open windows.
+		atomic.AddInt32(&mainWindowCount, 1)
+		// Defer to default window proc
+
+	case win.WM_DESTROY:
+		// Make sure that the data structure on the Go-side does not point to a non-existent
+		// window.
+		if w := windowGetPtr(hwnd); w != nil {
+			w.hWnd = 0
+		}
+		// Make sure we are no longer linked to as the active window
+		atomic.CompareAndSwapUintptr(&activeWindow, uintptr(hwnd), 0)
+		// If this is the last main window visible, post the quit message so that the
+		// message loop terminates.
+		if newval := atomic.AddInt32(&mainWindowCount, -1); newval == 0 {
+			win.PostQuitMessage(0)
+		}
+		// Defer to the default window proc
+
+	case win.WM_ACTIVATE:
+		if wParam != 0 {
+			atomic.StoreUintptr(&activeWindow, uintptr(hwnd))
+		}
+		// Defer to the default window proc
+
+	case win.WM_SETFOCUS:
+		// The main window doesn't need focus, we want to delegate to a control
+		if hwnd == win.GetFocus() { // Is this always true
+			child := win.GetWindow(hwnd, win.GW_CHILD)
+			for child != 0 {
+				if style := win.GetWindowLong(child, win.GWL_STYLE); (style & win.WS_TABSTOP) != 0 {
+					win.SetFocus(child)
+					break
+				}
+				child = win.GetWindow(child, win.GW_HWNDNEXT)
+			}
+		}
+		// Defer to the default window proc
+
+	case win.WM_SIZE:
+		windowGetPtr(hwnd).onSize(hwnd)
+		// Defer to the default window proc
+
+	case win.WM_GETMINMAXINFO:
+		if w := windowGetPtr(hwnd); w != nil {
+			// Update tracking information based on our minimum size
+			mmi := (*win.MINMAXINFO)(unsafe.Pointer(lParam))
+			if limit := int32(w.windowMinSize.X); mmi.PtMinTrackSize.X < limit {
+				mmi.PtMinTrackSize.X = limit
+			}
+			if limit := int32(w.windowMinSize.Y); mmi.PtMinTrackSize.Y < limit {
+				mmi.PtMinTrackSize.Y = limit
+			}
+			return 0
+		}
+		// Defer to the default window proc
+
+	case win.WM_HSCROLL:
+		windowGetPtr(hwnd).setScrollPos(win.SB_HORZ, wParam)
+		return 0
+
+	case win.WM_VSCROLL:
+		windowGetPtr(hwnd).setScrollPos(win.SB_VERT, wParam)
+		return 0
+
+	case win.WM_COMMAND:
+		if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE {
+			return win.SendDlgItemMessage(hwnd, int32(win.LOWORD(uint32(wParam))), msg, wParam, lParam)
+		}
+		// Defer to the default window proc
+
+	case win.WM_NOTIFY:
+		if n := (*win.NMHDR)(unsafe.Pointer(lParam)); true {
+			return win.SendMessage(n.HwndFrom, win.WM_NOTIFY, wParam, lParam)
+		}
+		// Defer to the default window proc
+
+	}
+
+	// Let the default window proc handle all other messages
+	return win.DefWindowProc(hwnd, msg, wParam, lParam)
+}
+
+func windowGetPtr(hwnd win.HWND) *windowImpl {
+	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
+	if gwl == 0 {
+		return nil
+	}
+
+	ptr := (*windowImpl)(unsafe.Pointer(gwl))
+	if ptr.hWnd != hwnd {
+		panic("Internal error.")
+	}
+
+	return ptr
 }
