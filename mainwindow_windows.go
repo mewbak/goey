@@ -50,9 +50,10 @@ func init() {
 type windowImpl struct {
 	hWnd                    win.HWND
 	dpi                     image.Point
+	windowRectDelta         image.Point
+	windowMinSize           image.Point
 	child                   Element
 	childSize               Size
-	minimumSize             Size
 	horizontalScroll        bool
 	horizontalScrollVisible bool
 	horizontalScrollPos     Length
@@ -77,8 +78,8 @@ func registerMainWindowClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, er
 	return atom, nil
 }
 
-func (mw *windowImpl) onSize(hwnd win.HWND) {
-	if mw.child == nil {
+func (w *windowImpl) onSize(hwnd win.HWND) {
+	if w.child == nil {
 		return
 	}
 
@@ -86,28 +87,28 @@ func (mw *windowImpl) onSize(hwnd win.HWND) {
 	// convert device independent pixels into actual pixels, but the DPI can change
 	// from window to window when the computer has multiple monitors.  Fortunately,
 	// all layout should happen in the GUI thread.
-	mw.updateGlobalDPI()
+	w.updateGlobalDPI()
 
 	// Get the client rect for the main window.  This is the layout region.
 	rect := win.RECT{}
 	win.GetClientRect(hwnd, &rect)
-	size := mw.layoutChild(Size{
+	size := w.layoutChild(Size{
 		FromPixelsX(int(rect.Right - rect.Left)),
 		FromPixelsY(int(rect.Bottom - rect.Top)),
 	})
-	for mw.showScroll(size, rect) {
+	for w.showScroll(size, rect) {
 		win.GetClientRect(hwnd, &rect)
-		size = mw.layoutChild(Size{
+		size = w.layoutChild(Size{
 			FromPixelsX(int(rect.Right - rect.Left)),
 			FromPixelsY(int(rect.Bottom - rect.Top)),
 		})
 	}
-	mw.childSize = size
+	w.childSize = size
 
 	// Position the child element.
-	mw.child.SetBounds(Rectangle{
-		Point{-mw.horizontalScrollPos, -mw.verticalScrollPos},
-		Point{size.Width - mw.horizontalScrollPos, size.Height - mw.verticalScrollPos},
+	w.child.SetBounds(Rectangle{
+		Point{-w.horizontalScrollPos, -w.verticalScrollPos},
+		Point{size.Width - w.horizontalScrollPos, size.Height - w.verticalScrollPos},
 	})
 
 	// Update the position of all of the children
@@ -167,38 +168,13 @@ func wndproc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr 
 	case win.WM_GETMINMAXINFO:
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
 			mw := (*windowImpl)(unsafe.Pointer(w))
-			mw.updateGlobalDPI()
-			// We need to identify how much addition width and height are
-			// required for the windows border, statusbar, etc.
-			// TODO:  This value could be cached
-			windowRect := win.RECT{}
-			win.GetWindowRect(hwnd, &windowRect)
-			clientRect := win.RECT{}
-			win.GetClientRect(hwnd, &clientRect)
-			dx := (windowRect.Right - windowRect.Left) - (clientRect.Right - clientRect.Left)
-			dy := (windowRect.Bottom - windowRect.Top) - (clientRect.Bottom - clientRect.Top)
-			if mw.verticalScroll {
-				dx += win.GetSystemMetrics(win.SM_CXVSCROLL)
-			}
-			if mw.horizontalScroll {
-				dy += win.GetSystemMetrics(win.SM_CYHSCROLL)
-			}
 
 			// Update tracking information based on our minimum size
 			mmi := (*win.MINMAXINFO)(unsafe.Pointer(lParam))
-			if limit := int32(mw.minimumSize.Width.PixelsX()) + dx; mmi.PtMinTrackSize.X < limit {
+			if limit := int32(mw.windowMinSize.X); mmi.PtMinTrackSize.X < limit {
 				mmi.PtMinTrackSize.X = limit
 			}
-			if limit := int32(mw.minimumSize.Height.PixelsY()) + dy; mmi.PtMinTrackSize.Y < limit {
-				mmi.PtMinTrackSize.Y = limit
-			}
-			// If scrolling is enabled for either direction, we can relax the
-			// minimum window size.  These limits are fairly arbitrary, but we do need to
-			// leave enough space for the scroll bars.
-			if limit := int32((120 * DIP).PixelsX()); mw.horizontalScroll && mmi.PtMinTrackSize.X > limit {
-				mmi.PtMinTrackSize.X = limit
-			}
-			if limit := int32((120 * DIP).PixelsY()); mw.verticalScroll && mmi.PtMinTrackSize.Y > limit {
+			if limit := int32(mw.windowMinSize.Y); mmi.PtMinTrackSize.Y < limit {
 				mmi.PtMinTrackSize.Y = limit
 			}
 		}
@@ -276,11 +252,11 @@ func newWindow(title string, child Widget) (*Window, error) {
 	rect.Bottom = rect.Bottom - rect.Top + top
 	rect.Top = top
 
-	windowName_, err := syscall.UTF16PtrFromString(title)
+	windowName, err := syscall.UTF16PtrFromString(title)
 	if err != nil {
 		return nil, err
 	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, mainWindow.className, windowName_, style,
+	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, mainWindow.className, windowName, style,
 		rect.Left, rect.Top, rect.Right-rect.Left, rect.Bottom-rect.Top,
 		win.HWND_DESKTOP, 0, hInstance, nil)
 	if hwnd == 0 {
@@ -295,6 +271,7 @@ func newWindow(title string, child Widget) (*Window, error) {
 
 	retval := &Window{windowImpl{hWnd: hwnd}}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(&retval.windowImpl)))
+	retval.horizontalScroll, retval.verticalScroll = retval.scrollDefaults()
 
 	// Determine the DPI for this window
 	hdc := win.GetDC(hwnd)
@@ -302,6 +279,16 @@ func newWindow(title string, child Widget) (*Window, error) {
 	retval.dpi.Y = int(win.GetDeviceCaps(hdc, win.LOGPIXELSY))
 	win.ReleaseDC(hwnd, hdc)
 
+	// Calculate the extra width and height required for the borders
+	windowRect := win.RECT{}
+	win.GetWindowRect(hwnd, &windowRect)
+	win.GetClientRect(hwnd, &clientRect)
+	retval.windowRectDelta.X = int((windowRect.Right - windowRect.Left) - (clientRect.Right - clientRect.Left))
+	retval.windowRectDelta.Y = int((windowRect.Bottom - windowRect.Top) - (clientRect.Bottom - clientRect.Top))
+
+	// This will set the child for the window.  This will also perform any
+	// layout of the child, which includes calculating the minimum window
+	// size.
 	err = retval.setChild(child)
 	if err != nil {
 		win.DestroyWindow(hwnd)
@@ -339,17 +326,19 @@ func (w *windowImpl) message(m *Message) {
 	m.handle = uintptr(w.hWnd)
 }
 
+// setChild updates the child element of the window.  It also updates any
+// cached data linked to the child element, in particular the window's
+// minimum size.  This function will also perform layout on the child.
 func (w *windowImpl) setChild(child Widget) (err error) {
 	// Update the child element
 	w.child, err = DiffChild(Control{w.hWnd}, w.child, child)
+	w.updateWindowMinSize()
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
 	if w.child != nil {
+		// Ensure that tab-order is correct
 		w.child.SetOrder(win.HWND_TOP)
-		w.updateGlobalDPI()
-		w.minimumSize = w.child.MinimumSize()
-
-		// Determine the size constraints for the window
+		// Perform layout
 		w.onSize(w.hWnd)
 	}
 	// ... and we're done
@@ -359,6 +348,7 @@ func (w *windowImpl) setChild(child Widget) (err error) {
 func (w *windowImpl) setScroll(hscroll, vscroll bool) {
 	// Copy the new parameters for the window into the fields.
 	w.horizontalScroll, w.verticalScroll = hscroll, vscroll
+	w.updateWindowMinSize()
 
 	// If either scrollbar is being disabled, make sure to the state for
 	// that scrollbar, and to hide it.
@@ -373,10 +363,8 @@ func (w *windowImpl) setScroll(hscroll, vscroll bool) {
 		win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.FALSE)
 	}
 
-	// Even when enabled, the scrollbars appear only if required
-	// by the size of the windows content.  Run the event handler
-	// for resizing to reevaluate the logic for displaying the
-	// scroll bars.
+	// Changing the existance of scrollbar also changes the layout constraints.
+	// Need to relayout the child.  If necessary, this will show the scrollbars.
 	w.onSize(w.hWnd)
 }
 
@@ -527,4 +515,46 @@ func (w *windowImpl) setTitle(value string) error {
 
 func (w *windowImpl) updateGlobalDPI() {
 	DPI = image.Point{int(float32(w.dpi.X) * Scale), int(float32(w.dpi.Y) * Scale)}
+}
+
+func (w *windowImpl) updateWindowMinSize() {
+
+	// Determine the extra width and height required for borders, title bar,
+	// and scrollbars
+	dx := w.windowRectDelta.X
+	dy := w.windowRectDelta.Y
+	if w.verticalScroll {
+		// Want to include space for the scroll bar in the minimum width.
+		// If the scrollbar is already visible, it will already be part
+		// of the calculation through the difference in the window and client rectangles.
+		dx += int(win.GetSystemMetrics(win.SM_CXVSCROLL))
+	}
+	if w.horizontalScroll {
+		dy += int(win.GetSystemMetrics(win.SM_CYHSCROLL))
+	}
+
+	// If there is no child, then we just need enough space for the window chrome.
+	if w.child == nil {
+		w.windowMinSize.X = dx
+		w.windowMinSize.Y = dy
+		return
+	}
+
+	// Determine the minimum size (in pixels) for the child of the window
+	w.updateGlobalDPI()
+	size := w.child.MinimumSize()
+	w.windowMinSize = image.Point{
+		size.Width.PixelsX() + dx,
+		size.Height.PixelsY() + dy,
+	}
+
+	// If scrolling is enabled for either direction, we can relax the
+	// minimum window size.  These limits are fairly arbitrary, but we do need to
+	// leave enough space for the scroll bars.
+	if limit := (120 * DIP).PixelsX(); w.horizontalScroll && w.windowMinSize.X > limit {
+		w.windowMinSize.X = limit
+	}
+	if limit := (120 * DIP).PixelsY(); w.verticalScroll && w.windowMinSize.Y > limit {
+		w.windowMinSize.Y = limit
+	}
 }

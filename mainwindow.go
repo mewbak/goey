@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"os"
+	"strconv"
 	"sync/atomic"
 )
 
@@ -79,8 +81,24 @@ func (w *Window) Message(text string) *Message {
 	return ret
 }
 
+// Scroll returns the flags that determine whether scrolling is allowed in the
+// horizontal and vertical directions.
 func (w *Window) Scroll() (horizontal, vertical bool) {
 	return w.horizontalScroll, w.verticalScroll
+}
+
+func (w *Window) scrollDefaults() (horizontal, vertical bool) {
+	env := os.Getenv("GOEY_SCROLL")
+	if env == "" {
+		return false, false
+	}
+
+	value, err := strconv.ParseUint(env, 10, 64)
+	if err != nil || value >= 4 {
+		return false, false
+	}
+
+	return (value & 2) == 2, (value & 1) == 1
 }
 
 // SetChildren changes the child windows and widgets of the window.  As
@@ -113,7 +131,7 @@ func (w *Window) SetIcon(img image.Image) error {
 	return w.setIcon(img)
 }
 
-// SetScroll sets whether scrolling is allowed in the horizontal and vertical directions
+// SetScroll sets whether scrolling is allowed in the horizontal and vertical directions.
 func (w *Window) SetScroll(horizontal, vertical bool) {
 	w.setScroll(horizontal, vertical)
 }
