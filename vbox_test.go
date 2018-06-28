@@ -4,6 +4,22 @@ import (
 	"testing"
 )
 
+func (w *mountedVBox) Props() Widget {
+	children := []Widget(nil)
+	if len(w.children) != 0 {
+		children = make([]Widget, 0, len(w.children))
+		for _, v := range w.children {
+			children = append(children, v.(Proper).Props())
+		}
+	}
+
+	return &VBox{
+		AlignMain:  w.alignMain,
+		AlignCross: w.alignCross,
+		Children:   children,
+	}
+}
+
 func TestVBox(t *testing.T) {
 	buttons := []Widget{
 		&Button{Text: "A"},

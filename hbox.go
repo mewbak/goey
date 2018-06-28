@@ -168,22 +168,6 @@ func (w *mountedHBox) MinimumSize() Size {
 	return size
 }
 
-func (w *mountedHBox) Props() Widget {
-	children := []Widget(nil)
-	if len(w.children) != 0 {
-		children = make([]Widget, 0, len(w.children))
-		for _, v := range w.children {
-			children = append(children, v.(Proper).Props())
-		}
-	}
-
-	return &HBox{
-		AlignMain:  w.alignMain,
-		AlignCross: w.alignCross,
-		Children:   children,
-	}
-}
-
 func (w *mountedHBox) SetBounds(bounds Rectangle) {
 	if len(w.children) == 0 {
 		return
