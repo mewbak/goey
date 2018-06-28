@@ -48,6 +48,19 @@ func (w Control) Text() string {
 	return win2.GetWindowText(w.hWnd)
 }
 
+// CalcRect is a wrapper around the WIN32 call DrawTextEx with the option DT_CALCRECT.
+func (w Control) CalcRect(text []uint16) (int32, int32) {
+	hdc := win.GetDC(w.hWnd)
+	if hMessageFont != 0 {
+		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
+	}
+	rect := win.RECT{0, 0, 0x7fffffff, 0x7fffffff}
+	win.DrawTextEx(hdc, &text[0], int32(len(text)), &rect, win.DT_CALCRECT, nil)
+	win.ReleaseDC(w.hWnd, hdc)
+
+	return rect.Right, rect.Bottom
+}
+
 // SetDisabled is a wrapper around the WIN32 call to EnableWindow.
 func (w Control) SetDisabled(value bool) {
 	win.EnableWindow(w.hWnd, !value)

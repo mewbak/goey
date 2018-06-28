@@ -72,16 +72,8 @@ func (w *mountedCheckbox) Props() Widget {
 
 func (w *mountedCheckbox) preferredWidth() Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-
-	hdc := win.GetDC(w.hWnd)
-	if hMessageFont != 0 {
-		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
-	}
-	rect := win.RECT{0, 0, 0xffff, 0xffff}
-	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
-	win.ReleaseDC(w.hWnd, hdc)
-
-	return FromPixelsX(int(rect.Right)) + 17
+	width, _ := w.CalcRect(w.text)
+	return FromPixelsX(int(width) + 17)
 }
 
 func (w *mountedCheckbox) Layout(bc Constraint) Size {

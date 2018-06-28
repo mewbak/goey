@@ -564,7 +564,7 @@ func windowGetPtr(hwnd win.HWND) *windowImpl {
 	}
 
 	ptr := (*windowImpl)(unsafe.Pointer(gwl))
-	if ptr.hWnd != hwnd {
+	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}
 

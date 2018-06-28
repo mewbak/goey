@@ -101,7 +101,7 @@ func (w *Window) scrollDefaults() (horizontal, vertical bool) {
 	return (value & 2) == 2, (value & 1) == 1
 }
 
-// SetChildren changes the child windows and widgets of the window.  As
+// SetChild changes the child widget of the window.  As
 // necessary, GUI widgets will be created or destroyed so that the GUI widgets
 // match the widgets described by the parameter children.  The
 // position of contained widgets will be updated to match the new layout

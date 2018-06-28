@@ -97,15 +97,8 @@ func (w *mountedSelectInput) MinimumSize() Size {
 		if err != nil {
 			w.preferredWidth = 75 * DIP
 		} else {
-			hdc := win.GetDC(w.hWnd)
-			if hMessageFont != 0 {
-				win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
-			}
-			rect := win.RECT{0, 0, 0x7fffffff, 0x7fffffff}
-			win.DrawTextEx(hdc, &text[0], int32(len(text)), &rect, win.DT_CALCRECT, nil)
-			win.ReleaseDC(w.hWnd, hdc)
-
-			w.preferredWidth = FromPixelsX(int(rect.Right)).Scale(13, 10)
+			width, _ := w.CalcRect(text)
+			w.preferredWidth = FromPixelsX(int(width)).Scale(13, 10)
 		}
 	}
 

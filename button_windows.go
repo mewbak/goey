@@ -89,20 +89,11 @@ func (w *mountedButton) Props() Widget {
 
 func (w *mountedButton) preferredWidth() Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	hdc := win.GetDC(w.hWnd)
-	if hMessageFont != 0 {
-		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
-	}
-	rect := win.RECT{0, 0, 0xffff, 0xffff}
-	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT, nil)
-	win.ReleaseDC(w.hWnd, hdc)
-
-	retval := FromPixelsX(int(rect.Right) + 7)
-	if retval < 75*DIP {
-		return 75 * DIP
-	}
-
-	return retval
+	width, _ := w.CalcRect(w.text)
+	return max(
+		75*DIP,
+		FromPixelsX(int(width)+7),
+	)
 }
 
 func (w *mountedButton) Layout(bc Constraint) Size {
