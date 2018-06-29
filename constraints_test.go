@@ -48,6 +48,33 @@ func TestConstraint(t *testing.T) {
 	}
 }
 
+func TestConstraint_ConstrainAndAttemptToPreserveAspectRatio(t *testing.T) {
+	cases := []struct {
+		in   Constraint
+		size Size
+		out  Size
+	}{
+		{Tight(Size{10 * DIP, 15 * DIP}), Size{10 * DIP, 15 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{Tight(Size{10 * DIP, 15 * DIP}), Size{20 * DIP, 30 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{Tight(Size{10 * DIP, 15 * DIP}), Size{2 * DIP, 3 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{TightWidth(10 * DIP), Size{10 * DIP, 15 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{TightWidth(15 * DIP), Size{10 * DIP, 15 * DIP}, Size{15 * DIP, 225 * DIP / 10}},
+		{TightWidth(5 * DIP), Size{10 * DIP, 15 * DIP}, Size{5 * DIP, 75 * DIP / 10}},
+		{TightHeight(15 * DIP), Size{10 * DIP, 15 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{TightHeight(30 * DIP), Size{10 * DIP, 15 * DIP}, Size{20 * DIP, 30 * DIP}},
+		{TightHeight(75 * DIP / 10), Size{10 * DIP, 15 * DIP}, Size{5 * DIP, 75 * DIP / 10}},
+		{Loose(Size{10 * DIP, 15 * DIP}), Size{10 * DIP, 15 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{Loose(Size{10 * DIP, 15 * DIP}), Size{20 * DIP, 30 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{Loose(Size{10 * DIP, 15 * DIP}), Size{2 * DIP, 3 * DIP}, Size{2 * DIP, 3 * DIP}},
+	}
+
+	for i, v := range cases {
+		out := v.in.ConstrainAndAttemptToPreserveAspectRatio(v.size)
+		if v.out != out {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.out, out)
+		}
+	}
+}
 func TestConstraint_Inset(t *testing.T) {
 	cases := []struct {
 		in      Constraint

@@ -137,13 +137,13 @@ func (bc Constraint) ConstrainWidth(width Length) Length {
 
 // Enforce returns new box constraints that respect the constraints,
 // while respecting the constraints of the method receiver as closely as possible.
-func (bc Constraint) Enforce(constraints Constraint) Constraint {
+/*func (bc Constraint) Enforce(constraints Constraint) Constraint {
 	minWidth := bc.Min.Width.Clamp(constraints.Min.Width, constraints.Max.Width)
 	maxWidth := bc.Max.Width.Clamp(constraints.Min.Width, constraints.Max.Width)
 	minHeight := bc.Min.Height.Clamp(constraints.Min.Height, constraints.Max.Height)
 	maxHeight := bc.Max.Height.Clamp(constraints.Min.Height, constraints.Max.Height)
 	return Constraint{Size{minWidth, minHeight}, Size{maxWidth, maxHeight}}
-}
+}*/
 
 // HasBoundedHeight is true if the maximum height is bounded.
 func (bc Constraint) HasBoundedHeight() bool {
