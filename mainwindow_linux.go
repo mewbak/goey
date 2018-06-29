@@ -76,7 +76,7 @@ func newWindow(title string, child Widget) (*Window, error) {
 	if len(os.Getenv("GOEY_DEBUGGING")) > 0 {
 		syscall.WindowSetInteractiveDebugging(true)
 	}
-	retval.setScroll(retval.scollDefaults())
+	retval.setScroll(retval.scrollDefaults())
 
 	return retval, nil
 }

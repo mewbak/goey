@@ -81,9 +81,11 @@ func decoration_onDraw(widget *gtk.DrawingArea, cr *cairo.Context, mounted *deco
 }
 
 func (w *decorationElement) Close() {
-	if w.handle != nil {
+	if w.child != nil {
 		w.child.Close()
 		w.child = nil
+	}
+	if w.handle != nil {
 		w.handle.Destroy()
 		w.handle = nil
 	}
@@ -93,11 +95,13 @@ func (w *decorationElement) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 
-	bounds.Min.X += w.insets.Left
-	bounds.Min.Y += w.insets.Top
-	bounds.Max.X -= w.insets.Right
-	bounds.Max.Y -= w.insets.Bottom
-	w.child.SetBounds(bounds)
+	if w.child != nil {
+		bounds.Min.X += w.insets.Left
+		bounds.Min.Y += w.insets.Top
+		bounds.Max.X -= w.insets.Right
+		bounds.Max.Y -= w.insets.Bottom
+		w.child.SetBounds(bounds)
+	}
 }
 
 func (w *decorationElement) updateProps(data *Decoration) error {
