@@ -132,6 +132,24 @@ func (w *mountedTextArea) MinimumSize() Size {
 	return Size{FromPixelsX(width), FromPixelsY(height)}
 }
 
+func (w *mountedTextArea) Props() Widget {
+	buffer, err := w.handle.GetBuffer()
+	if err != nil {
+		panic("count not get buffer, " + err.Error())
+	}
+	value, err := buffer.GetText(buffer.GetStartIter(), buffer.GetEndIter(), true)
+	if err != nil {
+		panic("could not get text, " + err.Error())
+	}
+	return &TextArea{
+		Value:      value,
+		Disabled:   !w.handle.GetSensitive(),
+		OnChange:   w.onChange,
+		OnFocus:    w.onFocus.callback,
+		OnBlur:     w.onBlur.callback,
+	}
+}
+
 func (w *mountedTextArea) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.frame.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
