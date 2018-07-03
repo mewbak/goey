@@ -3,13 +3,12 @@ package goey
 import (
 	"unsafe"
 
-	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 type mountedTextInput struct {
-	handle *gtk.Entry
+	Control
 
 	onChange   func(string)
 	shChange   glib.SignalHandle
@@ -32,7 +31,7 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 	control.SetEditable(!w.ReadOnly)
 
 	retval := &mountedTextInput{
-		handle:     control,
+		Control:    Control{&control.Widget},
 		onChange:   w.OnChange,
 		onEnterKey: w.OnEnterKey,
 	}
@@ -77,45 +76,27 @@ func textinput_onDestroy(widget *gtk.Entry, mounted *mountedTextInput) {
 	mounted.handle = nil
 }
 
-func (w *mountedTextInput) Close() {
-	if w.handle != nil {
-		w.handle.Destroy()
-		w.handle = nil
-	}
-}
-
-func (w *mountedTextInput) Handle() *gtk.Widget {
-	return &w.handle.Widget
-}
-
-func (w *mountedTextInput) Layout(bc Constraint) Size {
-	_, width := w.handle.GetPreferredWidth()
-	_, height := w.handle.GetPreferredHeight()
-	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
-}
-
-func (w *mountedTextInput) MinimumSize() Size {
-	width, _ := w.handle.GetPreferredWidth()
-	height, _ := w.handle.GetPreferredHeight()
-	return Size{FromPixelsX(width), FromPixelsY(height)}
+func (w *mountedTextInput) entry() *gtk.Entry {
+	return (*gtk.Entry)(unsafe.Pointer(w.handle))
 }
 
 func (w *mountedTextInput) Props() Widget {
-	value, err := w.handle.GetText()
+	entry := w.entry()
+	value, err := entry.GetText()
 	if err != nil {
 		panic("could not get text, " + err.Error())
 	}
-	placeholder, err := w.handle.GetPlaceholderText()
+	placeholder, err := entry.GetPlaceholderText()
 	if err != nil {
 		panic("could not get placeholder text, " + err.Error())
 	}
 
 	return &TextInput{
 		Value:       value,
-		Disabled:    !w.handle.GetSensitive(),
+		Disabled:    !entry.GetSensitive(),
 		Placeholder: placeholder,
-		Password:    !w.handle.GetVisibility(),
-		ReadOnly:    !w.handle.GetEditable(),
+		Password:    !entry.GetVisibility(),
+		ReadOnly:    !entry.GetEditable(),
 		OnChange:    w.onChange,
 		OnFocus:     w.onFocus.callback,
 		OnBlur:      w.onBlur.callback,
@@ -123,24 +104,20 @@ func (w *mountedTextInput) Props() Widget {
 	}
 }
 
-func (w *mountedTextInput) SetBounds(bounds Rectangle) {
-	pixels := bounds.Pixels()
-	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
-}
-
 func (w *mountedTextInput) updateProps(data *TextInput) error {
+	entry := w.entry()
 	w.onChange = nil // temporarily break OnChange to prevent event
-	w.handle.SetText(data.Value)
-	w.handle.SetEditable(!data.ReadOnly)
-	w.handle.SetPlaceholderText(data.Placeholder)
-	w.handle.SetSensitive(!data.Disabled)
-	w.handle.SetVisibility(!data.Password)
+	entry.SetText(data.Value)
+	entry.SetEditable(!data.ReadOnly)
+	entry.SetPlaceholderText(data.Placeholder)
+	entry.SetSensitive(!data.Disabled)
+	entry.SetVisibility(!data.Password)
 	w.onChange = data.OnChange
-	w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "changed", textinput_onChanged, w)
-	w.onFocus.Set(&w.handle.Widget, data.OnFocus)
-	w.onBlur.Set(&w.handle.Widget, data.OnBlur)
+	w.shChange = setSignalHandler(&entry.Widget, w.shChange, data.OnChange != nil, "changed", textinput_onChanged, w)
+	w.onFocus.Set(&entry.Widget, data.OnFocus)
+	w.onBlur.Set(&entry.Widget, data.OnBlur)
 	w.onEnterKey = data.OnEnterKey
-	w.shEnterKey = setSignalHandler(&w.handle.Widget, w.shEnterKey, data.OnEnterKey != nil, "activate", textinput_onActivate, w)
+	w.shEnterKey = setSignalHandler(&entry.Widget, w.shEnterKey, data.OnEnterKey != nil, "activate", textinput_onActivate, w)
 
 	return nil
 }
