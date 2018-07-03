@@ -70,7 +70,7 @@ func (w *mountedHBox) Close() {
 func (w *mountedHBox) Layout(bc Constraint) Size {
 	if len(w.children) == 0 {
 		w.totalWidth = 0
-		return Size{}
+		return bc.Constrain(Size{})
 	}
 
 	// Determine the constraints for layout of child elements.

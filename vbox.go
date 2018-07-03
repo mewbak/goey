@@ -104,7 +104,7 @@ func (w *mountedVBox) Close() {
 func (w *mountedVBox) Layout(bc Constraint) Size {
 	if len(w.children) == 0 {
 		w.totalHeight = 0
-		return Size{}
+		return bc.Constrain(Size{})
 	}
 
 	// Determine the constraints for layout of child elements.

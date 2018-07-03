@@ -68,7 +68,7 @@ func (w *windowImpl) layoutChild(windowSize Size) Size {
 	// Perform layout
 	size := w.child.Layout(constraints)
 	if !constraints.IsSatisfiedBy(size) {
-		fmt.Println("constraints not satisfied")
+		fmt.Println("constraints not satisfied,", constraints, ",", size)
 	}
 	return size
 }
