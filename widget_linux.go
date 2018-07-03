@@ -53,6 +53,9 @@ func (w *Control) MinimumSize() Size {
 
 func (w *Control) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
+	if pixels.Dx() <= 0 || pixels.Dy() <= 0 {
+		panic("internal error.  zero width or zero height bounds for control")
+	}
 	syscall.SetBounds(w.handle, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 

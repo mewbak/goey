@@ -222,7 +222,7 @@ func (w *mountedHBox) SetBounds(bounds Rectangle) {
 		}
 
 		dx := w.childrenSize[i].Width
-		w.setBoundsForChild(i, v, posX, bounds.Min.Y, posX, bounds.Max.Y)
+		w.setBoundsForChild(i, v, posX, bounds.Min.Y, posX+dx, bounds.Max.Y)
 		posX += dx + extraGap
 	}
 }
