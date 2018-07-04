@@ -45,7 +45,7 @@ func updateWindow() {
 
 func cycleMainAxisAlign() {
 	alignMain++
-	if alignMain > goey.SpaceBetween {
+	if alignMain > goey.Homogeneous {
 		alignMain = goey.MainStart
 	}
 	updateWindow()
