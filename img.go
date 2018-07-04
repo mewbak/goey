@@ -52,9 +52,18 @@ func (w *mountedImg) Layout(bc Constraint) Size {
 	return bc.ConstrainAndAttemptToPreserveAspectRatio(Size{w.width, w.height})
 }
 
-func (w *mountedImg) MinimumSize() Size {
-	// Determine ideal width.
-	return Size{w.width, w.height}
+func (w *mountedImg) MinIntrinsicHeight(width Length) Length {
+	if width < w.width {
+		return w.height * width / w.width
+	}
+	return w.height
+}
+
+func (w *mountedImg) MinIntrinsicWidth(height Length) Length {
+	if height < w.height {
+		return w.width * height / w.height
+	}
+	return w.width
 }
 
 // UpdateDimensions calculates default values for Width and Height if either

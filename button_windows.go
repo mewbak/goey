@@ -87,27 +87,24 @@ func (w *mountedButton) Props() Widget {
 	}
 }
 
-func (w *mountedButton) preferredWidth() Length {
+func (w *mountedButton) Layout(bc Constraint) Size {
+	width := w.MinIntrinsicWidth(0)
+	height := w.MinIntrinsicHeight(0)
+	return bc.Constrain(Size{width, height})
+}
+
+func (w *mountedButton) MinIntrinsicHeight(Length) Length {
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	return 23 * DIP
+}
+
+func (w *mountedButton) MinIntrinsicWidth(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	width, _ := w.CalcRect(w.text)
 	return max(
 		75*DIP,
 		FromPixelsX(int(width)+7),
 	)
-}
-
-func (w *mountedButton) Layout(bc Constraint) Size {
-	// Determine ideal width.
-	width := w.preferredWidth()
-	height := 23 * DIP
-	return bc.Constrain(Size{width, height})
-}
-
-func (w *mountedButton) MinimumSize() Size {
-	// Determine ideal width.
-	width := w.preferredWidth()
-	height := 23 * DIP
-	return Size{width, height}
 }
 
 func (w *mountedButton) updateProps(data *Button) error {

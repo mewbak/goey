@@ -71,21 +71,15 @@ type mountedTextArea struct {
 }
 
 func (w *mountedTextArea) Layout(bc Constraint) Size {
-	const lineHeight = 16 * DIP
-
-	width := w.preferredWidth()
-	height := 23*DIP + lineHeight.Scale(w.minLines-1, 1)
+	width := w.MinIntrinsicWidth(0)
+	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedTextArea) MinimumSize() Size {
+func (w *mountedTextArea) MinIntrinsicHeight(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-
 	const lineHeight = 16 * DIP
-
-	width := w.preferredWidth()
-	height := 23*DIP + lineHeight.Scale(w.minLines-1, 1)
-	return Size{width, height}
+	return 23*DIP + lineHeight.Scale(w.minLines-1, 1)
 }
 
 func (w *mountedTextArea) Props() Widget {

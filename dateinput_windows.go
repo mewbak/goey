@@ -80,17 +80,19 @@ type mountedDateInput struct {
 }
 
 func (w *mountedDateInput) Layout(bc Constraint) Size {
-	// Determine ideal width.
-	width := 75 * DIP
-	height := 23 * DIP
+	height := w.MinIntrinsicHeight(0)
+	width := w.MinIntrinsicWidth(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedDateInput) MinimumSize() Size {
+func (w *mountedDateInput) MinIntrinsicHeight(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	// Unclear what the correct width should be.  Using button for the moment
-	// Height set to match a text box.
-	return Size{75 * DIP, 23 * DIP}
+	return 23 * DIP
+}
+
+func (w *mountedDateInput) MinIntrinsicWidth(Length) Length {
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	return 75 * DIP
 }
 
 func (w *mountedDateInput) Props() Widget {

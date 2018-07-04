@@ -33,15 +33,15 @@ func (*mountedHR) Layout(bc Constraint) Size {
 	if bc.HasBoundedWidth() {
 		return bc.Constrain(Size{bc.Max.Width, 13 * DIP})
 	}
-	return bc.Constrain(Size{bc.Min.Width, 13 * DIP})
+	return bc.Constrain(Size{13 * DIP, 13 * DIP})
 }
 
-func (w *mountedHR) MinimumSize() Size {
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+func (w *mountedHR) MinIntrinsicHeight(width Length) Length {
+	return 13 * DIP
+}
 
-	width := 13 * DIP
-	height := 13 * DIP
-	return Size{width, height}
+func (w *mountedHR) MinIntrinsicWidth(height Length) Length {
+	return 13 * DIP
 }
 
 func (w *mountedHR) UpdateProps(data Widget) error {

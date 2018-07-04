@@ -88,10 +88,17 @@ type mountedSelectInput struct {
 }
 
 func (w *mountedSelectInput) Layout(bc Constraint) Size {
-	return bc.Constrain(w.MinimumSize())
+	width := w.MinIntrinsicWidth(0)
+	height := w.MinIntrinsicHeight(0)
+	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedSelectInput) MinimumSize() Size {
+func (w *mountedSelectInput) MinIntrinsicHeight(width Length) Length {
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	return 14 * DIP
+}
+
+func (w *mountedSelectInput) MinIntrinsicWidth(height Length) Length {
 	if w.preferredWidth == 0 {
 		text, err := syscall.UTF16FromString(w.longestString)
 		if err != nil {
@@ -101,10 +108,7 @@ func (w *mountedSelectInput) MinimumSize() Size {
 			w.preferredWidth = FromPixelsX(int(width)).Scale(13, 10)
 		}
 	}
-
-	width := w.preferredWidth
-	height := 14 * DIP
-	return Size{width, height}
+	return w.preferredWidth
 }
 
 func (w *mountedSelectInput) updateProps(data *SelectInput) error {

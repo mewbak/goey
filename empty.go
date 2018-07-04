@@ -41,14 +41,21 @@ func (w *mountedEmpty) Props() Widget {
 }
 
 func (w *mountedEmpty) Layout(bc Constraint) Size {
-	// Determine ideal width.
-	return bc.Constrain(Size{13 * DIP, 13 * DIP})
+	width := w.MinIntrinsicWidth(0)
+	height := w.MinIntrinsicHeight(0)
+	return bc.Constrain(Size{width,height})
 }
 
-func (w *mountedEmpty) MinimumSize() Size {
+func (w *mountedEmpty) MinIntrinsicHeight(width Length) Length {
 	// Same as static text
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return Size{13 * DIP, 13 * DIP}
+	return 13 * DIP
+}
+
+func (w *mountedEmpty) MinIntrinsicWidth(height Length) Length {
+	// Same as static text
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	return 13 * DIP
 }
 
 func (w *mountedEmpty) SetBounds(bounds Rectangle) {

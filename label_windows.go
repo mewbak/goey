@@ -54,11 +54,6 @@ type mountedLabel struct {
 	text []uint16
 }
 
-func (w *mountedLabel) preferredWidth() Length {
-	width, _ := w.CalcRect(w.text)
-	return FromPixelsX(int(width))
-}
-
 func (w *mountedLabel) Props() Widget {
 	return &Label{
 		Text: w.Control.Text(),
@@ -66,17 +61,19 @@ func (w *mountedLabel) Props() Widget {
 }
 
 func (w *mountedLabel) Layout(bc Constraint) Size {
-	// Determine ideal width.
-	width := w.preferredWidth()
-	height := 13 * DIP
+	width := w.MinIntrinsicWidth(0)
+	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedLabel) MinimumSize() Size {
-	// Determine ideal width.
-	width := w.preferredWidth()
-	height := 13 * DIP
-	return Size{width, height}
+func (w *mountedLabel) MinIntrinsicHeight(Length) Length {
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	return 13 * DIP
+}
+
+func (w *mountedLabel) MinIntrinsicWidth(Length) Length {
+	width, _ := w.CalcRect(w.text)
+	return FromPixelsX(int(width))
 }
 
 func (w *mountedLabel) SetBounds(bounds Rectangle) {

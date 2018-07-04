@@ -77,17 +77,20 @@ func (w *mountedCheckbox) preferredWidth() Length {
 }
 
 func (w *mountedCheckbox) Layout(bc Constraint) Size {
-	// Determine ideal width.
-	width := w.preferredWidth()
-	height := 17 * DIP
+	width := w.MinIntrinsicWidth(0)
+	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedCheckbox) MinimumSize() Size {
-	// Determine ideal width.
-	width := w.preferredWidth()
-	height := 17 * DIP
-	return Size{width, height}
+func (w *mountedCheckbox) MinIntrinsicHeight(Length) Length {
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	return 17 * DIP
+}
+
+func (w *mountedCheckbox) MinIntrinsicWidth(Length) Length {
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	width, _ := w.CalcRect(w.text)
+	return FromPixelsX(int(width) + 17)
 }
 
 func (w *mountedCheckbox) updateProps(data *Checkbox) error {

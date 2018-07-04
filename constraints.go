@@ -19,6 +19,13 @@ func max(a, b Length) Length {
 	return b
 }
 
+func min(a, b Length) Length {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 // Size represents the size of a rectangular element.
 type Size struct {
 	Width, Height Length

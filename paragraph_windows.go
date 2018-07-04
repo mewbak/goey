@@ -69,19 +69,7 @@ func paragraphMeasureReflowLimits(hwnd win.HWND) {
 	win.DrawTextEx(hdc, &caption[0], 1, &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(hwnd, hdc)
 	paragraphMinWidth = FromPixelsX(int(rect.Right)) * 20
-	paragraphMaxWidth = FromPixelsY(int(rect.Right)) * 80
-}
-
-func (w *mountedP) measureHeight(width Length) Length {
-	hdc := win.GetDC(w.hWnd)
-	if hMessageFont != 0 {
-		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
-	}
-	rect := win.RECT{0, 0, int32(width.PixelsX()), 0x7fffffff}
-	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
-	win.ReleaseDC(w.hWnd, hdc)
-
-	return FromPixelsY(int(rect.Bottom))
+	paragraphMaxWidth = FromPixelsX(int(rect.Right)) * 80
 }
 
 func (w *mountedP) Props() Widget {
@@ -102,51 +90,68 @@ func (w *mountedP) Props() Widget {
 
 func (w *mountedP) Layout(bc Constraint) Size {
 	if bc.HasBoundedWidth() {
+		if paragraphMaxWidth == 0 {
+			paragraphMeasureReflowLimits(w.hWnd)
+		}
 		width := bc.ConstrainWidth(paragraphMaxWidth)
-		height := w.measureHeight(width)
+		height := w.MinIntrinsicHeight(width)
 		return Size{width, bc.ConstrainHeight(height)}
 	}
 
 	if bc.HasBoundedHeight() {
-		// The correct strategy for other cases is not yet clear.
-		panic("not implemented")
+		if paragraphMaxWidth == 0 {
+			paragraphMeasureReflowLimits(w.hWnd)
+		}
+		height := w.MinIntrinsicHeight(paragraphMinWidth)
+		if height <= bc.Max.Height {
+			return Size{paragraphMinWidth, height}
+		}
+		height = w.MinIntrinsicHeight(paragraphMaxWidth)
+		return Size{paragraphMaxWidth, bc.ConstrainHeight(height)}
 	}
 
 	if bc.Min.Width > 0 {
 		width := bc.Min.Width
-		height := w.measureHeight(width)
+		height := w.MinIntrinsicHeight(width)
 		return Size{width, bc.ConstrainHeight(height)}
 	}
 
 	width := bc.ConstrainWidth(paragraphMaxWidth)
-	height := w.measureHeight(width)
+	height := w.MinIntrinsicHeight(width)
 	return Size{width, bc.ConstrainHeight(height)}
 }
 
-func (w *mountedP) MinimumSize() Size {
-	// As the width is narrowed, the paragraph will get higher.  Unlike other
-	// widgets, a single minimum size does not really work very well.
-	if paragraphMaxWidth == 0 {
-		paragraphMeasureReflowLimits(w.hWnd)
+func (w *mountedP) MinIntrinsicHeight(width Length) Length {
+	if width == Inf {
+		if paragraphMaxWidth == 0 {
+			paragraphMeasureReflowLimits(w.hWnd)
+		}
+		width = paragraphMaxWidth
 	}
 
-	// Get the unconstrained width of the paragraph
 	hdc := win.GetDC(w.hWnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
 	}
-	rect := win.RECT{0, 0, 0x7fffffff, 0x7fffffff}
+	rect := win.RECT{0, 0, int32(width.PixelsX()), 0x7fffffff}
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	width := FromPixelsX(int(rect.Right))
-	if width > paragraphMinWidth {
-		width = paragraphMinWidth
+	return FromPixelsY(int(rect.Bottom))
+}
+
+func (w *mountedP) MinIntrinsicWidth(height Length) Length {
+	if height != Inf {
+		panic("not implemented")
 	}
 
-	height := w.measureHeight(paragraphMaxWidth)
+	if paragraphMaxWidth == 0 {
+		paragraphMeasureReflowLimits(w.hWnd)
+	}
 
-	return Size{width, height}
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	width, _ := w.CalcRect(w.text)
+	return min(FromPixelsX(int(width)), paragraphMinWidth)
 }
 
 func (w *mountedP) SetBounds(bounds Rectangle) {

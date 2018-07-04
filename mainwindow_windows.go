@@ -236,7 +236,6 @@ func (w *windowImpl) message(m *Message) {
 func (w *windowImpl) setChild(child Widget) (err error) {
 	// Update the child element
 	w.child, err = DiffChild(Control{w.hWnd}, w.child, child)
-	w.updateWindowMinSize()
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
 	if w.child != nil {
@@ -260,7 +259,6 @@ func (w *windowImpl) setChild(child Widget) (err error) {
 func (w *windowImpl) setScroll(hscroll, vscroll bool) {
 	// Copy the new parameters for the window into the fields.
 	w.horizontalScroll, w.verticalScroll = hscroll, vscroll
-	w.updateWindowMinSize()
 
 	// If either scrollbar is being disabled, make sure to the state for
 	// that scrollbar, and to hide it.
@@ -453,10 +451,36 @@ func (w *windowImpl) updateWindowMinSize() {
 
 	// Determine the minimum size (in pixels) for the child of the window
 	w.updateGlobalDPI()
-	size := w.child.MinimumSize()
-	w.windowMinSize = image.Point{
-		size.Width.PixelsX() + dx,
-		size.Height.PixelsY() + dy,
+	if w.horizontalScroll && w.verticalScroll {
+		width := w.child.MinIntrinsicWidth(Inf)
+		height := w.child.MinIntrinsicHeight(Inf)
+		w.windowMinSize = image.Point{
+			width.PixelsX() + dx,
+			height.PixelsY() + dy,
+		}
+	} else if w.horizontalScroll {
+		height := w.child.MinIntrinsicHeight(Inf)
+		size := w.child.Layout(TightHeight(height))
+		w.windowMinSize = image.Point{
+			size.Width.PixelsX() + dx,
+			size.Height.PixelsY() + dy,
+		}
+	} else if w.verticalScroll {
+		width := w.child.MinIntrinsicWidth(Inf)
+		size := w.child.Layout(TightWidth(width))
+		w.windowMinSize = image.Point{
+			size.Width.PixelsX() + dx,
+			size.Height.PixelsY() + dy,
+		}
+	} else {
+		width := w.child.MinIntrinsicWidth(Inf)
+		height := w.child.MinIntrinsicHeight(Inf)
+		size1 := w.child.Layout(TightWidth(width))
+		size2 := w.child.Layout(TightHeight(height))
+		w.windowMinSize = image.Point{
+			max(width, size2.Width).PixelsX() + dx,
+			max(height, size1.Height).PixelsY() + dy,
+		}
 	}
 
 	// If scrolling is enabled for either direction, we can relax the
@@ -519,6 +543,9 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 
 	case win.WM_GETMINMAXINFO:
 		if w := windowGetPtr(hwnd); w != nil {
+			if w.windowMinSize.X == 0 {
+				w.updateWindowMinSize()
+			}
 			// Update tracking information based on our minimum size
 			mmi := (*win.MINMAXINFO)(unsafe.Pointer(lParam))
 			if limit := int32(w.windowMinSize.X); mmi.PtMinTrackSize.X < limit {

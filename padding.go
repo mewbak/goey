@@ -90,18 +90,24 @@ func (w *paddingElement) Layout(bc Constraint) Size {
 	}
 }
 
-func (w *paddingElement) MinimumSize() Size {
-	hinset := w.insets.Left + w.insets.Right
+func (w *paddingElement) MinIntrinsicHeight(width Length) Length {
 	vinset := w.insets.Top + w.insets.Bottom
 
 	if w.child == nil {
-		return Size{hinset, vinset}
+		return vinset
 	}
 
-	size := w.child.MinimumSize()
-	size.Width += hinset
-	size.Height += vinset
-	return size
+	return w.child.MinIntrinsicHeight(width) + vinset
+}
+
+func (w *paddingElement) MinIntrinsicWidth(height Length) Length {
+	hinset := w.insets.Left + w.insets.Right
+
+	if w.child == nil {
+		return hinset
+	}
+
+	return w.child.MinIntrinsicWidth(height) + hinset
 }
 
 func (w *paddingElement) SetBounds(bounds Rectangle) {

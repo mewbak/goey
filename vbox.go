@@ -93,7 +93,6 @@ type mountedVBox struct {
 
 	childrenSize []Size
 	totalHeight  Length
-	minimumSize  Size
 }
 
 func (w *mountedVBox) Close() {
@@ -121,8 +120,7 @@ func (w *mountedVBox) Layout(bc Constraint) Size {
 		if cbc.HasBoundedWidth() {
 			cbc = cbc.TightenWidth(cbc.Max.Width)
 		} else {
-			size := w.MinimumSize()
-			cbc = cbc.TightenWidth(max(cbc.Min.Width, size.Width))
+			cbc = cbc.TightenWidth(max(cbc.Min.Width, w.MinIntrinsicWidth(Inf)))
 		}
 	} else {
 		cbc = cbc.LoosenWidth()
@@ -150,53 +148,65 @@ func (w *mountedVBox) Layout(bc Constraint) Size {
 	return bc.Constrain(Size{minWidth, height})
 }
 
-func (w *mountedVBox) MinimumSize() Size {
+func (w *mountedVBox) MinIntrinsicWidth(height Length) Length {
 	if len(w.children) == 0 {
-		return Size{}
+		return 0
 	}
 
-	if !w.minimumSize.IsZero() {
-		return w.minimumSize
+	if w.alignMain == Homogeneous {
+		height = guardInf(height, height.Scale(1, len(w.children)))
+		size := w.children[0].MinIntrinsicWidth(height)
+		for _, v := range w.children[1:] {
+			size = max(size, v.MinIntrinsicWidth(height))
+		}
+		return size
 	}
 
-	size := w.children[0].MinimumSize()
+	size := w.children[0].MinIntrinsicWidth(Inf)
+	for _, v := range w.children[1:] {
+		size = max(size, v.MinIntrinsicWidth(Inf))
+	}
+	return size
+}
+
+func (w *mountedVBox) MinIntrinsicHeight(width Length) Length {
+	if len(w.children) == 0 {
+		return 0
+	}
+
+	size := w.children[0].MinIntrinsicHeight(width)
 	if w.alignMain.IsPacked() {
 		previous := w.children[0]
 		for _, v := range w.children[1:] {
 			// Add the preferred gap between this pair of widgets
-			size.Height += calculateVGap(previous, v)
+			size += calculateVGap(previous, v)
 			// Find minimum size for this widget, and update
-			tmp := v.MinimumSize()
-			size.Width = max(size.Width, tmp.Width)
-			size.Height += tmp.Height
+			size += v.MinIntrinsicHeight(width)
 		}
-	} else if w.alignMain == Homogeneous {
-		for _, v := range w.children[1:] {
-			// Find minimum size for this widget, and update
-			tmp := v.MinimumSize()
-			size.Height = max(size.Height, tmp.Height)
-			size.Width = max(size.Width, tmp.Width)
-		}
-
-		// Add a minimum gap between the controls.
-		size.Height = size.Height.Scale(len(w.children), 1) + calculateVGap(nil, nil).Scale(len(w.children)-1, 1)
-	} else {
-		for _, v := range w.children[1:] {
-			// Find minimum size for this widget, and update
-			tmp := v.MinimumSize()
-			size.Width = max(size.Width, tmp.Width)
-			size.Height += tmp.Height
-		}
-
-		// Add a minimum gap between the controls.
-		if w.alignMain == SpaceBetween {
-			size.Height += calculateVGap(nil, nil).Scale(len(w.children)-1, 1)
-		} else {
-			size.Height += calculateVGap(nil, nil).Scale(len(w.children)+1, 1)
-		}
+		return size
 	}
 
-	w.minimumSize = size
+	if w.alignMain == Homogeneous {
+		for _, v := range w.children[1:] {
+			size = max(size, v.MinIntrinsicHeight(width))
+		}
+
+		// Add a minimum gap between the controls.
+		size = size.Scale(len(w.children), 1) + calculateVGap(nil, nil).Scale(len(w.children)-1, 1)
+		return size
+	}
+
+	for _, v := range w.children[1:] {
+		size += v.MinIntrinsicHeight(width)
+	}
+
+	// Add a minimum gap between the controls.
+	if w.alignMain == SpaceBetween {
+		size += calculateVGap(nil, nil).Scale(len(w.children)-1, 1)
+	} else {
+		size += calculateVGap(nil, nil).Scale(len(w.children)+1, 1)
+	}
+
 	return size
 }
 
@@ -241,7 +251,6 @@ func (w *mountedVBox) SetBounds(bounds Rectangle) {
 			bounds.Min.Y += (bounds.Dy() - w.totalHeight) / 2
 		}
 	}
-
 	// Position all of the child controls.
 	posY := bounds.Min.Y
 	previous := Element(nil)
@@ -293,7 +302,6 @@ func (w *mountedVBox) updateProps(data *VBox) (err error) {
 	// Clear cached values
 	w.childrenSize = make([]Size, len(w.children))
 	w.totalHeight = 0
-	w.minimumSize = Size{}
 	return err
 }
 

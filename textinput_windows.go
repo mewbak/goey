@@ -123,24 +123,20 @@ func (w *mountedTextInput) Props() Widget {
 	}
 }
 
-func (w *mountedTextInputBase) preferredWidth() Length {
-	// TODO
-	return 75 * DIP
-}
-
 func (w *mountedTextInputBase) Layout(bc Constraint) Size {
-	// Determine ideal width.
-	width := w.preferredWidth()
-	height := 23 * DIP
+	width := w.MinIntrinsicWidth(0)
+	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedTextInputBase) MinimumSize() Size {
+func (w *mountedTextInputBase) MinIntrinsicHeight(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	return 23 * DIP
+}
 
-	width := w.preferredWidth()
-	height := 23 * DIP
-	return Size{width, height}
+func (w *mountedTextInputBase) MinIntrinsicWidth(Length) Length {
+	// TODO
+	return 75 * DIP
 }
 
 func (w *mountedTextInputBase) updatePlaceholder(text string) error {

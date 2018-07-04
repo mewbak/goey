@@ -59,7 +59,6 @@ type mountedHBox struct {
 
 	childrenSize []Size
 	totalWidth   Length
-	minimumSize  Size
 }
 
 func (w *mountedHBox) Close() {
@@ -87,8 +86,7 @@ func (w *mountedHBox) Layout(bc Constraint) Size {
 		if cbc.HasBoundedHeight() {
 			cbc = cbc.TightenHeight(cbc.Max.Height)
 		} else {
-			size := w.MinimumSize()
-			cbc = cbc.TightenHeight(max(cbc.Min.Height, size.Height))
+			cbc = cbc.TightenHeight(max(cbc.Min.Height, w.MinIntrinsicHeight(Inf)))
 		}
 	} else {
 		cbc = cbc.LoosenHeight()
@@ -118,53 +116,65 @@ func (w *mountedHBox) Layout(bc Constraint) Size {
 	return bc.Constrain(Size{width, minHeight})
 }
 
-func (w *mountedHBox) MinimumSize() Size {
+func (w *mountedHBox) MinIntrinsicHeight(width Length) Length {
 	if len(w.children) == 0 {
-		return Size{}
+		return 0
 	}
 
-	if !w.minimumSize.IsZero() {
-		return w.minimumSize
+	if w.alignMain == Homogeneous {
+		width = guardInf(width, width.Scale(1, len(w.children)))
+		size := w.children[0].MinIntrinsicHeight(width)
+		for _, v := range w.children[1:] {
+			size = max(size, v.MinIntrinsicHeight(width))
+		}
+		return size
 	}
 
-	size := w.children[0].MinimumSize()
+	size := w.children[0].MinIntrinsicHeight(Inf)
+	for _, v := range w.children[1:] {
+		size = max(size, v.MinIntrinsicHeight(Inf))
+	}
+	return size
+}
+
+func (w *mountedHBox) MinIntrinsicWidth(height Length) Length {
+	if len(w.children) == 0 {
+		return 0
+	}
+
+	size := w.children[0].MinIntrinsicWidth(height)
 	if w.alignMain.IsPacked() {
 		previous := w.children[0]
 		for _, v := range w.children[1:] {
 			// Add the preferred gap between this pair of widgets
-			size.Width += calculateHGap(previous, v)
+			size += calculateHGap(previous, v)
 			// Find minimum size for this widget, and update
-			tmp := v.MinimumSize()
-			size.Height = max(size.Height, tmp.Height)
-			size.Width += tmp.Width
+			size += v.MinIntrinsicWidth(height)
 		}
-	} else if w.alignMain == Homogeneous {
-		for _, v := range w.children[1:] {
-			// Find minimum size for this widget, and update
-			tmp := v.MinimumSize()
-			size.Height = max(size.Height, tmp.Height)
-			size.Width = max(size.Width, tmp.Width)
-		}
-
-		// Add a minimum gap between the controls.
-		size.Width = size.Width.Scale(len(w.children), 1) + calculateHGap(nil, nil).Scale(len(w.children)-1, 1)
-	} else {
-		for _, v := range w.children[1:] {
-			// Find minimum size for this widget, and update
-			tmp := v.MinimumSize()
-			size.Height = max(size.Height, tmp.Height)
-			size.Width += tmp.Width
-		}
-
-		// Add a minimum gap between the controls.
-		if w.alignMain == SpaceBetween {
-			size.Width += calculateHGap(nil, nil).Scale(len(w.children)-1, 1)
-		} else {
-			size.Width += calculateHGap(nil, nil).Scale(len(w.children)+1, 1)
-		}
+		return size
 	}
 
-	w.minimumSize = size
+	if w.alignMain == Homogeneous {
+		for _, v := range w.children[1:] {
+			size = max(size, v.MinIntrinsicWidth(height))
+		}
+
+		// Add a minimum gap between the controls.
+		size = size.Scale(len(w.children), 1) + calculateHGap(nil, nil).Scale(len(w.children)-1, 1)
+		return size
+	}
+
+	for _, v := range w.children[1:] {
+		size += v.MinIntrinsicWidth(height)
+	}
+
+	// Add a minimum gap between the controls.
+	if w.alignMain == SpaceBetween {
+		size += calculateHGap(nil, nil).Scale(len(w.children)-1, 1)
+	} else {
+		size += calculateHGap(nil, nil).Scale(len(w.children)+1, 1)
+	}
+
 	return size
 }
 
@@ -261,7 +271,6 @@ func (w *mountedHBox) updateProps(data *HBox) (err error) {
 	// Clear cached values
 	w.childrenSize = make([]Size, len(w.children))
 	w.totalWidth = 0
-	w.minimumSize = Size{}
 	return err
 }
 

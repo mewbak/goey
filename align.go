@@ -115,12 +115,28 @@ func (w *alignElement) Layout(bc Constraint) Size {
 	return bc.Constrain(size)
 }
 
-func (w *alignElement) MinimumSize() Size {
+func (w *alignElement) MinIntrinsicHeight(width Length) Length {
 	if w.child == nil {
-		return Size{}
+		return 0
 	}
 
-	return w.child.MinimumSize()
+	height := w.child.MinIntrinsicHeight(width)
+	if w.heightFactor > 0 {
+		return Length(float64(height) * w.heightFactor)
+	}
+	return height
+}
+
+func (w *alignElement) MinIntrinsicWidth(height Length) Length {
+	if w.child == nil {
+		return 0
+	}
+
+	width := w.child.MinIntrinsicWidth(height)
+	if w.widthFactor > 0 {
+		return Length(float64(width) * w.widthFactor)
+	}
+	return width
 }
 
 func (w *alignElement) SetBounds(bounds Rectangle) {

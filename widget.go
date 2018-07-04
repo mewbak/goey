@@ -47,10 +47,12 @@ type Element interface {
 	// Layout determines the best size for an element that sastisfies the
 	// constraints.
 	Layout(Constraint) Size
-	// MinimumSize reports the minimum dimensions for an element that will
-	// comfortably fit its contents.  The minimum size is not well-defined for
-	// all types of elements.
-	MinimumSize() Size
+	// MinIntrinsicHeight returns the minimum height that this element requires
+	// to be correctly displayed.
+	MinIntrinsicHeight(width Length) Length
+	// MinIntrinsicWidth returns the minimum width that this element requires
+	// to be correctly displayed.
+	MinIntrinsicWidth(height Length) Length
 	// SetBounds updates the position of the widget.
 	SetBounds(bounds Rectangle)
 	// UpdateProps will update the properties of the widget.  The Kind for

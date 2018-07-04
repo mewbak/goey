@@ -35,6 +35,10 @@ func (w *Decoration) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
+func (*decorationElement) Kind() *Kind {
+	return &decorationKind
+}
+
 func (w *decorationElement) Layout(bc Constraint) Size {
 	hinset := w.insets.Left + w.insets.Right
 	vinset := w.insets.Top + w.insets.Bottom
@@ -51,22 +55,24 @@ func (w *decorationElement) Layout(bc Constraint) Size {
 	}
 }
 
-func (w *decorationElement) MinimumSize() Size {
-	hinset := w.insets.Left + w.insets.Right
+func (w *decorationElement) MinIntrinsicHeight(width Length) Length {
 	vinset := w.insets.Top + w.insets.Bottom
 
 	if w.child == nil {
-		return Size{hinset, vinset}
+		return vinset
 	}
 
-	size := w.child.MinimumSize()
-	size.Width += hinset
-	size.Height += vinset
-	return size
+	return w.child.MinIntrinsicHeight(width) + vinset
 }
 
-func (*decorationElement) Kind() *Kind {
-	return &decorationKind
+func (w *decorationElement) MinIntrinsicWidth(height Length) Length {
+	hinset := w.insets.Left + w.insets.Right
+
+	if w.child == nil {
+		return hinset
+	}
+
+	return w.child.MinIntrinsicWidth(height) + hinset
 }
 
 func (w *decorationElement) UpdateProps(data Widget) error {
