@@ -8,19 +8,19 @@ func TestTextArea(t *testing.T) {
 	// Note, cannot use zero value for MinLines.  This will be changed to a
 	// default value, and cause the post mounting check that the widget was
 	// correctly instantiated to fail.
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&TextArea{Value: "A", MinLines: 3},
 		&TextArea{Value: "B", MinLines: 3, Placeholder: "..."},
 		&TextArea{Value: "C", MinLines: 3, Disabled: true},
-	})
+	)
 }
 
 func TestTextAreaEvents(t *testing.T) {
-	testingCheckFocusAndBlur(t, []Widget{
+	testingCheckFocusAndBlur(t,
 		&TextArea{},
 		&TextArea{},
 		&TextArea{},
-	})
+	)
 }
 
 func TestTextAreaProps(t *testing.T) {

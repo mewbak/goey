@@ -9,33 +9,33 @@ func TestDateInputCreate(t *testing.T) {
 	v1 := time.Date(2006, time.January, 2, 15, 4, 5, 0, time.Local)
 	v2 := time.Date(2007, time.January, 2, 15, 4, 5, 0, time.Local)
 
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&DateInput{Value: v1},
 		&DateInput{Value: v2, Disabled: true},
 		&DateInput{Value: v2},
-	})
+	)
 }
 
 func TestDateInputClose(t *testing.T) {
 	v1 := time.Date(2006, time.January, 2, 15, 4, 5, 0, time.Local)
 	v2 := time.Date(2007, time.January, 2, 15, 4, 5, 0, time.Local)
 
-	testingCloseWidgets(t, []Widget{
+	testingCloseWidgets(t,
 		&DateInput{Value: v1},
 		&DateInput{Value: v2, Disabled: true},
 		&DateInput{Value: v2},
-	})
+	)
 }
 
 func TestDateInputEvents(t *testing.T) {
 	v1 := time.Date(2006, time.January, 2, 15, 4, 5, 0, time.Local)
 	v2 := time.Date(2007, time.January, 2, 15, 4, 5, 0, time.Local)
 
-	testingCheckFocusAndBlur(t, []Widget{
+	testingCheckFocusAndBlur(t,
 		&DateInput{Value: v1},
 		&DateInput{Value: v2},
 		&DateInput{Value: v2},
-	})
+	)
 }
 
 func TestDateInputUpdateProps(t *testing.T) {

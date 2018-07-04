@@ -17,21 +17,21 @@ func (w *paddingElement) Props() Widget {
 }
 
 func TestPaddingCreate(t *testing.T) {
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&Padding{Child: &Button{Text: "A"}},
 		&Padding{Insets: DefaultInsets(), Child: &Button{Text: "B"}},
 		&Padding{Insets: UniformInsets(48 * DIP), Child: &Button{Text: "C"}},
 		&Padding{},
-	})
+	)
 }
 
 func TestPaddingClose(t *testing.T) {
-	testingCloseWidgets(t, []Widget{
+	testingCloseWidgets(t,
 		&Padding{Child: &Button{Text: "A"}},
 		&Padding{Insets: DefaultInsets(), Child: &Button{Text: "B"}},
 		&Padding{Insets: UniformInsets(48 * DIP), Child: &Button{Text: "C"}},
 		&Padding{},
-	})
+	)
 }
 
 func TestPaddingUpdateProps(t *testing.T) {

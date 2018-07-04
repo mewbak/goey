@@ -27,7 +27,7 @@ func TestHBox(t *testing.T) {
 		&Button{Text: "C"},
 	}
 
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&HBox{},
 		&HBox{Children: buttons, AlignMain: MainStart},
 		&HBox{Children: buttons, AlignMain: MainCenter},
@@ -35,7 +35,7 @@ func TestHBox(t *testing.T) {
 		&HBox{Children: buttons, AlignMain: SpaceAround},
 		&HBox{Children: buttons, AlignMain: SpaceBetween},
 		&HBox{Children: buttons, AlignMain: Homogeneous},
-	})
+	)
 }
 
 func TestHBoxClose(t *testing.T) {
@@ -45,10 +45,10 @@ func TestHBoxClose(t *testing.T) {
 		&Button{Text: "C"},
 	}
 
-	testingCloseWidgets(t, []Widget{
+	testingCloseWidgets(t,
 		&HBox{},
 		&HBox{Children: buttons, AlignMain: MainStart},
-	})
+	)
 }
 
 func TestHBoxUpdateProps(t *testing.T) {

@@ -20,21 +20,21 @@ func (w *alignElement) Props() Widget {
 }
 
 func TestAlignCreate(t *testing.T) {
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&Align{Child: &Button{Text: "A"}},
 		&Align{HAlign: AlignStart, Child: &Button{Text: "B"}},
 		&Align{HAlign: AlignEnd, Child: &Button{Text: "C"}},
 		&Align{HAlign: AlignCenter, Child: &Button{Text: "C"}},
 		&Align{HeightFactor: 2, WidthFactor: 2.5, Child: &Button{Text: "C"}},
 		&Align{},
-	})
+	)
 }
 
 func TestAlignClose(t *testing.T) {
-	testingCloseWidgets(t, []Widget{
+	testingCloseWidgets(t,
 		&Align{Child: &Button{Text: "A"}},
 		&Align{},
-	})
+	)
 }
 
 func TestAlignUpdateProps(t *testing.T) {

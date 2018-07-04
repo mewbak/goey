@@ -4,10 +4,17 @@ import (
 	"testing"
 )
 
-func TestEmpty(t *testing.T) {
-	testingRenderWidgets(t, []Widget{
+func TestEmptyCreate(t *testing.T) {
+	testingRenderWidgets(t,
 		&Empty{},
 		&Empty{},
 		&Empty{},
-	})
+	)
+}
+
+func TestEmptyClose(t *testing.T) {
+	testingCloseWidgets(t,
+		&Empty{},
+		&Empty{},
+	)
 }

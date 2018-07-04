@@ -5,16 +5,16 @@ import (
 )
 
 func TestHR(t *testing.T) {
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&HR{},
 		&HR{},
 		&HR{},
-	})
+	)
 }
 
 func TestHRClose(t *testing.T) {
-	testingCloseWidgets(t, []Widget{
+	testingCloseWidgets(t,
 		&HR{},
 		&HR{},
-	})
+	)
 }

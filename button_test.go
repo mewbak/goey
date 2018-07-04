@@ -45,27 +45,27 @@ func ExampleButton() {
 }
 
 func TestButtonCreate(t *testing.T) {
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&Button{Text: "A"},
 		&Button{Text: "D", Disabled: true},
 		&Button{Text: "E", Default: true},
-	})
+	)
 }
 
 func TestButtonClose(t *testing.T) {
-	testingCloseWidgets(t, []Widget{
+	testingCloseWidgets(t,
 		&Button{Text: "A"},
 		&Button{Text: "D", Disabled: true},
 		&Button{Text: "E", Default: true},
-	})
+	)
 }
 
 func TestButtonEvents(t *testing.T) {
-	testingCheckFocusAndBlur(t, []Widget{
+	testingCheckFocusAndBlur(t,
 		&Button{Text: "A"},
 		&Button{Text: "B"},
 		&Button{Text: "C"},
-	})
+	)
 }
 
 func TestButtonUpdateProps(t *testing.T) {

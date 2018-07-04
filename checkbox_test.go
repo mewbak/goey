@@ -5,25 +5,25 @@ import (
 )
 
 func TestCheckboxCreate(t *testing.T) {
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&Checkbox{Value: false, Text: "A"},
 		&Checkbox{Value: true, Text: "B", Disabled: true},
-	})
+	)
 }
 
 func TestCheckboxClose(t *testing.T) {
-	testingCloseWidgets(t, []Widget{
+	testingCloseWidgets(t,
 		&Checkbox{Value: false, Text: "A"},
 		&Checkbox{Value: true, Text: "B", Disabled: true},
-	})
+	)
 }
 
 func TestCheckboxEvents(t *testing.T) {
-	testingCheckFocusAndBlur(t, []Widget{
+	testingCheckFocusAndBlur(t,
 		&Checkbox{Text: "A"},
 		&Checkbox{Text: "B"},
 		&Checkbox{Text: "C"},
-	})
+	)
 }
 
 func TestCheckboxUpdateProps(t *testing.T) {

@@ -14,11 +14,11 @@ func TestImg(t *testing.T) {
 	draw.Draw(images[1], bounds, image.NewUniform(color.RGBA{255, 0, 255, 255}), image.Point{}, draw.Src)
 	draw.Draw(images[2], bounds, image.NewUniform(color.RGBA{0, 255, 255, 255}), image.Point{}, draw.Src)
 
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&Img{Image: images[0]},
 		&Img{Image: images[1]},
 		&Img{Image: images[2]},
-	})
+	)
 }
 
 func TestImgClose(t *testing.T) {
@@ -28,9 +28,9 @@ func TestImgClose(t *testing.T) {
 	draw.Draw(images[1], bounds, image.NewUniform(color.RGBA{255, 0, 255, 255}), image.Point{}, draw.Src)
 	draw.Draw(images[2], bounds, image.NewUniform(color.RGBA{0, 255, 255, 255}), image.Point{}, draw.Src)
 
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&Img{Image: images[0]},
 		&Img{Image: images[1]},
 		&Img{Image: images[2]},
-	})
+	)
 }

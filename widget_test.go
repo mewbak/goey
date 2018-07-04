@@ -11,7 +11,7 @@ type Proper interface {
 	Props() Widget
 }
 
-func testingRenderWidgets(t *testing.T, widgets []Widget) {
+func testingRenderWidgets(t *testing.T, widgets ...Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
@@ -79,7 +79,7 @@ func testingRenderWidgets(t *testing.T, widgets []Widget) {
 	}
 }
 
-func testingCloseWidgets(t *testing.T, widgets []Widget) {
+func testingCloseWidgets(t *testing.T, widgets ...Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
@@ -136,7 +136,7 @@ func testingCloseWidgets(t *testing.T, widgets []Widget) {
 	}
 }
 
-func testingCheckFocusAndBlur(t *testing.T, widgets []Widget) {
+func testingCheckFocusAndBlur(t *testing.T, widgets ...Widget) {
 	log := bytes.NewBuffer(nil)
 
 	for i := byte(0); i < 3; i++ {

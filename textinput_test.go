@@ -43,19 +43,27 @@ func ExampleTextInput() {
 }
 
 func TestTextInput(t *testing.T) {
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&TextInput{Value: "A"},
 		&TextInput{Value: "B", Placeholder: "..."},
 		&TextInput{Value: "C", Disabled: true},
-	})
+	)
+}
+
+func TestTextInputClose(t *testing.T) {
+	testingCloseWidgets(t,
+		&TextInput{Value: "A"},
+		&TextInput{Value: "B", Placeholder: "..."},
+		&TextInput{Value: "C", Disabled: true},
+	)
 }
 
 func TestTextInputEvents(t *testing.T) {
-	testingCheckFocusAndBlur(t, []Widget{
+	testingCheckFocusAndBlur(t,
 		&TextInput{},
 		&TextInput{},
 		&TextInput{},
-	})
+	)
 }
 
 func TestTextInputProps(t *testing.T) {

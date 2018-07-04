@@ -5,21 +5,21 @@ import (
 )
 
 func TestParagraph(t *testing.T) {
-	testingRenderWidgets(t, []Widget{
+	testingRenderWidgets(t,
 		&P{Text: "A", Align: JustifyLeft},
 		&P{Text: "B", Align: JustifyRight},
 		&P{Text: "C", Align: JustifyCenter},
 		&P{Text: "D", Align: JustifyFull},
-	})
+	)
 }
 
 func TestParagraphClose(t *testing.T) {
-	testingCloseWidgets(t, []Widget{
+	testingCloseWidgets(t,
 		&P{Text: "A", Align: JustifyLeft},
 		&P{Text: "B", Align: JustifyRight},
 		&P{Text: "C", Align: JustifyCenter},
 		&P{Text: "D", Align: JustifyFull},
-	})
+	)
 }
 
 func TestParagraphProps(t *testing.T) {
