@@ -9,10 +9,10 @@ type TextAlignment uint8
 
 // Allowed values for text alignment for text in paragraphs.
 const (
-	JustifyLeft   = TextAlignment(iota) // Text aligned to the left (ragged right)
-	JustifyCenter                       // Center alignment
-	JustifyRight                        // Text aligned to the right (ragged left)
-	JustifyFull                         // Text justified so that both left and right are flush
+	JustifyLeft   TextAlignment = iota // Text aligned to the left (ragged right)
+	JustifyCenter                      // Text aligned to the center
+	JustifyRight                       // Text aligned to the right (ragged left)
+	JustifyFull                        // Text justified so that both left and right are flush
 )
 
 // P describes a widget that contains significant text, which can reflow if necessary.

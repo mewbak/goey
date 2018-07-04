@@ -32,7 +32,7 @@ func nextControlID() uint32 {
 	return atomic.AddUint32(&currentControlID, 1)
 }
 
-// Control is an opaque type used as a platform-specific handle to a constrol
+// Control is an opaque type used as a platform-specific handle to a control
 // created using the platform GUI.  As an example, this will refer to a HWND
 // when targeting Windows, but a *GtkWidget when targeting GTK.
 //

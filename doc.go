@@ -8,7 +8,7 @@
 // are data-only representations of a desired GUI.  These widgets can be mounted
 // to create 'elements', which manage actual, visible GUI resources.  The
 // elements manage child elements, some number of platform-specific resources,
-// or both.
+// called 'controls', or both.
 //
 // Windows:  To get properly themed controls, a manifest is required.  Please
 // look at the source for the example applications for an example.  This file

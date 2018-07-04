@@ -18,9 +18,9 @@ var (
 // package.  Because of limited precision, the PT listed here is somewhat smaller
 // than its correct value.
 const (
-	DIP = Length(1 << 6)         // Device-independenant pixel (1/96 inch)
-	PT  = Length((96 << 6) / 72) // Point (1/72 inch)
-	PC  = Length((96 << 6) / 6)  // Pica (1/6 inch or 12 points)
+	DIP Length = (1 << 6)         // Device-independenant pixel (1/96 inch)
+	PT  Length = ((96 << 6) / 72) // Point (1/72 inch)
+	PC  Length = ((96 << 6) / 6)  // Pica (1/6 inch or 12 points)
 )
 
 // Length is a distance measured in device-independent pixels.  There are nominally

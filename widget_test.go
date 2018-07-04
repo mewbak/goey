@@ -2,10 +2,20 @@ package goey
 
 import (
 	"bytes"
+	"fmt"
 	"reflect"
 	"sync/atomic"
 	"testing"
 )
+
+func ExampleKind_String() {
+	kind := NewKind("bitbucket.org/rj/goey.Example")
+
+	fmt.Println("Kind is", kind.String())
+
+	// Output:
+	// Kind is bitbucket.org/rj/goey.Example
+}
 
 type Proper interface {
 	Props() Widget

@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	// ErrSetChildrenNotReentrant is returned if a reentrant call to
-	// the method SetChildren is called.
-	ErrSetChildrenNotReentrant = errors.New("method SetChildren is not reentrant")
+	// ErrSetChildrenNotReentrant is returned if a reentrant call to the method
+	// SetChild is called.
+	ErrSetChildrenNotReentrant = errors.New("method SetChild is not reentrant")
 
 	insideSetChildren uintptr
 )

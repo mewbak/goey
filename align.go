@@ -12,9 +12,9 @@ type Alignment int16
 
 // Common values for alignment, representing the position of child widget.
 const (
-	AlignStart  = Alignment(-32768) // Widget is aligned at the start (left or top).
-	AlignCenter = Alignment(0)      // Widget is aligned at the center.
-	AlignEnd    = Alignment(0x7fff) // Widget is aligned at the end (right or bottom).
+	AlignStart  Alignment = -32768 // Widget is aligned at the start (left or top).
+	AlignCenter Alignment = 0      // Widget is aligned at the center.
+	AlignEnd    Alignment = 0x7fff // Widget is aligned at the end (right or bottom).
 )
 
 // Align describes a widget that aligns a single child widget within its borders.
@@ -25,8 +25,9 @@ const (
 //
 // The size of the control depends on the WidthFactor and HeightFactor.  If zero,
 // the widget will try to be as large as possible or match the child, depending
-// on whether the box constraints are bound or not.  If greater than zero, then
-// the widget will try to size itself to be that much larger than the child widget.
+// on whether the box constraints are bound or not.  If a factor is greater than
+// zero, then the widget will try to size itself to be that much larger than the
+// child widget.
 type Align struct {
 	HAlign       Alignment // Horizontal alignment of child widget.
 	VAlign       Alignment // Vertical alignment of child widget.

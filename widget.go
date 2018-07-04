@@ -18,6 +18,11 @@ func NewKind(name string) Kind {
 	return Kind{name}
 }
 
+// String returns the string with the name of the widget and element kind.
+func (k Kind) String() string {
+	return k.name
+}
+
 // Widget is an interface that wraps any type describing part of a GUI.
 // A widget can be 'mounted' to create controls using the platform GUI.
 type Widget interface {
@@ -31,7 +36,7 @@ type Widget interface {
 	Mount(parent Control) (Element, error)
 }
 
-// Element is an interface that wrap any type representing a control, or group
+// Element is an interface that wraps any type representing a control, or group
 // of controls, created using the platform GUI.
 type Element interface {
 	// NativeElement provides platform dependent methods.  These should

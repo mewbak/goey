@@ -50,13 +50,14 @@ func DiffChild(parent Control, lhs Element, rhs Widget) (Element, error) {
 	return newChild, nil
 }
 
-// DiffChildren adds and removed controls in a GUI to reconcile differences
-// between the desired and current GUI state.
+// DiffChildren adds and removes elements and controls in a GUI to reconcile
+// differences between the desired and current GUI state.
 //
 // The elements contained in lhs should be considered as 'sunk' by this function,
 // and will be closed if necessary.  On the other hand, the caller will be
 // responsible for all of the returned elements.  Note that the returned slice
-// of elements may be non-nil even in the presence of an error.
+// of elements may be non-nil even in the presence of an error.  Use
+// CloseChildren if necessary to avoid leaking controls.
 func DiffChildren(parent Control, lhs []Element, rhs []Widget) ([]Element, error) {
 	// If the new tree does not contain any children, then we can trivially
 	// match the tree by deleting the actual widgets.

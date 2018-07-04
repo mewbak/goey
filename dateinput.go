@@ -9,7 +9,7 @@ var (
 )
 
 // DateInput describes a widget that users input or update a single date.
-// The model for the value is a string value.
+// The model for the value is a time.Time value.
 type DateInput struct {
 	Value    time.Time             // Values is the current string for the field
 	Disabled bool                  // Disabled is a flag indicating that the user cannot interact with this field
