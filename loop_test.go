@@ -7,14 +7,39 @@ import (
 	"testing"
 )
 
-func TestDoFailure(t *testing.T) {
-	err := Do(func() error {
-		return nil
-	})
+func ExampleRun() {
+	// This init function will be used to create a window on the GUI thread.
+	init := func() error {
+		// Create an empty window.
+		window, err := NewWindow("Test", nil)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return err
+		}
 
-	if err != ErrNotRunning {
-		t.Errorf("Unexpected success in call to Do")
+		go func() {
+			// Because of goroutine, we are now off the GUI thread.
+			// Schedule an action.
+			err := Do(func() error {
+				window.Close()
+				fmt.Println("...like tears in rain")
+				return nil
+			})
+			if err != nil {
+				fmt.Println("Error:", err)
+			}
+		}()
+
+		return nil
 	}
+
+	err := Run(init)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	// Output:
+	// ...like tears in rain
 }
 
 func ExampleDo() {
@@ -43,7 +68,7 @@ func TestRun(t *testing.T) {
 		}
 
 		go func() {
-			// Try running the main loop again, but in parallel.  We shoudl get an error.
+			// Try running the main loop again, but in parallel.  We should get an error.
 			err := Run(func() error {
 				return nil
 			})
@@ -141,5 +166,15 @@ func TestDo(t *testing.T) {
 	}
 	if c := atomic.LoadUint32(&count); c != 10 {
 		t.Errorf("Want count=10, got count==%d", c)
+	}
+}
+
+func TestDoFailure(t *testing.T) {
+	err := Do(func() error {
+		return nil
+	})
+
+	if err != ErrNotRunning {
+		t.Errorf("Unexpected success in call to Do")
 	}
 }
