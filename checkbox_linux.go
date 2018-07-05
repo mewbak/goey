@@ -3,13 +3,12 @@ package goey
 import (
 	"unsafe"
 
-	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 type mountedCheckbox struct {
-	handle *gtk.CheckButton
+	Control
 
 	onChange func(bool)
 	shClick  glib.SignalHandle
@@ -27,7 +26,7 @@ func (w *Checkbox) mount(parent Control) (Element, error) {
 	control.SetSensitive(!w.Disabled)
 
 	retval := &mountedCheckbox{
-		handle:   control,
+		Control:  Control{&control.Widget},
 		onChange: w.OnChange,
 	}
 
@@ -52,61 +51,39 @@ func checkbox_onDestroy(widget *gtk.CheckButton, mounted *mountedCheckbox) {
 	mounted.handle = nil
 }
 
-func (w *mountedCheckbox) Close() {
-	if w.handle != nil {
-		w.handle.Destroy()
-		w.handle = nil
-	}
+func (w *mountedCheckbox) checkbutton() *gtk.CheckButton {
+	return (*gtk.CheckButton)(unsafe.Pointer(w.handle))
 }
 
 func (w *mountedCheckbox) Props() Widget {
-	text, err := w.handle.GetLabel()
+	checkbutton := w.checkbutton()
+	text, err := checkbutton.GetLabel()
 	if err != nil {
 		panic("Could not get label: " + err.Error())
 	}
 
 	return &Checkbox{
-		Value:    w.handle.GetActive(),
+		Value:    checkbutton.GetActive(),
 		Text:     text,
-		Disabled: !w.handle.GetSensitive(),
+		Disabled: !checkbutton.GetSensitive(),
 		OnChange: w.onChange,
 		OnFocus:  w.onFocus.callback,
 		OnBlur:   w.onBlur.callback,
 	}
 }
 
-func (w *mountedCheckbox) Handle() *gtk.Widget {
-	return &w.handle.Widget
-}
-
-func (w *mountedCheckbox) Layout(bc Constraint) Size {
-	_, width := w.handle.GetPreferredWidth()
-	_, height := w.handle.GetPreferredHeight()
-	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
-}
-
-func (w *mountedCheckbox) MinimumSize() Size {
-	width, _ := w.handle.GetPreferredWidth()
-	height, _ := w.handle.GetPreferredHeight()
-	return Size{FromPixelsX(width), FromPixelsY(height)}
-}
-
-func (w *mountedCheckbox) SetBounds(bounds Rectangle) {
-	pixels := bounds.Pixels()
-	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
-}
-
 func (w *mountedCheckbox) updateProps(data *Checkbox) error {
+	checkbutton := w.checkbutton()
 
 	w.onChange = nil // temporarily break OnChange to prevent event
-	w.handle.SetLabel(data.Text)
-	w.handle.SetActive(data.Value)
-	w.handle.SetSensitive(!data.Disabled)
+	checkbutton.SetLabel(data.Text)
+	checkbutton.SetActive(data.Value)
+	checkbutton.SetSensitive(!data.Disabled)
 
 	w.onChange = data.OnChange
-	w.shClick = setSignalHandler(&w.handle.Widget, w.shClick, data.OnChange != nil, "clicked", checkbox_onClick, w)
-	w.onFocus.Set(&w.handle.Widget, data.OnFocus)
-	w.onBlur.Set(&w.handle.Widget, data.OnBlur)
+	w.shClick = setSignalHandler(&checkbutton.Widget, w.shClick, data.OnChange != nil, "clicked", checkbox_onClick, w)
+	w.onFocus.Set(&checkbutton.Widget, data.OnFocus)
+	w.onBlur.Set(&checkbutton.Widget, data.OnBlur)
 
 	return nil
 }

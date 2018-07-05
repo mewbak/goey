@@ -4,13 +4,12 @@ import (
 	"time"
 	"unsafe"
 
-	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 type mountedDateInput struct {
-	handle *gtk.Calendar
+	Control
 
 	onChange func(time.Time)
 	shChange glib.SignalHandle
@@ -28,7 +27,7 @@ func (w *DateInput) mount(parent Control) (Element, error) {
 	control.SelectDay(uint(w.Value.Day()))
 
 	retval := &mountedDateInput{
-		handle:   control,
+		Control:  Control{&control.Widget},
 		onChange: w.OnChange,
 	}
 
@@ -54,42 +53,19 @@ func dateinput_onDestroy(widget *gtk.Calendar, mounted *mountedDateInput) {
 	mounted.handle = nil
 }
 
-func (w *mountedDateInput) Close() {
-	if w.handle != nil {
-		w.handle.Destroy()
-		w.handle = nil
-	}
+func (w *mountedDateInput) calendar() *gtk.Calendar {
+	return (*gtk.Calendar)(unsafe.Pointer(w.handle))
 }
-
-func (w *mountedDateInput) Handle() *gtk.Widget {
-	return &w.handle.Widget
-}
-
-func (w *mountedDateInput) Layout(bc Constraint) Size {
-	_, width := w.handle.GetPreferredWidth()
-	_, height := w.handle.GetPreferredHeight()
-	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
-}
-
-func (w *mountedDateInput) MinimumSize() Size {
-	width, _ := w.handle.GetPreferredWidth()
-	height, _ := w.handle.GetPreferredHeight()
-	return Size{FromPixelsX(width), FromPixelsY(height)}
-}
-
-func (w *mountedDateInput) SetBounds(bounds Rectangle) {
-	pixels := bounds.Pixels()
-	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
-}
-
 func (w *mountedDateInput) updateProps(data *DateInput) error {
+	handle := w.calendar()
+
 	w.onChange = nil // temporarily break OnChange to prevent event
-	w.handle.SelectMonth(uint(data.Value.Month())-1, uint(data.Value.Year()))
-	w.handle.SelectDay(uint(data.Value.Day()))
+	handle.SelectMonth(uint(data.Value.Month())-1, uint(data.Value.Year()))
+	handle.SelectDay(uint(data.Value.Day()))
 	w.onChange = data.OnChange
 	//w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "value-changed", intinput_onChanged, w)
-	w.onFocus.Set(&w.handle.Widget, data.OnFocus)
-	w.onBlur.Set(&w.handle.Widget, data.OnBlur)
+	w.onFocus.Set(&handle.Widget, data.OnFocus)
+	w.onBlur.Set(&handle.Widget, data.OnBlur)
 
 	return nil
 }

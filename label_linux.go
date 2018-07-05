@@ -3,12 +3,11 @@ package goey
 import (
 	"unsafe"
 
-	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 type mountedLabel struct {
-	handle *gtk.Label
+	Control
 }
 
 func (w *Label) mount(parent Control) (Element, error) {
@@ -23,7 +22,7 @@ func (w *Label) mount(parent Control) (Element, error) {
 	handle.SetLineWrap(false)
 	handle.Show()
 
-	retval := &mountedLabel{handle}
+	retval := &mountedLabel{Control: Control{&handle.Widget}}
 	handle.Connect("destroy", label_onDestroy, retval)
 
 	return retval, nil
@@ -33,31 +32,13 @@ func label_onDestroy(widget *gtk.Label, mounted *mountedLabel) {
 	mounted.handle = nil
 }
 
-func (w *mountedLabel) Close() {
-	if w.handle != nil {
-		w.handle.Destroy()
-		w.handle = nil
-	}
-}
-
-func (w *mountedLabel) Handle() *gtk.Widget {
-	return &w.handle.Widget
-}
-
-func (w *mountedLabel) Layout(bc Constraint) Size {
-	_, width := w.handle.GetPreferredWidth()
-	_, height := w.handle.GetPreferredHeight()
-	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
-}
-
-func (w *mountedLabel) MinimumSize() Size {
-	width, _ := w.handle.GetPreferredWidth()
-	height, _ := w.handle.GetPreferredHeight()
-	return Size{FromPixelsX(width), FromPixelsY(height)}
+func (w *mountedLabel) label() *gtk.Label {
+	return (*gtk.Label)(unsafe.Pointer(w.handle))
 }
 
 func (w *mountedLabel) Props() Widget {
-	text, err := w.handle.GetText()
+	label := w.label()
+	text, err := label.GetText()
 	if err != nil {
 		panic("Could not get text, " + err.Error())
 	}
@@ -67,12 +48,8 @@ func (w *mountedLabel) Props() Widget {
 	}
 }
 
-func (w *mountedLabel) SetBounds(bounds Rectangle) {
-	pixels := bounds.Pixels()
-	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
-}
-
 func (w *mountedLabel) updateProps(data *Label) error {
-	w.handle.SetText(data.Text)
+	label := w.label()
+	label.SetText(data.Text)
 	return nil
 }

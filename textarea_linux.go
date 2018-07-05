@@ -126,10 +126,18 @@ func (w *mountedTextArea) Layout(bc Constraint) Size {
 	return bc.Constrain(Size{width, FromPixelsX(height)})
 }
 
-func (w *mountedTextArea) MinimumSize() Size {
-	width, _ := w.frame.GetPreferredWidth()
+func (w *mountedTextArea) MinIntrinsicHeight(width Length) Length {
+	if width != Inf {
+		height, _ := syscall.WidgetGetPreferredHeightForWidth(&w.frame.Widget, width.PixelsX())
+		return FromPixelsY(height)
+	}
 	height, _ := w.frame.GetPreferredHeight()
-	return Size{FromPixelsX(width), FromPixelsY(height)}
+	return FromPixelsY(height)
+}
+
+func (w *mountedTextArea) MinIntrinsicWidth(Length) Length {
+	width, _ := w.frame.GetPreferredWidth()
+	return FromPixelsX(width)
 }
 
 func (w *mountedTextArea) Props() Widget {
@@ -142,11 +150,11 @@ func (w *mountedTextArea) Props() Widget {
 		panic("could not get text, " + err.Error())
 	}
 	return &TextArea{
-		Value:      value,
-		Disabled:   !w.handle.GetSensitive(),
-		OnChange:   w.onChange,
-		OnFocus:    w.onFocus.callback,
-		OnBlur:     w.onBlur.callback,
+		Value:    value,
+		Disabled: !w.handle.GetSensitive(),
+		OnChange: w.onChange,
+		OnFocus:  w.onFocus.callback,
+		OnBlur:   w.onBlur.callback,
 	}
 }
 

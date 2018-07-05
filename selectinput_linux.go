@@ -3,13 +3,12 @@ package goey
 import (
 	"unsafe"
 
-	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 type mountedSelectInput struct {
-	handle *gtk.ComboBoxText
+	Control
 
 	onChange func(int)
 	shChange glib.SignalHandle
@@ -31,7 +30,7 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 	control.SetSensitive(!w.Disabled)
 
 	retval := &mountedSelectInput{
-		handle:   control,
+		Control:  Control{&control.Widget},
 		onChange: w.OnChange,
 	}
 
@@ -56,47 +55,25 @@ func selectinput_onDestroy(widget *gtk.ComboBoxText, mounted *mountedSelectInput
 	mounted.handle = nil
 }
 
-func (w *mountedSelectInput) Close() {
-	if w.handle != nil {
-		w.handle.Destroy()
-		w.handle = nil
-	}
-}
-
-func (w *mountedSelectInput) Handle() *gtk.Widget {
-	return &w.handle.Widget
-}
-
-func (w *mountedSelectInput) Layout(bc Constraint) Size {
-	_, width := w.handle.GetPreferredWidth()
-	_, height := w.handle.GetPreferredHeight()
-	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
-}
-
-func (w *mountedSelectInput) MinimumSize() Size {
-	width, _ := w.handle.GetPreferredWidth()
-	height, _ := w.handle.GetPreferredHeight()
-	return Size{FromPixelsX(width), FromPixelsY(height)}
-}
-
-func (w *mountedSelectInput) SetBounds(bounds Rectangle) {
-	pixels := bounds.Pixels()
-	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
+func (w *mountedSelectInput) comboboxtext() *gtk.ComboBoxText {
+	return (*gtk.ComboBoxText)(unsafe.Pointer(w.handle))
 }
 
 func (w *mountedSelectInput) updateProps(data *SelectInput) error {
+	cbt := w.comboboxtext()
+
 	w.onChange = nil // temporarily break OnChange to prevent event
 	// Todo, can we avoid rebuilding the list?
-	w.handle.RemoveAll()
+	cbt.RemoveAll()
 	for _, v := range data.Items {
-		w.handle.AppendText(v)
+		cbt.AppendText(v)
 	}
-	w.handle.SetActive(data.Value)
+	cbt.SetActive(data.Value)
 
-	w.handle.SetSensitive(!data.Disabled)
+	cbt.SetSensitive(!data.Disabled)
 	w.onChange = data.OnChange
-	w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "changed", selectinput_onChanged, w)
-	w.onFocus.Set(&w.handle.Widget, data.OnFocus)
-	w.onBlur.Set(&w.handle.Widget, data.OnBlur)
+	w.shChange = setSignalHandler(&cbt.Widget, w.shChange, data.OnChange != nil, "changed", selectinput_onChanged, w)
+	w.onFocus.Set(&cbt.Widget, data.OnFocus)
+	w.onBlur.Set(&cbt.Widget, data.OnBlur)
 	return nil
 }

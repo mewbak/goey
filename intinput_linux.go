@@ -3,13 +3,12 @@ package goey
 import (
 	"unsafe"
 
-	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 type mountedIntInput struct {
-	handle *gtk.SpinButton
+	Control
 
 	onChange func(int64)
 	shChange glib.SignalHandle
@@ -29,7 +28,7 @@ func (w *IntInput) mount(parent Control) (Element, error) {
 	control.SetPlaceholderText(w.Placeholder)
 
 	retval := &mountedIntInput{
-		handle:   control,
+		Control:  Control{&control.Widget},
 		onChange: w.OnChange,
 	}
 
@@ -55,42 +54,20 @@ func intinput_onDestroy(widget *gtk.SpinButton, mounted *mountedIntInput) {
 	mounted.handle = nil
 }
 
-func (w *mountedIntInput) Close() {
-	if w.handle != nil {
-		w.handle.Destroy()
-		w.handle = nil
-	}
-}
-
-func (w *mountedIntInput) Handle() *gtk.Widget {
-	return &w.handle.Widget
-}
-
-func (w *mountedIntInput) Layout(bc Constraint) Size {
-	_, width := w.handle.GetPreferredWidth()
-	_, height := w.handle.GetPreferredHeight()
-	return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
-}
-
-func (w *mountedIntInput) MinimumSize() Size {
-	width, _ := w.handle.GetPreferredWidth()
-	height, _ := w.handle.GetPreferredHeight()
-	return Size{FromPixelsX(width), FromPixelsY(height)}
-}
-
-func (w *mountedIntInput) SetBounds(bounds Rectangle) {
-	pixels := bounds.Pixels()
-	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
+func (w *mountedIntInput) spinbutton() *gtk.SpinButton {
+	return (*gtk.SpinButton)(unsafe.Pointer(w.handle))
 }
 
 func (w *mountedIntInput) updateProps(data *IntInput) error {
+	button := w.spinbutton()
+
 	w.onChange = nil // break OnChange to prevent event
-	w.handle.SetValue(float64(data.Value))
-	w.handle.SetPlaceholderText(data.Placeholder)
+	button.SetValue(float64(data.Value))
+	button.SetPlaceholderText(data.Placeholder)
 	w.onChange = data.OnChange
-	w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "value-changed", intinput_onChanged, w)
-	w.onFocus.Set(&w.handle.Widget, data.OnFocus)
-	w.onBlur.Set(&w.handle.Widget, data.OnBlur)
+	w.shChange = setSignalHandler(&button.Widget, w.shChange, data.OnChange != nil, "value-changed", intinput_onChanged, w)
+	w.onFocus.Set(&button.Widget, data.OnFocus)
+	w.onBlur.Set(&button.Widget, data.OnBlur)
 
 	return nil
 }

@@ -48,10 +48,18 @@ func (w *Control) Layout(bc Constraint) Size {
 	return bc.Constrain(Size{width, FromPixelsX(height)})
 }
 
-func (w *Control) MinimumSize() Size {
-	width, _ := w.handle.GetPreferredWidth()
+func (w *Control) MinIntrinsicHeight(width Length) Length {
+	if width != Inf {
+		height, _ := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
+		return FromPixelsY(height)
+	}
 	height, _ := w.handle.GetPreferredHeight()
-	return Size{FromPixelsX(width), FromPixelsY(height)}
+	return FromPixelsY(height)
+}
+
+func (w *Control) MinIntrinsicWidth(Length) Length {
+	width, _ := w.handle.GetPreferredWidth()
+	return FromPixelsX(width)
 }
 
 func (w *Control) SetBounds(bounds Rectangle) {
