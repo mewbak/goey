@@ -36,6 +36,7 @@ const (
 	MCN_SELECT = MCN_FIRST + 4
 
 	STM_SETIMAGE = 0x0172
+	STM_GETIMAGE = 0x0173
 )
 
 type NMSELCHANGE struct {

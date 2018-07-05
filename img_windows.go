@@ -7,7 +7,6 @@ import (
 	"unsafe"
 
 	win2 "bitbucket.org/rj/goey/syscall"
-
 	"github.com/lxn/win"
 )
 
@@ -86,6 +85,25 @@ func imageToBitmap(prop image.Image) (win.HBITMAP, []uint8, error) {
 	return hbitmap, img.Pix, nil
 }
 
+func bitmapToImage(hdc win.HDC, hbitmap win.HBITMAP) image.Image {
+	bmi := win.BITMAPINFO{}
+	bmi.BmiHeader.BiSize = uint32(unsafe.Sizeof(bmi))
+	win.GetDIBits(hdc, hbitmap, 0, 0, nil, &bmi, 0)
+	if bmi.BmiHeader.BiPlanes == 1 && bmi.BmiHeader.BiBitCount == 32 && bmi.BmiHeader.BiCompression == 3 /*BI_BITFIELDS*/ {
+		// Get the pixel data
+		buffer := make([]byte, bmi.BmiHeader.BiSizeImage)
+		win.GetDIBits(hdc, hbitmap, 0, uint32(bmi.BmiHeader.BiHeight), &buffer[0], &bmi, 0)
+
+		// Need to convert BGR to RGB
+		for i := 0; i < len(buffer); i += 4 {
+			buffer[i+0], buffer[i+2] = buffer[i+2], buffer[i+0]
+		}
+		return &image.RGBA{buffer, int(bmi.BmiHeader.BiWidth * 4), image.Rect(0, 0, int(bmi.BmiHeader.BiWidth), int(bmi.BmiHeader.BiHeight))}
+	}
+
+	return nil
+}
+
 func (w *Img) mount(parent Control) (Element, error) {
 	// Create the bitmap
 	hbitmap, buffer, err := imageToBitmap(w.Image)
@@ -122,6 +140,27 @@ type mountedImg struct {
 	imageData []uint8
 	width     Length
 	height    Length
+}
+
+func (w *mountedImg) Props() Widget {
+	// Need to recreate the image from the HBITMAP
+	hbitmap := win.HBITMAP(win.SendMessage(w.hWnd, win2.STM_GETIMAGE, 0 /*IMAGE_BITMAP*/, 0))
+	if hbitmap == 0 {
+		return &Img{
+			Width:  w.width,
+			Height: w.height,
+		}
+	}
+
+	hdc := win.GetDC(w.hWnd)
+	img := bitmapToImage(hdc, hbitmap)
+	win.ReleaseDC(w.hWnd, hdc)
+
+	return &Img{
+		Image:  img,
+		Width:  w.width,
+		Height: w.height,
+	}
 }
 
 func (w *mountedImg) SetBounds(bounds Rectangle) {
