@@ -31,7 +31,7 @@ func (w *Control) Handle() *gtk.Widget {
 
 func (w *Control) Layout(bc Constraint) Size {
 	if !bc.HasBoundedWidth() && !bc.HasBoundedHeight() {
-		// No need to worry about breaking the constraints.  We can take as 
+		// No need to worry about breaking the constraints.  We can take as
 		// much space as desired.
 		_, width := w.handle.GetPreferredWidth()
 		_, height := w.handle.GetPreferredHeight()
@@ -46,11 +46,11 @@ func (w *Control) Layout(bc Constraint) Size {
 		// Get the best height for this width.
 		_, height := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
 		// Height may need to be increased to meet minimum.
-		return Size{width, bc.ConstrainHeight(FromPixelsY(height)}))
+		return Size{width, bc.ConstrainHeight(FromPixelsY(height))}
 	}
 
 	// Not clear the following is the best general approach given GTK layout
-	// model.  
+	// model.
 	height1, height2 := w.handle.GetPreferredHeight()
 	if height := FromPixelsY(height2); height < bc.Max.Height {
 		_, width := w.handle.GetPreferredWidth()

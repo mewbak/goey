@@ -4,7 +4,7 @@ import (
 	"github.com/lxn/win"
 )
 
-func (w *mountedHBox) SetOrder(previous win.HWND) win.HWND {
+func (w *hboxElement) SetOrder(previous win.HWND) win.HWND {
 	for _, v := range w.children {
 		previous = v.SetOrder(previous)
 	}
