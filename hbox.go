@@ -38,7 +38,7 @@ func (w *HBox) Mount(parent Control) (Element, error) {
 		c = append(c, mountedChild)
 	}
 
-	return &mountedHBox{
+	return &hboxElement{
 		parent:       parent,
 		children:     c,
 		alignMain:    w.AlignMain,
@@ -47,11 +47,11 @@ func (w *HBox) Mount(parent Control) (Element, error) {
 	}, nil
 }
 
-func (*mountedHBox) Kind() *Kind {
+func (*hboxElement) Kind() *Kind {
 	return &hboxKind
 }
 
-type mountedHBox struct {
+type hboxElement struct {
 	parent     Control
 	children   []Element
 	alignMain  MainAxisAlign
@@ -61,12 +61,12 @@ type mountedHBox struct {
 	totalWidth   Length
 }
 
-func (w *mountedHBox) Close() {
+func (w *hboxElement) Close() {
 	CloseElements(w.children)
 	w.children = nil
 }
 
-func (w *mountedHBox) Layout(bc Constraint) Size {
+func (w *hboxElement) Layout(bc Constraint) Size {
 	if len(w.children) == 0 {
 		w.totalWidth = 0
 		return bc.Constrain(Size{})
@@ -116,7 +116,7 @@ func (w *mountedHBox) Layout(bc Constraint) Size {
 	return bc.Constrain(Size{width, minHeight})
 }
 
-func (w *mountedHBox) MinIntrinsicHeight(width Length) Length {
+func (w *hboxElement) MinIntrinsicHeight(width Length) Length {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -137,7 +137,7 @@ func (w *mountedHBox) MinIntrinsicHeight(width Length) Length {
 	return size
 }
 
-func (w *mountedHBox) MinIntrinsicWidth(height Length) Length {
+func (w *hboxElement) MinIntrinsicWidth(height Length) Length {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -178,7 +178,7 @@ func (w *mountedHBox) MinIntrinsicWidth(height Length) Length {
 	return size
 }
 
-func (w *mountedHBox) SetBounds(bounds Rectangle) {
+func (w *hboxElement) SetBounds(bounds Rectangle) {
 	if len(w.children) == 0 {
 		return
 	}
@@ -237,7 +237,7 @@ func (w *mountedHBox) SetBounds(bounds Rectangle) {
 	}
 }
 
-func (w *mountedHBox) setBoundsForChild(i int, v Element, posX, posY, posX2, posY2 Length) {
+func (w *hboxElement) setBoundsForChild(i int, v Element, posX, posY, posX2, posY2 Length) {
 	dy := w.childrenSize[i].Height
 	switch w.alignCross {
 	case CrossStart:
@@ -263,7 +263,7 @@ func (w *mountedHBox) setBoundsForChild(i int, v Element, posX, posY, posX2, pos
 	}
 }
 
-func (w *mountedHBox) updateProps(data *HBox) (err error) {
+func (w *hboxElement) updateProps(data *HBox) (err error) {
 	// Update properties
 	w.alignMain = data.AlignMain
 	w.alignCross = data.AlignCross
@@ -274,6 +274,6 @@ func (w *mountedHBox) updateProps(data *HBox) (err error) {
 	return err
 }
 
-func (w *mountedHBox) UpdateProps(data Widget) error {
+func (w *hboxElement) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*HBox))
 }

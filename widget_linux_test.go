@@ -13,7 +13,7 @@ type Handler interface {
 
 func testingSetFocus(t *testing.T, w *Window, i int) {
 	// Check the size
-	handle := w.child.(*mountedVBox).children[i].(Handler).Handle()
+	handle := w.child.(*vboxElement).children[i].(Handler).Handle()
 	if !handle.GetCanFocus() {
 		t.Errorf("Widget can not grab focus.")
 		return

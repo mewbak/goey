@@ -46,7 +46,7 @@ func (w *Window) children() []Element {
 		return nil
 	}
 
-	if vbox, ok := child.(*mountedVBox); ok {
+	if vbox, ok := child.(*vboxElement); ok {
 		return vbox.children
 	}
 

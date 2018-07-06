@@ -72,7 +72,7 @@ func (w *VBox) Mount(parent Control) (Element, error) {
 		c = append(c, mountedChild)
 	}
 
-	return &mountedVBox{
+	return &vboxElement{
 		parent:       parent,
 		children:     c,
 		alignMain:    w.AlignMain,
@@ -81,11 +81,11 @@ func (w *VBox) Mount(parent Control) (Element, error) {
 	}, nil
 }
 
-func (*mountedVBox) Kind() *Kind {
+func (*vboxElement) Kind() *Kind {
 	return &vboxKind
 }
 
-type mountedVBox struct {
+type vboxElement struct {
 	parent     Control
 	children   []Element
 	alignMain  MainAxisAlign
@@ -95,12 +95,12 @@ type mountedVBox struct {
 	totalHeight  Length
 }
 
-func (w *mountedVBox) Close() {
+func (w *vboxElement) Close() {
 	CloseElements(w.children)
 	w.children = nil
 }
 
-func (w *mountedVBox) Layout(bc Constraint) Size {
+func (w *vboxElement) Layout(bc Constraint) Size {
 	if len(w.children) == 0 {
 		w.totalHeight = 0
 		return bc.Constrain(Size{})
@@ -148,7 +148,7 @@ func (w *mountedVBox) Layout(bc Constraint) Size {
 	return bc.Constrain(Size{minWidth, height})
 }
 
-func (w *mountedVBox) MinIntrinsicWidth(height Length) Length {
+func (w *vboxElement) MinIntrinsicWidth(height Length) Length {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -169,7 +169,7 @@ func (w *mountedVBox) MinIntrinsicWidth(height Length) Length {
 	return size
 }
 
-func (w *mountedVBox) MinIntrinsicHeight(width Length) Length {
+func (w *vboxElement) MinIntrinsicHeight(width Length) Length {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -210,7 +210,7 @@ func (w *mountedVBox) MinIntrinsicHeight(width Length) Length {
 	return size
 }
 
-func (w *mountedVBox) SetBounds(bounds Rectangle) {
+func (w *vboxElement) SetBounds(bounds Rectangle) {
 	if len(w.children) == 0 {
 		return
 	}
@@ -268,7 +268,7 @@ func (w *mountedVBox) SetBounds(bounds Rectangle) {
 	}
 }
 
-func (w *mountedVBox) setBoundsForChild(i int, v Element, posX, posY, posX2, posY2 Length) {
+func (w *vboxElement) setBoundsForChild(i int, v Element, posX, posY, posX2, posY2 Length) {
 	dx := w.childrenSize[i].Width
 	switch w.alignCross {
 	case CrossStart:
@@ -294,7 +294,7 @@ func (w *mountedVBox) setBoundsForChild(i int, v Element, posX, posY, posX2, pos
 	}
 }
 
-func (w *mountedVBox) updateProps(data *VBox) (err error) {
+func (w *vboxElement) updateProps(data *VBox) (err error) {
 	// Update properties
 	w.alignMain = data.AlignMain
 	w.alignCross = data.AlignCross
@@ -305,6 +305,6 @@ func (w *mountedVBox) updateProps(data *VBox) (err error) {
 	return err
 }
 
-func (w *mountedVBox) UpdateProps(data Widget) error {
+func (w *vboxElement) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*VBox))
 }

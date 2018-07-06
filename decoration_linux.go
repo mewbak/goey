@@ -20,12 +20,13 @@ func (w *Decoration) mount(parent Control) (Element, error) {
 	retval := &decorationElement{
 		handle: control,
 		fill:   w.Fill,
+		stroke: w.Stroke,
 		insets: w.Insets,
 		radius: w.Radius,
 	}
 
-	control.Connect("destroy", decoration_onDestroy, retval)
-	control.Connect("draw", decoration_onDraw, retval)
+	control.Connect("destroy", decorationOnDestroy, retval)
+	control.Connect("draw", decorationOnDraw, retval)
 	control.Show()
 
 	child, err := DiffChild(parent, nil, w.Child)
@@ -41,6 +42,7 @@ func (w *Decoration) mount(parent Control) (Element, error) {
 type decorationElement struct {
 	handle *gtk.DrawingArea
 	fill   color.RGBA
+	stroke color.RGBA
 	insets Insets
 	radius Length
 
@@ -48,11 +50,11 @@ type decorationElement struct {
 	childSize Size
 }
 
-func decoration_onDestroy(widget *gtk.DrawingArea, mounted *decorationElement) {
+func decorationOnDestroy(widget *gtk.DrawingArea, mounted *decorationElement) {
 	mounted.handle = nil
 }
 
-func decoration_onDraw(widget *gtk.DrawingArea, cr *cairo.Context, mounted *decorationElement) bool {
+func decorationOnDraw(widget *gtk.DrawingArea, cr *cairo.Context, mounted *decorationElement) bool {
 	a := mounted.handle.GetAllocation()
 	if mounted.radius > 0 {
 		radius := float64(mounted.radius.PixelsX())
@@ -75,8 +77,18 @@ func decoration_onDraw(widget *gtk.DrawingArea, cr *cairo.Context, mounted *deco
 	} else {
 		cr.Rectangle(0, 0, float64(a.GetWidth()), float64(a.GetHeight()))
 	}
-	cr.SetSourceRGB(float64(mounted.fill.R)/0xFF, float64(mounted.fill.G)/0xFF, float64(mounted.fill.B)/0xFF)
-	cr.Fill()
+	if mounted.fill.A > 0 && mounted.stroke.A > 0 {
+		cr.SetSourceRGB(float64(mounted.fill.R)/0xFF, float64(mounted.fill.G)/0xFF, float64(mounted.fill.B)/0xFF)
+		cr.FillPreserve()
+		cr.SetSourceRGB(float64(mounted.stroke.R)/0xFF, float64(mounted.stroke.G)/0xFF, float64(mounted.stroke.B)/0xFF)
+		cr.Stroke()
+	} else if mounted.fill.A > 0 {
+		cr.SetSourceRGB(float64(mounted.fill.R)/0xFF, float64(mounted.fill.G)/0xFF, float64(mounted.fill.B)/0xFF)
+		cr.Fill()
+	} else if mounted.stroke.A > 0 {
+		cr.SetSourceRGB(float64(mounted.stroke.R)/0xFF, float64(mounted.stroke.G)/0xFF, float64(mounted.stroke.B)/0xFF)
+		cr.Stroke()
+	}
 	return false
 }
 
@@ -106,6 +118,7 @@ func (w *decorationElement) SetBounds(bounds Rectangle) {
 
 func (w *decorationElement) updateProps(data *Decoration) error {
 	w.fill = data.Fill
+	w.stroke = data.Stroke
 	w.radius = data.Radius
 
 	parent, err := w.handle.GetParent()
