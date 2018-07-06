@@ -1,7 +1,8 @@
 package goey
 
 var (
-	paragraphKind = Kind{"bitbucket.org/rj/goey.Paragraph"}
+	paragraphKind     = Kind{"bitbucket.org/rj/goey.Paragraph"}
+	paragraphMaxWidth Length
 )
 
 // TextAlignment identifies the different types of text alignment that are possible.
@@ -16,6 +17,10 @@ const (
 )
 
 // P describes a widget that contains significant text, which can reflow if necessary.
+//
+// For a short run of text, the widget will try to match the size of the text.
+// For longer runs of text, the widget will try to keep the width between 20em
+// and 80em.
 type P struct {
 	Text  string        // Text is the content of the paragraph
 	Align TextAlignment // Align is the text alignment for the paragraph
@@ -34,10 +39,54 @@ func (w *P) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedP) Kind() *Kind {
+func (*paragraphElement) Kind() *Kind {
 	return &paragraphKind
 }
 
-func (w *mountedP) UpdateProps(data Widget) error {
+func (w *paragraphElement) Layout(bc Constraint) Size {
+	if bc.HasBoundedWidth() {
+		width := bc.ConstrainWidth(w.maxReflowWidth())
+		height := w.MinIntrinsicHeight(width)
+		return Size{width, bc.ConstrainHeight(height)}
+	}
+
+	if bc.HasBoundedHeight() {
+		width := w.minReflowWidth()
+		height := w.MinIntrinsicHeight(width)
+		if height <= bc.Max.Height {
+			return Size{width, height}
+		}
+		width = w.maxReflowWidth()
+		height = w.MinIntrinsicHeight(width)
+		return Size{width, bc.ConstrainHeight(height)}
+	}
+
+	if bc.Min.Width > 0 {
+		width := bc.Min.Width
+		height := w.MinIntrinsicHeight(width)
+		return Size{width, bc.ConstrainHeight(height)}
+	}
+
+	width := bc.ConstrainWidth(w.maxReflowWidth())
+	height := w.MinIntrinsicHeight(width)
+	return Size{width, bc.ConstrainHeight(height)}
+}
+
+func (w *paragraphElement) minReflowWidth() Length {
+	if paragraphMaxWidth == 0 {
+		w.measureReflowLimits()
+	}
+	// Get a minimum width of 20em compared to a max of 80em
+	return paragraphMaxWidth / 4
+}
+
+func (w *paragraphElement) maxReflowWidth() Length {
+	if paragraphMaxWidth == 0 {
+		w.measureReflowLimits()
+	}
+	return paragraphMaxWidth
+}
+
+func (w *paragraphElement) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*P))
 }

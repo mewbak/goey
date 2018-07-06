@@ -1,15 +1,11 @@
 package goey
 
 import (
-	win2 "bitbucket.org/rj/goey/syscall"
-	"github.com/lxn/win"
 	"syscall"
 	"unsafe"
-)
 
-var (
-	paragraphMinWidth Length
-	paragraphMaxWidth Length
+	win2 "bitbucket.org/rj/goey/syscall"
+	"github.com/lxn/win"
 )
 
 func (w *P) calcStyle() uint32 {
@@ -47,32 +43,32 @@ func (w *P) mount(parent Control) (Element, error) {
 		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
 	}
 
-	retval := &mountedP{Control: Control{hwnd}, text: text}
+	retval := &paragraphElement{Control: Control{hwnd}, text: text}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
-type mountedP struct {
+type paragraphElement struct {
 	Control
 	text []uint16
 }
 
-func paragraphMeasureReflowLimits(hwnd win.HWND) {
+func (w *paragraphElement) measureReflowLimits() {
+	hwnd := w.hWnd
 	hdc := win.GetDC(hwnd)
 	if hMessageFont != 0 {
 		win.SelectObject(hdc, win.HGDIOBJ(hMessageFont))
 	}
 	// Calculate the width of a single 'm' (find the em width)
 	rect := win.RECT{0, 0, 0x7fffffff, 0x7fffffff}
-	caption := [...]uint16{'m'}
-	win.DrawTextEx(hdc, &caption[0], 1, &rect, win.DT_CALCRECT, nil)
+	caption := [10]uint16{'m', 'm', 'm', 'm', 'm', 'm', 'm', 'm', 'm', 'm'}
+	win.DrawTextEx(hdc, &caption[0], 10, &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(hwnd, hdc)
-	paragraphMinWidth = FromPixelsX(int(rect.Right)) * 20
-	paragraphMaxWidth = FromPixelsX(int(rect.Right)) * 80
+	paragraphMaxWidth = FromPixelsX(int(rect.Right)) * 8
 }
 
-func (w *mountedP) Props() Widget {
+func (w *paragraphElement) Props() Widget {
 	align := JustifyLeft
 	if style := win.GetWindowLong(w.hWnd, win.GWL_STYLE); style&win.SS_CENTER == win.SS_CENTER {
 		align = JustifyCenter
@@ -88,45 +84,9 @@ func (w *mountedP) Props() Widget {
 	}
 }
 
-func (w *mountedP) Layout(bc Constraint) Size {
-	if bc.HasBoundedWidth() {
-		if paragraphMaxWidth == 0 {
-			paragraphMeasureReflowLimits(w.hWnd)
-		}
-		width := bc.ConstrainWidth(paragraphMaxWidth)
-		height := w.MinIntrinsicHeight(width)
-		return Size{width, bc.ConstrainHeight(height)}
-	}
-
-	if bc.HasBoundedHeight() {
-		if paragraphMaxWidth == 0 {
-			paragraphMeasureReflowLimits(w.hWnd)
-		}
-		height := w.MinIntrinsicHeight(paragraphMinWidth)
-		if height <= bc.Max.Height {
-			return Size{paragraphMinWidth, height}
-		}
-		height = w.MinIntrinsicHeight(paragraphMaxWidth)
-		return Size{paragraphMaxWidth, bc.ConstrainHeight(height)}
-	}
-
-	if bc.Min.Width > 0 {
-		width := bc.Min.Width
-		height := w.MinIntrinsicHeight(width)
-		return Size{width, bc.ConstrainHeight(height)}
-	}
-
-	width := bc.ConstrainWidth(paragraphMaxWidth)
-	height := w.MinIntrinsicHeight(width)
-	return Size{width, bc.ConstrainHeight(height)}
-}
-
-func (w *mountedP) MinIntrinsicHeight(width Length) Length {
+func (w *paragraphElement) MinIntrinsicHeight(width Length) Length {
 	if width == Inf {
-		if paragraphMaxWidth == 0 {
-			paragraphMeasureReflowLimits(w.hWnd)
-		}
-		width = paragraphMaxWidth
+		width = w.maxReflowWidth()
 	}
 
 	hdc := win.GetDC(w.hWnd)
@@ -140,21 +100,16 @@ func (w *mountedP) MinIntrinsicHeight(width Length) Length {
 	return FromPixelsY(int(rect.Bottom))
 }
 
-func (w *mountedP) MinIntrinsicWidth(height Length) Length {
+func (w *paragraphElement) MinIntrinsicWidth(height Length) Length {
 	if height != Inf {
 		panic("not implemented")
 	}
 
-	if paragraphMaxWidth == 0 {
-		paragraphMeasureReflowLimits(w.hWnd)
-	}
-
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	width, _ := w.CalcRect(w.text)
-	return min(FromPixelsX(int(width)), paragraphMinWidth)
+	return min(FromPixelsX(int(width)), w.minReflowWidth())
 }
 
-func (w *mountedP) SetBounds(bounds Rectangle) {
+func (w *paragraphElement) SetBounds(bounds Rectangle) {
 	w.Control.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't
@@ -162,7 +117,7 @@ func (w *mountedP) SetBounds(bounds Rectangle) {
 	win.InvalidateRect(w.hWnd, nil, true)
 }
 
-func (w *mountedP) updateProps(data *P) error {
+func (w *paragraphElement) updateProps(data *P) error {
 	text, err := syscall.UTF16FromString(data.Text)
 	if err != nil {
 		return err

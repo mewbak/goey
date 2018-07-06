@@ -3,10 +3,11 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type mountedP struct {
+type paragraphElement struct {
 	Control
 }
 
@@ -35,22 +36,22 @@ func (w *P) mount(parent Control) (Element, error) {
 	handle.SetJustify(w.Align.native())
 	handle.SetLineWrap(true)
 
-	retval := &mountedP{Control{&handle.Widget}}
-	handle.Connect("destroy", paragraph_onDestroy, retval)
+	retval := &paragraphElement{Control{&handle.Widget}}
+	handle.Connect("destroy", paragraphOnDestroy, retval)
 	handle.Show()
 
 	return retval, nil
 }
 
-func paragraph_onDestroy(widget *gtk.Label, mounted *mountedP) {
+func paragraphOnDestroy(widget *gtk.Label, mounted *paragraphElement) {
 	mounted.handle = nil
 }
 
-func (w *mountedP) label() *gtk.Label {
+func (w *paragraphElement) label() *gtk.Label {
 	return (*gtk.Label)(unsafe.Pointer(w.handle))
 }
 
-func (w *mountedP) Props() Widget {
+func (w *paragraphElement) Props() Widget {
 	label := w.label()
 	text, err := label.GetText()
 	if err != nil {
@@ -73,7 +74,40 @@ func (w *mountedP) Props() Widget {
 	}
 }
 
-func (w *mountedP) updateProps(data *P) error {
+func (w *paragraphElement) measureReflowLimits() {
+	label := w.label()
+
+	text, err := label.GetText()
+	if err != nil {
+		panic(err)
+	}
+
+	label.SetText("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
+	width, _ := label.GetPreferredWidth()
+	label.SetText(text)
+
+	paragraphMaxWidth = FromPixelsX(width)
+}
+
+func (w *paragraphElement) MinIntrinsicHeight(width Length) Length {
+	if width == Inf {
+		width = w.maxReflowWidth()
+	}
+
+	height, _ := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
+	return FromPixelsY(height)
+}
+
+func (w *paragraphElement) MinIntrinsicWidth(height Length) Length {
+	if height != Inf {
+		panic("not implemented")
+	}
+
+	width, _ := w.label().GetPreferredWidth()
+	return min(FromPixelsX(int(width)), w.minReflowWidth())
+}
+
+func (w *paragraphElement) updateProps(data *P) error {
 	label := w.label()
 	label.SetText(data.Text)
 	label.SetJustify(data.Align.native())
