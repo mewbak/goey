@@ -10,8 +10,9 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type mountedImg struct {
-	handle    *gtk.Image
+type imgElement struct {
+	Control
+
 	imageData []uint8
 	width     Length
 	height    Length
@@ -35,6 +36,22 @@ func imageToPixbuf(prop image.Image) (*gdk.Pixbuf, []uint8, error) {
 	return pixbuf, img.Pix, nil
 }
 
+func pixbufToImage(pixbuf *gdk.Pixbuf) image.Image {
+	cs := pixbuf.GetColorspace()
+	bps := pixbuf.GetBitsPerSample()
+	alpha := pixbuf.GetHasAlpha()
+
+	if cs == gdk.COLORSPACE_RGB && alpha && bps == 8 {
+		return &image.RGBA{
+			pixbuf.GetPixels(),
+			pixbuf.GetRowstride(),
+			image.Rect(0, 0, pixbuf.GetWidth(), pixbuf.GetHeight()),
+		}
+	}
+
+	return nil
+}
+
 func (w *Img) mount(parent Control) (Element, error) {
 	// Create the bitmap
 	pixbuf, buffer, err := imageToPixbuf(w.Image)
@@ -49,33 +66,29 @@ func (w *Img) mount(parent Control) (Element, error) {
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(handle)
 	handle.Show()
 
-	retval := &mountedImg{handle, buffer, w.Width, w.Height}
-	handle.Connect("destroy", img_onDestroy, retval)
+	retval := &imgElement{Control{&handle.Widget}, buffer, w.Width, w.Height}
+	handle.Connect("destroy", imgOnDestroy, retval)
 
 	return retval, nil
 }
 
-func img_onDestroy(widget *gtk.Label, mounted *mountedImg) {
+func imgOnDestroy(widget *gtk.Label, mounted *imgElement) {
 	mounted.handle = nil
 }
 
-func (w *mountedImg) Close() {
-	if w.handle != nil {
-		w.handle.Destroy()
-		w.handle = nil
+func (w *imgElement) image() *gtk.Image {
+	return (*gtk.Image)(unsafe.Pointer(w.handle))
+}
+
+func (w *imgElement) Props() Widget {
+	return &Img{
+		Image:  pixbufToImage(w.image().GetPixbuf()),
+		Width:  w.width,
+		Height: w.height,
 	}
 }
 
-func (w *mountedImg) Handle() *gtk.Widget {
-	return &w.handle.Widget
-}
-
-func (w *mountedImg) SetBounds(bounds Rectangle) {
-	pixels := bounds.Pixels()
-	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
-}
-
-func (w *mountedImg) updateProps(data *Img) error {
+func (w *imgElement) updateProps(data *Img) error {
 	w.width, w.height = data.Width, data.Height
 
 	// Create the bitmap
@@ -84,7 +97,7 @@ func (w *mountedImg) updateProps(data *Img) error {
 		return err
 	}
 	w.imageData = buffer
-	w.handle.SetFromPixbuf(pixbuf)
+	w.image().SetFromPixbuf(pixbuf)
 
 	return nil
 }

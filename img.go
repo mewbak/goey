@@ -43,23 +43,23 @@ func (w *Img) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedImg) Kind() *Kind {
+func (*imgElement) Kind() *Kind {
 	return &imgKind
 }
 
-func (w *mountedImg) Layout(bc Constraint) Size {
+func (w *imgElement) Layout(bc Constraint) Size {
 	// Determine ideal width.
 	return bc.ConstrainAndAttemptToPreserveAspectRatio(Size{w.width, w.height})
 }
 
-func (w *mountedImg) MinIntrinsicHeight(width Length) Length {
+func (w *imgElement) MinIntrinsicHeight(width Length) Length {
 	if width < w.width {
 		return w.height * width / w.width
 	}
 	return w.height
 }
 
-func (w *mountedImg) MinIntrinsicWidth(height Length) Length {
+func (w *imgElement) MinIntrinsicWidth(height Length) Length {
 	if height < w.height {
 		return w.width * height / w.height
 	}
@@ -83,7 +83,7 @@ func (w *Img) UpdateDimensions() {
 	}
 }
 
-func (w *mountedImg) UpdateProps(data Widget) error {
+func (w *imgElement) UpdateProps(data Widget) error {
 	// Forward to the platform-dependant code
 	return w.updateProps(data.(*Img))
 }

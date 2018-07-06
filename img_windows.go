@@ -124,7 +124,7 @@ func (w *Img) mount(parent Control) (Element, error) {
 	}
 	win.SendMessage(hwnd, win2.STM_SETIMAGE, win.IMAGE_BITMAP, uintptr(hbitmap))
 
-	retval := &mountedImg{
+	retval := &imgElement{
 		Control:   Control{hwnd},
 		imageData: buffer,
 		width:     w.Width,
@@ -135,14 +135,14 @@ func (w *Img) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-type mountedImg struct {
+type imgElement struct {
 	Control
 	imageData []uint8
 	width     Length
 	height    Length
 }
 
-func (w *mountedImg) Props() Widget {
+func (w *imgElement) Props() Widget {
 	// Need to recreate the image from the HBITMAP
 	hbitmap := win.HBITMAP(win.SendMessage(w.hWnd, win2.STM_GETIMAGE, 0 /*IMAGE_BITMAP*/, 0))
 	if hbitmap == 0 {
@@ -163,7 +163,7 @@ func (w *mountedImg) Props() Widget {
 	}
 }
 
-func (w *mountedImg) SetBounds(bounds Rectangle) {
+func (w *imgElement) SetBounds(bounds Rectangle) {
 	w.Control.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't
@@ -171,7 +171,7 @@ func (w *mountedImg) SetBounds(bounds Rectangle) {
 	win.InvalidateRect(w.hWnd, nil, true)
 }
 
-func (w *mountedImg) updateProps(data *Img) error {
+func (w *imgElement) updateProps(data *Img) error {
 	w.width, w.height = data.Width, data.Height
 
 	// Create the bitmap
