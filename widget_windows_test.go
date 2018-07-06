@@ -1,8 +1,9 @@
 package goey
 
 import (
-	"github.com/lxn/win"
 	"testing"
+
+	"github.com/lxn/win"
 )
 
 func TestCalculateHGap(t *testing.T) {
@@ -11,9 +12,9 @@ func TestCalculateHGap(t *testing.T) {
 		expected Length
 	}{
 		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11 * DIP}, // Space between unrelated controls
-		{(*mountedTextInput)(nil), (*mountedButton)(nil), 11 * DIP},    // Space between unrelated controls
-		{(*mountedButton)(nil), (*mountedTextInput)(nil), 11 * DIP},    // Space between unrelated controls
-		{(*mountedButton)(nil), (*mountedButton)(nil), 7 * DIP},        // Space between adjacent buttons
+		{(*mountedTextInput)(nil), (*buttonElement)(nil), 11 * DIP},    // Space between unrelated controls
+		{(*buttonElement)(nil), (*mountedTextInput)(nil), 11 * DIP},    // Space between unrelated controls
+		{(*buttonElement)(nil), (*buttonElement)(nil), 7 * DIP},        // Space between adjacent buttons
 	}
 
 	for _, v := range cases {
@@ -35,7 +36,7 @@ func TestCalculateVGap(t *testing.T) {
 		{(*mountedLabel)(nil), (*mountedTextInput)(nil), 5 * DIP}, // Space between text labels and associated fields
 		//{(*mountedLabel)(nil), (*mountedSelectInput)(nil), 5 * DIP},      // Space between text labels and associated fields
 		{(*mountedLabel)(nil), (*mountedTextArea)(nil), 5 * DIP}, // Space between text labels and associated fields
-		//{(*mountedCheckbox)(nil), (*mountedCheckbox)(nil), 7 * DIP},      // Space between related controls
+		//{(*checkboxElement)(nil), (*checkboxElement)(nil), 7 * DIP},      // Space between related controls
 		//{(*mountedP)(nil), (*mountedP)(nil), 11 * DIP},                   // Space between paragraphs of text
 	}
 

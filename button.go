@@ -27,11 +27,11 @@ func (w *Button) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedButton) Kind() *Kind {
+func (*buttonElement) Kind() *Kind {
 	return &buttonKind
 }
 
-func (w *mountedButton) UpdateProps(data Widget) error {
+func (w *buttonElement) UpdateProps(data Widget) error {
 	// Forward to the platform-dependant code
 	return w.updateProps(data.(*Button))
 }

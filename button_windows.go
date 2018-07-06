@@ -55,7 +55,7 @@ func (w *Button) mount(parent Control) (Element, error) {
 	// Subclass the window procedure
 	subclassWindowProcedure(hwnd, &button.oldWindowProc, syscall.NewCallback(buttonWindowProc))
 
-	retval := &mountedButton{
+	retval := &buttonElement{
 		Control: Control{hwnd},
 		text:    text,
 		onClick: w.OnClick,
@@ -67,7 +67,7 @@ func (w *Button) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-type mountedButton struct {
+type buttonElement struct {
 	Control
 	text []uint16
 
@@ -76,7 +76,7 @@ type mountedButton struct {
 	onBlur  func()
 }
 
-func (w *mountedButton) Props() Widget {
+func (w *buttonElement) Props() Widget {
 	return &Button{
 		Text:     w.Control.Text(),
 		Disabled: !win.IsWindowEnabled(w.hWnd),
@@ -87,18 +87,18 @@ func (w *mountedButton) Props() Widget {
 	}
 }
 
-func (w *mountedButton) Layout(bc Constraint) Size {
+func (w *buttonElement) Layout(bc Constraint) Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedButton) MinIntrinsicHeight(Length) Length {
+func (w *buttonElement) MinIntrinsicHeight(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23 * DIP
 }
 
-func (w *mountedButton) MinIntrinsicWidth(Length) Length {
+func (w *buttonElement) MinIntrinsicWidth(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	width, _ := w.CalcRect(w.text)
 	return max(
@@ -107,7 +107,7 @@ func (w *mountedButton) MinIntrinsicWidth(Length) Length {
 	)
 }
 
-func (w *mountedButton) updateProps(data *Button) error {
+func (w *buttonElement) updateProps(data *Button) error {
 	text, err := syscall.UTF16FromString(data.Text)
 	if err != nil {
 		return err
@@ -158,13 +158,13 @@ func buttonWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 	return win.CallWindowProc(button.oldWindowProc, hwnd, msg, wParam, lParam)
 }
 
-func buttonGetPtr(hwnd win.HWND) *mountedButton {
+func buttonGetPtr(hwnd win.HWND) *buttonElement {
 	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
 	if gwl == 0 {
 		panic("Internal error.")
 	}
 
-	ptr := (*mountedButton)(unsafe.Pointer(gwl))
+	ptr := (*buttonElement)(unsafe.Pointer(gwl))
 	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}

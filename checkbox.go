@@ -28,10 +28,10 @@ func (w *Checkbox) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedCheckbox) Kind() *Kind {
+func (*checkboxElement) Kind() *Kind {
 	return &checkboxKind
 }
 
-func (w *mountedCheckbox) UpdateProps(data Widget) error {
+func (w *checkboxElement) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*Checkbox))
 }

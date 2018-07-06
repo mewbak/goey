@@ -73,8 +73,8 @@ func calculateHGap(previous Element, current Element) Length {
 	// inferred from the order and type of controls.
 	//
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	if _, ok := previous.(*mountedButton); ok {
-		if _, ok := current.(*mountedButton); ok {
+	if _, ok := previous.(*buttonElement); ok {
+		if _, ok := current.(*buttonElement); ok {
 			// Any pair of successive buttons will be assumed to be in a
 			// related group.
 			return 7 * DIP
@@ -98,8 +98,8 @@ func calculateVGap(previous Element, current Element) Length {
 		// be 'associated'.
 		return 5 * DIP
 	}
-	if _, ok := previous.(*mountedCheckbox); ok {
-		if _, ok := current.(*mountedCheckbox); ok {
+	if _, ok := previous.(*checkboxElement); ok {
+		if _, ok := current.(*checkboxElement); ok {
 			// Any pair of successive checkboxes will be assumed to be in a
 			// related group.
 			return 7 * DIP

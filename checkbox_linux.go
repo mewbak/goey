@@ -7,7 +7,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type mountedCheckbox struct {
+type checkboxElement struct {
 	Control
 
 	onChange func(bool)
@@ -25,13 +25,13 @@ func (w *Checkbox) mount(parent Control) (Element, error) {
 	control.SetActive(w.Value)
 	control.SetSensitive(!w.Disabled)
 
-	retval := &mountedCheckbox{
+	retval := &checkboxElement{
 		Control:  Control{&control.Widget},
 		onChange: w.OnChange,
 	}
 
-	control.Connect("destroy", checkbox_onDestroy, retval)
-	retval.shClick = setSignalHandler(&control.Widget, 0, w.OnChange != nil, "clicked", checkbox_onClick, retval)
+	control.Connect("destroy", checkboxOnDestroy, retval)
+	retval.shClick = setSignalHandler(&control.Widget, 0, w.OnChange != nil, "clicked", checkboxOnClick, retval)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
 	control.Show()
@@ -39,7 +39,7 @@ func (w *Checkbox) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func checkbox_onClick(widget *gtk.CheckButton, mounted *mountedCheckbox) {
+func checkboxOnClick(widget *gtk.CheckButton, mounted *checkboxElement) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -47,15 +47,15 @@ func checkbox_onClick(widget *gtk.CheckButton, mounted *mountedCheckbox) {
 	mounted.onChange(widget.GetActive())
 }
 
-func checkbox_onDestroy(widget *gtk.CheckButton, mounted *mountedCheckbox) {
+func checkboxOnDestroy(widget *gtk.CheckButton, mounted *checkboxElement) {
 	mounted.handle = nil
 }
 
-func (w *mountedCheckbox) checkbutton() *gtk.CheckButton {
+func (w *checkboxElement) checkbutton() *gtk.CheckButton {
 	return (*gtk.CheckButton)(unsafe.Pointer(w.handle))
 }
 
-func (w *mountedCheckbox) Props() Widget {
+func (w *checkboxElement) Props() Widget {
 	checkbutton := w.checkbutton()
 	text, err := checkbutton.GetLabel()
 	if err != nil {
@@ -72,7 +72,7 @@ func (w *mountedCheckbox) Props() Widget {
 	}
 }
 
-func (w *mountedCheckbox) updateProps(data *Checkbox) error {
+func (w *checkboxElement) updateProps(data *Checkbox) error {
 	checkbutton := w.checkbutton()
 
 	w.onChange = nil // temporarily break OnChange to prevent event
@@ -81,7 +81,7 @@ func (w *mountedCheckbox) updateProps(data *Checkbox) error {
 	checkbutton.SetSensitive(!data.Disabled)
 
 	w.onChange = data.OnChange
-	w.shClick = setSignalHandler(&checkbutton.Widget, w.shClick, data.OnChange != nil, "clicked", checkbox_onClick, w)
+	w.shClick = setSignalHandler(&checkbutton.Widget, w.shClick, data.OnChange != nil, "clicked", checkboxOnClick, w)
 	w.onFocus.Set(&checkbutton.Widget, data.OnFocus)
 	w.onBlur.Set(&checkbutton.Widget, data.OnBlur)
 

@@ -7,7 +7,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type mountedButton struct {
+type buttonElement struct {
 	Control
 
 	onClick clickSlot
@@ -29,9 +29,9 @@ func (w *Button) mount(parent Control) (Element, error) {
 		control.GrabDefault()
 	}
 
-	retval := &mountedButton{Control: Control{&control.Widget}}
+	retval := &buttonElement{Control: Control{&control.Widget}}
 
-	control.Connect("destroy", button_onDestroy, retval)
+	control.Connect("destroy", buttonOnDestroy, retval)
 	retval.onClick.Set(&control.Widget, w.OnClick)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
@@ -40,15 +40,15 @@ func (w *Button) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func button_onDestroy(widget *gtk.Button, mounted *mountedButton) {
+func buttonOnDestroy(widget *gtk.Button, mounted *buttonElement) {
 	mounted.handle = nil
 }
 
-func (w *mountedButton) button() *gtk.Button {
+func (w *buttonElement) button() *gtk.Button {
 	return (*gtk.Button)(unsafe.Pointer(w.handle))
 }
 
-func (w *mountedButton) Props() Widget {
+func (w *buttonElement) Props() Widget {
 	button := w.button()
 	text, err := button.GetLabel()
 	if err != nil {
@@ -65,7 +65,7 @@ func (w *mountedButton) Props() Widget {
 	}
 }
 
-func (w *mountedButton) updateProps(data *Button) error {
+func (w *buttonElement) updateProps(data *Button) error {
 	button := w.button()
 	button.SetLabel(data.Text)
 	button.SetSensitive(!data.Disabled)

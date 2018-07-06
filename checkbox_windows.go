@@ -1,9 +1,10 @@
 package goey
 
 import (
-	"github.com/lxn/win"
 	"syscall"
 	"unsafe"
+
+	"github.com/lxn/win"
 )
 
 func (w *Checkbox) mount(parent Control) (Element, error) {
@@ -39,7 +40,7 @@ func (w *Checkbox) mount(parent Control) (Element, error) {
 	// Subclass the window procedure
 	subclassWindowProcedure(hwnd, &button.oldWindowProc, syscall.NewCallback(checkboxWindowProc))
 
-	retval := &mountedCheckbox{
+	retval := &checkboxElement{
 		Control:  Control{hwnd},
 		text:     text,
 		onChange: w.OnChange,
@@ -51,7 +52,7 @@ func (w *Checkbox) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-type mountedCheckbox struct {
+type checkboxElement struct {
 	Control
 	text     []uint16
 	onChange func(value bool)
@@ -59,7 +60,7 @@ type mountedCheckbox struct {
 	onBlur   func()
 }
 
-func (w *mountedCheckbox) Props() Widget {
+func (w *checkboxElement) Props() Widget {
 	return &Checkbox{
 		Text:     w.Control.Text(),
 		Value:    win.SendMessage(w.hWnd, win.BM_GETCHECK, 0, 0) == win.BST_CHECKED,
@@ -70,30 +71,30 @@ func (w *mountedCheckbox) Props() Widget {
 	}
 }
 
-func (w *mountedCheckbox) preferredWidth() Length {
+func (w *checkboxElement) preferredWidth() Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	width, _ := w.CalcRect(w.text)
 	return FromPixelsX(int(width) + 17)
 }
 
-func (w *mountedCheckbox) Layout(bc Constraint) Size {
+func (w *checkboxElement) Layout(bc Constraint) Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedCheckbox) MinIntrinsicHeight(Length) Length {
+func (w *checkboxElement) MinIntrinsicHeight(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 17 * DIP
 }
 
-func (w *mountedCheckbox) MinIntrinsicWidth(Length) Length {
+func (w *checkboxElement) MinIntrinsicWidth(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	width, _ := w.CalcRect(w.text)
 	return FromPixelsX(int(width) + 17)
 }
 
-func (w *mountedCheckbox) updateProps(data *Checkbox) error {
+func (w *checkboxElement) updateProps(data *Checkbox) error {
 	w.SetText(data.Text)
 	w.SetDisabled(data.Disabled)
 	if data.Value {
@@ -151,13 +152,13 @@ func checkboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 	return win.CallWindowProc(button.oldWindowProc, hwnd, msg, wParam, lParam)
 }
 
-func checkboxGetPtr(hwnd win.HWND) *mountedCheckbox {
+func checkboxGetPtr(hwnd win.HWND) *checkboxElement {
 	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
 	if gwl == 0 {
 		panic("Internal error.")
 	}
 
-	ptr := (*mountedCheckbox)(unsafe.Pointer(gwl))
+	ptr := (*checkboxElement)(unsafe.Pointer(gwl))
 	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}
