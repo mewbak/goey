@@ -30,14 +30,14 @@ func TestCalculateVGap(t *testing.T) {
 		w1, w2   Element
 		expected Length
 	}{
-		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11 * DIP}, // Space between unrelated controls
-		//{(*mountedTextInput)(nil), (*paragraphElement)(nil), 11 * DIP},           // Space between unrelated controls
-		//{(*mountedTextInput)(nil), (*mountedSelectInput)(nil), 11 * DIP}, // Space between unrelated controls
-		{(*mountedLabel)(nil), (*mountedTextInput)(nil), 5 * DIP}, // Space between text labels and associated fields
-		//{(*mountedLabel)(nil), (*mountedSelectInput)(nil), 5 * DIP},      // Space between text labels and associated fields
-		{(*mountedLabel)(nil), (*mountedTextArea)(nil), 5 * DIP}, // Space between text labels and associated fields
-		//{(*checkboxElement)(nil), (*checkboxElement)(nil), 7 * DIP},      // Space between related controls
-		//{(*paragraphElement)(nil), (*paragraphElement)(nil), 11 * DIP},                   // Space between paragraphs of text
+		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11 * DIP},   // Space between unrelated controls
+		{(*mountedTextInput)(nil), (*paragraphElement)(nil), 11 * DIP},   // Space between unrelated controls
+		{(*mountedTextInput)(nil), (*mountedSelectInput)(nil), 11 * DIP}, // Space between unrelated controls
+		{(*mountedLabel)(nil), (*mountedTextInput)(nil), 5 * DIP},        // Space between text labels and associated fields
+		{(*mountedLabel)(nil), (*mountedSelectInput)(nil), 5 * DIP},      // Space between text labels and associated fields
+		{(*mountedLabel)(nil), (*mountedTextArea)(nil), 5 * DIP},         // Space between text labels and associated fields
+		{(*checkboxElement)(nil), (*checkboxElement)(nil), 7 * DIP},      // Space between related controls
+		{(*paragraphElement)(nil), (*paragraphElement)(nil), 11 * DIP},   // Space between paragraphs of text
 	}
 
 	for _, v := range cases {
