@@ -68,6 +68,44 @@ func TestVBoxUpdateProps(t *testing.T) {
 }
 
 func TestVBoxLayout(t *testing.T) {
+	children := []Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}
+
+	cases := []struct {
+		children    []Element
+		alignMain   MainAxisAlign
+		alignCross  CrossAxisAlign
+		constraints Constraint
+		size        Size
+		bounds      []Rectangle
+	}{
+		{nil, MainStart, Stretch, TightWidth(40 * DIP), Size{40 * DIP, 0}, []Rectangle{}},
+		{children, MainStart, Stretch, TightWidth(40 * DIP), Size{40 * DIP, 50 * DIP}, []Rectangle{
+			Rect(0, 0, 40*DIP, 26*DIP), Rect(0, 37*DIP, 40*DIP, 50*DIP),
+		}},
+	}
+
+	for i, v := range cases {
+		in := vboxElement{
+			children:     v.children,
+			alignMain:    v.alignMain,
+			alignCross:   v.alignCross,
+			childrenSize: make([]Size, len(v.children)),
+		}
+
+		size := in.Layout(v.constraints)
+		if size != v.size {
+			t.Errorf("Incorrect size on case %d, got %s, want %s", i, size, v.size)
+		}
+		in.SetBounds(Rectangle{Point{}, Point{size.Width, size.Height}})
+		for j, u := range v.bounds {
+			if got := v.children[j].(*mockElement).Bounds; got != u {
+				t.Errorf("Incorrect bounds case %d-%d, got %s, want %s", i, j, got, u)
+			}
+		}
+	}
+}
+
+func TestVBoxMinIntrinsic(t *testing.T) {
 	cases := []struct {
 		children           []Element
 		alignMain          MainAxisAlign
@@ -76,14 +114,14 @@ func TestVBoxLayout(t *testing.T) {
 		minIntrinsicWidth  Length
 	}{
 		{nil, MainStart, Stretch, 0, 0},
-		{[]Element{&mockElement{13 * DIP, 13 * DIP}, &mockElement{13 * DIP, 13 * DIP}}, MainStart, Stretch, 37 * DIP, 13 * DIP},
-		{[]Element{&mockElement{13 * DIP, 13 * DIP}, &mockElement{15 * DIP, 13 * DIP}}, MainStart, Stretch, 37 * DIP, 15 * DIP},
-		{[]Element{&mockElement{13 * DIP, 26 * DIP}, &mockElement{11 * DIP, 13 * DIP}}, MainStart, Stretch, 50 * DIP, 13 * DIP},
-		{[]Element{&mockElement{13 * DIP, 26 * DIP}, &mockElement{11 * DIP, 13 * DIP}}, MainCenter, Stretch, 50 * DIP, 13 * DIP},
-		{[]Element{&mockElement{13 * DIP, 26 * DIP}, &mockElement{11 * DIP, 13 * DIP}}, MainEnd, Stretch, 50 * DIP, 13 * DIP},
-		{[]Element{&mockElement{13 * DIP, 26 * DIP}, &mockElement{11 * DIP, 13 * DIP}}, SpaceAround, Stretch, 72 * DIP, 13 * DIP},
-		{[]Element{&mockElement{13 * DIP, 26 * DIP}, &mockElement{11 * DIP, 13 * DIP}}, SpaceBetween, Stretch, 50 * DIP, 13 * DIP},
-		{[]Element{&mockElement{13 * DIP, 26 * DIP}, &mockElement{11 * DIP, 13 * DIP}}, Homogeneous, Stretch, (26*2 + 11) * DIP, 13 * DIP},
+		{[]Element{mock(13*DIP, 13*DIP), mock(13*DIP, 13*DIP)}, MainStart, Stretch, 37 * DIP, 13 * DIP},
+		{[]Element{mock(13*DIP, 13*DIP), mock(15*DIP, 13*DIP)}, MainStart, Stretch, 37 * DIP, 15 * DIP},
+		{[]Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, MainStart, Stretch, 50 * DIP, 13 * DIP},
+		{[]Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, MainCenter, Stretch, 50 * DIP, 13 * DIP},
+		{[]Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, MainEnd, Stretch, 50 * DIP, 13 * DIP},
+		{[]Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, SpaceAround, Stretch, 72 * DIP, 13 * DIP},
+		{[]Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, SpaceBetween, Stretch, 50 * DIP, 13 * DIP},
+		{[]Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, Homogeneous, Stretch, (26*2 + 11) * DIP, 13 * DIP},
 	}
 
 	for i, v := range cases {

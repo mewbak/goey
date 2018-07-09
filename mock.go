@@ -4,8 +4,16 @@ var (
 	mockKind = Kind{"bitbucket.org/rj/goey.Mock"}
 )
 
+func mock(width, height Length) Element {
+	return &mockElement{
+		Width:  width,
+		Height: height,
+	}
+}
+
 type mockElement struct {
 	Width, Height Length
+	Bounds        Rectangle
 }
 
 func (*mockElement) Close() {
@@ -27,7 +35,8 @@ func (m *mockElement) MinIntrinsicWidth(height Length) Length {
 	return m.Width
 }
 
-func (*mockElement) SetBounds(bounds Rectangle) {
+func (m *mockElement) SetBounds(bounds Rectangle) {
+	m.Bounds = bounds
 }
 
 func (*mockElement) UpdateProps(data Widget) error {

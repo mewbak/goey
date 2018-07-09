@@ -7,6 +7,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"bitbucket.org/rj/goey"
@@ -17,9 +18,19 @@ var (
 	clickCount int
 	alignMain  = goey.SpaceAround
 	alignCross = goey.Stretch
+	direction  bool
 )
 
 func main() {
+	if env := os.Getenv("GOEY_DIR"); env != "" {
+		value, err := strconv.ParseUint(env, 10, 64)
+		if err != nil {
+			fmt.Println("Error: ", err)
+		} else {
+			direction = (value % 2) != 0
+		}
+	}
+
 	err := goey.Run(createWindow)
 	if err != nil {
 		fmt.Println("Error: ", err)
@@ -76,32 +87,46 @@ func render() goey.Widget {
 	if clickCount > 0 {
 		text = text + "  (" + strconv.Itoa(clickCount) + ")"
 	}
+
+	children := []goey.Widget{
+		&goey.Button{Text: text,
+			Default: true,
+			OnClick: func() {
+				clickCount++
+				updateWindow()
+			},
+			OnFocus: onfocus(1),
+			OnBlur:  onblur(1),
+		},
+		&goey.Button{Text: "Extra button",
+			OnClick: cycleMainAxisAlign,
+			OnFocus: onfocus(2),
+			OnBlur:  onblur(2),
+		},
+		&goey.Button{Text: "Cycle cross axis align",
+			OnClick: cycleCrossAxisAlign,
+			OnFocus: onfocus(3),
+			OnBlur:  onblur(3),
+		},
+	}
+
+	if direction {
+		return &goey.Padding{
+			Insets: goey.DefaultInsets(),
+			Child: &goey.HBox{
+				AlignMain:  alignMain,
+				AlignCross: alignCross,
+				Children:   children,
+			},
+		}
+	}
+
 	return &goey.Padding{
 		Insets: goey.DefaultInsets(),
 		Child: &goey.VBox{
 			AlignMain:  alignMain,
 			AlignCross: alignCross,
-			Children: []goey.Widget{
-				&goey.Button{Text: text,
-					Default: true,
-					OnClick: func() {
-						clickCount++
-						updateWindow()
-					},
-					OnFocus: onfocus(1),
-					OnBlur:  onblur(1),
-				},
-				&goey.Button{Text: "Extra button",
-					OnClick: cycleMainAxisAlign,
-					OnFocus: onfocus(2),
-					OnBlur:  onblur(2),
-				},
-				&goey.Button{Text: "Cycle cross axis align",
-					OnClick: cycleCrossAxisAlign,
-					OnFocus: onfocus(3),
-					OnBlur:  onblur(3),
-				},
-			},
+			Children:   children,
 		},
 	}
 }
