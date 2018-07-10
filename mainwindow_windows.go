@@ -55,6 +55,7 @@ type windowImpl struct {
 	windowMinSize           image.Point
 	child                   Element
 	childSize               Size
+	onClosing               func() bool
 	horizontalScroll        bool
 	horizontalScrollVisible bool
 	horizontalScrollPos     Length
@@ -418,6 +419,10 @@ func (w *windowImpl) setIcon(img image.Image) error {
 	return nil
 }
 
+func (w *windowImpl) setOnClosing(callback func() bool) {
+	w.onClosing = callback
+}
+
 func (w *windowImpl) setTitle(value string) error {
 	return Control{w.hWnd}.SetText(value)
 }
@@ -514,6 +519,14 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 		// message loop terminates.
 		if newval := atomic.AddInt32(&mainWindowCount, -1); newval == 0 {
 			win.PostQuitMessage(0)
+		}
+		// Defer to the default window proc
+
+	case win.WM_CLOSE:
+		if cb := windowGetPtr(hwnd).onClosing; cb != nil {
+			if block := cb(); block {
+				return 0
+			}
 		}
 		// Defer to the default window proc
 
