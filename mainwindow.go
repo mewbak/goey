@@ -131,6 +131,15 @@ func (w *Window) SetIcon(img image.Image) error {
 	return w.setIcon(img)
 }
 
+// SetOnClosing changes the event callback for when the user tries to close the
+// window.  This callback can also be used to save or close any resources
+// before the window is closed.
+//
+// Returning true from the callback will prevent the window from closing.
+func (w *Window) SetOnClosing(callback func() bool) {
+	w.setOnClosing(callback)
+}
+
 // SetScroll sets whether scrolling is allowed in the horizontal and vertical directions.
 func (w *Window) SetScroll(horizontal, vertical bool) {
 	w.setScroll(horizontal, vertical)

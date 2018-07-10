@@ -7,11 +7,13 @@ import (
 	"unsafe"
 
 	"bitbucket.org/rj/goey/syscall"
+	"github.com/gotk3/gotk3/gdk"
+	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 var (
-	mainWindowCount int32 = 0
+	mainWindowCount int32
 	vscrollbarWidth Length
 )
 
@@ -34,6 +36,8 @@ type windowImpl struct {
 	childMinSize     Size
 	horizontalScroll bool
 	verticalScroll   bool
+	onClosing        func() bool
+	shClosing        glib.SignalHandle
 }
 
 func newWindow(title string, child Widget) (*Window, error) {
@@ -79,6 +83,10 @@ func newWindow(title string, child Widget) (*Window, error) {
 	retval.setScroll(retval.scrollDefaults())
 
 	return retval, nil
+}
+
+func windowOnClosing(widget *gtk.Window, _ *gdk.Event, w *windowImpl) bool {
+	return w.onClosing()
 }
 
 func (w *windowImpl) doLayout() {
@@ -157,23 +165,28 @@ func (w *windowImpl) setChild(child Widget) (err error) {
 	return err
 }
 
-func (mw *windowImpl) setScroll(horz, vert bool) {
-	mw.horizontalScroll = horz
-	mw.verticalScroll = vert
-	mw.scroll.SetPolicy(boolToPolicy(horz), boolToPolicy(vert))
+func (w *windowImpl) setScroll(horz, vert bool) {
+	w.horizontalScroll = horz
+	w.verticalScroll = vert
+	w.scroll.SetPolicy(boolToPolicy(horz), boolToPolicy(vert))
 }
 
-func (mw *windowImpl) setIcon(img image.Image) error {
+func (w *windowImpl) setIcon(img image.Image) error {
 	pixbuf, _, err := imageToPixbuf(img)
 	if err != nil {
 		return err
 	}
-	mw.handle.SetIcon(pixbuf)
+	w.handle.SetIcon(pixbuf)
 	return nil
 }
 
-func (mw *windowImpl) setTitle(value string) error {
-	mw.handle.SetTitle(value)
+func (w *windowImpl) setOnClosing(callback func() bool) {
+	w.onClosing = callback
+	w.shClosing = setSignalHandler(&w.handle.Widget, 0, callback != nil, "delete-event", windowOnClosing, w)
+}
+
+func (w *windowImpl) setTitle(value string) error {
+	w.handle.SetTitle(value)
 	return nil
 }
 
