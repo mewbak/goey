@@ -133,8 +133,10 @@ func (w *vboxElement) Layout(bc Constraint) Size {
 		if i > 0 {
 			if w.alignMain.IsPacked() {
 				height += calculateVGap(previous, v)
-				previous = v
+			} else {
+				height += calculateVGap(nil, nil)
 			}
+			previous = v
 		}
 		w.childrenSize[i] = v.Layout(cbc)
 		minWidth = max(minWidth, w.childrenSize[i].Width)
@@ -180,6 +182,7 @@ func (w *vboxElement) MinIntrinsicHeight(width Length) Length {
 		for _, v := range w.children[1:] {
 			// Add the preferred gap between this pair of widgets
 			size += calculateVGap(previous, v)
+			previous = v
 			// Find minimum size for this widget, and update
 			size += v.MinIntrinsicHeight(width)
 		}
@@ -242,15 +245,18 @@ func (w *vboxElement) SetBounds(bounds Rectangle) {
 	case SpaceAround:
 		extraGap = (bounds.Dy() - w.totalHeight).Scale(1, len(w.children)+1)
 		bounds.Min.Y += extraGap
+		extraGap += calculateVGap(nil, nil)
 	case SpaceBetween:
 		if len(w.children) > 1 {
 			extraGap = (bounds.Dy() - w.totalHeight).Scale(1, len(w.children)-1)
+			extraGap += calculateVGap(nil, nil)
 		} else {
 			// There are no controls between which to put the extra space.
 			// The following essentially convert SpaceBetween to SpaceAround
 			bounds.Min.Y += (bounds.Dy() - w.totalHeight) / 2
 		}
 	}
+
 	// Position all of the child controls.
 	posY := bounds.Min.Y
 	previous := Element(nil)

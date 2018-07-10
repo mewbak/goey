@@ -148,6 +148,7 @@ func (w *hboxElement) MinIntrinsicWidth(height Length) Length {
 		for _, v := range w.children[1:] {
 			// Add the preferred gap between this pair of widgets
 			size += calculateHGap(previous, v)
+			previous = v
 			// Find minimum size for this widget, and update
 			size += v.MinIntrinsicWidth(height)
 		}
@@ -210,9 +211,11 @@ func (w *hboxElement) SetBounds(bounds Rectangle) {
 	case SpaceAround:
 		extraGap = (bounds.Dx() - w.totalWidth).Scale(1, len(w.children)+1)
 		bounds.Min.X += extraGap
+		extraGap += calculateHGap(nil, nil)
 	case SpaceBetween:
 		if len(w.children) > 1 {
 			extraGap = (bounds.Dx() - w.totalWidth).Scale(1, len(w.children)-1)
+			extraGap += calculateHGap(nil, nil)
 		} else {
 			// There are no controls between which to put the extra space.
 			// The following essentially convert SpaceBetween to SpaceAround

@@ -82,6 +82,12 @@ func TestVBoxLayout(t *testing.T) {
 		{children, MainStart, Stretch, TightWidth(40 * DIP), Size{40 * DIP, 50 * DIP}, []Rectangle{
 			Rect(0, 0, 40*DIP, 26*DIP), Rect(0, 37*DIP, 40*DIP, 50*DIP),
 		}},
+		{children, MainEnd, Stretch, Tight(Size{40 * DIP, 150 * DIP}), Size{40 * DIP, 150 * DIP}, []Rectangle{
+			Rect(0, 100*DIP, 40*DIP, 126*DIP), Rect(0, 137*DIP, 40*DIP, 150*DIP),
+		}},
+		{children, SpaceBetween, Stretch, Tight(Size{40 * DIP, 150 * DIP}), Size{40 * DIP, 150 * DIP}, []Rectangle{
+			Rect(0, 0, 40*DIP, 26*DIP), Rect(0, 137*DIP, 40*DIP, 150*DIP),
+		}},
 	}
 
 	for i, v := range cases {

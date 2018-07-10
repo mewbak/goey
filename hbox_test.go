@@ -88,6 +88,9 @@ func TestHBoxLayout(t *testing.T) {
 		{children, MainEnd, Stretch, Tight(Size{150 * DIP, 40 * DIP}), Size{150 * DIP, 40 * DIP}, []Rectangle{
 			Rect(100*DIP, 0, 126*DIP, 40*DIP), Rect(137*DIP, 0, 150*DIP, 40*DIP),
 		}},
+		{children, SpaceBetween, Stretch, Tight(Size{150 * DIP, 40 * DIP}), Size{150 * DIP, 40 * DIP}, []Rectangle{
+			Rect(0, 0, 26*DIP, 40*DIP), Rect(137*DIP, 0, 150*DIP, 40*DIP),
+		}},
 	}
 
 	for i, v := range cases {
