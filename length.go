@@ -119,10 +119,6 @@ func (p Point) Pixels() image.Point {
 // It is well-formed if Min.X <= Max.X and likewise for Y. Points are always
 // well-formed. A rectangle's methods always return well-formed outputs for
 // well-formed inputs.
-//
-// A Rectangle is also an Image whose bounds are the rectangle itself. At
-// returns color.Opaque for points in the rectangle and color.Transparent
-// otherwise.
 type Rectangle struct {
 	Min, Max Point
 }
