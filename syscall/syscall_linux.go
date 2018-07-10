@@ -1,9 +1,13 @@
-// Package syscall fills in some missing APIs from GTK+ 3 that are not provided
-// by gotk3's package.  These are limited to those required by the package goey,
-// and should be candidates for upstreaming.  Naming convention is to convert
-// snake-case used by the C API to camel-case.
+// Package syscall provides platform-dependent routines required to support the
+// package goey.
+// In particular, when using GTK+3, the goal is to fill in some missing APIs
+// that are not provided by gotk3's package.
+// Anything found herein should be a candidate for upstreaming.
+// Naming convention is to convert snake-case used by the C API to camel-case.
 //
 // This package is intended for internal use.
+//
+// This package contains platform-specific details.
 package syscall
 
 import (

@@ -1,10 +1,14 @@
-// Package syscall fills in some missing APIs from WIN32 that are not provided
-// by lxn's WIN32 binding.  These are limited to those required by the package goey,
-// and should be candidates for upstreaming.  Since the WIN32 naming convention
-// is also camel case, most of the functions in this package are named exactly
-// as their C API counterpart.
+// Package syscall provides platform-dependent routines required to support the
+// package goey.
+// In particular, on WIN32, the goal is to fill in some missing APIs that are not
+// provided by lxn's WIN32 binding.
+// Anything found herein should be a candidate for upstreaming.
+// Since the WIN32 naming convention  is also camel case, most of the functions
+// in this package are named exactly as their C API counterpart.
 //
 // This package is intended for internal use.
+//
+// This package contains platform-specific details.
 package syscall
 
 import (
@@ -39,13 +43,14 @@ const (
 	STM_GETIMAGE = 0x0173
 )
 
+// NMSELCHANGE match the C structure of the same name.
 type NMSELCHANGE struct {
 	Nmhdr      win.NMHDR
 	StSelStart win.SYSTEMTIME
 	StSelEnd   win.SYSTEMTIME
 }
 
-// SetClassLong is a wrapper.
+// SetClassLongPtr is a wrapper.
 func SetClassLongPtr(hWnd win.HWND, index int32, value uintptr) uintptr {
 	ret, _, _ := syscall.Syscall(procSetClassLongPtr.Addr(), 3,
 		uintptr(hWnd),
@@ -55,7 +60,7 @@ func SetClassLongPtr(hWnd win.HWND, index int32, value uintptr) uintptr {
 	return ret
 }
 
-// GetDesktpoWindow is a wrapper.
+// GetDesktopWindow is a wrapper.
 func GetDesktopWindow() win.HWND {
 	r1, _, err := syscall.Syscall(procGetDesktopWindow.Addr(), 0, 0, 0, 0)
 	if err != 0 {
