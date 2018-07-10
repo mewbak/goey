@@ -75,12 +75,9 @@ func (w *hboxElement) Layout(bc Constraint) Size {
 	// Determine the constraints for layout of child elements.
 	cbc := bc.LoosenWidth()
 	if w.alignMain == Homogeneous {
-		if count := len(w.children); count > 1 {
-			gap := calculateHGap(nil, nil)
-			cbc.TightenWidth(cbc.Max.Width.Scale(1, count) - gap.Scale(1, count-1))
-		} else {
-			cbc.TightenWidth(cbc.Max.Width.Scale(1, count))
-		}
+		count := len(w.children)
+		gap := calculateHGap(nil, nil)
+		cbc.TightenWidth(cbc.Max.Width.Scale(1, count) - gap.Scale(count-1, count))
 	}
 	if w.alignCross == Stretch {
 		if cbc.HasBoundedHeight() {
