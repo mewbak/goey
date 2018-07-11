@@ -52,7 +52,7 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 		win.SendMessage(hwnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
 	}
 
-	retval := &mountedTextArea{mountedTextInputBase{
+	retval := &textareaElement{textinputElementBase{
 		Control:  Control{hwnd},
 		onChange: w.OnChange,
 		onFocus:  w.OnFocus,
@@ -65,24 +65,24 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-type mountedTextArea struct {
-	mountedTextInputBase
+type textareaElement struct {
+	textinputElementBase
 	minLines int
 }
 
-func (w *mountedTextArea) Layout(bc Constraint) Size {
+func (w *textareaElement) Layout(bc Constraint) Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedTextArea) MinIntrinsicHeight(Length) Length {
+func (w *textareaElement) MinIntrinsicHeight(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	const lineHeight = 16 * DIP
 	return 23*DIP + lineHeight.Scale(w.minLines-1, 1)
 }
 
-func (w *mountedTextArea) Props() Widget {
+func (w *textareaElement) Props() Widget {
 	var buffer [80]uint16
 	win.SendMessage(w.hWnd, win.EM_GETCUEBANNER, uintptr(unsafe.Pointer(&buffer[0])), 80)
 	ndx := 0
@@ -106,7 +106,7 @@ func (w *mountedTextArea) Props() Widget {
 	}
 }
 
-func (w *mountedTextArea) updateProps(data *TextArea) error {
+func (w *textareaElement) updateProps(data *TextArea) error {
 	if data.Value != w.Text() {
 		w.SetText(data.Value)
 	}

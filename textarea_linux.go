@@ -8,7 +8,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type mountedTextArea struct {
+type textareaElement struct {
 	handle *gtk.TextView
 	buffer *gtk.TextBuffer
 	frame  *gtk.Frame
@@ -60,7 +60,7 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 	frame.Add(swindow)
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(frame)
 
-	retval := &mountedTextArea{
+	retval := &textareaElement{
 		handle:   control,
 		buffer:   buffer,
 		frame:    frame,
@@ -83,7 +83,7 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func textareaOnChanged(buffer *gtk.TextBuffer, mounted *mountedTextArea) {
+func textareaOnChanged(buffer *gtk.TextBuffer, mounted *textareaElement) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -96,11 +96,11 @@ func textareaOnChanged(buffer *gtk.TextBuffer, mounted *mountedTextArea) {
 	mounted.onChange(text)
 }
 
-func textareaOnDestroy(widget *gtk.TextView, mounted *mountedTextArea) {
+func textareaOnDestroy(widget *gtk.TextView, mounted *textareaElement) {
 	mounted.handle = nil
 }
 
-func (w *mountedTextArea) Close() {
+func (w *textareaElement) Close() {
 	if w.handle != nil {
 		w.frame.Destroy()
 		w.buffer.Unref()
@@ -110,11 +110,11 @@ func (w *mountedTextArea) Close() {
 	}
 }
 
-func (w *mountedTextArea) Handle() *gtk.Widget {
+func (w *textareaElement) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
-func (w *mountedTextArea) Layout(bc Constraint) Size {
+func (w *textareaElement) Layout(bc Constraint) Size {
 	if !bc.HasBoundedWidth() {
 		_, width := w.handle.GetPreferredWidth()
 		_, height := w.handle.GetPreferredHeight()
@@ -126,7 +126,7 @@ func (w *mountedTextArea) Layout(bc Constraint) Size {
 	return bc.Constrain(Size{width, FromPixelsX(height)})
 }
 
-func (w *mountedTextArea) MinIntrinsicHeight(width Length) Length {
+func (w *textareaElement) MinIntrinsicHeight(width Length) Length {
 	if width != Inf {
 		height, _ := syscall.WidgetGetPreferredHeightForWidth(&w.frame.Widget, width.PixelsX())
 		return FromPixelsY(height)
@@ -135,12 +135,12 @@ func (w *mountedTextArea) MinIntrinsicHeight(width Length) Length {
 	return FromPixelsY(height)
 }
 
-func (w *mountedTextArea) MinIntrinsicWidth(Length) Length {
+func (w *textareaElement) MinIntrinsicWidth(Length) Length {
 	width, _ := w.frame.GetPreferredWidth()
 	return FromPixelsX(width)
 }
 
-func (w *mountedTextArea) Props() Widget {
+func (w *textareaElement) Props() Widget {
 	buffer, err := w.handle.GetBuffer()
 	if err != nil {
 		panic("count not get buffer, " + err.Error())
@@ -158,12 +158,12 @@ func (w *mountedTextArea) Props() Widget {
 	}
 }
 
-func (w *mountedTextArea) SetBounds(bounds Rectangle) {
+func (w *textareaElement) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.frame.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
-func (w *mountedTextArea) updateProps(data *TextArea) error {
+func (w *textareaElement) updateProps(data *TextArea) error {
 	// TextView will send a 'changed' event, even if the new value is the
 	// same.  To stop an infinite loop, we need to protect by checking
 	// ourselves.

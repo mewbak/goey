@@ -4,6 +4,6 @@ import (
 	"github.com/lxn/win"
 )
 
-func (w *mountedEmpty) SetOrder(hwnd win.HWND) win.HWND {
+func (w *emptyElement) SetOrder(hwnd win.HWND) win.HWND {
 	return hwnd
 }

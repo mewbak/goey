@@ -22,10 +22,10 @@ func (w *Label) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedLabel) Kind() *Kind {
+func (*labelElement) Kind() *Kind {
 	return &labelKind
 }
 
-func (w *mountedLabel) UpdateProps(data Widget) error {
+func (w *labelElement) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*Label))
 }

@@ -1,10 +1,11 @@
 package goey
 
 import (
-	win2 "bitbucket.org/rj/goey/syscall"
-	"github.com/lxn/win"
 	"syscall"
 	"unsafe"
+
+	win2 "bitbucket.org/rj/goey/syscall"
+	"github.com/lxn/win"
 )
 
 var (
@@ -43,40 +44,40 @@ func (w *Label) mount(parent Control) (Element, error) {
 		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
 	}
 
-	retval := &mountedLabel{Control: Control{hwnd}, text: text}
+	retval := &labelElement{Control: Control{hwnd}, text: text}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
-type mountedLabel struct {
+type labelElement struct {
 	Control
 	text []uint16
 }
 
-func (w *mountedLabel) Props() Widget {
+func (w *labelElement) Props() Widget {
 	return &Label{
 		Text: w.Control.Text(),
 	}
 }
 
-func (w *mountedLabel) Layout(bc Constraint) Size {
+func (w *labelElement) Layout(bc Constraint) Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedLabel) MinIntrinsicHeight(Length) Length {
+func (w *labelElement) MinIntrinsicHeight(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 13 * DIP
 }
 
-func (w *mountedLabel) MinIntrinsicWidth(Length) Length {
+func (w *labelElement) MinIntrinsicWidth(Length) Length {
 	width, _ := w.CalcRect(w.text)
 	return FromPixelsX(int(width))
 }
 
-func (w *mountedLabel) SetBounds(bounds Rectangle) {
+func (w *labelElement) SetBounds(bounds Rectangle) {
 	w.Control.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't
@@ -84,7 +85,7 @@ func (w *mountedLabel) SetBounds(bounds Rectangle) {
 	win.InvalidateRect(w.hWnd, nil, true)
 }
 
-func (w *mountedLabel) updateProps(data *Label) error {
+func (w *labelElement) updateProps(data *Label) error {
 	text, err := syscall.UTF16FromString(data.Text)
 	if err != nil {
 		return err

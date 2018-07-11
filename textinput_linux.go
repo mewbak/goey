@@ -7,7 +7,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type mountedTextInput struct {
+type textinputElement struct {
 	Control
 
 	onChange   func(string)
@@ -30,7 +30,7 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 	control.SetVisibility(!w.Password)
 	control.SetEditable(!w.ReadOnly)
 
-	retval := &mountedTextInput{
+	retval := &textinputElement{
 		Control:    Control{&control.Widget},
 		onChange:   w.OnChange,
 		onEnterKey: w.OnEnterKey,
@@ -46,7 +46,7 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func textinputOnActivate(obj *glib.Object, mounted *mountedTextInput) {
+func textinputOnActivate(obj *glib.Object, mounted *textinputElement) {
 	// Not sure why, but the widget comes into this callback as a glib.Object,
 	// and not the gtk.Entry.  Need to wrap the value.  This pokes into the internals
 	// of the gtk package.
@@ -59,7 +59,7 @@ func textinputOnActivate(obj *glib.Object, mounted *mountedTextInput) {
 	mounted.onEnterKey(text)
 }
 
-func textinputOnChanged(widget *gtk.Entry, mounted *mountedTextInput) {
+func textinputOnChanged(widget *gtk.Entry, mounted *textinputElement) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -72,15 +72,15 @@ func textinputOnChanged(widget *gtk.Entry, mounted *mountedTextInput) {
 	mounted.onChange(text)
 }
 
-func textinputOnDestroy(widget *gtk.Entry, mounted *mountedTextInput) {
+func textinputOnDestroy(widget *gtk.Entry, mounted *textinputElement) {
 	mounted.handle = nil
 }
 
-func (w *mountedTextInput) entry() *gtk.Entry {
+func (w *textinputElement) entry() *gtk.Entry {
 	return (*gtk.Entry)(unsafe.Pointer(w.handle))
 }
 
-func (w *mountedTextInput) Props() Widget {
+func (w *textinputElement) Props() Widget {
 	entry := w.entry()
 	value, err := entry.GetText()
 	if err != nil {
@@ -104,7 +104,7 @@ func (w *mountedTextInput) Props() Widget {
 	}
 }
 
-func (w *mountedTextInput) updateProps(data *TextInput) error {
+func (w *textinputElement) updateProps(data *TextInput) error {
 	entry := w.entry()
 	w.onChange = nil // temporarily break OnChange to prevent event
 	entry.SetText(data.Value)

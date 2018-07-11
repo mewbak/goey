@@ -1,11 +1,12 @@
 package goey
 
 import (
-	win2 "bitbucket.org/rj/goey/syscall"
-	"github.com/lxn/win"
 	"syscall"
 	"time"
 	"unsafe"
+
+	win2 "bitbucket.org/rj/goey/syscall"
+	"github.com/lxn/win"
 )
 
 var (
@@ -61,7 +62,7 @@ func (w *DateInput) mount(parent Control) (Element, error) {
 	// Subclass the window procedure
 	subclassWindowProcedure(hwnd, &oldDateTimePickWindowProc, syscall.NewCallback(dateinputWindowProc))
 
-	retval := &mountedDateInput{
+	retval := &dateinputElement{
 		Control:  Control{hwnd},
 		onChange: w.OnChange,
 		onFocus:  w.OnFocus,
@@ -72,30 +73,30 @@ func (w *DateInput) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-type mountedDateInput struct {
+type dateinputElement struct {
 	Control
 	onChange func(value time.Time)
 	onFocus  func()
 	onBlur   func()
 }
 
-func (w *mountedDateInput) Layout(bc Constraint) Size {
+func (w *dateinputElement) Layout(bc Constraint) Size {
 	height := w.MinIntrinsicHeight(0)
 	width := w.MinIntrinsicWidth(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedDateInput) MinIntrinsicHeight(Length) Length {
+func (w *dateinputElement) MinIntrinsicHeight(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23 * DIP
 }
 
-func (w *mountedDateInput) MinIntrinsicWidth(Length) Length {
+func (w *dateinputElement) MinIntrinsicWidth(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 75 * DIP
 }
 
-func (w *mountedDateInput) Props() Widget {
+func (w *dateinputElement) Props() Widget {
 	st := win.SYSTEMTIME{}
 	win.SendMessage(w.hWnd, win.DTM_GETSYSTEMTIME, 0, uintptr(unsafe.Pointer(&st)))
 
@@ -109,7 +110,7 @@ func (w *mountedDateInput) Props() Widget {
 	}
 }
 
-func (w *mountedDateInput) updateProps(data *DateInput) error {
+func (w *dateinputElement) updateProps(data *DateInput) error {
 	st := data.systemTime()
 	win.SendMessage(w.hWnd, win.DTM_SETSYSTEMTIME, win.GDT_VALID, uintptr(unsafe.Pointer(&st)))
 
@@ -161,13 +162,13 @@ func dateinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 	return win.CallWindowProc(oldDateTimePickWindowProc, hwnd, msg, wParam, lParam)
 }
 
-func dateinputGetPtr(hwnd win.HWND) *mountedDateInput {
+func dateinputGetPtr(hwnd win.HWND) *dateinputElement {
 	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
 	if gwl == 0 {
 		panic("Internal error.")
 	}
 
-	ptr := (*mountedDateInput)(unsafe.Pointer(gwl))
+	ptr := (*dateinputElement)(unsafe.Pointer(gwl))
 	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}

@@ -1,10 +1,11 @@
 package goey
 
 import (
-	"github.com/lxn/win"
 	"strconv"
 	"syscall"
 	"unsafe"
+
+	"github.com/lxn/win"
 )
 
 func (w *IntInput) mount(parent Control) (Element, error) {
@@ -52,7 +53,7 @@ func (w *IntInput) mount(parent Control) (Element, error) {
 		win.SendMessage(hwnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
 	}
 
-	retval := &mountedIntInput{mountedTextInputBase{
+	retval := &intinputElement{textinputElementBase{
 		Control:    Control{hwnd},
 		onChange:   w.wrapOnChange(),
 		onFocus:    w.OnFocus,
@@ -83,11 +84,11 @@ func (w *IntInput) wrapOnChange() func(string) {
 	}
 }
 
-type mountedIntInput struct {
-	mountedTextInputBase
+type intinputElement struct {
+	textinputElementBase
 }
 
-func (w *mountedIntInput) updateProps(data *IntInput) error {
+func (w *intinputElement) updateProps(data *IntInput) error {
 	text := strconv.FormatInt(data.Value, 10)
 	if text != w.Text() {
 		w.SetText(text)

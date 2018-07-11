@@ -31,10 +31,10 @@ func (w *DateInput) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedDateInput) Kind() *Kind {
+func (*dateinputElement) Kind() *Kind {
 	return &dateInputKind
 }
 
-func (w *mountedDateInput) UpdateProps(data Widget) error {
+func (w *dateinputElement) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*DateInput))
 }

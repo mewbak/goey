@@ -7,7 +7,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type mountedIntInput struct {
+type intinputElement struct {
 	Control
 
 	onChange func(int64)
@@ -27,7 +27,7 @@ func (w *IntInput) mount(parent Control) (Element, error) {
 	control.SetIncrements(1, 10)
 	control.SetPlaceholderText(w.Placeholder)
 
-	retval := &mountedIntInput{
+	retval := &intinputElement{
 		Control:  Control{&control.Widget},
 		onChange: w.OnChange,
 	}
@@ -41,7 +41,7 @@ func (w *IntInput) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func intinputOnChanged(widget *gtk.SpinButton, mounted *mountedIntInput) {
+func intinputOnChanged(widget *gtk.SpinButton, mounted *intinputElement) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -50,15 +50,15 @@ func intinputOnChanged(widget *gtk.SpinButton, mounted *mountedIntInput) {
 	mounted.onChange(int64(text))
 }
 
-func intinputOnDestroy(widget *gtk.SpinButton, mounted *mountedIntInput) {
+func intinputOnDestroy(widget *gtk.SpinButton, mounted *intinputElement) {
 	mounted.handle = nil
 }
 
-func (w *mountedIntInput) spinbutton() *gtk.SpinButton {
+func (w *intinputElement) spinbutton() *gtk.SpinButton {
 	return (*gtk.SpinButton)(unsafe.Pointer(w.handle))
 }
 
-func (w *mountedIntInput) updateProps(data *IntInput) error {
+func (w *intinputElement) updateProps(data *IntInput) error {
 	button := w.spinbutton()
 
 	w.onChange = nil // break OnChange to prevent event

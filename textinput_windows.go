@@ -74,7 +74,7 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 		win.SendMessage(hwnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
 	}
 
-	retval := &mountedTextInput{mountedTextInputBase{
+	retval := &textinputElement{textinputElementBase{
 		Control:    Control{hwnd},
 		onChange:   w.OnChange,
 		onFocus:    w.OnFocus,
@@ -86,7 +86,7 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-type mountedTextInputBase struct {
+type textinputElementBase struct {
 	Control
 	onChange   func(value string)
 	onFocus    func()
@@ -94,11 +94,11 @@ type mountedTextInputBase struct {
 	onEnterKey func(value string)
 }
 
-type mountedTextInput struct {
-	mountedTextInputBase
+type textinputElement struct {
+	textinputElementBase
 }
 
-func (w *mountedTextInput) Props() Widget {
+func (w *textinputElement) Props() Widget {
 	var buffer [80]uint16
 	win.SendMessage(w.hWnd, win.EM_GETCUEBANNER, uintptr(unsafe.Pointer(&buffer[0])), 80)
 	ndx := 0
@@ -123,23 +123,23 @@ func (w *mountedTextInput) Props() Widget {
 	}
 }
 
-func (w *mountedTextInputBase) Layout(bc Constraint) Size {
+func (w *textinputElementBase) Layout(bc Constraint) Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedTextInputBase) MinIntrinsicHeight(Length) Length {
+func (w *textinputElementBase) MinIntrinsicHeight(Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23 * DIP
 }
 
-func (w *mountedTextInputBase) MinIntrinsicWidth(Length) Length {
+func (w *textinputElementBase) MinIntrinsicWidth(Length) Length {
 	// TODO
 	return 75 * DIP
 }
 
-func (w *mountedTextInputBase) updatePlaceholder(text string) error {
+func (w *textinputElementBase) updatePlaceholder(text string) error {
 	// Update the control
 	if text != "" {
 		textPlaceholder, err := syscall.UTF16PtrFromString(text)
@@ -155,7 +155,7 @@ func (w *mountedTextInputBase) updatePlaceholder(text string) error {
 	return nil
 }
 
-func (w *mountedTextInputBase) updateProps(data *TextInput) error {
+func (w *textinputElementBase) updateProps(data *TextInput) error {
 	if data.Value != w.Text() {
 		w.SetText(data.Value)
 	}
@@ -223,13 +223,13 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 	return win.CallWindowProc(edit.oldWindowProc, hwnd, msg, wParam, lParam)
 }
 
-func textinputGetPtr(hwnd win.HWND) *mountedTextInputBase {
+func textinputGetPtr(hwnd win.HWND) *textinputElementBase {
 	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
 	if gwl == 0 {
 		panic("Internal error.")
 	}
 
-	ptr := (*mountedTextInputBase)(unsafe.Pointer(gwl))
+	ptr := (*textinputElementBase)(unsafe.Pointer(gwl))
 	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}

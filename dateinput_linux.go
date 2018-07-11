@@ -8,7 +8,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type mountedDateInput struct {
+type dateinputElement struct {
 	Control
 
 	onChange func(time.Time)
@@ -26,7 +26,7 @@ func (w *DateInput) mount(parent Control) (Element, error) {
 	control.SelectMonth(uint(w.Value.Month())-1, uint(w.Value.Year()))
 	control.SelectDay(uint(w.Value.Day()))
 
-	retval := &mountedDateInput{
+	retval := &dateinputElement{
 		Control:  Control{&control.Widget},
 		onChange: w.OnChange,
 	}
@@ -40,7 +40,7 @@ func (w *DateInput) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func dateinputOnChanged(widget *gtk.Calendar, mounted *mountedDateInput) {
+func dateinputOnChanged(widget *gtk.Calendar, mounted *dateinputElement) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -49,14 +49,14 @@ func dateinputOnChanged(widget *gtk.Calendar, mounted *mountedDateInput) {
 	mounted.onChange(time.Date(int(y), time.Month(m+1), int(d), 0, 0, 0, 0, time.Local))
 }
 
-func dateinputOnDestroy(widget *gtk.Calendar, mounted *mountedDateInput) {
+func dateinputOnDestroy(widget *gtk.Calendar, mounted *dateinputElement) {
 	mounted.handle = nil
 }
 
-func (w *mountedDateInput) calendar() *gtk.Calendar {
+func (w *dateinputElement) calendar() *gtk.Calendar {
 	return (*gtk.Calendar)(unsafe.Pointer(w.handle))
 }
-func (w *mountedDateInput) updateProps(data *DateInput) error {
+func (w *dateinputElement) updateProps(data *DateInput) error {
 	handle := w.calendar()
 
 	w.onChange = nil // temporarily break OnChange to prevent event

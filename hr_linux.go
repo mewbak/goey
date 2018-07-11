@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type mountedHR struct {
+type hrElement struct {
 	Control
 }
 
@@ -17,7 +17,7 @@ func (w *HR) mount(parent Control) (Element, error) {
 	}
 	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
 
-	retval := &mountedHR{
+	retval := &hrElement{
 		Control: Control{&control.Widget},
 	}
 
@@ -27,6 +27,6 @@ func (w *HR) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func hrOnDestroy(widget *gtk.Separator, mounted *mountedHR) {
+func hrOnDestroy(widget *gtk.Separator, mounted *hrElement) {
 	mounted.handle = nil
 }

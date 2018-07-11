@@ -93,7 +93,7 @@ func calculateVGap(previous Element, current Element) Length {
 	// inferred from the order and type of controls.
 	//
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	if _, ok := previous.(*mountedLabel); ok {
+	if _, ok := previous.(*labelElement); ok {
 		// Any label immediately preceding any other control will be assumed to
 		// be 'associated'.
 		return 5 * DIP

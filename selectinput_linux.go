@@ -7,7 +7,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type mountedSelectInput struct {
+type selectinputElement struct {
 	Control
 
 	onChange func(int)
@@ -29,7 +29,7 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 	control.SetCanFocus(true)
 	control.SetSensitive(!w.Disabled)
 
-	retval := &mountedSelectInput{
+	retval := &selectinputElement{
 		Control:  Control{&control.Widget},
 		onChange: w.OnChange,
 	}
@@ -43,7 +43,7 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func selectinputOnChanged(widget *gtk.ComboBoxText, mounted *mountedSelectInput) {
+func selectinputOnChanged(widget *gtk.ComboBoxText, mounted *selectinputElement) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -51,15 +51,15 @@ func selectinputOnChanged(widget *gtk.ComboBoxText, mounted *mountedSelectInput)
 	mounted.onChange(widget.GetActive())
 }
 
-func selectinputOnDestroy(widget *gtk.ComboBoxText, mounted *mountedSelectInput) {
+func selectinputOnDestroy(widget *gtk.ComboBoxText, mounted *selectinputElement) {
 	mounted.handle = nil
 }
 
-func (w *mountedSelectInput) comboboxtext() *gtk.ComboBoxText {
+func (w *selectinputElement) comboboxtext() *gtk.ComboBoxText {
 	return (*gtk.ComboBoxText)(unsafe.Pointer(w.handle))
 }
 
-func (w *mountedSelectInput) updateProps(data *SelectInput) error {
+func (w *selectinputElement) updateProps(data *SelectInput) error {
 	cbt := w.comboboxtext()
 
 	w.onChange = nil // temporarily break OnChange to prevent event

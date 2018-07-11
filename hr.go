@@ -21,30 +21,30 @@ func (w *HR) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedHR) Kind() *Kind {
+func (*hrElement) Kind() *Kind {
 	return &hrKind
 }
 
-func (w *mountedHR) Props() Widget {
+func (w *hrElement) Props() Widget {
 	return &HR{}
 }
 
-func (*mountedHR) Layout(bc Constraint) Size {
+func (*hrElement) Layout(bc Constraint) Size {
 	if bc.HasBoundedWidth() {
 		return bc.Constrain(Size{bc.Max.Width, 13 * DIP})
 	}
 	return bc.Constrain(Size{13 * DIP, 13 * DIP})
 }
 
-func (w *mountedHR) MinIntrinsicHeight(width Length) Length {
+func (w *hrElement) MinIntrinsicHeight(width Length) Length {
 	return 13 * DIP
 }
 
-func (w *mountedHR) MinIntrinsicWidth(height Length) Length {
+func (w *hrElement) MinIntrinsicWidth(height Length) Length {
 	return 13 * DIP
 }
 
-func (w *mountedHR) UpdateProps(data Widget) error {
+func (w *hrElement) UpdateProps(data Widget) error {
 	// This widget does not have any properties, so there cannot be anything
 	// to update.
 	return nil

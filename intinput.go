@@ -29,10 +29,10 @@ func (w *IntInput) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedIntInput) Kind() *Kind {
+func (*intinputElement) Kind() *Kind {
 	return &intInputKind
 }
 
-func (w *mountedIntInput) UpdateProps(data Widget) error {
+func (w *intinputElement) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*IntInput))
 }

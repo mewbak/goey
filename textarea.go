@@ -30,11 +30,11 @@ func (w *TextArea) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedTextArea) Kind() *Kind {
+func (*textareaElement) Kind() *Kind {
 	return &textareaKind
 }
 
-func (w *mountedTextArea) UpdateProps(data Widget) error {
+func (w *textareaElement) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*TextArea))
 }
 

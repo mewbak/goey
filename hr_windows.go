@@ -62,13 +62,13 @@ func (w *HR) mount(parent Control) (Element, error) {
 		return nil, err
 	}
 
-	retval := &mountedHR{Control: Control{hwnd}}
+	retval := &hrElement{Control: Control{hwnd}}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
-type mountedHR struct {
+type hrElement struct {
 	Control
 }
 
@@ -78,7 +78,7 @@ func hrWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (re
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
 		if w := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA); w != 0 {
-			ptr := (*mountedHR)(unsafe.Pointer(w))
+			ptr := (*hrElement)(unsafe.Pointer(w))
 			ptr.hWnd = 0
 		}
 		// Defer to the old window proc

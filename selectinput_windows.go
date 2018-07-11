@@ -65,7 +65,7 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 	// Subclass the window procedure
 	subclassWindowProcedure(hwnd, &oldComboboxWindowProc, syscall.NewCallback(comboboxWindowProc))
 
-	retval := &mountedSelectInput{
+	retval := &selectinputElement{
 		Control:       Control{hwnd},
 		onChange:      w.OnChange,
 		onFocus:       w.OnFocus,
@@ -77,7 +77,7 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-type mountedSelectInput struct {
+type selectinputElement struct {
 	Control
 	onChange func(value int)
 	onFocus  func()
@@ -87,18 +87,18 @@ type mountedSelectInput struct {
 	preferredWidth Length
 }
 
-func (w *mountedSelectInput) Layout(bc Constraint) Size {
+func (w *selectinputElement) Layout(bc Constraint) Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *mountedSelectInput) MinIntrinsicHeight(width Length) Length {
+func (w *selectinputElement) MinIntrinsicHeight(width Length) Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 14 * DIP
 }
 
-func (w *mountedSelectInput) MinIntrinsicWidth(height Length) Length {
+func (w *selectinputElement) MinIntrinsicWidth(height Length) Length {
 	if w.preferredWidth == 0 {
 		text, err := syscall.UTF16FromString(w.longestString)
 		if err != nil {
@@ -111,7 +111,7 @@ func (w *mountedSelectInput) MinIntrinsicWidth(height Length) Length {
 	return w.preferredWidth
 }
 
-func (w *mountedSelectInput) updateProps(data *SelectInput) error {
+func (w *selectinputElement) updateProps(data *SelectInput) error {
 	// TODO:  Update the items in the combobox
 	// TODO:  Update the selection based on Value
 	// TODO:  Update the selection based on Unset.
@@ -162,13 +162,13 @@ func comboboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 	return win.CallWindowProc(oldComboboxWindowProc, hwnd, msg, wParam, lParam)
 }
 
-func selectinputGetPtr(hwnd win.HWND) *mountedSelectInput {
+func selectinputGetPtr(hwnd win.HWND) *selectinputElement {
 	gwl := win.GetWindowLongPtr(hwnd, win.GWLP_USERDATA)
 	if gwl == 0 {
 		panic("Internal error.")
 	}
 
-	ptr := (*mountedSelectInput)(unsafe.Pointer(gwl))
+	ptr := (*selectinputElement)(unsafe.Pointer(gwl))
 	if ptr.hWnd != hwnd && ptr.hWnd != 0 {
 		panic("Internal error.")
 	}

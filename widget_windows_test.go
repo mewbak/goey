@@ -11,9 +11,9 @@ func TestCalculateHGap(t *testing.T) {
 		w1, w2   Element
 		expected Length
 	}{
-		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11 * DIP}, // Space between unrelated controls
-		{(*mountedTextInput)(nil), (*buttonElement)(nil), 11 * DIP},    // Space between unrelated controls
-		{(*buttonElement)(nil), (*mountedTextInput)(nil), 11 * DIP},    // Space between unrelated controls
+		{(*textinputElement)(nil), (*textinputElement)(nil), 11 * DIP}, // Space between unrelated controls
+		{(*textinputElement)(nil), (*buttonElement)(nil), 11 * DIP},    // Space between unrelated controls
+		{(*buttonElement)(nil), (*textinputElement)(nil), 11 * DIP},    // Space between unrelated controls
 		{(*buttonElement)(nil), (*buttonElement)(nil), 7 * DIP},        // Space between adjacent buttons
 	}
 
@@ -30,12 +30,12 @@ func TestCalculateVGap(t *testing.T) {
 		w1, w2   Element
 		expected Length
 	}{
-		{(*mountedTextInput)(nil), (*mountedTextInput)(nil), 11 * DIP},   // Space between unrelated controls
-		{(*mountedTextInput)(nil), (*paragraphElement)(nil), 11 * DIP},   // Space between unrelated controls
-		{(*mountedTextInput)(nil), (*mountedSelectInput)(nil), 11 * DIP}, // Space between unrelated controls
-		{(*mountedLabel)(nil), (*mountedTextInput)(nil), 5 * DIP},        // Space between text labels and associated fields
-		{(*mountedLabel)(nil), (*mountedSelectInput)(nil), 5 * DIP},      // Space between text labels and associated fields
-		{(*mountedLabel)(nil), (*mountedTextArea)(nil), 5 * DIP},         // Space between text labels and associated fields
+		{(*textinputElement)(nil), (*textinputElement)(nil), 11 * DIP},   // Space between unrelated controls
+		{(*textinputElement)(nil), (*paragraphElement)(nil), 11 * DIP},   // Space between unrelated controls
+		{(*textinputElement)(nil), (*selectinputElement)(nil), 11 * DIP}, // Space between unrelated controls
+		{(*labelElement)(nil), (*textinputElement)(nil), 5 * DIP},        // Space between text labels and associated fields
+		{(*labelElement)(nil), (*selectinputElement)(nil), 5 * DIP},      // Space between text labels and associated fields
+		{(*labelElement)(nil), (*textareaElement)(nil), 5 * DIP},         // Space between text labels and associated fields
 		{(*checkboxElement)(nil), (*checkboxElement)(nil), 7 * DIP},      // Space between related controls
 		{(*paragraphElement)(nil), (*paragraphElement)(nil), 11 * DIP},   // Space between paragraphs of text
 	}

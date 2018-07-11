@@ -31,10 +31,10 @@ func (w *TextInput) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedTextInput) Kind() *Kind {
+func (*textinputElement) Kind() *Kind {
 	return &textInputKind
 }
 
-func (w *mountedTextInput) UpdateProps(data Widget) error {
+func (w *textinputElement) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*TextInput))
 }

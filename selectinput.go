@@ -28,10 +28,10 @@ func (w *SelectInput) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*mountedSelectInput) Kind() *Kind {
+func (*selectinputElement) Kind() *Kind {
 	return &selectKind
 }
 
-func (w *mountedSelectInput) UpdateProps(data Widget) error {
+func (w *selectinputElement) UpdateProps(data Widget) error {
 	return w.updateProps(data.(*SelectInput))
 }
