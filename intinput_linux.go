@@ -32,8 +32,8 @@ func (w *IntInput) mount(parent Control) (Element, error) {
 		onChange: w.OnChange,
 	}
 
-	control.Connect("destroy", intinput_onDestroy, retval)
-	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "value-changed", intinput_onChanged, retval)
+	control.Connect("destroy", intinputOnDestroy, retval)
+	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "value-changed", intinputOnChanged, retval)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
 	control.Show()
@@ -41,7 +41,7 @@ func (w *IntInput) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func intinput_onChanged(widget *gtk.SpinButton, mounted *mountedIntInput) {
+func intinputOnChanged(widget *gtk.SpinButton, mounted *mountedIntInput) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -50,7 +50,7 @@ func intinput_onChanged(widget *gtk.SpinButton, mounted *mountedIntInput) {
 	mounted.onChange(int64(text))
 }
 
-func intinput_onDestroy(widget *gtk.SpinButton, mounted *mountedIntInput) {
+func intinputOnDestroy(widget *gtk.SpinButton, mounted *mountedIntInput) {
 	mounted.handle = nil
 }
 
@@ -65,7 +65,7 @@ func (w *mountedIntInput) updateProps(data *IntInput) error {
 	button.SetValue(float64(data.Value))
 	button.SetPlaceholderText(data.Placeholder)
 	w.onChange = data.OnChange
-	w.shChange = setSignalHandler(&button.Widget, w.shChange, data.OnChange != nil, "value-changed", intinput_onChanged, w)
+	w.shChange = setSignalHandler(&button.Widget, w.shChange, data.OnChange != nil, "value-changed", intinputOnChanged, w)
 	w.onFocus.Set(&button.Widget, data.OnFocus)
 	w.onBlur.Set(&button.Widget, data.OnBlur)
 

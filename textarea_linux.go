@@ -68,9 +68,9 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 		minLines: minlinesDefault(w.MinLines),
 	}
 
-	control.Connect("destroy", textarea_onDestroy, retval)
+	control.Connect("destroy", textareaOnDestroy, retval)
 	if w.OnChange != nil {
-		sh, err := buffer.Connect("changed", textarea_onChanged, retval)
+		sh, err := buffer.Connect("changed", textareaOnChanged, retval)
 		if err != nil {
 			panic("Failed to connect 'changed' event")
 		}
@@ -83,7 +83,7 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func textarea_onChanged(buffer *gtk.TextBuffer, mounted *mountedTextArea) {
+func textareaOnChanged(buffer *gtk.TextBuffer, mounted *mountedTextArea) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -96,7 +96,7 @@ func textarea_onChanged(buffer *gtk.TextBuffer, mounted *mountedTextArea) {
 	mounted.onChange(text)
 }
 
-func textarea_onDestroy(widget *gtk.TextView, mounted *mountedTextArea) {
+func textareaOnDestroy(widget *gtk.TextView, mounted *mountedTextArea) {
 	mounted.handle = nil
 }
 
@@ -182,7 +182,7 @@ func (w *mountedTextArea) updateProps(data *TextArea) error {
 
 	w.onChange = data.OnChange
 	if data.OnChange != nil && w.shChange == 0 {
-		sh, err := buffer.Connect("changed", textinput_onChanged, w)
+		sh, err := buffer.Connect("changed", textinputOnChanged, w)
 		if err != nil {
 			panic("Failed to connect 'changed' event")
 		}

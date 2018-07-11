@@ -23,12 +23,12 @@ func (w *Label) mount(parent Control) (Element, error) {
 	handle.Show()
 
 	retval := &mountedLabel{Control: Control{&handle.Widget}}
-	handle.Connect("destroy", label_onDestroy, retval)
+	handle.Connect("destroy", labelOnDestroy, retval)
 
 	return retval, nil
 }
 
-func label_onDestroy(widget *gtk.Label, mounted *mountedLabel) {
+func labelOnDestroy(widget *gtk.Label, mounted *mountedLabel) {
 	mounted.handle = nil
 }
 

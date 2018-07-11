@@ -34,8 +34,8 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 		onChange: w.OnChange,
 	}
 
-	control.Connect("destroy", selectinput_onDestroy, retval)
-	retval.shChange = setSignalHandler(&control.Widget, 0, w.OnChange != nil, "changed", selectinput_onChanged, retval)
+	control.Connect("destroy", selectinputOnDestroy, retval)
+	retval.shChange = setSignalHandler(&control.Widget, 0, w.OnChange != nil, "changed", selectinputOnChanged, retval)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
 	control.Show()
@@ -43,7 +43,7 @@ func (w *SelectInput) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func selectinput_onChanged(widget *gtk.ComboBoxText, mounted *mountedSelectInput) {
+func selectinputOnChanged(widget *gtk.ComboBoxText, mounted *mountedSelectInput) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -51,7 +51,7 @@ func selectinput_onChanged(widget *gtk.ComboBoxText, mounted *mountedSelectInput
 	mounted.onChange(widget.GetActive())
 }
 
-func selectinput_onDestroy(widget *gtk.ComboBoxText, mounted *mountedSelectInput) {
+func selectinputOnDestroy(widget *gtk.ComboBoxText, mounted *mountedSelectInput) {
 	mounted.handle = nil
 }
 
@@ -72,7 +72,7 @@ func (w *mountedSelectInput) updateProps(data *SelectInput) error {
 
 	cbt.SetSensitive(!data.Disabled)
 	w.onChange = data.OnChange
-	w.shChange = setSignalHandler(&cbt.Widget, w.shChange, data.OnChange != nil, "changed", selectinput_onChanged, w)
+	w.shChange = setSignalHandler(&cbt.Widget, w.shChange, data.OnChange != nil, "changed", selectinputOnChanged, w)
 	w.onFocus.Set(&cbt.Widget, data.OnFocus)
 	w.onBlur.Set(&cbt.Widget, data.OnBlur)
 	return nil

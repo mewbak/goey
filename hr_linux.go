@@ -21,12 +21,12 @@ func (w *HR) mount(parent Control) (Element, error) {
 		Control: Control{&control.Widget},
 	}
 
-	control.Connect("destroy", hr_onDestroy, retval)
+	control.Connect("destroy", hrOnDestroy, retval)
 	control.Show()
 
 	return retval, nil
 }
 
-func hr_onDestroy(widget *gtk.Separator, mounted *mountedHR) {
+func hrOnDestroy(widget *gtk.Separator, mounted *mountedHR) {
 	mounted.handle = nil
 }

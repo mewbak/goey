@@ -31,8 +31,8 @@ func (w *DateInput) mount(parent Control) (Element, error) {
 		onChange: w.OnChange,
 	}
 
-	control.Connect("destroy", dateinput_onDestroy, retval)
-	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "day-selected", dateinput_onChanged, retval)
+	control.Connect("destroy", dateinputOnDestroy, retval)
+	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "day-selected", dateinputOnChanged, retval)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
 	control.Show()
@@ -40,7 +40,7 @@ func (w *DateInput) mount(parent Control) (Element, error) {
 	return retval, nil
 }
 
-func dateinput_onChanged(widget *gtk.Calendar, mounted *mountedDateInput) {
+func dateinputOnChanged(widget *gtk.Calendar, mounted *mountedDateInput) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -49,7 +49,7 @@ func dateinput_onChanged(widget *gtk.Calendar, mounted *mountedDateInput) {
 	mounted.onChange(time.Date(int(y), time.Month(m+1), int(d), 0, 0, 0, 0, time.Local))
 }
 
-func dateinput_onDestroy(widget *gtk.Calendar, mounted *mountedDateInput) {
+func dateinputOnDestroy(widget *gtk.Calendar, mounted *mountedDateInput) {
 	mounted.handle = nil
 }
 
@@ -63,7 +63,7 @@ func (w *mountedDateInput) updateProps(data *DateInput) error {
 	handle.SelectMonth(uint(data.Value.Month())-1, uint(data.Value.Year()))
 	handle.SelectDay(uint(data.Value.Day()))
 	w.onChange = data.OnChange
-	//w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "value-changed", intinput_onChanged, w)
+	//w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "value-changed", intinputOnChanged, w)
 	w.onFocus.Set(&handle.Widget, data.OnFocus)
 	w.onBlur.Set(&handle.Widget, data.OnBlur)
 

@@ -67,8 +67,8 @@ func newWindow(title string, child Widget) (*Window, error) {
 	}}
 	app.SetTitle(title)
 	app.SetBorderWidth(0)
-	app.Connect("destroy", mainwindow_onDestroy, retval)
-	app.Connect("size-allocate", mainwindow_onSizeAllocate, retval)
+	app.Connect("destroy", mainwindowOnDestroy, retval)
+	app.Connect("size-allocate", mainwindowOnSizeAllocate, retval)
 	app.SetDefaultSize(400, 400)
 	app.ShowAll()
 
@@ -249,13 +249,13 @@ func (w *windowImpl) updateWindowMinSize() {
 	w.handle.SetSizeRequest(request.X, request.Y)
 }
 
-func mainwindow_onDestroy(widget *gtk.Window, mw *Window) {
+func mainwindowOnDestroy(widget *gtk.Window, mw *Window) {
 	mw.handle = nil
 	if c := atomic.AddInt32(&mainWindowCount, -1); c == 0 {
 		gtk.MainQuit()
 	}
 }
 
-func mainwindow_onSizeAllocate(widget *gtk.Window, rect uintptr, mw *Window) {
+func mainwindowOnSizeAllocate(widget *gtk.Window, rect uintptr, mw *Window) {
 	mw.doLayout()
 }

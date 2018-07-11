@@ -36,17 +36,17 @@ func (w *TextInput) mount(parent Control) (Element, error) {
 		onEnterKey: w.OnEnterKey,
 	}
 
-	control.Connect("destroy", textinput_onDestroy, retval)
-	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "changed", textinput_onChanged, retval)
+	control.Connect("destroy", textinputOnDestroy, retval)
+	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "changed", textinputOnChanged, retval)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
-	retval.shEnterKey = setSignalHandler(&control.Widget, 0, retval.onEnterKey != nil, "activate", textinput_onActivate, retval)
+	retval.shEnterKey = setSignalHandler(&control.Widget, 0, retval.onEnterKey != nil, "activate", textinputOnActivate, retval)
 	control.Show()
 
 	return retval, nil
 }
 
-func textinput_onActivate(obj *glib.Object, mounted *mountedTextInput) {
+func textinputOnActivate(obj *glib.Object, mounted *mountedTextInput) {
 	// Not sure why, but the widget comes into this callback as a glib.Object,
 	// and not the gtk.Entry.  Need to wrap the value.  This pokes into the internals
 	// of the gtk package.
@@ -59,7 +59,7 @@ func textinput_onActivate(obj *glib.Object, mounted *mountedTextInput) {
 	mounted.onEnterKey(text)
 }
 
-func textinput_onChanged(widget *gtk.Entry, mounted *mountedTextInput) {
+func textinputOnChanged(widget *gtk.Entry, mounted *mountedTextInput) {
 	if mounted.onChange == nil {
 		return
 	}
@@ -72,7 +72,7 @@ func textinput_onChanged(widget *gtk.Entry, mounted *mountedTextInput) {
 	mounted.onChange(text)
 }
 
-func textinput_onDestroy(widget *gtk.Entry, mounted *mountedTextInput) {
+func textinputOnDestroy(widget *gtk.Entry, mounted *mountedTextInput) {
 	mounted.handle = nil
 }
 
@@ -113,11 +113,11 @@ func (w *mountedTextInput) updateProps(data *TextInput) error {
 	entry.SetSensitive(!data.Disabled)
 	entry.SetVisibility(!data.Password)
 	w.onChange = data.OnChange
-	w.shChange = setSignalHandler(&entry.Widget, w.shChange, data.OnChange != nil, "changed", textinput_onChanged, w)
+	w.shChange = setSignalHandler(&entry.Widget, w.shChange, data.OnChange != nil, "changed", textinputOnChanged, w)
 	w.onFocus.Set(&entry.Widget, data.OnFocus)
 	w.onBlur.Set(&entry.Widget, data.OnBlur)
 	w.onEnterKey = data.OnEnterKey
-	w.shEnterKey = setSignalHandler(&entry.Widget, w.shEnterKey, data.OnEnterKey != nil, "activate", textinput_onActivate, w)
+	w.shEnterKey = setSignalHandler(&entry.Widget, w.shEnterKey, data.OnEnterKey != nil, "activate", textinputOnActivate, w)
 
 	return nil
 }
