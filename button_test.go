@@ -60,7 +60,7 @@ func TestButtonClose(t *testing.T) {
 	)
 }
 
-func TestButtonEvents(t *testing.T) {
+func TestButtonFocus(t *testing.T) {
 	testingCheckFocusAndBlur(t,
 		&Button{Text: "A"},
 		&Button{Text: "B"},
@@ -68,7 +68,15 @@ func TestButtonEvents(t *testing.T) {
 	)
 }
 
-func TestButtonUpdateProps(t *testing.T) {
+func TestButtonClick(t *testing.T) {
+	testingCheckClick(t,
+		&Button{Text: "A"},
+		&Button{Text: "B"},
+		&Button{Text: "C"},
+	)
+}
+
+func TestButtonUpdate(t *testing.T) {
 	testingUpdateWidgets(t, []Widget{
 		&Button{Text: "A"},
 		&Button{Text: "D", Disabled: true},

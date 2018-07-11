@@ -201,6 +201,64 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...Widget) {
 	}
 }
 
+func testingCheckClick(t *testing.T, widgets ...Widget) {
+	log := bytes.NewBuffer(nil)
+
+	for i := byte(0); i < 3; i++ {
+		letter := 'a' + i
+		if elem, ok := widgets[i].(*Checkbox); ok {
+			elem.OnChange = func(value bool) {
+				log.Write([]byte{'c', letter})
+			}
+		} else {
+			s := reflect.ValueOf(widgets[i])
+			s.Elem().FieldByName("OnClick").Set(reflect.ValueOf(func() {
+				log.Write([]byte{'c', letter})
+			}))
+		}
+	}
+
+	init := func() error {
+		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
+		if err != nil {
+			t.Errorf("Failed to create window, %s", err)
+		}
+
+		go func(window *Window) {
+			// Run the actions, which are counted.
+			for i := 0; i < 3; i++ {
+				err := Do(func() error {
+					testingClick(t, window, i)
+					return nil
+				})
+				if err != nil {
+					t.Errorf("Error in Do, %s", err)
+				}
+			}
+
+			// Close the window
+			err := Do(func() error {
+				window.Close()
+				return nil
+			})
+			if err != nil {
+				t.Errorf("Error in Do, %s", err)
+			}
+		}(window)
+
+		return nil
+	}
+
+	err := Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
+	const want = "cacbcc"
+	if s := log.String(); s != want {
+		t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
+	}
+}
+
 func testingUpdateWidgets(t *testing.T, widgets []Widget, update []Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in

@@ -18,8 +18,16 @@ func TestCheckboxClose(t *testing.T) {
 	)
 }
 
-func TestCheckboxEvents(t *testing.T) {
+func TestCheckboxFocus(t *testing.T) {
 	testingCheckFocusAndBlur(t,
+		&Checkbox{Text: "A"},
+		&Checkbox{Text: "B"},
+		&Checkbox{Text: "C"},
+	)
+}
+
+func TestCheckboxClick(t *testing.T) {
+	testingCheckClick(t,
 		&Checkbox{Text: "A"},
 		&Checkbox{Text: "B"},
 		&Checkbox{Text: "C"},
