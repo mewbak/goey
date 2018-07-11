@@ -23,21 +23,23 @@ func init() {
 
 func boolToPolicy(value bool) gtk.PolicyType {
 	if value {
-		return gtk.POLICY_AUTOMATIC
+		return gtk.POLICY_ALWAYS
 	}
 	return gtk.POLICY_NEVER
 }
 
 type windowImpl struct {
-	handle           *gtk.Window
-	scroll           *gtk.ScrolledWindow
-	layout           *gtk.Layout
-	child            Element
-	childMinSize     Size
-	horizontalScroll bool
-	verticalScroll   bool
-	onClosing        func() bool
-	shClosing        glib.SignalHandle
+	handle                  *gtk.Window
+	scroll                  *gtk.ScrolledWindow
+	layout                  *gtk.Layout
+	child                   Element
+	childMinSize            Size
+	horizontalScroll        bool
+	horizontalScrollVisible bool
+	verticalScroll          bool
+	verticalScrollVisible   bool
+	onClosing               func() bool
+	shClosing               glib.SignalHandle
 }
 
 func newWindow(title string, child Widget) (*Window, error) {
@@ -71,6 +73,7 @@ func newWindow(title string, child Widget) (*Window, error) {
 	app.Connect("size-allocate", mainwindowOnSizeAllocate, retval)
 	app.SetDefaultSize(400, 400)
 	app.ShowAll()
+	retval.horizontalScroll, retval.verticalScroll = retval.scrollDefaults()
 
 	err = retval.setChild(child)
 	if err != nil {
@@ -89,7 +92,7 @@ func windowOnClosing(widget *gtk.Window, _ *gdk.Event, w *windowImpl) bool {
 	return w.onClosing()
 }
 
-func (w *windowImpl) doLayout() {
+func (w *windowImpl) onSize() {
 	if w.child == nil {
 		return
 	}
@@ -98,7 +101,35 @@ func (w *windowImpl) doLayout() {
 	DPI.X, DPI.Y = 96, 96
 
 	width, height := w.handle.GetSize()
-	size := w.layoutChild(Size{FromPixelsX(width), FromPixelsY(height)})
+	clientSize := Size{FromPixelsX(width), FromPixelsY(height)}
+	size := w.layoutChild(clientSize)
+	if w.horizontalScroll && w.verticalScroll {
+		// Show scroll bars if necessary.
+		w.showScrollV(size.Height, clientSize.Height)
+		ok := w.showScrollH(size.Width, clientSize.Width)
+		// Adding horizontal scroll take vertical space, so we need to check
+		// again for vertical scroll.
+		if ok {
+			_, height := w.handle.GetSize()
+			w.showScrollV(size.Height, FromPixelsY(height))
+		}
+	} else if w.verticalScroll {
+		// Show scroll bars if necessary.
+		ok := w.showScrollV(size.Height, clientSize.Height)
+		if ok {
+			width, height := w.handle.GetSize()
+			clientSize := Size{FromPixelsX(width), FromPixelsY(height)}
+			size = w.layoutChild(clientSize)
+		}
+	} else if w.horizontalScroll {
+		// Show scroll bars if necessary.
+		ok := w.showScrollH(size.Width, clientSize.Width)
+		if ok {
+			width, height := w.handle.GetSize()
+			clientSize := Size{FromPixelsX(width), FromPixelsY(height)}
+			size = w.layoutChild(clientSize)
+		}
+	}
 	w.layout.SetSize(uint(size.Width.PixelsX()), uint(size.Height.PixelsY()))
 	bounds := Rectangle{
 		Point{}, Point{size.Width, size.Height},
@@ -159,7 +190,7 @@ func (w *windowImpl) setChild(child Widget) (err error) {
 		// Constrain window size
 		w.updateWindowMinSize()
 		// Properties may have changed sizes, so we need to do layout.
-		w.doLayout()
+		w.onSize()
 	}
 	// ... and we're done
 	return err
@@ -168,7 +199,49 @@ func (w *windowImpl) setChild(child Widget) (err error) {
 func (w *windowImpl) setScroll(horz, vert bool) {
 	w.horizontalScroll = horz
 	w.verticalScroll = vert
-	w.scroll.SetPolicy(boolToPolicy(horz), boolToPolicy(vert))
+	// Hide the scrollbars as a reset
+	w.scroll.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_NEVER)
+	w.horizontalScrollVisible = false
+	w.verticalScrollVisible = false
+	// Redo layout to account for new box constraints, and show
+	// scrollbars if necessary
+	w.onSize()
+}
+
+func (w *windowImpl) showScrollH(width Length, clientWidth Length) bool {
+	if width > clientWidth {
+		if !w.horizontalScrollVisible {
+			// Show the scrollbar
+			w.scroll.SetPolicy(gtk.POLICY_ALWAYS, boolToPolicy(w.verticalScrollVisible))
+			w.horizontalScrollVisible = true
+			return true
+		}
+	} else if w.horizontalScrollVisible {
+		// Remove the scroll bar
+		w.scroll.SetPolicy(gtk.POLICY_NEVER, boolToPolicy(w.verticalScrollVisible))
+		w.horizontalScrollVisible = false
+		return true
+	}
+
+	return false
+}
+
+func (w *windowImpl) showScrollV(height Length, clientHeight Length) bool {
+	if height > clientHeight {
+		if !w.verticalScrollVisible {
+			// Show the scrollbar
+			w.scroll.SetPolicy(boolToPolicy(w.horizontalScrollVisible), gtk.POLICY_ALWAYS)
+			w.verticalScrollVisible = true
+			return true
+		}
+	} else if w.verticalScrollVisible {
+		// Remove the scroll bar
+		w.scroll.SetPolicy(boolToPolicy(w.horizontalScrollVisible), gtk.POLICY_NEVER)
+		w.verticalScrollVisible = false
+		return true
+	}
+
+	return false
 }
 
 func (w *windowImpl) setIcon(img image.Image) error {
@@ -257,5 +330,5 @@ func mainwindowOnDestroy(widget *gtk.Window, mw *Window) {
 }
 
 func mainwindowOnSizeAllocate(widget *gtk.Window, rect uintptr, mw *Window) {
-	mw.doLayout()
+	mw.onSize()
 }
