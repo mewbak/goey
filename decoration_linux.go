@@ -103,6 +103,15 @@ func (w *decorationElement) Close() {
 	}
 }
 
+func (w *decorationElement) props() *Decoration {
+	return &Decoration{
+		Fill:   w.fill,
+		Stroke: w.stroke,
+		Insets: w.insets,
+		Radius: w.radius,
+	}
+}
+
 func (w *decorationElement) SetBounds(bounds Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())

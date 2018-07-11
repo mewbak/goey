@@ -10,6 +10,15 @@ var (
 	white = color.RGBA{0xff, 0xff, 0xff, 0xff}
 )
 
+func (w *decorationElement) Props() Widget {
+	widget := w.props()
+	if w.child != nil {
+		widget.Child = w.child.(Proper).Props()
+	}
+
+	return widget
+}
+
 func decorationChildWidget(child Element) Widget {
 	if child == nil {
 		return nil

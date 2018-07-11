@@ -1,10 +1,11 @@
 package goey
 
 import (
-	"github.com/lxn/win"
 	"image/color"
 	"syscall"
 	"unsafe"
+
+	"github.com/lxn/win"
 )
 
 var (
@@ -152,7 +153,7 @@ func (w *decorationElement) Close() {
 	w.Control.Close()
 }
 
-func (w *decorationElement) Props() Widget {
+func (w *decorationElement) props() *Decoration {
 	// TODO:  Can we determine the color of the brush or pen?  That would allow
 	// to verify that the change has propagated right down to the WIN32
 	// API.  This code won't detect if their is skew between the colours stored
@@ -163,7 +164,6 @@ func (w *decorationElement) Props() Widget {
 		Stroke: w.stroke,
 		Insets: w.insets,
 		Radius: w.radius,
-		Child:  decorationChildWidget(w.child),
 	}
 }
 
