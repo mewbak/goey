@@ -68,7 +68,6 @@ func createWindow() error {
 	if err != nil {
 		return err
 	}
-	mw.SetScroll(false, true)
 	mainWindow = mw
 
 	// Set the icon

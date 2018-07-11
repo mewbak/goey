@@ -91,19 +91,53 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 	// all layout should happen in the GUI thread.
 	w.updateGlobalDPI()
 
-	// Get the client rect for the main window.  This is the layout region.
+	// Perform layout
 	rect := win.RECT{}
 	win.GetClientRect(hwnd, &rect)
-	size := w.layoutChild(Size{
+	clientSize := Size{
 		FromPixelsX(int(rect.Right - rect.Left)),
 		FromPixelsY(int(rect.Bottom - rect.Top)),
-	})
-	for w.showScroll(size, rect) {
-		win.GetClientRect(hwnd, &rect)
-		size = w.layoutChild(Size{
-			FromPixelsX(int(rect.Right - rect.Left)),
-			FromPixelsY(int(rect.Bottom - rect.Top)),
-		})
+	}
+	size := w.layoutChild(clientSize)
+
+	if w.horizontalScroll && w.verticalScroll {
+		// Show scroll bars if necessary.
+		w.showScrollV(size.Height, clientSize.Height)
+		ok := w.showScrollH(size.Width, clientSize.Width)
+		// Adding horizontal scroll take vertical space, so we need to check
+		// again for vertical scroll.
+		if ok {
+			win.GetClientRect(hwnd, &rect)
+			w.showScrollV(size.Height, FromPixelsY(int(rect.Bottom-rect.Top)))
+		}
+	}
+
+	if w.verticalScroll {
+		// Show scroll bars if necessary.
+		ok := w.showScrollV(size.Height, clientSize.Height)
+		if ok {
+			rect := win.RECT{}
+			win.GetClientRect(hwnd, &rect)
+			clientSize := Size{
+				FromPixelsX(int(rect.Right - rect.Left)),
+				FromPixelsY(int(rect.Bottom - rect.Top)),
+			}
+			size = w.layoutChild(clientSize)
+		}
+	}
+
+	if w.horizontalScroll {
+		// Show scroll bars if necessary.
+		ok := w.showScrollH(size.Width, clientSize.Width)
+		if ok {
+			rect := win.RECT{}
+			win.GetClientRect(hwnd, &rect)
+			clientSize := Size{
+				FromPixelsX(int(rect.Right - rect.Left)),
+				FromPixelsY(int(rect.Bottom - rect.Top)),
+			}
+			size = w.layoutChild(clientSize)
+		}
 	}
 	w.childSize = size
 
@@ -237,6 +271,7 @@ func (w *windowImpl) message(m *Message) {
 func (w *windowImpl) setChild(child Widget) (err error) {
 	// Update the child element
 	w.child, err = DiffChild(Control{w.hWnd}, w.child, child)
+	w.windowMinSize = image.Point{}
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
 	if w.child != nil {
@@ -350,60 +385,67 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 	}
 }
 
-func (w *windowImpl) showScroll(size Size, rect win.RECT) bool {
-	if w.horizontalScroll {
-		if size.Width > FromPixelsY(int(rect.Right-rect.Left)) {
-			if !w.horizontalScrollVisible {
-				// Create the scroll bar
-				win2.ShowScrollBar(w.hWnd, win.SB_HORZ, win.TRUE)
-				w.horizontalScrollVisible = true
-				return true
-			}
-			si := win.SCROLLINFO{
-				FMask: win.SIF_PAGE | win.SIF_RANGE,
-				NMin:  0,
-				NMax:  int32(size.Width.PixelsX()),
-				NPage: uint32(rect.Right - rect.Left),
-			}
-			si.CbSize = uint32(unsafe.Sizeof(si))
-			win.SetScrollInfo(w.hWnd, win.SB_HORZ, &si, true)
-			si.FMask = win.SIF_POS
-			win.GetScrollInfo(w.hWnd, win.SB_HORZ, &si)
-			w.horizontalScrollPos = FromPixelsX(int(si.NPos))
-		} else if w.horizontalScrollVisible {
-			// Remove the scroll bar
-			win2.ShowScrollBar(w.hWnd, win.SB_HORZ, win.FALSE)
-			w.horizontalScrollPos = 0
-			w.horizontalScrollVisible = false
+func (w *windowImpl) showScrollH(width Length, clientWidth Length) bool {
+	if width > clientWidth {
+		if !w.horizontalScrollVisible {
+			// Create the scroll bar
+			win2.ShowScrollBar(w.hWnd, win.SB_HORZ, win.TRUE)
+		}
+		si := win.SCROLLINFO{
+			FMask: win.SIF_PAGE | win.SIF_RANGE,
+			NMin:  0,
+			NMax:  int32(width.PixelsX()),
+			NPage: uint32(clientWidth.PixelsX()),
+		}
+		si.CbSize = uint32(unsafe.Sizeof(si))
+		win.SetScrollInfo(w.hWnd, win.SB_HORZ, &si, true)
+		si.FMask = win.SIF_POS
+		win.GetScrollInfo(w.hWnd, win.SB_HORZ, &si)
+		w.horizontalScrollPos = FromPixelsX(int(si.NPos))
+
+		if !w.horizontalScrollVisible {
+			w.horizontalScrollVisible = true
 			return true
 		}
+		return false
+	} else if w.horizontalScrollVisible {
+		// Remove the scroll bar
+		win2.ShowScrollBar(w.hWnd, win.SB_HORZ, win.FALSE)
+		w.horizontalScrollPos = 0
+		w.horizontalScrollVisible = false
+		return true
 	}
 
-	if w.verticalScroll {
-		if size.Height > FromPixelsY(int(rect.Bottom-rect.Top)) {
-			if !w.verticalScrollVisible {
-				// Create the scroll bar
-				win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.TRUE)
-				w.verticalScrollVisible = true
-				return true
-			}
-			si := win.SCROLLINFO{
-				FMask: win.SIF_PAGE | win.SIF_RANGE,
-				NMin:  0,
-				NMax:  int32(size.Height.PixelsY()),
-				NPage: uint32(rect.Bottom - rect.Top),
-			}
-			si.CbSize = uint32(unsafe.Sizeof(si))
-			win.SetScrollInfo(w.hWnd, win.SB_VERT, &si, true)
-			si.FMask = win.SIF_POS
-			win.GetScrollInfo(w.hWnd, win.SB_VERT, &si)
-			w.verticalScrollPos = FromPixelsY(int(si.NPos))
-		} else if w.verticalScrollVisible {
-			win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.FALSE)
-			w.verticalScrollPos = 0
-			w.verticalScrollVisible = false
+	return false
+}
+
+func (w *windowImpl) showScrollV(height Length, clientHeight Length) bool {
+	if height > clientHeight {
+		if !w.verticalScrollVisible {
+			// Create the scroll bar
+			win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.TRUE)
+		}
+		si := win.SCROLLINFO{
+			FMask: win.SIF_PAGE | win.SIF_RANGE,
+			NMin:  0,
+			NMax:  int32(height.PixelsY()),
+			NPage: uint32(clientHeight.PixelsY()),
+		}
+		si.CbSize = uint32(unsafe.Sizeof(si))
+		win.SetScrollInfo(w.hWnd, win.SB_VERT, &si, true)
+		si.FMask = win.SIF_POS
+		win.GetScrollInfo(w.hWnd, win.SB_VERT, &si)
+		w.verticalScrollPos = FromPixelsY(int(si.NPos))
+		if !w.verticalScrollVisible {
+			w.verticalScrollVisible = true
 			return true
 		}
+		return false
+	} else if w.verticalScrollVisible {
+		win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.FALSE)
+		w.verticalScrollPos = 0
+		w.verticalScrollVisible = false
+		return true
 	}
 
 	return false

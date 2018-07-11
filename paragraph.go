@@ -61,13 +61,7 @@ func (w *paragraphElement) Layout(bc Constraint) Size {
 		return Size{width, bc.ConstrainHeight(height)}
 	}
 
-	if bc.Min.Width > 0 {
-		width := bc.Min.Width
-		height := w.MinIntrinsicHeight(width)
-		return Size{width, bc.ConstrainHeight(height)}
-	}
-
-	width := bc.ConstrainWidth(w.maxReflowWidth())
+	width := bc.ConstrainWidth(w.minReflowWidth())
 	height := w.MinIntrinsicHeight(width)
 	return Size{width, bc.ConstrainHeight(height)}
 }
