@@ -110,9 +110,7 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 			win.GetClientRect(hwnd, &rect)
 			w.showScrollV(size.Height, FromPixelsY(int(rect.Bottom-rect.Top)))
 		}
-	}
-
-	if w.verticalScroll {
+	} else if w.verticalScroll {
 		// Show scroll bars if necessary.
 		ok := w.showScrollV(size.Height, clientSize.Height)
 		if ok {
@@ -124,9 +122,7 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 			}
 			size = w.layoutChild(clientSize)
 		}
-	}
-
-	if w.horizontalScroll {
+	} else if w.horizontalScroll {
 		// Show scroll bars if necessary.
 		ok := w.showScrollH(size.Width, clientSize.Width)
 		if ok {
