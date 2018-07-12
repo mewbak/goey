@@ -15,7 +15,7 @@ var (
 	// ErrNotRunning indicates that the main loop is not running.
 	ErrNotRunning = errors.New("main loop is not running")
 
-	// ErrAlreadyRunning indicates that the main loop is not running.
+	// ErrAlreadyRunning indicates that the main loop is already running.
 	ErrAlreadyRunning = errors.New("main loop is already running")
 )
 
@@ -25,14 +25,15 @@ var (
 
 // Run locks the OS thread to act as a GUI thread, and then iterates over the
 // event loop until there are no more instances of Window open.
-// If the main loop is already running, this function will return an error.
+// If the main loop is already running, this function will return an error
+// (ErrAlreadyRunning).
 //
 // Modification of the GUI should happen only on the GUI thread.  This includes
 // creating any windows, mounting any widgets, or updating the properties of any
 // elements.
 //
 // The parameter action takes a closure that can be used to initialize the GUI.
-// Any futher modifications to the GUI also need to be schedule on the GUI
+// Any futher modifications to the GUI also need to be scheduled on the GUI
 // thread, which can be done using the function Do.
 func Run(action func() error) error {
 	// Pin the GUI message loop to a single thread
@@ -60,13 +61,14 @@ func Run(action func() error) error {
 }
 
 // Do runs the passed function on the GUI thread.  If the event loop is not
-// running, this function will return an error.  Any error from the callback will
-// also be returned.
+// running, this function will return an error (ErrNotRunning).  Any error from
+// the callback will also be returned.
 //
 // Because this function involves asynronous communication with the GUI thread,
 // it can deadlock if called from the GUI thread.  It is therefore not safe to
 // use in any event callbacks from widgets.  However, since those callbacks are
-// executing on the GUI thread, the use of Do is also unnecessary.
+// executing on the GUI thread, the use of Do is also unnecessary in that
+// context.
 //
 // Note, this function contains a race-condition, in that the the action may be
 // scheduled while the event loop is being terminated, in which case the
@@ -86,7 +88,7 @@ func Do(action func() error) error {
 	return do(action)
 }
 
-// Loop run one interation of the event loop.  This function's use by user code
+// Loop runs one interation of the event loop.  This function's use by user code
 // should be very rare.
 //
 // This function is only safe to call on the GUI thread.
