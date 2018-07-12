@@ -78,6 +78,10 @@ func (w *Img) UpdateDimensions() {
 }
 
 func (w *imgElement) UpdateProps(data Widget) error {
+	img := data.(*Img)
+
+	// Fill in the height and width if they are left at zero.
+	img.UpdateDimensions()
 	// Forward to the platform-dependant code
 	return w.updateProps(data.(*Img))
 }
