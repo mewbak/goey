@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"runtime"
 	"sync/atomic"
 	"testing"
 )
@@ -19,6 +20,23 @@ func ExampleKind_String() {
 
 type Proper interface {
 	Props() Widget
+}
+
+func equal(t *testing.T, lhs, rhs Widget) bool {
+	// On windows, the message EM_GETCUEBANNER does not work unless the manifest
+	// is set correctly.  This cannot be done for the package, since that
+	// manifest will conflict with the manifest of any app.
+	if runtime.GOOS == "windows" {
+		if value := reflect.ValueOf(rhs).Elem().FieldByName("Placeholder"); value.IsValid() {
+			placeholder := value.String()
+			if placeholder != "" {
+				t.Logf("Zeroing 'Placeholder' field during test")
+			}
+			value.SetString("")
+		}
+	}
+
+	return reflect.DeepEqual(lhs, rhs)
 }
 
 func testingRenderWidgets(t *testing.T, widgets ...Widget) {
@@ -55,7 +73,7 @@ func testingRenderWidgets(t *testing.T, widgets ...Widget) {
 						if n1, n2 := data.Kind(), widgets[i].Kind(); n1 != n2 {
 							t.Errorf("Wanted data.Kind() == widgets[%d].Kind(), got %s and %s", i, n1, n2)
 						}
-						if !reflect.DeepEqual(data, widgets[i]) {
+						if !equal(t, data, widgets[i]) {
 							t.Errorf("Wanted data == widgets[i], got %v and %v", data, widgets[i])
 						}
 					} else {
@@ -304,7 +322,7 @@ func testingUpdateWidgets(t *testing.T, widgets []Widget, update []Widget) {
 						if n1, n2 := data.Kind(), update[i].Kind(); n1 != n2 {
 							t.Errorf("Wanted data.Kind() == update[%d].Kind(), got %s and %s", i, n1, n2)
 						}
-						if !reflect.DeepEqual(data, update[i]) {
+						if !equal(t, data, update[i]) {
 							t.Errorf("Wanted data == update[i], got %v and %v", data, update[i])
 						}
 					} else {
