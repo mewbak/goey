@@ -1,9 +1,16 @@
+// This package provides an example application built using the goey package
+// that demontrates using the Decoration widget.  Clicking the button will cycle
+// through various background colours, occasionally adding a border, and also
+// cycle through increasing the border radius.
+//
+// The management of scrollbars can be tested by using the environment variable
+// GOEY_SCROLL.  Allowed values are 0 through 3, which enable no scrollbars,
+// the vertical scrollbar, the horizontal scrollbar, or both scrollbars.
 package main
 
 import (
 	"fmt"
 	"image/color"
-	"os"
 	"strconv"
 
 	"bitbucket.org/rj/goey"
@@ -29,13 +36,10 @@ func main() {
 }
 
 func createWindow() error {
-	setscroll := os.Getenv("GOEY_SETSCROLL") != ""
-
 	mw, err := goey.NewWindow("One Button", render())
 	if err != nil {
 		return err
 	}
-	mw.SetScroll(setscroll, setscroll)
 	mainWindow = mw
 
 	return nil

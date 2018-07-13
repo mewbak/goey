@@ -1,6 +1,7 @@
-// Package main for an example application using the goey package to show
-// two editable multiline text fields.  As the fields are edited, a
-// status line with the total count of characters is maintained.
+// This package provides an example application built using the goey package.
+// that demontrates two multiline text fields.  A status bar shows the combined
+// count of characters in both fields, showing how the GUI can be easily kept
+// in sync with changes to data.
 package main
 
 import (
@@ -28,7 +29,7 @@ func createWindow() error {
 	if err != nil {
 		return err
 	}
-	mw.SetScroll(false,true)
+	mw.SetScroll(false, true)
 	mainWindow = mw
 	return nil
 }

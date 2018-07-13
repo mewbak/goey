@@ -1,3 +1,11 @@
+// This package provides an example application built using the goey package
+// that demontrates using the Image widget.  Clicking the button will cycle
+// through images that are a uniform colour, as well as an/ image of the Go
+// mascot.
+//
+// The management of scrollbars can be tested by using the environment variable
+// GOEY_SCROLL.  Allowed values are 0 through 3, which enable no scrollbars,
+// the vertical scrollbar, the horizontal scrollbar, or both scrollbars.
 package main
 
 import (

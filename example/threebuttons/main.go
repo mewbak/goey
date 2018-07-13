@@ -1,8 +1,18 @@
-// Package main for an example application using the goey package to show
-// three button which different event behaviours.  The top button maintains a
-// running count of how many times it has been clicked.  The middle button
-// changes the vertical alignment of the buttons.  The bottom button changes
-// the horizontal alignment.
+// This package provides an example application built using the goey package.
+// that demontrates three button with different behaviours.  The top button
+// maintains a running count of how many times it has been clicked.  The middle
+// button changes the vertical alignment of the buttons.  The bottom button
+// changes the horizontal alignment.
+//
+// The different values for MainAxisAlignemtn and CrossAxisAlignment can be
+// explored with this example.
+//
+// The management of scrollbars can be tested by using the environment variable
+// GOEY_SCROLL.  Allowed values are 0 through 3, which enable no scrollbars,
+// the vertical scrollbar, the horizontal scrollbar, or both scrollbars.
+//
+// Setting the environment variable GOEY_DIR=1 will change the layout of the
+// buttons from vertical to horizontal.
 package main
 
 import (
