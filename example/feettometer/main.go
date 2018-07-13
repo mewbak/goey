@@ -1,6 +1,11 @@
-// Package main for an example application using the goey package to display
-// various images.  The images can be cycled by clicking a button, and each
-// image has an associated description.
+// This package provides an example application built using the goey package
+// that rebuilds the classic Tcl/Tk tutorial application.  The example also
+// shows the use of a custom layout container, MinSizedBox, showing that new
+// layouts can be developped outside of the main package, and used portably.
+//
+// The management of scrollbars can be tested by using the environment variable
+// GOEY_SCROLL.  Allowed values are 0 through 3, which enable no scrollbars,
+// the vertical scrollbar, the horizontal scrollbar, or both scrollbars.
 package main
 
 import (
@@ -44,7 +49,7 @@ func update() {
 func render() goey.Widget {
 	return &goey.Padding{
 		Insets: goey.DefaultInsets(),
-		Child: &goey.VBox{
+		Child: &goey.Align{Child: &MinSizedBox{Child: &goey.VBox{
 			AlignMain: goey.MainCenter,
 			Children: []goey.Widget{
 				&goey.HBox{
@@ -73,7 +78,7 @@ func render() goey.Widget {
 					},
 				},
 			},
-		},
+		}}},
 	}
 }
 
