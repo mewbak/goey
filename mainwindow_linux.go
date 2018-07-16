@@ -2,11 +2,9 @@ package goey
 
 import (
 	"image"
-	"os"
 	"sync/atomic"
 	"unsafe"
 
-	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -79,9 +77,6 @@ func newWindow(title string, child Widget) (*Window, error) {
 	if err != nil {
 		app.Destroy()
 		return nil, err
-	}
-	if len(os.Getenv("GOEY_DEBUGGING")) > 0 {
-		syscall.WindowSetInteractiveDebugging(true)
 	}
 	retval.setScroll(retval.scrollDefaults())
 

@@ -47,25 +47,12 @@ func PixbufNewFromBytes(bytes []uint8, colorspace gdk.Colorspace, hasAlpha bool,
 	return &gdk.Pixbuf{glib.Take(unsafe.Pointer(ret))}
 }
 
-// LayoutGetVAdjustment is a wrapper around gtk_layout_get_vadjustment.
-func LayoutGetVAdjustment(widget *gtk.Layout) *gtk.Adjustment {
-	p := unsafe.Pointer(widget.GObject)
-	a := C.gtk_layout_get_vadjustment((*C.GtkLayout)(p))
-	obj := glib.Take(unsafe.Pointer(a))
-	return &gtk.Adjustment{glib.InitiallyUnowned{obj}}
-}
-
 // WidgetGetPreferredHeightForWidth is a wrapper around gtk_widget_get_preferred_height_for_width.
 func WidgetGetPreferredHeightForWidth(widget *gtk.Widget, width int) (int, int) {
 	var minimum, natural C.gint
 	p := unsafe.Pointer(widget.GObject)
 	C.gtk_widget_get_preferred_height_for_width((*C.GtkWidget)(p), C.gint(width), &minimum, &natural)
 	return int(minimum), int(natural)
-}
-
-// WindowSetInteractiveDebugging is a wrapper around gtk_window_set_interactive_debugging.
-func WindowSetInteractiveDebugging(enable bool) {
-	C.gtk_window_set_interactive_debugging(fromBool(enable))
 }
 
 // SetBounds is a specialized wrapper around gtk_widget_size_allocate.  However,
