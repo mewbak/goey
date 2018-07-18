@@ -152,6 +152,7 @@ func (w *textareaElement) Props() Widget {
 	return &TextArea{
 		Value:    value,
 		Disabled: !w.handle.GetSensitive(),
+		MinLines: w.minLines,
 		OnChange: w.onChange,
 		OnFocus:  w.onFocus.callback,
 		OnBlur:   w.onBlur.callback,
@@ -180,6 +181,7 @@ func (w *textareaElement) updateProps(data *TextArea) error {
 		buffer.SetText(data.Value)
 	}
 
+	w.minLines = data.MinLines
 	w.onChange = data.OnChange
 	if data.OnChange != nil && w.shChange == 0 {
 		sh, err := buffer.Connect("changed", textinputOnChanged, w)
