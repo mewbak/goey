@@ -5,7 +5,7 @@ import (
 	"image"
 )
 
-func ExampleSize() {
+func ExampleSize_FromPixels() {
 	// Most code should not need to worry about setting the DPI.  Windows will
 	// ensure that the DPI is set.
 	DPI = image.Point{96, 96}
