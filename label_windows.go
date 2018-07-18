@@ -4,6 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
 )
@@ -30,7 +31,7 @@ func (w *Label) mount(parent base.Control) (base.Element, error) {
 	hwnd := win.CreateWindowEx(0, staticClassName, &text[0],
 		win.WS_CHILD|win.WS_VISIBLE|win.SS_LEFT,
 		10, 10, 100, 100,
-		parent.hWnd, 0, 0, nil)
+		parent.HWnd, 0, 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -55,7 +56,7 @@ type labelElement struct {
 	text []uint16
 }
 
-func (w *labelElement) Props() Widget {
+func (w *labelElement) Props() base.Widget {
 	return &Label{
 		Text: w.Control.Text(),
 	}
@@ -64,17 +65,17 @@ func (w *labelElement) Props() Widget {
 func (w *labelElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
-	return bc.Constrain(Size{width, height})
+	return bc.Constrain(base.Size{width, height})
 }
 
-func (w *labelElement) MinIntrinsicHeight(Length) Length {
+func (w *labelElement) MinIntrinsicHeight(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 13 * DIP
 }
 
-func (w *labelElement) MinIntrinsicWidth(Length) Length {
+func (w *labelElement) MinIntrinsicWidth(base.Length) base.Length {
 	width, _ := w.CalcRect(w.text)
-	return FromPixelsX(int(width))
+	return base.FromPixelsX(int(width))
 }
 
 func (w *labelElement) SetBounds(bounds base.Rectangle) {

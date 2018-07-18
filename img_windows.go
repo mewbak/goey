@@ -6,6 +6,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
 )
@@ -114,7 +115,7 @@ func (w *Img) mount(parent base.Control) (base.Element, error) {
 	hwnd := win.CreateWindowEx(0, staticClassName, nil,
 		win.WS_CHILD|win.WS_VISIBLE|win.SS_BITMAP|win.SS_LEFT,
 		10, 10, 100, 100,
-		parent.hWnd, 0, 0, nil)
+		parent.HWnd, 0, 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -138,11 +139,11 @@ func (w *Img) mount(parent base.Control) (base.Element, error) {
 type imgElement struct {
 	Control
 	imageData []uint8
-	width     Length
-	height    Length
+	width     base.Length
+	height    base.Length
 }
 
-func (w *imgElement) Props() Widget {
+func (w *imgElement) Props() base.Widget {
 	// Need to recreate the image from the HBITMAP
 	hbitmap := win.HBITMAP(win.SendMessage(w.hWnd, win2.STM_GETIMAGE, 0 /*IMAGE_BITMAP*/, 0))
 	if hbitmap == 0 {

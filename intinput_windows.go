@@ -5,6 +5,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/lxn/win"
 )
 
@@ -21,7 +22,7 @@ func (w *IntInput) mount(parent base.Control) (base.Element, error) {
 	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, edit.className, text,
 		style,
 		10, 10, 100, 100,
-		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
+		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {

@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
 )
@@ -53,15 +54,15 @@ type windowImpl struct {
 	dpi                     image.Point
 	windowRectDelta         image.Point
 	windowMinSize           image.Point
-	child                   Element
-	childSize               Size
+	child                   base.Element
+	childSize               base.Size
 	onClosing               func() bool
 	horizontalScroll        bool
 	horizontalScrollVisible bool
-	horizontalScrollPos     Length
+	horizontalScrollPos     base.Length
 	verticalScroll          bool
 	verticalScrollVisible   bool
-	verticalScrollPos       Length
+	verticalScrollPos       base.Length
 }
 
 func registerMainWindowClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, error) {
@@ -94,9 +95,9 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 	// Perform layout
 	rect := win.RECT{}
 	win.GetClientRect(hwnd, &rect)
-	clientSize := Size{
-		FromPixelsX(int(rect.Right - rect.Left)),
-		FromPixelsY(int(rect.Bottom - rect.Top)),
+	clientSize := base.Size{
+		base.FromPixelsX(int(rect.Right - rect.Left)),
+		base.FromPixelsY(int(rect.Bottom - rect.Top)),
 	}
 	size := w.layoutChild(clientSize)
 
@@ -108,7 +109,7 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 		// again for vertical scroll.
 		if ok {
 			win.GetClientRect(hwnd, &rect)
-			w.showScrollV(size.Height, FromPixelsY(int(rect.Bottom-rect.Top)))
+			w.showScrollV(size.Height, base.FromPixelsY(int(rect.Bottom-rect.Top)))
 		}
 	} else if w.verticalScroll {
 		// Show scroll bars if necessary.
@@ -116,9 +117,9 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 		if ok {
 			rect := win.RECT{}
 			win.GetClientRect(hwnd, &rect)
-			clientSize := Size{
-				FromPixelsX(int(rect.Right - rect.Left)),
-				FromPixelsY(int(rect.Bottom - rect.Top)),
+			clientSize := base.Size{
+				base.FromPixelsX(int(rect.Right - rect.Left)),
+				base.FromPixelsY(int(rect.Bottom - rect.Top)),
 			}
 			size = w.layoutChild(clientSize)
 		}
@@ -128,9 +129,9 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 		if ok {
 			rect := win.RECT{}
 			win.GetClientRect(hwnd, &rect)
-			clientSize := Size{
-				FromPixelsX(int(rect.Right - rect.Left)),
-				FromPixelsY(int(rect.Bottom - rect.Top)),
+			clientSize := base.Size{
+				base.FromPixelsX(int(rect.Right - rect.Left)),
+				base.FromPixelsY(int(rect.Bottom - rect.Top)),
 			}
 			size = w.layoutChild(clientSize)
 		}
@@ -138,16 +139,16 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 	w.childSize = size
 
 	// Position the child element.
-	w.child.SetBounds(Rectangle{
-		Point{-w.horizontalScrollPos, -w.verticalScrollPos},
-		Point{size.Width - w.horizontalScrollPos, size.Height - w.verticalScrollPos},
+	w.child.SetBounds(base.Rectangle{
+		base.Point{-w.horizontalScrollPos, -w.verticalScrollPos},
+		base.Point{size.Width - w.horizontalScrollPos, size.Height - w.verticalScrollPos},
 	})
 
 	// Update the position of all of the children
 	win.InvalidateRect(hwnd, &rect, true)
 }
 
-func newWindow(title string, child Widget) (*Window, error) {
+func newWindow(title string, child base.Widget) (*Window, error) {
 	const Width = 640
 	const Height = 480
 
@@ -246,7 +247,7 @@ func (w *windowImpl) close() {
 	win.OleUninitialize()
 }
 
-func (w *windowImpl) getChild() Element {
+func (w *windowImpl) getChild() base.Element {
 	return w.child
 }
 
@@ -264,9 +265,9 @@ func (w *windowImpl) message(m *Message) {
 // setChild updates the child element of the window.  It also updates any
 // cached data linked to the child element, in particular the window's
 // minimum size.  This function will also perform layout on the child.
-func (w *windowImpl) setChild(child Widget) (err error) {
+func (w *windowImpl) setChild(child base.Widget) (err error) {
 	// Update the child element
-	w.child, err = base.DiffChild(Control{w.hWnd}, w.child, child)
+	w.child, err = base.DiffChild(base.Control{w.hWnd}, w.child, child)
 	w.windowMinSize = image.Point{}
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
@@ -365,15 +366,15 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 	// If the position has changed, scroll window and update it.
 	if si.NPos != currentPos {
 		if direction == win.SB_HORZ {
-			w.horizontalScrollPos = FromPixelsX(int(si.NPos))
+			w.horizontalScrollPos = base.FromPixelsX(int(si.NPos))
 		} else {
-			w.verticalScrollPos = FromPixelsY(int(si.NPos))
+			w.verticalScrollPos = base.FromPixelsY(int(si.NPos))
 		}
 		rect := win.RECT{}
 		win.GetClientRect(w.hWnd, &rect)
-		w.child.SetBounds(Rectangle{
-			Point{-w.horizontalScrollPos, -w.verticalScrollPos},
-			Point{w.childSize.Width - w.horizontalScrollPos, w.childSize.Height - w.verticalScrollPos},
+		w.child.SetBounds(base.Rectangle{
+			base.Point{-w.horizontalScrollPos, -w.verticalScrollPos},
+			base.Point{w.childSize.Width - w.horizontalScrollPos, w.childSize.Height - w.verticalScrollPos},
 		})
 
 		// TODO:  Use ScrollWindow function to reduce flicker during scrolling
@@ -381,7 +382,7 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 	}
 }
 
-func (w *windowImpl) showScrollH(width Length, clientWidth Length) bool {
+func (w *windowImpl) showScrollH(width base.Length, clientWidth base.Length) bool {
 	if width > clientWidth {
 		if !w.horizontalScrollVisible {
 			// Create the scroll bar
@@ -397,7 +398,7 @@ func (w *windowImpl) showScrollH(width Length, clientWidth Length) bool {
 		win.SetScrollInfo(w.hWnd, win.SB_HORZ, &si, true)
 		si.FMask = win.SIF_POS
 		win.GetScrollInfo(w.hWnd, win.SB_HORZ, &si)
-		w.horizontalScrollPos = FromPixelsX(int(si.NPos))
+		w.horizontalScrollPos = base.FromPixelsX(int(si.NPos))
 
 		if !w.horizontalScrollVisible {
 			w.horizontalScrollVisible = true
@@ -415,7 +416,7 @@ func (w *windowImpl) showScrollH(width Length, clientWidth Length) bool {
 	return false
 }
 
-func (w *windowImpl) showScrollV(height Length, clientHeight Length) bool {
+func (w *windowImpl) showScrollV(height base.Length, clientHeight base.Length) bool {
 	if height > clientHeight {
 		if !w.verticalScrollVisible {
 			// Create the scroll bar
@@ -431,7 +432,7 @@ func (w *windowImpl) showScrollV(height Length, clientHeight Length) bool {
 		win.SetScrollInfo(w.hWnd, win.SB_VERT, &si, true)
 		si.FMask = win.SIF_POS
 		win.GetScrollInfo(w.hWnd, win.SB_VERT, &si)
-		w.verticalScrollPos = FromPixelsY(int(si.NPos))
+		w.verticalScrollPos = base.FromPixelsY(int(si.NPos))
 		if !w.verticalScrollVisible {
 			w.verticalScrollVisible = true
 			return true
@@ -466,7 +467,7 @@ func (w *windowImpl) setTitle(value string) error {
 }
 
 func (w *windowImpl) updateGlobalDPI() {
-	DPI = image.Point{int(float32(w.dpi.X) * Scale), int(float32(w.dpi.Y) * Scale)}
+	base.DPI = image.Point{int(float32(w.dpi.X) * Scale), int(float32(w.dpi.Y) * Scale)}
 }
 
 func (w *windowImpl) updateWindowMinSize() {
@@ -495,31 +496,31 @@ func (w *windowImpl) updateWindowMinSize() {
 	// Determine the minimum size (in pixels) for the child of the window
 	w.updateGlobalDPI()
 	if w.horizontalScroll && w.verticalScroll {
-		width := w.child.MinIntrinsicWidth(Inf)
-		height := w.child.MinIntrinsicHeight(Inf)
+		width := w.child.MinIntrinsicWidth(base.Inf)
+		height := w.child.MinIntrinsicHeight(base.Inf)
 		w.windowMinSize = image.Point{
 			width.PixelsX() + dx,
 			height.PixelsY() + dy,
 		}
 	} else if w.horizontalScroll {
-		height := w.child.MinIntrinsicHeight(Inf)
-		size := w.child.Layout(TightHeight(height))
+		height := w.child.MinIntrinsicHeight(base.Inf)
+		size := w.child.Layout(base.TightHeight(height))
 		w.windowMinSize = image.Point{
 			size.Width.PixelsX() + dx,
 			size.Height.PixelsY() + dy,
 		}
 	} else if w.verticalScroll {
-		width := w.child.MinIntrinsicWidth(Inf)
-		size := w.child.Layout(TightWidth(width))
+		width := w.child.MinIntrinsicWidth(base.Inf)
+		size := w.child.Layout(base.TightWidth(width))
 		w.windowMinSize = image.Point{
 			size.Width.PixelsX() + dx,
 			size.Height.PixelsY() + dy,
 		}
 	} else {
-		width := w.child.MinIntrinsicWidth(Inf)
-		height := w.child.MinIntrinsicHeight(Inf)
-		size1 := w.child.Layout(TightWidth(width))
-		size2 := w.child.Layout(TightHeight(height))
+		width := w.child.MinIntrinsicWidth(base.Inf)
+		height := w.child.MinIntrinsicHeight(base.Inf)
+		size1 := w.child.Layout(base.TightWidth(width))
+		size2 := w.child.Layout(base.TightHeight(height))
 		w.windowMinSize = image.Point{
 			max(width, size2.Width).PixelsX() + dx,
 			max(height, size1.Height).PixelsY() + dy,

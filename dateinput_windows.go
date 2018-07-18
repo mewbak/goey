@@ -5,6 +5,7 @@ import (
 	"time"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
 )
@@ -38,7 +39,7 @@ func (w *DateInput) mount(parent base.Control) (base.Element, error) {
 	hwnd := win.CreateWindowEx(0, datetimepickClassName, nil,
 		style,
 		10, 10, 100, 100,
-		parent.hWnd, 0, 0, nil)
+		parent.HWnd, 0, 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -83,20 +84,20 @@ type dateinputElement struct {
 func (w *dateinputElement) Layout(bc base.Constraints) base.Size {
 	height := w.MinIntrinsicHeight(0)
 	width := w.MinIntrinsicWidth(0)
-	return bc.Constrain(Size{width, height})
+	return bc.Constrain(base.Size{width, height})
 }
 
-func (w *dateinputElement) MinIntrinsicHeight(Length) Length {
+func (w *dateinputElement) MinIntrinsicHeight(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23 * DIP
 }
 
-func (w *dateinputElement) MinIntrinsicWidth(Length) Length {
+func (w *dateinputElement) MinIntrinsicWidth(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 75 * DIP
 }
 
-func (w *dateinputElement) Props() Widget {
+func (w *dateinputElement) Props() base.Widget {
 	st := win.SYSTEMTIME{}
 	win.SendMessage(w.hWnd, win.DTM_GETSYSTEMTIME, 0, uintptr(unsafe.Pointer(&st)))
 

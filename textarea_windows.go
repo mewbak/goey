@@ -4,6 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/lxn/win"
 )
 
@@ -20,7 +21,7 @@ func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, edit.className, text,
 		style,
 		10, 10, 100, 100,
-		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
+		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -73,16 +74,16 @@ type textareaElement struct {
 func (w *textareaElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
-	return bc.Constrain(Size{width, height})
+	return bc.Constrain(base.Size{width, height})
 }
 
-func (w *textareaElement) MinIntrinsicHeight(Length) Length {
+func (w *textareaElement) MinIntrinsicHeight(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	const lineHeight = 16 * DIP
 	return 23*DIP + lineHeight.Scale(w.minLines-1, 1)
 }
 
-func (w *textareaElement) Props() Widget {
+func (w *textareaElement) Props() base.Widget {
 	var buffer [80]uint16
 	win.SendMessage(w.hWnd, win.EM_GETCUEBANNER, uintptr(unsafe.Pointer(&buffer[0])), 80)
 	ndx := 0

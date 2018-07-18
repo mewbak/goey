@@ -1,10 +1,12 @@
 package goey
 
 import (
-	win2 "bitbucket.org/rj/goey/syscall"
-	"github.com/lxn/win"
 	"syscall"
 	"unsafe"
+
+	"bitbucket.org/rj/goey/base"
+	win2 "bitbucket.org/rj/goey/syscall"
+	"github.com/lxn/win"
 )
 
 var (
@@ -42,7 +44,7 @@ func (w *TextInput) mount(parent base.Control) (base.Element, error) {
 	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, edit.className, text,
 		style,
 		10, 10, 100, 100,
-		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
+		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -98,7 +100,7 @@ type textinputElement struct {
 	textinputElementBase
 }
 
-func (w *textinputElement) Props() Widget {
+func (w *textinputElement) Props() base.Widget {
 	var buffer [80]uint16
 	win.SendMessage(w.hWnd, win.EM_GETCUEBANNER, uintptr(unsafe.Pointer(&buffer[0])), 80)
 	ndx := 0
@@ -126,15 +128,15 @@ func (w *textinputElement) Props() Widget {
 func (w *textinputElementBase) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
-	return bc.Constrain(Size{width, height})
+	return bc.Constrain(base.Size{width, height})
 }
 
-func (w *textinputElementBase) MinIntrinsicHeight(Length) Length {
+func (w *textinputElementBase) MinIntrinsicHeight(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23 * DIP
 }
 
-func (w *textinputElementBase) MinIntrinsicWidth(Length) Length {
+func (w *textinputElementBase) MinIntrinsicWidth(base.Length) base.Length {
 	// TODO
 	return 75 * DIP
 }

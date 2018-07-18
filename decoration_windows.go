@@ -5,6 +5,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/lxn/win"
 )
 
@@ -43,7 +44,7 @@ func (w *Decoration) mount(parent base.Control) (base.Element, error) {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE)
 	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, decoration.className, nil, style,
 		10, 10, 100, 100,
-		parent.hWnd, 0, 0, nil)
+		parent.HWnd, 0, 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -64,7 +65,7 @@ func (w *Decoration) mount(parent base.Control) (base.Element, error) {
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	if w.Child != nil {
-		child, err := w.Child.Mount(Control{hwnd})
+		child, err := w.Child.Mount(base.Control{hwnd})
 		if err != nil {
 			win.DestroyWindow(hwnd)
 			return nil, err
@@ -80,12 +81,12 @@ type decorationElement struct {
 	fill   color.RGBA
 	stroke color.RGBA
 	insets Insets
-	radius Length
+	radius base.Length
 	hBrush win.HBRUSH
 	hPen   win.HPEN
 
-	child     Element
-	childSize Size
+	child     base.Element
+	childSize base.Size
 }
 
 func createBrush(clr color.RGBA) win.HBRUSH {
@@ -172,8 +173,8 @@ func (w *decorationElement) SetBounds(bounds base.Rectangle) {
 	w.Control.SetBounds(bounds)
 
 	if w.child != nil {
-		px := FromPixelsX(1)
-		py := FromPixelsY(1)
+		px := base.FromPixelsX(1)
+		py := base.FromPixelsY(1)
 		position := bounds.Min
 		bounds.Min.X += px + w.insets.Left - position.X
 		bounds.Min.Y += py + w.insets.Top - position.Y
@@ -221,7 +222,7 @@ func (w *decorationElement) updateProps(data *Decoration) error {
 	w.insets = data.Insets
 	w.radius = data.Radius
 
-	child, err := base.DiffChild(Control{w.hWnd}, w.child, data.Child)
+	child, err := base.DiffChild(base.Control{w.hWnd}, w.child, data.Child)
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"bitbucket.org/rj/goey/base"
 	"github.com/lxn/win"
 	"syscall"
 	"unsafe"
@@ -34,7 +35,7 @@ func (w *Button) mount(parent base.Control) (base.Element, error) {
 
 	hwnd := win.CreateWindowEx(0, button.className, &text[0], style,
 		10, 10, 100, 100,
-		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
+		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -76,7 +77,7 @@ type buttonElement struct {
 	onBlur  func()
 }
 
-func (w *buttonElement) Props() Widget {
+func (w *buttonElement) Props() base.Widget {
 	return &Button{
 		Text:     w.Control.Text(),
 		Disabled: !win.IsWindowEnabled(w.hWnd),
@@ -90,20 +91,20 @@ func (w *buttonElement) Props() Widget {
 func (w *buttonElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
-	return bc.Constrain(Size{width, height})
+	return bc.Constrain(base.Size{width, height})
 }
 
-func (w *buttonElement) MinIntrinsicHeight(Length) Length {
+func (w *buttonElement) MinIntrinsicHeight(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 23 * DIP
 }
 
-func (w *buttonElement) MinIntrinsicWidth(Length) Length {
+func (w *buttonElement) MinIntrinsicWidth(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	width, _ := w.CalcRect(w.text)
 	return max(
 		75*DIP,
-		FromPixelsX(int(width)+7),
+		base.FromPixelsX(int(width)+7),
 	)
 }
 

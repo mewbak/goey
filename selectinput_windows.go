@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"bitbucket.org/rj/goey/base"
 	"github.com/lxn/win"
 	"syscall"
 	"unsafe"
@@ -26,7 +27,7 @@ func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
 	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, comboboxClassName, nil,
 		win.WS_CHILD|win.WS_VISIBLE|win.WS_TABSTOP|win.CBS_DROPDOWNLIST,
 		10, 10, 100, 100,
-		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
+		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -84,13 +85,13 @@ type selectinputElement struct {
 	onBlur   func()
 
 	longestString  string
-	preferredWidth Length
+	preferredWidth base.Length
 }
 
 func (w *selectinputElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
-	return bc.Constrain(Size{width, height})
+	return bc.Constrain(base.Size{width, height})
 }
 
 func (w *selectinputElement) MinIntrinsicHeight(width base.Length) base.Length {
@@ -105,7 +106,7 @@ func (w *selectinputElement) MinIntrinsicWidth(height base.Length) base.Length {
 			w.preferredWidth = 75 * DIP
 		} else {
 			width, _ := w.CalcRect(text)
-			w.preferredWidth = FromPixelsX(int(width)).Scale(13, 10)
+			w.preferredWidth = base.FromPixelsX(int(width)).Scale(13, 10)
 		}
 	}
 	return w.preferredWidth

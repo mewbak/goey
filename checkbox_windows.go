@@ -4,6 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/lxn/win"
 )
 
@@ -16,7 +17,7 @@ func (w *Checkbox) mount(parent base.Control) (base.Element, error) {
 	hwnd := win.CreateWindowEx(0, button.className, &text[0],
 		win.WS_CHILD|win.WS_VISIBLE|win.WS_TABSTOP|win.BS_CHECKBOX|win.BS_TEXT|win.BS_NOTIFY,
 		10, 10, 100, 100,
-		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
+		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -60,7 +61,7 @@ type checkboxElement struct {
 	onBlur   func()
 }
 
-func (w *checkboxElement) Props() Widget {
+func (w *checkboxElement) Props() base.Widget {
 	return &Checkbox{
 		Text:     w.Control.Text(),
 		Value:    win.SendMessage(w.hWnd, win.BM_GETCHECK, 0, 0) == win.BST_CHECKED,
@@ -71,27 +72,27 @@ func (w *checkboxElement) Props() Widget {
 	}
 }
 
-func (w *checkboxElement) preferredWidth() Length {
+func (w *checkboxElement) preferredWidth() base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	width, _ := w.CalcRect(w.text)
-	return FromPixelsX(int(width) + 17)
+	return base.FromPixelsX(int(width) + 17)
 }
 
 func (w *checkboxElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
-	return bc.Constrain(Size{width, height})
+	return bc.Constrain(base.Size{width, height})
 }
 
-func (w *checkboxElement) MinIntrinsicHeight(Length) Length {
+func (w *checkboxElement) MinIntrinsicHeight(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 17 * DIP
 }
 
-func (w *checkboxElement) MinIntrinsicWidth(Length) Length {
+func (w *checkboxElement) MinIntrinsicWidth(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	width, _ := w.CalcRect(w.text)
-	return FromPixelsX(int(width) + 17)
+	return base.FromPixelsX(int(width) + 17)
 }
 
 func (w *checkboxElement) updateProps(data *Checkbox) error {

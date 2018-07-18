@@ -5,6 +5,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
 )

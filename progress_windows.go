@@ -4,6 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/lxn/win"
 )
 
@@ -26,7 +27,7 @@ func (w *Progress) mount(parent base.Control) (base.Element, error) {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE)
 	hwnd := win.CreateWindowEx(0, progress.className, nil, style,
 		10, 10, 100, 100,
-		parent.hWnd, win.HMENU(nextControlID()), 0, nil)
+		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -61,20 +62,20 @@ func (w *progressElement) Layout(bc base.Constraints) base.Size {
 		width = 355 * DIP
 	}
 	height := w.MinIntrinsicHeight(0)
-	return bc.Constrain(Size{width, height})
+	return bc.Constrain(base.Size{width, height})
 }
 
-func (w *progressElement) MinIntrinsicHeight(Length) Length {
+func (w *progressElement) MinIntrinsicHeight(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 15 * DIP
 }
 
-func (w *progressElement) MinIntrinsicWidth(Length) Length {
+func (w *progressElement) MinIntrinsicWidth(base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 160 * DIP
 }
 
-func (w *progressElement) Props() Widget {
+func (w *progressElement) Props() base.Widget {
 	min := win.SendMessage(w.hWnd, win.PBM_GETRANGE, win.TRUE, 0)
 	max := win.SendMessage(w.hWnd, win.PBM_GETRANGE, win.FALSE, 0)
 	value := win.SendMessage(w.hWnd, win.PBM_GETPOS, 0, 0)

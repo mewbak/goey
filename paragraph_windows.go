@@ -4,6 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
 )
@@ -29,7 +30,7 @@ func (w *P) mount(parent base.Control) (base.Element, error) {
 	hwnd := win.CreateWindowEx(0, staticClassName, &text[0],
 		w.calcStyle(),
 		10, 10, 100, 100,
-		parent.hWnd, 0, 0, nil)
+		parent.HWnd, 0, 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
@@ -65,10 +66,10 @@ func (w *paragraphElement) measureReflowLimits() {
 	caption := [10]uint16{'m', 'm', 'm', 'm', 'm', 'm', 'm', 'm', 'm', 'm'}
 	win.DrawTextEx(hdc, &caption[0], 10, &rect, win.DT_CALCRECT, nil)
 	win.ReleaseDC(hwnd, hdc)
-	paragraphMaxWidth = FromPixelsX(int(rect.Right)) * 8
+	paragraphMaxWidth = base.FromPixelsX(int(rect.Right)) * 8
 }
 
-func (w *paragraphElement) Props() Widget {
+func (w *paragraphElement) Props() base.Widget {
 	align := JustifyLeft
 	if style := win.GetWindowLong(w.hWnd, win.GWL_STYLE); style&win.SS_CENTER == win.SS_CENTER {
 		align = JustifyCenter
@@ -85,7 +86,7 @@ func (w *paragraphElement) Props() Widget {
 }
 
 func (w *paragraphElement) MinIntrinsicHeight(width base.Length) base.Length {
-	if width == Inf {
+	if width == base.Inf {
 		width = w.maxReflowWidth()
 	}
 
@@ -97,16 +98,16 @@ func (w *paragraphElement) MinIntrinsicHeight(width base.Length) base.Length {
 	win.DrawTextEx(hdc, &w.text[0], int32(len(w.text)), &rect, win.DT_CALCRECT|win.DT_WORDBREAK, nil)
 	win.ReleaseDC(w.hWnd, hdc)
 
-	return FromPixelsY(int(rect.Bottom))
+	return base.FromPixelsY(int(rect.Bottom))
 }
 
 func (w *paragraphElement) MinIntrinsicWidth(height base.Length) base.Length {
-	if height != Inf {
+	if height != base.Inf {
 		panic("not implemented")
 	}
 
 	width, _ := w.CalcRect(w.text)
-	return min(FromPixelsX(int(width)), w.minReflowWidth())
+	return min(base.FromPixelsX(int(width)), w.minReflowWidth())
 }
 
 func (w *paragraphElement) SetBounds(bounds base.Rectangle) {

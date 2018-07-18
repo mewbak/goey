@@ -4,6 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/lxn/win"
 )
 
@@ -53,7 +54,7 @@ func (w *HR) mount(parent base.Control) (base.Element, error) {
 
 	hwnd := win.CreateWindowEx(0, hr.className, nil, win.WS_CHILD|win.WS_VISIBLE,
 		10, 10, 100, 100,
-		parent.hWnd, 0, 0, nil)
+		parent.HWnd, 0, 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {
