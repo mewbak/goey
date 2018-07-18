@@ -44,6 +44,27 @@ func ExampleRectangle() {
 	// Rectangle (10:00,20:00)-(90:00,80:00) has dimensions 80dip by 60dip.
 }
 
+func TestFromPixels(t *testing.T) {
+	cases := []struct {
+		dpix, dpiy       int
+		pixelsx, pixelsy int
+		lengthx, lengthy Length
+	}{
+		{96, 96, 2, 3, 2 * DIP, 3 * DIP},
+		{96, 96 * 3 / 2, 2, 3, 2 * DIP, 2 * DIP},
+	}
+
+	for i, v := range cases {
+		DPI = image.Point{v.dpix, v.dpiy}
+		if got := FromPixelsX(v.pixelsx); got != v.lengthx {
+			t.Errorf("Unexpected conversion in FromPixelsX on case %d, got %v, want %v", i, got, v.lengthx)
+		}
+		if got := FromPixelsY(v.pixelsy); got != v.lengthy {
+			t.Errorf("Unexpected conversion in FromPixelsY on case %d, got %v, want %v", i, got, v.lengthy)
+		}
+	}
+}
+
 func TestLength(t *testing.T) {
 	t.Logf("Constants DIP: %d", 1*DIP)
 	t.Logf("Constants PT:  %d", 1*PT)
