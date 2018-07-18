@@ -127,3 +127,27 @@ func TestLength_Pixels(t *testing.T) {
 		}
 	}
 }
+
+func TestRect(t *testing.T) {
+	cases := []struct {
+		x0, y0, x1, y1 Length
+		min            Point
+		width          Length
+		height         Length
+	}{
+		{1 * DIP, 2 * DIP, 10 * DIP, 12 * DIP, Point{1 * DIP, 2 * DIP}, 9 * DIP, 10 * DIP},
+		{1 * DIP, 12 * DIP, 10 * DIP, 2 * DIP, Point{1 * DIP, 2 * DIP}, 9 * DIP, 10 * DIP},
+		{10 * DIP, 2 * DIP, 1 * DIP, 12 * DIP, Point{1 * DIP, 2 * DIP}, 9 * DIP, 10 * DIP},
+		{10 * DIP, 12 * DIP, 1 * DIP, 2 * DIP, Point{1 * DIP, 2 * DIP}, 9 * DIP, 10 * DIP},
+	}
+
+	for i, v := range cases {
+		out := Rect(v.x0, v.y0, v.x1, v.y1)
+		if got := out.Dx(); got != v.width {
+			t.Errorf("Error in case %d, want %s, got %s", i, got, v.width)
+		}
+		if got := out.Dy(); got != v.height {
+			t.Errorf("Error in case %d, want %s, got %s", i, got, v.height)
+		}
+	}
+}

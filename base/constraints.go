@@ -26,7 +26,8 @@ type Constraints struct {
 }
 
 // Expand creates box constraints that force elements to expand to as large as
-// possible.
+// possible.  The constraints for both width and height will be tight and
+// unbounded.
 func Expand() Constraints {
 	return Constraints{Size{Inf, Inf}, Size{Inf, Inf}}
 }
@@ -44,6 +45,7 @@ func ExpandWidth(height Length) Constraints {
 }
 
 // Loose creates box constraints that forbid sizes larger than the given size.
+// The constraints for both width and height will be loose and bounded.
 func Loose(size Size) Constraints {
 	return Constraints{Size{}, size}
 }
@@ -54,13 +56,13 @@ func Tight(size Size) Constraints {
 }
 
 // TightWidth creates a box constraints that is respected only by sizes with
-// the given width.  The height is unconstrained.
+// the given width.  The height is unconstrained (i.e. loose and unbounded).
 func TightWidth(width Length) Constraints {
 	return Constraints{Size{width, 0}, Size{width, Inf}}
 }
 
 // TightHeight creates a box constraints that is respected only by sizes with
-// the given height.  The width is unconstrained.
+// the given height.  The width is unconstrained (i.e. loose and unbounded).
 func TightHeight(height Length) Constraints {
 	return Constraints{Size{0, height}, Size{Inf, height}}
 }

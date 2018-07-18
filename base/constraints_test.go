@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestConstraint(t *testing.T) {
+func TestConstraints(t *testing.T) {
 	cases := []struct {
 		in                                                   Constraints
 		isNormalized, isTight, hasTightWidth, hasTightHeight bool
@@ -48,7 +48,40 @@ func TestConstraint(t *testing.T) {
 	}
 }
 
-func TestConstraint_ConstrainAndAttemptToPreserveAspectRatio(t *testing.T) {
+func TestConstraints_Constrain(t *testing.T) {
+	cases := []struct {
+		in   Constraints
+		size Size
+		out  Size
+	}{
+		{Tight(Size{10 * DIP, 15 * DIP}), Size{10 * DIP, 15 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{Tight(Size{10 * DIP, 15 * DIP}), Size{20 * DIP, 30 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{Tight(Size{10 * DIP, 15 * DIP}), Size{2 * DIP, 3 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{TightWidth(10 * DIP), Size{10 * DIP, 15 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{TightWidth(15 * DIP), Size{10 * DIP, 15 * DIP}, Size{15 * DIP, 15 * DIP}},
+		{TightWidth(5 * DIP), Size{10 * DIP, 15 * DIP}, Size{5 * DIP, 15 * DIP}},
+		{TightHeight(15 * DIP), Size{10 * DIP, 15 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{TightHeight(30 * DIP), Size{10 * DIP, 15 * DIP}, Size{10 * DIP, 30 * DIP}},
+		{TightHeight(75 * DIP / 10), Size{10 * DIP, 15 * DIP}, Size{10 * DIP, 75 * DIP / 10}},
+		{Loose(Size{10 * DIP, 15 * DIP}), Size{10 * DIP, 15 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{Loose(Size{10 * DIP, 15 * DIP}), Size{20 * DIP, 30 * DIP}, Size{10 * DIP, 15 * DIP}},
+		{Loose(Size{10 * DIP, 15 * DIP}), Size{2 * DIP, 3 * DIP}, Size{2 * DIP, 3 * DIP}},
+	}
+
+	for i, v := range cases {
+		if out := v.in.Constrain(v.size); v.out != out {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.out, out)
+		}
+		if out := v.in.ConstrainWidth(v.size.Width); v.out.Width != out {
+			t.Errorf("Failed on case %d width, want %v, got %v", i, v.out.Width, out)
+		}
+		if out := v.in.ConstrainHeight(v.size.Height); v.out.Height != out {
+			t.Errorf("Failed on case %d height, want %v, got %v", i, v.out.Height, out)
+		}
+	}
+}
+
+func TestConstraints_ConstrainAndAttemptToPreserveAspectRatio(t *testing.T) {
 	cases := []struct {
 		in   Constraints
 		size Size
@@ -75,7 +108,7 @@ func TestConstraint_ConstrainAndAttemptToPreserveAspectRatio(t *testing.T) {
 		}
 	}
 }
-func TestConstraint_Inset(t *testing.T) {
+func TestConstraints_Inset(t *testing.T) {
 	cases := []struct {
 		in      Constraints
 		deflate Length
@@ -104,7 +137,7 @@ func TestConstraint_Inset(t *testing.T) {
 	}
 }
 
-func TestConstraint_Tighten(t *testing.T) {
+func TestConstraints_Tighten(t *testing.T) {
 	cases := []struct {
 		in   Constraints
 		size Size

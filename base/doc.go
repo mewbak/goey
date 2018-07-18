@@ -1,6 +1,6 @@
 // Package base provides interfaces for the description, creation, and updating
 // of GUI widgets.  Any users interested in creating new widgets will need to
-// implement the interfacts Widget and Element described herein.
+// implement the interfaces Widget and Element described herein.
 //
 // GUI state is managed using three groups of types.  There are 'widgets', which
 // are data-only representations of a desired GUI.  These widgets can be mounted
