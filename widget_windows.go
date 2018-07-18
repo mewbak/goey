@@ -67,7 +67,7 @@ func (w Control) SetDisabled(value bool) {
 }
 
 // SetBounds is a wrapper around the WIN32 call to MoveWindow.
-func (w *Control) SetBounds(bounds Rectangle) {
+func (w *Control) SetBounds(bounds base.Rectangle) {
 	win.MoveWindow(w.hWnd, int32(bounds.Min.X.PixelsX()), int32(bounds.Min.Y.PixelsY()), int32(bounds.Dx().PixelsX()), int32(bounds.Dy().PixelsY()), true)
 }
 
@@ -101,12 +101,6 @@ func (w *Control) Close() {
 		win.DestroyWindow(w.hWnd)
 		w.hWnd = 0
 	}
-}
-
-// NativeElement contains platform-specific methods that all widgets
-// must support on WIN32
-type NativeElement interface {
-	SetOrder(previous win.HWND) win.HWND
 }
 
 func subclassWindowProcedure(hWnd win.HWND, oldWindowProc *uintptr, newWindowProc uintptr) {

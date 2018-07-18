@@ -22,7 +22,7 @@ func init() {
 	}
 }
 
-func (w *Progress) mount(parent Control) (Element, error) {
+func (w *Progress) mount(parent base.Control) (base.Element, error) {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE)
 	hwnd := win.CreateWindowEx(0, progress.className, nil, style,
 		10, 10, 100, 100,
@@ -54,7 +54,7 @@ type progressElement struct {
 	Control
 }
 
-func (w *progressElement) Layout(bc Constraint) Size {
+func (w *progressElement) Layout(bc base.Constraints) base.Size {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	width := w.MinIntrinsicWidth(0)
 	if bc.Max.Width > 355*DIP {

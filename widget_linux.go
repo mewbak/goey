@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
@@ -29,63 +30,58 @@ func (w *Control) Handle() *gtk.Widget {
 	return w.handle
 }
 
-func (w *Control) Layout(bc Constraint) Size {
+func (w *Control) Layout(bc base.Constraints) base.Size {
 	if !bc.HasBoundedWidth() && !bc.HasBoundedHeight() {
 		// No need to worry about breaking the constraints.  We can take as
 		// much space as desired.
 		_, width := w.handle.GetPreferredWidth()
 		_, height := w.handle.GetPreferredHeight()
 		// Dimensions may need to be increased to meet minimums.
-		return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
+		return bc.Constrain(base.Size{base.FromPixelsX(width), base.FromPixelsY(height)})
 	}
 	if !bc.HasBoundedHeight() {
 		// No need to worry about height.  Find the width that best meets the
 		// widgets preferred width.
 		_, width1 := w.handle.GetPreferredWidth()
-		width := bc.ConstrainWidth(FromPixelsX(width1))
+		width := bc.ConstrainWidth(base.FromPixelsX(width1))
 		// Get the best height for this width.
 		_, height := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
 		// Height may need to be increased to meet minimum.
-		return Size{width, bc.ConstrainHeight(FromPixelsY(height))}
+		return base.Size{width, bc.ConstrainHeight(base.FromPixelsY(height))}
 	}
 
 	// Not clear the following is the best general approach given GTK layout
 	// model.
 	height1, height2 := w.handle.GetPreferredHeight()
-	if height := FromPixelsY(height2); height < bc.Max.Height {
+	if height := base.FromPixelsY(height2); height < bc.Max.Height {
 		_, width := w.handle.GetPreferredWidth()
-		return bc.Constrain(Size{FromPixelsX(width), height})
+		return bc.Constrain(base.Size{base.FromPixelsX(width), height})
 	}
 
 	_, width := w.handle.GetPreferredWidth()
-	return bc.Constrain(Size{FromPixelsX(width), FromPixelsX(height1)})
+	return bc.Constrain(base.Size{base.FromPixelsX(width), base.FromPixelsX(height1)})
 }
 
-func (w *Control) MinIntrinsicHeight(width Length) Length {
-	if width != Inf {
+func (w *Control) MinIntrinsicHeight(width base.Length) base.Length {
+	if width != base.Inf {
 		height, _ := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
-		return FromPixelsY(height)
+		return base.FromPixelsY(height)
 	}
 	height, _ := w.handle.GetPreferredHeight()
-	return FromPixelsY(height)
+	return base.FromPixelsY(height)
 }
 
-func (w *Control) MinIntrinsicWidth(Length) Length {
+func (w *Control) MinIntrinsicWidth(base.Length) base.Length {
 	width, _ := w.handle.GetPreferredWidth()
-	return FromPixelsX(width)
+	return base.FromPixelsX(width)
 }
 
-func (w *Control) SetBounds(bounds Rectangle) {
+func (w *Control) SetBounds(bounds base.Rectangle) {
 	pixels := bounds.Pixels()
 	if pixels.Dx() <= 0 || pixels.Dy() <= 0 {
 		panic("internal error.  zero width or zero height bounds for control")
 	}
 	syscall.SetBounds(w.handle, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
-}
-
-// NativeElement contains platform-specific methods that all widgets
-// must support on GTK.
-type NativeElement interface {
 }
 
 func setSignalHandler(control *gtk.Widget, sh glib.SignalHandle, ok bool, name string, thunk interface{}, userData interface{}) glib.SignalHandle {

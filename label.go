@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	labelKind = Kind{"bitbucket.org/rj/goey.Label"}
+	labelKind = base.NewKind("bitbucket.org/rj/goey.Label")
 )
 
 // Label describes a widget that provides a descriptive label for other fields.
@@ -11,21 +15,21 @@ type Label struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*Label) Kind() *Kind {
+func (*Label) Kind() *base.Kind {
 	return &labelKind
 }
 
 // Mount creates a label in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *Label) Mount(parent Control) (Element, error) {
+func (w *Label) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*labelElement) Kind() *Kind {
+func (*labelElement) Kind() *base.Kind {
 	return &labelKind
 }
 
-func (w *labelElement) UpdateProps(data Widget) error {
+func (w *labelElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*Label))
 }

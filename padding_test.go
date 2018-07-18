@@ -2,10 +2,12 @@ package goey
 
 import (
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
-func (w *paddingElement) Props() Widget {
-	child := Widget(nil)
+func (w *paddingElement) Props() base.Widget {
+	child := base.Widget(nil)
 	if w.child != nil {
 		child = w.child.(Proper).Props()
 	}
@@ -35,12 +37,12 @@ func TestPaddingClose(t *testing.T) {
 }
 
 func TestPaddingUpdateProps(t *testing.T) {
-	testingUpdateWidgets(t, []Widget{
+	testingUpdateWidgets(t, []base.Widget{
 		&Padding{Child: &Button{Text: "A"}},
 		&Padding{Insets: DefaultInsets(), Child: &Button{Text: "B"}},
 		&Padding{Insets: UniformInsets(48 * DIP), Child: &Button{Text: "C"}},
 		&Padding{},
-	}, []Widget{
+	}, []base.Widget{
 		&Padding{Insets: DefaultInsets(), Child: &Button{Text: "AB"}},
 		&Padding{Insets: UniformInsets(48 * DIP), Child: &Button{Text: "BC"}},
 		&Padding{},

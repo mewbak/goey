@@ -2,6 +2,8 @@ package goey
 
 import (
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 func TestTextArea(t *testing.T) {
@@ -24,11 +26,11 @@ func TestTextAreaEvents(t *testing.T) {
 }
 
 func TestTextAreaProps(t *testing.T) {
-	testingUpdateWidgets(t, []Widget{
+	testingUpdateWidgets(t, []base.Widget{
 		&TextArea{Value: "A", MinLines: 5},
 		&TextArea{Value: "B", MinLines: 3, Placeholder: "..."},
 		&TextArea{Value: "C", MinLines: 3, Disabled: true},
-	}, []Widget{
+	}, []base.Widget{
 		&TextArea{Value: "AA", MinLines: 6},
 		&TextArea{Value: "BA", MinLines: 3, Disabled: true},
 		&TextArea{Value: "CA", MinLines: 3, Placeholder: "***", Disabled: false},

@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	hboxKind = Kind{"bitbucket.org/rj/goey.HBox"}
+	hboxKind = base.NewKind("bitbucket.org/rj/goey.HBox")
 )
 
 // HBox describes a layout widget that arranges its child widgets into a row.
@@ -15,24 +19,24 @@ var (
 type HBox struct {
 	AlignMain  MainAxisAlign  // Control distribution of excess horizontal space when positioning children.
 	AlignCross CrossAxisAlign // Control distribution of excess vertical space when positioning children.
-	Children   []Widget       // Children.
+	Children   []base.Widget  // Children.
 }
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*HBox) Kind() *Kind {
+func (*HBox) Kind() *base.Kind {
 	return &hboxKind
 }
 
 // Mount creates a horiztonal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
-func (w *HBox) Mount(parent Control) (Element, error) {
-	c := make([]Element, 0, len(w.Children))
+func (w *HBox) Mount(parent base.Control) (base.Element, error) {
+	c := make([]base.Element, 0, len(w.Children))
 
 	for _, v := range w.Children {
 		mountedChild, err := v.Mount(parent)
 		if err != nil {
-			CloseElements(c)
+			base.CloseElements(c)
 			return nil, err
 		}
 		c = append(c, mountedChild)
@@ -43,33 +47,33 @@ func (w *HBox) Mount(parent Control) (Element, error) {
 		children:     c,
 		alignMain:    w.AlignMain,
 		alignCross:   w.AlignCross,
-		childrenSize: make([]Size, len(c)),
+		childrenSize: make([]base.Size, len(c)),
 	}, nil
 }
 
-func (*hboxElement) Kind() *Kind {
+func (*hboxElement) Kind() *base.Kind {
 	return &hboxKind
 }
 
 type hboxElement struct {
-	parent     Control
-	children   []Element
+	parent     base.Control
+	children   []base.Element
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
 
-	childrenSize []Size
-	totalWidth   Length
+	childrenSize []base.Size
+	totalWidth   base.Length
 }
 
 func (w *hboxElement) Close() {
-	CloseElements(w.children)
+	base.CloseElements(w.children)
 	w.children = nil
 }
 
-func (w *hboxElement) Layout(bc Constraint) Size {
+func (w *hboxElement) Layout(bc base.Constraints) base.Size {
 	if len(w.children) == 0 {
 		w.totalWidth = 0
-		return bc.Constrain(Size{})
+		return bc.Constrain(base.Size{})
 	}
 
 	// Determine the constraints for layout of child elements.
@@ -83,15 +87,15 @@ func (w *hboxElement) Layout(bc Constraint) Size {
 		if cbc.HasBoundedHeight() {
 			cbc = cbc.TightenHeight(cbc.Max.Height)
 		} else {
-			cbc = cbc.TightenHeight(max(cbc.Min.Height, w.MinIntrinsicHeight(Inf)))
+			cbc = cbc.TightenHeight(max(cbc.Min.Height, w.MinIntrinsicHeight(base.Inf)))
 		}
 	} else {
 		cbc = cbc.LoosenHeight()
 	}
 
-	width := Length(0)
-	minHeight := Length(0)
-	previous := Element(nil)
+	width := base.Length(0)
+	minHeight := base.Length(0)
+	previous := base.Element(nil)
 	for i, v := range w.children {
 		if i > 0 {
 			if w.alignMain.IsPacked() {
@@ -108,12 +112,12 @@ func (w *hboxElement) Layout(bc Constraint) Size {
 	w.totalWidth = width
 
 	if w.alignCross == Stretch {
-		return bc.Constrain(Size{width, cbc.Min.Height})
+		return bc.Constrain(base.Size{width, cbc.Min.Height})
 	}
-	return bc.Constrain(Size{width, minHeight})
+	return bc.Constrain(base.Size{width, minHeight})
 }
 
-func (w *hboxElement) MinIntrinsicHeight(width Length) Length {
+func (w *hboxElement) MinIntrinsicHeight(width base.Length) base.Length {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -127,14 +131,14 @@ func (w *hboxElement) MinIntrinsicHeight(width Length) Length {
 		return size
 	}
 
-	size := w.children[0].MinIntrinsicHeight(Inf)
+	size := w.children[0].MinIntrinsicHeight(base.Inf)
 	for _, v := range w.children[1:] {
-		size = max(size, v.MinIntrinsicHeight(Inf))
+		size = max(size, v.MinIntrinsicHeight(base.Inf))
 	}
 	return size
 }
 
-func (w *hboxElement) MinIntrinsicWidth(height Length) Length {
+func (w *hboxElement) MinIntrinsicWidth(height base.Length) base.Length {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -176,7 +180,7 @@ func (w *hboxElement) MinIntrinsicWidth(height Length) Length {
 	return size
 }
 
-func (w *hboxElement) SetBounds(bounds Rectangle) {
+func (w *hboxElement) SetBounds(bounds base.Rectangle) {
 	if len(w.children) == 0 {
 		return
 	}
@@ -197,7 +201,7 @@ func (w *hboxElement) SetBounds(bounds Rectangle) {
 	// Adjust the bounds so that the minimum Y handles vertical alignment
 	// of the controls.  We also calculate 'extraGap' which will adjust
 	// spacing of the controls for non-packed alignments.
-	extraGap := Length(0)
+	extraGap := base.Length(0)
 	switch w.alignMain {
 	case MainStart:
 		// Do nothing
@@ -222,7 +226,7 @@ func (w *hboxElement) SetBounds(bounds Rectangle) {
 
 	// Position all of the child controls.
 	posX := bounds.Min.X
-	previous := Element(nil)
+	previous := base.Element(nil)
 	for i, v := range w.children {
 		if w.alignMain.IsPacked() {
 			if i > 0 {
@@ -237,28 +241,28 @@ func (w *hboxElement) SetBounds(bounds Rectangle) {
 	}
 }
 
-func (w *hboxElement) setBoundsForChild(i int, v Element, posX, posY, posX2, posY2 Length) {
+func (w *hboxElement) setBoundsForChild(i int, v base.Element, posX, posY, posX2, posY2 base.Length) {
 	dy := w.childrenSize[i].Height
 	switch w.alignCross {
 	case CrossStart:
-		v.SetBounds(Rectangle{
-			Point{posX, posY},
-			Point{posX2, posY + dy},
+		v.SetBounds(base.Rectangle{
+			base.Point{posX, posY},
+			base.Point{posX2, posY + dy},
 		})
 	case CrossCenter:
-		v.SetBounds(Rectangle{
-			Point{posX, posY + (posY2-posY-dy)/2},
-			Point{posX2, posY + (posY2-posY+dy)/2},
+		v.SetBounds(base.Rectangle{
+			base.Point{posX, posY + (posY2-posY-dy)/2},
+			base.Point{posX2, posY + (posY2-posY+dy)/2},
 		})
 	case CrossEnd:
-		v.SetBounds(Rectangle{
-			Point{posX, posY2 - dy},
-			Point{posX2, posY2},
+		v.SetBounds(base.Rectangle{
+			base.Point{posX, posY2 - dy},
+			base.Point{posX2, posY2},
 		})
 	case Stretch:
-		v.SetBounds(Rectangle{
-			Point{posX, posY},
-			Point{posX2, posY2},
+		v.SetBounds(base.Rectangle{
+			base.Point{posX, posY},
+			base.Point{posX2, posY2},
 		})
 	}
 }
@@ -267,13 +271,13 @@ func (w *hboxElement) updateProps(data *HBox) (err error) {
 	// Update properties
 	w.alignMain = data.AlignMain
 	w.alignCross = data.AlignCross
-	w.children, err = DiffChildren(w.parent, w.children, data.Children)
+	w.children, err = base.DiffChildren(w.parent, w.children, data.Children)
 	// Clear cached values
-	w.childrenSize = make([]Size, len(w.children))
+	w.childrenSize = make([]base.Size, len(w.children))
 	w.totalWidth = 0
 	return err
 }
 
-func (w *hboxElement) UpdateProps(data Widget) error {
+func (w *hboxElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*HBox))
 }

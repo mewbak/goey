@@ -2,6 +2,8 @@ package goey
 
 import (
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 func TestLabel(t *testing.T) {
@@ -21,11 +23,11 @@ func TestLabelClose(t *testing.T) {
 }
 
 func TestLabelUpdateProps(t *testing.T) {
-	testingUpdateWidgets(t, []Widget{
+	testingUpdateWidgets(t, []base.Widget{
 		&Label{Text: "A"},
 		&Label{Text: "B"},
 		&Label{Text: "C"},
-	}, []Widget{
+	}, []base.Widget{
 		&Label{Text: "AB"},
 		&Label{Text: "BC"},
 		&Label{Text: "CD"},

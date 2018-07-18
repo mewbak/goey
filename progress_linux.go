@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -11,13 +12,13 @@ type progressElement struct {
 	min, max int
 }
 
-func (w *Progress) mount(parent Control) (Element, error) {
+func (w *Progress) mount(parent base.Control) (base.Element, error) {
 	control, err := gtk.ProgressBarNew()
 	if err != nil {
 		return nil, err
 	}
 
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
+	parent.Handle.Add(control)
 	control.SetFraction(float64(w.Value-w.Min) / float64(w.Max-w.Min))
 
 	retval := &progressElement{
@@ -40,7 +41,7 @@ func (w *progressElement) progressbar() *gtk.ProgressBar {
 	return (*gtk.ProgressBar)(unsafe.Pointer(w.handle))
 }
 
-func (w *progressElement) Props() Widget {
+func (w *progressElement) Props() base.Widget {
 	if w.min == w.max {
 		return &Progress{
 			Value: w.min,

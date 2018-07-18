@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -10,13 +11,13 @@ type labelElement struct {
 	Control
 }
 
-func (w *Label) mount(parent Control) (Element, error) {
+func (w *Label) mount(parent base.Control) (base.Element, error) {
 	handle, err := gtk.LabelNew(w.Text)
 	if err != nil {
 		return nil, err
 	}
 	handle.SetSingleLineMode(false)
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(handle)
+	parent.Handle.Add(handle)
 	handle.SetJustify(gtk.JUSTIFY_LEFT)
 	handle.SetXAlign(0)
 	handle.SetLineWrap(false)
@@ -36,7 +37,7 @@ func (w *labelElement) label() *gtk.Label {
 	return (*gtk.Label)(unsafe.Pointer(w.handle))
 }
 
-func (w *labelElement) Props() Widget {
+func (w *labelElement) Props() base.Widget {
 	label := w.label()
 	text, err := label.GetText()
 	if err != nil {

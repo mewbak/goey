@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	textareaKind = Kind{"bitbucket.org/rj/goey.TextArea"}
+	textareaKind = base.NewKind("bitbucket.org/rj/goey.TextArea")
 )
 
 // TextArea describes a widget that users input or update a multi-line of text.
@@ -19,22 +23,22 @@ type TextArea struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*TextArea) Kind() *Kind {
+func (*TextArea) Kind() *base.Kind {
 	return &textareaKind
 }
 
 // Mount creates a text area control in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *TextArea) Mount(parent Control) (Element, error) {
+func (w *TextArea) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*textareaElement) Kind() *Kind {
+func (*textareaElement) Kind() *base.Kind {
 	return &textareaKind
 }
 
-func (w *textareaElement) UpdateProps(data Widget) error {
+func (w *textareaElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*TextArea))
 }
 

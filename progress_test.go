@@ -2,6 +2,8 @@ package goey
 
 import (
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 func TestProgressCreate(t *testing.T) {
@@ -19,10 +21,10 @@ func TestProgressClose(t *testing.T) {
 }
 
 func TestProgressUpdate(t *testing.T) {
-	testingUpdateWidgets(t, []Widget{
+	testingUpdateWidgets(t, []base.Widget{
 		&Progress{Value: 50, Min: 0, Max: 100},
 		&Progress{Value: 50, Min: 0, Max: 100},
-	}, []Widget{
+	}, []base.Widget{
 		&Progress{Value: 75, Min: 0, Max: 100},
 		&Progress{Value: 50, Min: 0, Max: 200},
 	})

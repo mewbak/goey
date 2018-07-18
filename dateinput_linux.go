@@ -4,6 +4,7 @@ import (
 	"time"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -17,12 +18,12 @@ type dateinputElement struct {
 	onBlur   blurSlot
 }
 
-func (w *DateInput) mount(parent Control) (Element, error) {
+func (w *DateInput) mount(parent base.Control) (base.Element, error) {
 	control, err := gtk.CalendarNew()
 	if err != nil {
 		return nil, err
 	}
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
+	(*gtk.Container)(unsafe.Pointer(parent.Handle)).Add(control)
 	control.SelectMonth(uint(w.Value.Month())-1, uint(w.Value.Year()))
 	control.SelectDay(uint(w.Value.Day()))
 

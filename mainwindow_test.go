@@ -9,6 +9,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 func ExampleNewWindow() {
@@ -17,7 +19,7 @@ func ExampleNewWindow() {
 	createWindow := func() error {
 		// Create a top-level window.
 		mw, err := NewWindow("Test", &VBox{
-			Children: []Widget{
+			Children: []base.Widget{
 				&Button{Text: "Click me!"},
 			},
 		})
@@ -166,7 +168,7 @@ func TestNewWindow_SetChild(t *testing.T) {
 	}
 
 	createWindow := func() error {
-		widgets := []Widget{}
+		widgets := []base.Widget{}
 
 		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
@@ -258,7 +260,7 @@ func TestNewWindow_SetIcon(t *testing.T) {
 		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
 		}
-		mw, err := NewWindow("Test", &VBox{MainCenter, CrossCenter, []Widget{&Button{Text: "Click me!"}}})
+		mw, err := NewWindow("Test", &VBox{MainCenter, CrossCenter, []base.Widget{&Button{Text: "Click me!"}}})
 		if err != nil {
 			t.Fatalf("Failed to create window, %s", err)
 		}
@@ -317,7 +319,7 @@ func TestNewWindow_SetTitle(t *testing.T) {
 		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
 		}
-		mw, err := NewWindow("Test", &VBox{Children: []Widget{
+		mw, err := NewWindow("Test", &VBox{Children: []base.Widget{
 			&Button{Text: "Click me!"},
 			&Button{Text: "Or me!"},
 			&Button{Text: "But not me."},

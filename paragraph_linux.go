@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -26,13 +27,13 @@ func (a TextAlignment) native() gtk.Justification {
 	panic("not reachable")
 }
 
-func (w *P) mount(parent Control) (Element, error) {
+func (w *P) mount(parent base.Control) (base.Element, error) {
 	handle, err := gtk.LabelNew(w.Text)
 	if err != nil {
 		return nil, err
 	}
 	handle.SetSingleLineMode(false)
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(handle)
+	parent.Handle.Add(handle)
 	handle.SetJustify(w.Align.native())
 	handle.SetLineWrap(true)
 
@@ -51,7 +52,7 @@ func (w *paragraphElement) label() *gtk.Label {
 	return (*gtk.Label)(unsafe.Pointer(w.handle))
 }
 
-func (w *paragraphElement) Props() Widget {
+func (w *paragraphElement) Props() base.Widget {
 	label := w.label()
 	text, err := label.GetText()
 	if err != nil {
@@ -86,25 +87,25 @@ func (w *paragraphElement) measureReflowLimits() {
 	width, _ := label.GetPreferredWidth()
 	label.SetText(text)
 
-	paragraphMaxWidth = FromPixelsX(width)
+	paragraphMaxWidth = base.FromPixelsX(width)
 }
 
-func (w *paragraphElement) MinIntrinsicHeight(width Length) Length {
-	if width == Inf {
+func (w *paragraphElement) MinIntrinsicHeight(width base.Length) base.Length {
+	if width == base.Inf {
 		width = w.maxReflowWidth()
 	}
 
 	height, _ := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
-	return FromPixelsY(height)
+	return base.FromPixelsY(height)
 }
 
-func (w *paragraphElement) MinIntrinsicWidth(height Length) Length {
-	if height != Inf {
+func (w *paragraphElement) MinIntrinsicWidth(height base.Length) base.Length {
+	if height != base.Inf {
 		panic("not implemented")
 	}
 
 	width, _ := w.label().GetPreferredWidth()
-	return min(FromPixelsX(int(width)), w.minReflowWidth())
+	return min(base.FromPixelsX(int(width)), w.minReflowWidth())
 }
 
 func (w *paragraphElement) updateProps(data *P) error {

@@ -2,10 +2,12 @@ package goey
 
 import (
 	"image"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
-	imgKind = Kind{"bitbucket.org/rj/goey.Img"}
+	imgKind = base.NewKind("bitbucket.org/rj/goey.Img")
 )
 
 // Img describes a widget that contains a bitmap image.
@@ -18,18 +20,18 @@ var (
 // be calculate to maintain the aspect ratio of the image.
 type Img struct {
 	Image         image.Image // Image to be displayed.
-	Width, Height Length      // Dimensions for the image (see notes on sizing).
+	Width, Height base.Length // Dimensions for the image (see notes on sizing).
 }
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*Img) Kind() *Kind {
+func (*Img) Kind() *base.Kind {
 	return &imgKind
 }
 
 // Mount creates a horiztonal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
-func (w *Img) Mount(parent Control) (Element, error) {
+func (w *Img) Mount(parent base.Control) (base.Element, error) {
 	// Fill in the height and width if they are left at zero.
 	w.UpdateDimensions()
 
@@ -37,23 +39,23 @@ func (w *Img) Mount(parent Control) (Element, error) {
 	return w.mount(parent)
 }
 
-func (*imgElement) Kind() *Kind {
+func (*imgElement) Kind() *base.Kind {
 	return &imgKind
 }
 
-func (w *imgElement) Layout(bc Constraint) Size {
+func (w *imgElement) Layout(bc base.Constraints) base.Size {
 	// Determine ideal width.
-	return bc.ConstrainAndAttemptToPreserveAspectRatio(Size{w.width, w.height})
+	return bc.ConstrainAndAttemptToPreserveAspectRatio(base.Size{w.width, w.height})
 }
 
-func (w *imgElement) MinIntrinsicHeight(width Length) Length {
+func (w *imgElement) MinIntrinsicHeight(width base.Length) base.Length {
 	if width < w.width {
 		return w.height * width / w.width
 	}
 	return w.height
 }
 
-func (w *imgElement) MinIntrinsicWidth(height Length) Length {
+func (w *imgElement) MinIntrinsicWidth(height base.Length) base.Length {
 	if height < w.height {
 		return w.width * height / w.height
 	}
@@ -77,7 +79,7 @@ func (w *Img) UpdateDimensions() {
 	}
 }
 
-func (w *imgElement) UpdateProps(data Widget) error {
+func (w *imgElement) UpdateProps(data base.Widget) error {
 	img := data.(*Img)
 
 	// Fill in the height and width if they are left at zero.

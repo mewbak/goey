@@ -3,6 +3,8 @@ package goey
 import (
 	"strconv"
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 func ExampleButton() {
@@ -13,7 +15,7 @@ func ExampleButton() {
 	var mainWindow *Window
 	// These functions are used to update the GUI.  See below
 	var update func()
-	var render func() Widget
+	var render func() base.Widget
 
 	// Update function
 	update = func() {
@@ -25,7 +27,7 @@ func ExampleButton() {
 
 	// Render function generates a tree of Widgets to describe the desired
 	// state of the GUI.
-	render = func() Widget {
+	render = func() base.Widget {
 		// Prep - text for the button
 		text := "Click me!"
 		if clickCount > 0 {
@@ -35,7 +37,7 @@ func ExampleButton() {
 		return &VBox{
 			AlignMain:  MainCenter,
 			AlignCross: CrossCenter,
-			Children: []Widget{
+			Children: []base.Widget{
 				&Button{Text: text, OnClick: func() {
 					clickCount++
 					update()
@@ -77,11 +79,11 @@ func TestButtonClick(t *testing.T) {
 }
 
 func TestButtonUpdate(t *testing.T) {
-	testingUpdateWidgets(t, []Widget{
+	testingUpdateWidgets(t, []base.Widget{
 		&Button{Text: "A"},
 		&Button{Text: "D", Disabled: true},
 		&Button{Text: "E", Default: true},
-	}, []Widget{
+	}, []base.Widget{
 		&Button{Text: "AB"},
 		&Button{Text: "DB", Disabled: false},
 		&Button{Text: "EB", Disabled: true, Default: true},

@@ -21,6 +21,7 @@ import (
 	"strconv"
 
 	"bitbucket.org/rj/goey"
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -92,13 +93,13 @@ func onblur(ndx int) func() {
 	}
 }
 
-func render() goey.Widget {
+func render() base.Widget {
 	text := "Click me!"
 	if clickCount > 0 {
 		text = text + "  (" + strconv.Itoa(clickCount) + ")"
 	}
 
-	children := []goey.Widget{
+	children := []base.Widget{
 		&goey.Button{Text: text,
 			Default: true,
 			OnClick: func() {

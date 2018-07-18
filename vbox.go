@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	vboxKind = Kind{"bitbucket.org/rj/goey.VBox"}
+	vboxKind = base.NewKind("bitbucket.org/rj/goey.VBox")
 )
 
 // MainAxisAlign identifies the different types of alignment that are possible
@@ -49,24 +53,24 @@ const (
 type VBox struct {
 	AlignMain  MainAxisAlign
 	AlignCross CrossAxisAlign
-	Children   []Widget
+	Children   []base.Widget
 }
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*VBox) Kind() *Kind {
+func (*VBox) Kind() *base.Kind {
 	return &vboxKind
 }
 
 // Mount creates a vertical layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
-func (w *VBox) Mount(parent Control) (Element, error) {
-	c := make([]Element, 0, len(w.Children))
+func (w *VBox) Mount(parent base.Control) (base.Element, error) {
+	c := make([]base.Element, 0, len(w.Children))
 
 	for _, v := range w.Children {
 		mountedChild, err := v.Mount(parent)
 		if err != nil {
-			CloseElements(c)
+			base.CloseElements(c)
 			return nil, err
 		}
 		c = append(c, mountedChild)
@@ -77,33 +81,33 @@ func (w *VBox) Mount(parent Control) (Element, error) {
 		children:     c,
 		alignMain:    w.AlignMain,
 		alignCross:   w.AlignCross,
-		childrenSize: make([]Size, len(c)),
+		childrenSize: make([]base.Size, len(c)),
 	}, nil
 }
 
-func (*vboxElement) Kind() *Kind {
+func (*vboxElement) Kind() *base.Kind {
 	return &vboxKind
 }
 
 type vboxElement struct {
-	parent     Control
-	children   []Element
+	parent     base.Control
+	children   []base.Element
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
 
-	childrenSize []Size
-	totalHeight  Length
+	childrenSize []base.Size
+	totalHeight  base.Length
 }
 
 func (w *vboxElement) Close() {
-	CloseElements(w.children)
+	base.CloseElements(w.children)
 	w.children = nil
 }
 
-func (w *vboxElement) Layout(bc Constraint) Size {
+func (w *vboxElement) Layout(bc base.Constraints) base.Size {
 	if len(w.children) == 0 {
 		w.totalHeight = 0
-		return bc.Constrain(Size{})
+		return bc.Constrain(base.Size{})
 	}
 
 	// Determine the constraints for layout of child elements.
@@ -117,15 +121,15 @@ func (w *vboxElement) Layout(bc Constraint) Size {
 		if cbc.HasBoundedWidth() {
 			cbc = cbc.TightenWidth(cbc.Max.Width)
 		} else {
-			cbc = cbc.TightenWidth(max(cbc.Min.Width, w.MinIntrinsicWidth(Inf)))
+			cbc = cbc.TightenWidth(max(cbc.Min.Width, w.MinIntrinsicWidth(base.Inf)))
 		}
 	} else {
 		cbc = cbc.LoosenWidth()
 	}
 
-	height := Length(0)
-	minWidth := Length(0)
-	previous := Element(nil)
+	height := base.Length(0)
+	minWidth := base.Length(0)
+	previous := base.Element(nil)
 	for i, v := range w.children {
 		if i > 0 {
 			if w.alignMain.IsPacked() {
@@ -142,12 +146,12 @@ func (w *vboxElement) Layout(bc Constraint) Size {
 	w.totalHeight = height
 
 	if w.alignCross == Stretch {
-		return bc.Constrain(Size{cbc.Min.Width, height})
+		return bc.Constrain(base.Size{cbc.Min.Width, height})
 	}
-	return bc.Constrain(Size{minWidth, height})
+	return bc.Constrain(base.Size{minWidth, height})
 }
 
-func (w *vboxElement) MinIntrinsicWidth(height Length) Length {
+func (w *vboxElement) MinIntrinsicWidth(height base.Length) base.Length {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -161,14 +165,14 @@ func (w *vboxElement) MinIntrinsicWidth(height Length) Length {
 		return size
 	}
 
-	size := w.children[0].MinIntrinsicWidth(Inf)
+	size := w.children[0].MinIntrinsicWidth(base.Inf)
 	for _, v := range w.children[1:] {
-		size = max(size, v.MinIntrinsicWidth(Inf))
+		size = max(size, v.MinIntrinsicWidth(base.Inf))
 	}
 	return size
 }
 
-func (w *vboxElement) MinIntrinsicHeight(width Length) Length {
+func (w *vboxElement) MinIntrinsicHeight(width base.Length) base.Length {
 	if len(w.children) == 0 {
 		return 0
 	}
@@ -210,7 +214,7 @@ func (w *vboxElement) MinIntrinsicHeight(width Length) Length {
 	return size
 }
 
-func (w *vboxElement) SetBounds(bounds Rectangle) {
+func (w *vboxElement) SetBounds(bounds base.Rectangle) {
 	if len(w.children) == 0 {
 		return
 	}
@@ -231,7 +235,7 @@ func (w *vboxElement) SetBounds(bounds Rectangle) {
 	// Adjust the bounds so that the minimum Y handles vertical alignment
 	// of the controls.  We also calculate 'extraGap' which will adjust
 	// spacing of the controls for non-packed alignments.
-	extraGap := Length(0)
+	extraGap := base.Length(0)
 	switch w.alignMain {
 	case MainStart:
 		// Do nothing
@@ -256,7 +260,7 @@ func (w *vboxElement) SetBounds(bounds Rectangle) {
 
 	// Position all of the child controls.
 	posY := bounds.Min.Y
-	previous := Element(nil)
+	previous := base.Element(nil)
 	for i, v := range w.children {
 		if w.alignMain.IsPacked() {
 			if i > 0 {
@@ -271,28 +275,28 @@ func (w *vboxElement) SetBounds(bounds Rectangle) {
 	}
 }
 
-func (w *vboxElement) setBoundsForChild(i int, v Element, posX, posY, posX2, posY2 Length) {
+func (w *vboxElement) setBoundsForChild(i int, v base.Element, posX, posY, posX2, posY2 base.Length) {
 	dx := w.childrenSize[i].Width
 	switch w.alignCross {
 	case CrossStart:
-		v.SetBounds(Rectangle{
-			Point{posX, posY},
-			Point{posX + dx, posY2},
+		v.SetBounds(base.Rectangle{
+			base.Point{posX, posY},
+			base.Point{posX + dx, posY2},
 		})
 	case CrossCenter:
-		v.SetBounds(Rectangle{
-			Point{posX + (posX2-posX-dx)/2, posY},
-			Point{posX + (posX2-posX+dx)/2, posY2},
+		v.SetBounds(base.Rectangle{
+			base.Point{posX + (posX2-posX-dx)/2, posY},
+			base.Point{posX + (posX2-posX+dx)/2, posY2},
 		})
 	case CrossEnd:
-		v.SetBounds(Rectangle{
-			Point{posX2 - dx, posY},
-			Point{posX2, posY2},
+		v.SetBounds(base.Rectangle{
+			base.Point{posX2 - dx, posY},
+			base.Point{posX2, posY2},
 		})
 	case Stretch:
-		v.SetBounds(Rectangle{
-			Point{posX, posY},
-			Point{posX2, posY2},
+		v.SetBounds(base.Rectangle{
+			base.Point{posX, posY},
+			base.Point{posX2, posY2},
 		})
 	}
 }
@@ -301,13 +305,13 @@ func (w *vboxElement) updateProps(data *VBox) (err error) {
 	// Update properties
 	w.alignMain = data.AlignMain
 	w.alignCross = data.AlignCross
-	w.children, err = DiffChildren(w.parent, w.children, data.Children)
+	w.children, err = base.DiffChildren(w.parent, w.children, data.Children)
 	// Clear cached values
-	w.childrenSize = make([]Size, len(w.children))
+	w.childrenSize = make([]base.Size, len(w.children))
 	w.totalHeight = 0
 	return err
 }
 
-func (w *vboxElement) UpdateProps(data Widget) error {
+func (w *vboxElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*VBox))
 }

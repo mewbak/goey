@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"bitbucket.org/rj/goey"
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -35,7 +36,7 @@ func createWindow() error {
 	return nil
 }
 
-func render() goey.Widget {
+func render() base.Widget {
 	return &goey.Padding{
 		Insets: goey.UniformInsets(36 * goey.DIP),
 		Child: &goey.Align{

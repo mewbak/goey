@@ -19,7 +19,7 @@ func init() {
 	}
 }
 
-func (w *SelectInput) mount(parent Control) (Element, error) {
+func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
 	if w.Value >= len(w.Items) {
 		w.Value = len(w.Items) - 1
 	}
@@ -87,18 +87,18 @@ type selectinputElement struct {
 	preferredWidth Length
 }
 
-func (w *selectinputElement) Layout(bc Constraint) Size {
+func (w *selectinputElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
 }
 
-func (w *selectinputElement) MinIntrinsicHeight(width Length) Length {
+func (w *selectinputElement) MinIntrinsicHeight(width base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 	return 14 * DIP
 }
 
-func (w *selectinputElement) MinIntrinsicWidth(height Length) Length {
+func (w *selectinputElement) MinIntrinsicWidth(height base.Length) base.Length {
 	if w.preferredWidth == 0 {
 		text, err := syscall.UTF16FromString(w.longestString)
 		if err != nil {

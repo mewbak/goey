@@ -104,7 +104,7 @@ func bitmapToImage(hdc win.HDC, hbitmap win.HBITMAP) image.Image {
 	return nil
 }
 
-func (w *Img) mount(parent Control) (Element, error) {
+func (w *Img) mount(parent base.Control) (base.Element, error) {
 	// Create the bitmap
 	hbitmap, buffer, err := imageToBitmap(w.Image)
 	if err != nil {
@@ -163,7 +163,7 @@ func (w *imgElement) Props() Widget {
 	}
 }
 
-func (w *imgElement) SetBounds(bounds Rectangle) {
+func (w *imgElement) SetBounds(bounds base.Rectangle) {
 	w.Control.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't

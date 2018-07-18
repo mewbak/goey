@@ -33,7 +33,7 @@ func (w *DateInput) systemTime() win.SYSTEMTIME {
 	}
 }
 
-func (w *DateInput) mount(parent Control) (Element, error) {
+func (w *DateInput) mount(parent base.Control) (base.Element, error) {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP)
 	hwnd := win.CreateWindowEx(0, datetimepickClassName, nil,
 		style,
@@ -80,7 +80,7 @@ type dateinputElement struct {
 	onBlur   func()
 }
 
-func (w *dateinputElement) Layout(bc Constraint) Size {
+func (w *dateinputElement) Layout(bc base.Constraints) base.Size {
 	height := w.MinIntrinsicHeight(0)
 	width := w.MinIntrinsicWidth(0)
 	return bc.Constrain(Size{width, height})

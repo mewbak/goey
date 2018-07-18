@@ -7,7 +7,7 @@ import (
 	"github.com/lxn/win"
 )
 
-func (w *Checkbox) mount(parent Control) (Element, error) {
+func (w *Checkbox) mount(parent base.Control) (base.Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (w *checkboxElement) preferredWidth() Length {
 	return FromPixelsX(int(width) + 17)
 }
 
-func (w *checkboxElement) Layout(bc Constraint) Size {
+func (w *checkboxElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})

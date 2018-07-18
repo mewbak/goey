@@ -1,4 +1,4 @@
-package goey
+package base
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 
 func TestConstraint(t *testing.T) {
 	cases := []struct {
-		in                                                   Constraint
+		in                                                   Constraints
 		isNormalized, isTight, hasTightWidth, hasTightHeight bool
 		isBounded, hasBoundedWidth, hasBoundedHeight         bool
 	}{
@@ -50,7 +50,7 @@ func TestConstraint(t *testing.T) {
 
 func TestConstraint_ConstrainAndAttemptToPreserveAspectRatio(t *testing.T) {
 	cases := []struct {
-		in   Constraint
+		in   Constraints
 		size Size
 		out  Size
 	}{
@@ -77,9 +77,9 @@ func TestConstraint_ConstrainAndAttemptToPreserveAspectRatio(t *testing.T) {
 }
 func TestConstraint_Inset(t *testing.T) {
 	cases := []struct {
-		in      Constraint
+		in      Constraints
 		deflate Length
-		out     Constraint
+		out     Constraints
 	}{
 		{Tight(Size{}), 1 * DIP, Tight(Size{})},
 		{Tight(Size{2 * DIP, 2 * DIP}), 10 * DIP, Tight(Size{})},
@@ -106,13 +106,13 @@ func TestConstraint_Inset(t *testing.T) {
 
 func TestConstraint_Tighten(t *testing.T) {
 	cases := []struct {
-		in   Constraint
+		in   Constraints
 		size Size
-		out  Constraint
+		out  Constraints
 	}{
 		{Expand(), Size{10 * DIP, 10 * DIP}, Expand()},
-		{ExpandHeight(10 * DIP), Size{10 * DIP, 10 * DIP}, Constraint{Size{10 * DIP, Inf}, Size{10 * DIP, Inf}}},
-		{ExpandWidth(10 * DIP), Size{10 * DIP, 10 * DIP}, Constraint{Size{Inf, 10 * DIP}, Size{Inf, 10 * DIP}}},
+		{ExpandHeight(10 * DIP), Size{10 * DIP, 10 * DIP}, Constraints{Size{10 * DIP, Inf}, Size{10 * DIP, Inf}}},
+		{ExpandWidth(10 * DIP), Size{10 * DIP, 10 * DIP}, Constraints{Size{Inf, 10 * DIP}, Size{Inf, 10 * DIP}}},
 		{Loose(Size{20 * DIP, 25 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 10 * DIP})},
 		{Loose(Size{20 * DIP, 25 * DIP}), Size{30 * DIP, 30 * DIP}, Tight(Size{20 * DIP, 25 * DIP})},
 		{Tight(Size{10 * DIP, 15 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP})},

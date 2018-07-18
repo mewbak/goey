@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"sync/atomic"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -23,7 +25,7 @@ type Window struct {
 }
 
 // NewWindow create a new top-level window for the application.
-func NewWindow(title string, child Widget) (*Window, error) {
+func NewWindow(title string, child base.Widget) (*Window, error) {
 	return newWindow(title, child)
 }
 
@@ -34,13 +36,13 @@ func (w *Window) Close() {
 
 // Child returns the mounted child for the window.  In general, this
 // method should not be used.
-func (w *Window) Child() Element {
+func (w *Window) Child() base.Element {
 	return w.getChild()
 }
 
 // children assumes that the direct child of the window is a VBox, and then
 // returns the children of that element.  It is used for testing.
-func (w *Window) children() []Element {
+func (w *Window) children() []base.Element {
 	child := w.getChild()
 	if child == nil {
 		return nil
@@ -53,16 +55,16 @@ func (w *Window) children() []Element {
 	return nil
 }
 
-func (w *windowImpl) layoutChild(windowSize Size) Size {
+func (w *windowImpl) layoutChild(windowSize base.Size) base.Size {
 	// Create the constraints
-	constraints := Tight(windowSize)
+	constraints := base.Tight(windowSize)
 
 	// Relax maximum size when scolling is allowed
 	if w.horizontalScroll {
-		constraints.Max.Width = Inf
+		constraints.Max.Width = base.Inf
 	}
 	if w.verticalScroll {
-		constraints.Max.Height = Inf
+		constraints.Max.Height = base.Inf
 	}
 
 	// Perform layout
@@ -106,7 +108,7 @@ func (w *Window) scrollDefaults() (horizontal, vertical bool) {
 // match the widgets described by the parameter children.  The
 // position of contained widgets will be updated to match the new layout
 // properties.
-func (w *Window) SetChild(child Widget) error {
+func (w *Window) SetChild(child base.Widget) error {
 	// One source of bugs in widgets is when the fire an event when being
 	// updated.  This can lead to reentrant calls to SetChildren, typically
 	// with incorrect information since the GUI is in an inconsistent state

@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -12,7 +13,7 @@ import (
 
 var (
 	mainWindowCount int32
-	vscrollbarWidth Length
+	vscrollbarWidth base.Length
 )
 
 func init() {
@@ -30,8 +31,8 @@ type windowImpl struct {
 	handle                  *gtk.Window
 	scroll                  *gtk.ScrolledWindow
 	layout                  *gtk.Layout
-	child                   Element
-	childMinSize            Size
+	child                   base.Element
+	childMinSize            base.Size
 	horizontalScroll        bool
 	horizontalScrollVisible bool
 	verticalScroll          bool
@@ -40,7 +41,7 @@ type windowImpl struct {
 	shClosing               glib.SignalHandle
 }
 
-func newWindow(title string, child Widget) (*Window, error) {
+func newWindow(title string, child base.Widget) (*Window, error) {
 	app, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
 		return nil, err
@@ -93,10 +94,10 @@ func (w *windowImpl) onSize() {
 	}
 
 	// Update the global DPI
-	DPI.X, DPI.Y = 96, 96
+	base.DPI.X, base.DPI.Y = 96, 96
 
 	width, height := w.handle.GetSize()
-	clientSize := Size{FromPixelsX(width), FromPixelsY(height)}
+	clientSize := base.Size{base.FromPixelsX(width), base.FromPixelsY(height)}
 	size := w.layoutChild(clientSize)
 	if w.horizontalScroll && w.verticalScroll {
 		// Show scroll bars if necessary.
@@ -106,14 +107,14 @@ func (w *windowImpl) onSize() {
 		// again for vertical scroll.
 		if ok {
 			_, height := w.handle.GetSize()
-			w.showScrollV(size.Height, FromPixelsY(height))
+			w.showScrollV(size.Height, base.FromPixelsY(height))
 		}
 	} else if w.verticalScroll {
 		// Show scroll bars if necessary.
 		ok := w.showScrollV(size.Height, clientSize.Height)
 		if ok {
 			width, height := w.handle.GetSize()
-			clientSize := Size{FromPixelsX(width), FromPixelsY(height)}
+			clientSize := base.Size{base.FromPixelsX(width), base.FromPixelsY(height)}
 			size = w.layoutChild(clientSize)
 		}
 	} else if w.horizontalScroll {
@@ -121,18 +122,18 @@ func (w *windowImpl) onSize() {
 		ok := w.showScrollH(size.Width, clientSize.Width)
 		if ok {
 			width, height := w.handle.GetSize()
-			clientSize := Size{FromPixelsX(width), FromPixelsY(height)}
+			clientSize := base.Size{base.FromPixelsX(width), base.FromPixelsY(height)}
 			size = w.layoutChild(clientSize)
 		}
 	}
 	w.layout.SetSize(uint(size.Width.PixelsX()), uint(size.Height.PixelsY()))
-	bounds := Rectangle{
-		Point{}, Point{size.Width, size.Height},
+	bounds := base.Rectangle{
+		base.Point{}, base.Point{size.Width, size.Height},
 	}
 	w.child.SetBounds(bounds)
 }
 
-func (w *windowImpl) getChild() Element {
+func (w *windowImpl) getChild() base.Element {
 	return w.child
 }
 
@@ -148,7 +149,7 @@ func (w *windowImpl) message(m *Message) {
 	m.handle = uintptr(unsafe.Pointer(w.handle))
 }
 
-func get_vscrollbar_width(window *gtk.Window) (Length, error) {
+func get_vscrollbar_width(window *gtk.Window) (base.Length, error) {
 	if vscrollbarWidth != 0 {
 		return vscrollbarWidth, nil
 	}
@@ -169,18 +170,18 @@ func get_vscrollbar_width(window *gtk.Window) (Length, error) {
 	_, retval := sb.GetPreferredWidth()
 	sb.Destroy()
 	window.Add(oldChild)
-	vscrollbarWidth = FromPixelsX(retval)
+	vscrollbarWidth = base.FromPixelsX(retval)
 	return vscrollbarWidth, nil
 }
 
-func (w *windowImpl) setChild(child Widget) (err error) {
+func (w *windowImpl) setChild(child base.Widget) (err error) {
 	// Update the child element
-	w.child, err = DiffChild(Control{&w.layout.Widget}, w.child, child)
+	w.child, err = base.DiffChild(base.Control{&w.layout.Container}, w.child, child)
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.
 	if w.child != nil {
 		// Update the global DPI
-		DPI.X, DPI.Y = 96, 96
+		base.DPI.X, base.DPI.Y = 96, 96
 
 		// Constrain window size
 		w.updateWindowMinSize()
@@ -203,7 +204,7 @@ func (w *windowImpl) setScroll(horz, vert bool) {
 	w.onSize()
 }
 
-func (w *windowImpl) showScrollH(width Length, clientWidth Length) bool {
+func (w *windowImpl) showScrollH(width base.Length, clientWidth base.Length) bool {
 	if width > clientWidth {
 		if !w.horizontalScrollVisible {
 			// Show the scrollbar
@@ -221,7 +222,7 @@ func (w *windowImpl) showScrollH(width Length, clientWidth Length) bool {
 	return false
 }
 
-func (w *windowImpl) showScrollV(height Length, clientHeight Length) bool {
+func (w *windowImpl) showScrollV(height base.Length, clientHeight base.Length) bool {
 	if height > clientHeight {
 		if !w.verticalScrollVisible {
 			// Show the scrollbar
@@ -281,25 +282,25 @@ func (w *windowImpl) updateWindowMinSize() {
 	request := image.Point{}
 	// Determine the minimum size (in pixels) for the child of the window
 	if w.horizontalScroll && w.verticalScroll {
-		width := w.child.MinIntrinsicWidth(Inf)
-		height := w.child.MinIntrinsicHeight(Inf)
+		width := w.child.MinIntrinsicWidth(base.Inf)
+		height := w.child.MinIntrinsicHeight(base.Inf)
 		request.X = width.PixelsX() + dx
 		request.Y = height.PixelsY() + dy
 	} else if w.horizontalScroll {
-		height := w.child.MinIntrinsicHeight(Inf)
-		size := w.child.Layout(TightHeight(height))
+		height := w.child.MinIntrinsicHeight(base.Inf)
+		size := w.child.Layout(base.TightHeight(height))
 		request.X = size.Width.PixelsX() + dx
 		request.Y = height.PixelsY() + dy
 	} else if w.verticalScroll {
-		width := w.child.MinIntrinsicWidth(Inf)
-		size := w.child.Layout(TightWidth(width))
+		width := w.child.MinIntrinsicWidth(base.Inf)
+		size := w.child.Layout(base.TightWidth(width))
 		request.X = width.PixelsX() + dx
 		request.Y = size.Height.PixelsY() + dy
 	} else {
-		width := w.child.MinIntrinsicWidth(Inf)
-		height := w.child.MinIntrinsicHeight(Inf)
-		size1 := w.child.Layout(TightWidth(width))
-		size2 := w.child.Layout(TightHeight(height))
+		width := w.child.MinIntrinsicWidth(base.Inf)
+		height := w.child.MinIntrinsicHeight(base.Inf)
+		size1 := w.child.Layout(base.TightWidth(width))
+		size2 := w.child.Layout(base.TightHeight(height))
 		request.X = max(width, size2.Width).PixelsX() + dx
 		request.Y = max(height, size1.Height).PixelsY() + dy
 	}

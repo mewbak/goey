@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -15,14 +16,14 @@ type buttonElement struct {
 	onBlur  blurSlot
 }
 
-func (w *Button) mount(parent Control) (Element, error) {
+func (w *Button) mount(parent base.Control) (base.Element, error) {
 	control, err := gtk.ButtonNewWithLabel(w.Text)
 	if err != nil {
 		return nil, err
 	}
 	control.AddEvents(int(gdk.FOCUS_CHANGE_MASK))
 
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
+	parent.Handle.Add(control)
 	control.SetSensitive(!w.Disabled)
 	control.SetCanDefault(true)
 	if w.Default {
@@ -48,7 +49,7 @@ func (w *buttonElement) button() *gtk.Button {
 	return (*gtk.Button)(unsafe.Pointer(w.handle))
 }
 
-func (w *buttonElement) Props() Widget {
+func (w *buttonElement) Props() base.Widget {
 	button := w.button()
 	text, err := button.GetLabel()
 	if err != nil {

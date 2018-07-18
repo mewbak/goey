@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	progressKind = Kind{"bitbucket.org/rj/goey.Progress"}
+	progressKind = base.NewKind("bitbucket.org/rj/goey.Progress")
 )
 
 // Progress describes a widget that shows a progress bar.
@@ -16,13 +20,13 @@ type Progress struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*Progress) Kind() *Kind {
+func (*Progress) Kind() *base.Kind {
 	return &progressKind
 }
 
 // Mount creates a text area control in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *Progress) Mount(parent Control) (Element, error) {
+func (w *Progress) Mount(parent base.Control) (base.Element, error) {
 	// Fill in default values for the range.
 	w.UpdateRange()
 
@@ -37,11 +41,11 @@ func (w *Progress) UpdateRange() {
 	}
 }
 
-func (*progressElement) Kind() *Kind {
+func (*progressElement) Kind() *base.Kind {
 	return &progressKind
 }
 
-func (w *progressElement) UpdateProps(data Widget) error {
+func (w *progressElement) UpdateProps(data base.Widget) error {
 	pb := data.(*Progress)
 
 	// Fill in default values for the range.

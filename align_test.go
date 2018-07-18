@@ -2,10 +2,12 @@ package goey
 
 import (
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
-func (w *alignElement) Props() Widget {
-	child := Widget(nil)
+func (w *alignElement) Props() base.Widget {
+	child := base.Widget(nil)
 	if w.child != nil {
 		child = w.child.(Proper).Props()
 	}
@@ -38,14 +40,14 @@ func TestAlignClose(t *testing.T) {
 }
 
 func TestAlignUpdateProps(t *testing.T) {
-	testingUpdateWidgets(t, []Widget{
+	testingUpdateWidgets(t, []base.Widget{
 		&Align{Child: &Button{Text: "A"}},
 		&Align{HAlign: AlignStart, Child: &Button{Text: "B"}},
 		&Align{HAlign: AlignEnd, Child: &Button{Text: "C"}},
 		&Align{HAlign: AlignCenter, Child: &Button{Text: "C"}},
 		&Align{HeightFactor: 2, WidthFactor: 2.5, Child: &Button{Text: "C"}},
 		&Align{},
-	}, []Widget{
+	}, []base.Widget{
 		&Align{Child: &Button{Text: "AB"}},
 		&Align{HAlign: AlignCenter, Child: &Button{Text: "BC"}},
 		&Align{HAlign: AlignStart, Child: &Button{Text: "CD"}},

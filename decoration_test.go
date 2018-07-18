@@ -3,6 +3,8 @@ package goey
 import (
 	"image/color"
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -10,7 +12,7 @@ var (
 	white = color.RGBA{0xff, 0xff, 0xff, 0xff}
 )
 
-func (w *decorationElement) Props() Widget {
+func (w *decorationElement) Props() base.Widget {
 	widget := w.props()
 	if w.child != nil {
 		widget.Child = w.child.(Proper).Props()
@@ -19,7 +21,7 @@ func (w *decorationElement) Props() Widget {
 	return widget
 }
 
-func decorationChildWidget(child Element) Widget {
+func decorationChildWidget(child base.Element) base.Widget {
 	if child == nil {
 		return nil
 	}
@@ -46,12 +48,12 @@ func TestDecorationClose(t *testing.T) {
 }
 
 func TestDecorationUpdate(t *testing.T) {
-	testingUpdateWidgets(t, []Widget{
+	testingUpdateWidgets(t, []base.Widget{
 		&Decoration{Child: &Button{Text: "A"}},
 		&Decoration{},
 		&Decoration{Stroke: black},
 		&Decoration{Fill: black, Stroke: white, Radius: 4 * DIP},
-	}, []Widget{
+	}, []base.Widget{
 		&Decoration{},
 		&Decoration{Child: &Button{Text: "A"}},
 		&Decoration{Fill: black, Stroke: white, Radius: 4 * DIP},

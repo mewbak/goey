@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -16,12 +17,12 @@ type checkboxElement struct {
 	onBlur   blurSlot
 }
 
-func (w *Checkbox) mount(parent Control) (Element, error) {
+func (w *Checkbox) mount(parent base.Control) (base.Element, error) {
 	control, err := gtk.CheckButtonNewWithLabel(w.Text)
 	if err != nil {
 		return nil, err
 	}
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
+	parent.Handle.Add(control)
 	control.SetActive(w.Value)
 	control.SetSensitive(!w.Disabled)
 
@@ -55,7 +56,7 @@ func (w *checkboxElement) checkbutton() *gtk.CheckButton {
 	return (*gtk.CheckButton)(unsafe.Pointer(w.handle))
 }
 
-func (w *checkboxElement) Props() Widget {
+func (w *checkboxElement) Props() base.Widget {
 	checkbutton := w.checkbutton()
 	text, err := checkbutton.GetLabel()
 	if err != nil {

@@ -20,7 +20,7 @@ func (w *P) calcStyle() uint32 {
 	return style
 }
 
-func (w *P) mount(parent Control) (Element, error) {
+func (w *P) mount(parent base.Control) (base.Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (w *paragraphElement) Props() Widget {
 	}
 }
 
-func (w *paragraphElement) MinIntrinsicHeight(width Length) Length {
+func (w *paragraphElement) MinIntrinsicHeight(width base.Length) base.Length {
 	if width == Inf {
 		width = w.maxReflowWidth()
 	}
@@ -100,7 +100,7 @@ func (w *paragraphElement) MinIntrinsicHeight(width Length) Length {
 	return FromPixelsY(int(rect.Bottom))
 }
 
-func (w *paragraphElement) MinIntrinsicWidth(height Length) Length {
+func (w *paragraphElement) MinIntrinsicWidth(height base.Length) base.Length {
 	if height != Inf {
 		panic("not implemented")
 	}
@@ -109,7 +109,7 @@ func (w *paragraphElement) MinIntrinsicWidth(height Length) Length {
 	return min(FromPixelsX(int(width)), w.minReflowWidth())
 }
 
-func (w *paragraphElement) SetBounds(bounds Rectangle) {
+func (w *paragraphElement) SetBounds(bounds base.Rectangle) {
 	w.Control.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't

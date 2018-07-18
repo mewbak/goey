@@ -8,7 +8,7 @@ import (
 	"github.com/lxn/win"
 )
 
-func (w *IntInput) mount(parent Control) (Element, error) {
+func (w *IntInput) mount(parent base.Control) (base.Element, error) {
 	text, err := syscall.UTF16PtrFromString(strconv.FormatInt(w.Value, 10))
 	if err != nil {
 		return nil, err

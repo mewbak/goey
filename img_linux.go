@@ -5,6 +5,7 @@ import (
 	"image/draw"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
@@ -14,8 +15,8 @@ type imgElement struct {
 	Control
 
 	imageData []uint8
-	width     Length
-	height    Length
+	width     base.Length
+	height    base.Length
 }
 
 func imageToPixbuf(prop image.Image) (*gdk.Pixbuf, []uint8, error) {
@@ -52,7 +53,7 @@ func pixbufToImage(pixbuf *gdk.Pixbuf) image.Image {
 	return nil
 }
 
-func (w *Img) mount(parent Control) (Element, error) {
+func (w *Img) mount(parent base.Control) (base.Element, error) {
 	// Create the bitmap
 	pixbuf, buffer, err := imageToPixbuf(w.Image)
 	if err != nil {
@@ -63,7 +64,7 @@ func (w *Img) mount(parent Control) (Element, error) {
 	if err != nil {
 		return nil, err
 	}
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(handle)
+	parent.Handle.Add(handle)
 	handle.Show()
 
 	retval := &imgElement{Control{&handle.Widget}, buffer, w.Width, w.Height}
@@ -80,7 +81,7 @@ func (w *imgElement) image() *gtk.Image {
 	return (*gtk.Image)(unsafe.Pointer(w.handle))
 }
 
-func (w *imgElement) Props() Widget {
+func (w *imgElement) Props() base.Widget {
 	return &Img{
 		Image:  pixbufToImage(w.image().GetPixbuf()),
 		Width:  w.width,

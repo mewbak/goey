@@ -1,4 +1,4 @@
-package goey
+package base
 
 // CloseElements closes all of the elements contained in a slice.
 // This is a utility function to help containers close all of their children

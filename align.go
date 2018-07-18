@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	alignKind = Kind{"bitbucket.org/rj/goey.Align"}
+	alignKind = base.NewKind("bitbucket.org/rj/goey.Align")
 )
 
 // Alignment represents the position of a child widget along one dimension.
@@ -29,20 +33,20 @@ const (
 // zero, then the widget will try to size itself to be that much larger than the
 // child widget.
 type Align struct {
-	HAlign       Alignment // Horizontal alignment of child widget.
-	VAlign       Alignment // Vertical alignment of child widget.
-	WidthFactor  float64   // If greater than zero, ratio of container width to child width.
-	HeightFactor float64   // If greater than zero, ratio of container height to child height.
-	Child        Widget    // Child widget.
+	HAlign       Alignment   // Horizontal alignment of child widget.
+	VAlign       Alignment   // Vertical alignment of child widget.
+	WidthFactor  float64     // If greater than zero, ratio of container width to child width.
+	HeightFactor float64     // If greater than zero, ratio of container height to child height.
+	Child        base.Widget // Child widget.
 }
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*Align) Kind() *Kind {
+func (*Align) Kind() *base.Kind {
 	return &alignKind
 }
 
-func mountIfNotNil(parent Control, child Widget) (Element, error) {
+func mountIfNotNil(parent base.Control, child base.Widget) (base.Element, error) {
 	if child == nil {
 		return nil, nil
 	}
@@ -51,7 +55,7 @@ func mountIfNotNil(parent Control, child Widget) (Element, error) {
 
 // Mount creates a button in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *Align) Mount(parent Control) (Element, error) {
+func (w *Align) Mount(parent base.Control) (base.Element, error) {
 	// Mount the child
 	child, err := mountIfNotNil(parent, w.Child)
 	if err != nil {
@@ -69,9 +73,9 @@ func (w *Align) Mount(parent Control) (Element, error) {
 }
 
 type alignElement struct {
-	parent       Control
-	child        Element
-	childSize    Size
+	parent       base.Control
+	child        base.Element
+	childSize    base.Size
 	halign       Alignment
 	valign       Alignment
 	widthFactor  float64
@@ -85,22 +89,22 @@ func (w *alignElement) Close() {
 	}
 }
 
-func (*alignElement) Kind() *Kind {
+func (*alignElement) Kind() *base.Kind {
 	return &alignKind
 }
 
-func (w *alignElement) Layout(bc Constraint) Size {
+func (w *alignElement) Layout(bc base.Constraints) base.Size {
 	shrinkWrapWidth := w.widthFactor > 0 || !bc.HasBoundedWidth()
 	shrinkWrapHeight := w.heightFactor > 0 || !bc.HasBoundedHeight()
 
 	if w.child == nil {
 
-		size := Size{}
+		size := base.Size{}
 		if !shrinkWrapWidth {
-			size.Width = Inf
+			size.Width = base.Inf
 		}
 		if !shrinkWrapHeight {
-			size.Height = Inf
+			size.Height = base.Inf
 		}
 		return bc.Constrain(size)
 	}
@@ -108,39 +112,39 @@ func (w *alignElement) Layout(bc Constraint) Size {
 	size := w.child.Layout(bc.Loosen())
 	w.childSize = size
 	if shrinkWrapWidth && w.widthFactor > 0 {
-		size.Width = Length(float64(size.Width) * w.widthFactor)
+		size.Width = base.Length(float64(size.Width) * w.widthFactor)
 	}
 	if shrinkWrapHeight && w.heightFactor > 0 {
-		size.Height = Length(float64(size.Height) * w.heightFactor)
+		size.Height = base.Length(float64(size.Height) * w.heightFactor)
 	}
 	return bc.Constrain(size)
 }
 
-func (w *alignElement) MinIntrinsicHeight(width Length) Length {
+func (w *alignElement) MinIntrinsicHeight(width base.Length) base.Length {
 	if w.child == nil {
 		return 0
 	}
 
 	height := w.child.MinIntrinsicHeight(width)
 	if w.heightFactor > 0 {
-		return Length(float64(height) * w.heightFactor)
+		return base.Length(float64(height) * w.heightFactor)
 	}
 	return height
 }
 
-func (w *alignElement) MinIntrinsicWidth(height Length) Length {
+func (w *alignElement) MinIntrinsicWidth(height base.Length) base.Length {
 	if w.child == nil {
 		return 0
 	}
 
 	width := w.child.MinIntrinsicWidth(height)
 	if w.widthFactor > 0 {
-		return Length(float64(width) * w.widthFactor)
+		return base.Length(float64(width) * w.widthFactor)
 	}
 	return width
 }
 
-func (w *alignElement) SetBounds(bounds Rectangle) {
+func (w *alignElement) SetBounds(bounds base.Rectangle) {
 	if w.child == nil {
 		return
 	}
@@ -149,11 +153,14 @@ func (w *alignElement) SetBounds(bounds Rectangle) {
 		(bounds.Max.X-w.childSize.Width).Scale(int(w.halign)-int(AlignStart), int(AlignEnd)-int(AlignStart))
 	y := bounds.Min.Y.Scale(int(w.valign)-int(AlignEnd), int(AlignStart)-int(AlignEnd)) +
 		(bounds.Max.Y-w.childSize.Height).Scale(int(w.valign)-int(AlignStart), int(AlignEnd)-int(AlignStart))
-	w.child.SetBounds(Rectangle{Point{x, y}, Point{x + w.childSize.Width, y + w.childSize.Height}})
+	w.child.SetBounds(base.Rectangle{
+		base.Point{x, y},
+		base.Point{x + w.childSize.Width, y + w.childSize.Height},
+	})
 }
 
 func (w *alignElement) updateProps(data *Align) (err error) {
-	w.child, err = DiffChild(w.parent, w.child, data.Child)
+	w.child, err = base.DiffChild(w.parent, w.child, data.Child)
 	w.widthFactor = data.WidthFactor
 	w.heightFactor = data.HeightFactor
 	w.halign = data.HAlign
@@ -161,6 +168,6 @@ func (w *alignElement) updateProps(data *Align) (err error) {
 	return err
 }
 
-func (w *alignElement) UpdateProps(data Widget) error {
+func (w *alignElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*Align))
 }

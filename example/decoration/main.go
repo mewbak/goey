@@ -14,6 +14,7 @@ import (
 	"strconv"
 
 	"bitbucket.org/rj/goey"
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -52,7 +53,7 @@ func updateWindow() {
 	}
 }
 
-func render() goey.Widget {
+func render() base.Widget {
 	text := "Click me!"
 	if clickCount > 0 {
 		text = text + "  (" + strconv.Itoa(clickCount) + ")"
@@ -64,7 +65,7 @@ func render() goey.Widget {
 	return &goey.VBox{
 		AlignMain:  goey.SpaceAround,
 		AlignCross: goey.CrossCenter,
-		Children: []goey.Widget{
+		Children: []base.Widget{
 			&goey.Padding{
 				Insets: goey.DefaultInsets(),
 				Child: &goey.P{
@@ -75,7 +76,7 @@ func render() goey.Widget {
 				Fill:   colors[clickCount%4],
 				Stroke: stroke,
 				Insets: goey.UniformInsets(0.5 * 96 * goey.DIP),
-				Radius: goey.Length(clickCount%16) * (2 * goey.DIP),
+				Radius: (2 * goey.DIP).Scale(clickCount%16, 1),
 				Child: &goey.Button{Text: text, OnClick: func() {
 					clickCount++
 					updateWindow()

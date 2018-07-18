@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -18,12 +19,12 @@ type textinputElement struct {
 	shEnterKey glib.SignalHandle
 }
 
-func (w *TextInput) mount(parent Control) (Element, error) {
+func (w *TextInput) mount(parent base.Control) (base.Element, error) {
 	control, err := gtk.EntryNew()
 	if err != nil {
 		return nil, err
 	}
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
+	parent.Handle.Add(control)
 	control.SetText(w.Value)
 	control.SetPlaceholderText(w.Placeholder)
 	control.SetSensitive(!w.Disabled)
@@ -80,7 +81,7 @@ func (w *textinputElement) entry() *gtk.Entry {
 	return (*gtk.Entry)(unsafe.Pointer(w.handle))
 }
 
-func (w *textinputElement) Props() Widget {
+func (w *textinputElement) Props() base.Widget {
 	entry := w.entry()
 	value, err := entry.GetText()
 	if err != nil {

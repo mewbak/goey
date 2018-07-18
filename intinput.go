@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	intInputKind = Kind{"bitbucket.org/rj/goey.IntInput"}
+	intInputKind = base.NewKind("bitbucket.org/rj/goey.IntInput")
 )
 
 // IntInput describes a widget that users input or update a single integer value.
@@ -18,21 +22,21 @@ type IntInput struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*IntInput) Kind() *Kind {
+func (*IntInput) Kind() *base.Kind {
 	return &intInputKind
 }
 
 // Mount creates a text field in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *IntInput) Mount(parent Control) (Element, error) {
+func (w *IntInput) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*intinputElement) Kind() *Kind {
+func (*intinputElement) Kind() *base.Kind {
 	return &intInputKind
 }
 
-func (w *intinputElement) UpdateProps(data Widget) error {
+func (w *intinputElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*IntInput))
 }

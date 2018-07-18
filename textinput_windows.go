@@ -23,7 +23,7 @@ func init() {
 	}
 }
 
-func (w *TextInput) mount(parent Control) (Element, error) {
+func (w *TextInput) mount(parent base.Control) (base.Element, error) {
 	text, err := syscall.UTF16PtrFromString(w.Value)
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ func (w *textinputElement) Props() Widget {
 	}
 }
 
-func (w *textinputElementBase) Layout(bc Constraint) Size {
+func (w *textinputElementBase) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})

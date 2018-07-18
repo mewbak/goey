@@ -1,8 +1,7 @@
 package goey
 
 import (
-	"unsafe"
-
+	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -20,7 +19,7 @@ type textareaElement struct {
 	onBlur   blurSlot
 }
 
-func (w *TextArea) mount(parent Control) (Element, error) {
+func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	buffer, err := gtk.TextBufferNew(nil)
 	if err != nil {
 		return nil, err
@@ -58,7 +57,7 @@ func (w *TextArea) mount(parent Control) (Element, error) {
 	}
 	frame.SetShadowType(gtk.SHADOW_ETCHED_IN)
 	frame.Add(swindow)
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(frame)
+	parent.Handle.Add(frame)
 
 	retval := &textareaElement{
 		handle:   control,
@@ -114,33 +113,36 @@ func (w *textareaElement) Handle() *gtk.Widget {
 	return &w.handle.Widget
 }
 
-func (w *textareaElement) Layout(bc Constraint) Size {
+func (w *textareaElement) Layout(bc base.Constraints) base.Size {
 	if !bc.HasBoundedWidth() {
 		_, width := w.handle.GetPreferredWidth()
 		_, height := w.handle.GetPreferredHeight()
-		return bc.Constrain(Size{FromPixelsX(width), FromPixelsY(height)})
+		return bc.Constrain(base.Size{
+			base.FromPixelsX(width), 
+			base.FromPixelsY(height),
+		})
 	}
 
 	width := bc.Max.Width
 	_, height := syscall.WidgetGetPreferredHeightForWidth(&w.frame.Widget, width.PixelsX())
-	return bc.Constrain(Size{width, FromPixelsX(height)})
+	return bc.Constrain(base.Size{width, base.FromPixelsX(height)})
 }
 
-func (w *textareaElement) MinIntrinsicHeight(width Length) Length {
-	if width != Inf {
+func (w *textareaElement) MinIntrinsicHeight(width base.Length) base.Length {
+	if width != base.Inf {
 		height, _ := syscall.WidgetGetPreferredHeightForWidth(&w.frame.Widget, width.PixelsX())
-		return FromPixelsY(height)
+		return base.FromPixelsY(height)
 	}
 	height, _ := w.frame.GetPreferredHeight()
-	return FromPixelsY(height)
+	return base.FromPixelsY(height)
 }
 
-func (w *textareaElement) MinIntrinsicWidth(Length) Length {
+func (w *textareaElement) MinIntrinsicWidth(base.Length) base.Length {
 	width, _ := w.frame.GetPreferredWidth()
-	return FromPixelsX(width)
+	return base.FromPixelsX(width)
 }
 
-func (w *textareaElement) Props() Widget {
+func (w *textareaElement) Props() base.Widget {
 	buffer, err := w.handle.GetBuffer()
 	if err != nil {
 		panic("count not get buffer, " + err.Error())
@@ -159,7 +161,7 @@ func (w *textareaElement) Props() Widget {
 	}
 }
 
-func (w *textareaElement) SetBounds(bounds Rectangle) {
+func (w *textareaElement) SetBounds(bounds base.Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.frame.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }

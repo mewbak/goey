@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -16,12 +17,12 @@ type intinputElement struct {
 	onBlur   blurSlot
 }
 
-func (w *IntInput) mount(parent Control) (Element, error) {
+func (w *IntInput) mount(parent base.Control) (base.Element, error) {
 	control, err := gtk.SpinButtonNew(nil, 1, 0)
 	if err != nil {
 		return nil, err
 	}
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
+	parent.Handle.Add(control)
 	control.SetRange(-0x7FFFFFFFFFFFFFFF, 0x7FFFFFFFFFFFFFFF)
 	control.SetValue(float64(w.Value))
 	control.SetIncrements(1, 10)

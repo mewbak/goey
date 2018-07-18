@@ -3,6 +3,8 @@ package goey
 import (
 	"fmt"
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 func ExampleTextInput() {
@@ -11,7 +13,7 @@ func ExampleTextInput() {
 	var mainWindow *Window
 	// These functions are used to update the GUI.  See below
 	var update func()
-	var render func() Widget
+	var render func() base.Widget
 
 	// Update function
 	update = func() {
@@ -23,10 +25,10 @@ func ExampleTextInput() {
 
 	// Render function generates a tree of Widgets to describe the desired
 	// state of the GUI.
-	render = func() Widget {
+	render = func() base.Widget {
 		// Prep - text for the button
 		// The GUI contains a single widget, this button.
-		return &VBox{Children: []Widget{
+		return &VBox{Children: []base.Widget{
 			&Label{Text: "Enter you text below:"},
 			&TextInput{
 				Value:       "",
@@ -67,11 +69,11 @@ func TestTextInputEvents(t *testing.T) {
 }
 
 func TestTextInputProps(t *testing.T) {
-	testingUpdateWidgets(t, []Widget{
+	testingUpdateWidgets(t, []base.Widget{
 		&TextInput{Value: "A"},
 		&TextInput{Value: "B", Placeholder: "..."},
 		&TextInput{Value: "C", Disabled: true},
-	}, []Widget{
+	}, []base.Widget{
 		&TextInput{Value: "AA"},
 		&TextInput{Value: "BA", Disabled: true},
 		&TextInput{Value: "CA", Placeholder: "***", Disabled: false},

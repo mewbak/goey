@@ -266,7 +266,7 @@ func (w *windowImpl) message(m *Message) {
 // minimum size.  This function will also perform layout on the child.
 func (w *windowImpl) setChild(child Widget) (err error) {
 	// Update the child element
-	w.child, err = DiffChild(Control{w.hWnd}, w.child, child)
+	w.child, err = base.DiffChild(Control{w.hWnd}, w.child, child)
 	w.windowMinSize = image.Point{}
 	// Whether or not an error has occured, redo the layout so the children
 	// are placed.

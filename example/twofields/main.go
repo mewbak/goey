@@ -5,9 +5,11 @@
 package main
 
 import (
-	"bitbucket.org/rj/goey"
 	"fmt"
 	"strconv"
+
+	"bitbucket.org/rj/goey"
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -41,11 +43,11 @@ func updateWindow() {
 	}
 }
 
-func render() goey.Widget {
+func render() base.Widget {
 	return &goey.Padding{
 		Insets: goey.DefaultInsets(),
 		Child: &goey.VBox{
-			Children: []goey.Widget{
+			Children: []base.Widget{
 				&goey.Label{Text: "This is the most important field:"},
 				&goey.TextArea{Value: text[0], Placeholder: "You should type something here.",
 					OnChange: func(value string) {

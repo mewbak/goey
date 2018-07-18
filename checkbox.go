@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	checkboxKind = Kind{"bitbucket.org/rj/goey.Checkbox"}
+	checkboxKind = base.NewKind("bitbucket.org/rj/goey.Checkbox")
 )
 
 // Checkbox describes a widget that users input or update a flag.
@@ -17,21 +21,21 @@ type Checkbox struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*Checkbox) Kind() *Kind {
+func (*Checkbox) Kind() *base.Kind {
 	return &checkboxKind
 }
 
 // Mount creates a checkbox in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *Checkbox) Mount(parent Control) (Element, error) {
+func (w *Checkbox) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*checkboxElement) Kind() *Kind {
+func (*checkboxElement) Kind() *base.Kind {
 	return &checkboxKind
 }
 
-func (w *checkboxElement) UpdateProps(data Widget) error {
+func (w *checkboxElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*Checkbox))
 }

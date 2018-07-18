@@ -1,9 +1,11 @@
 package main
 
 import (
-	"bitbucket.org/rj/goey"
 	"fmt"
 	"strconv"
+
+	"bitbucket.org/rj/goey"
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -34,12 +36,12 @@ func update() {
 	}
 }
 
-func render() goey.Widget {
+func render() base.Widget {
 	labelText := "What needs to be done?"
 	if len(Model) > 0 {
 		labelText = labelText + "  (" + strconv.Itoa(len(Model)) + ")"
 	}
-	widgets := []goey.Widget{
+	widgets := []base.Widget{
 		&goey.Label{Text: "What needs to be done:"},
 		&goey.TextInput{Placeholder: "Enter todo description.", OnEnterKey: onNewTodoItem},
 	}

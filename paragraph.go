@@ -1,8 +1,12 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	paragraphKind     = Kind{"bitbucket.org/rj/goey.Paragraph"}
-	paragraphMaxWidth Length
+	paragraphKind     = base.NewKind("bitbucket.org/rj/goey.Paragraph")
+	paragraphMaxWidth base.Length
 )
 
 // TextAlignment identifies the different types of text alignment that are possible.
@@ -28,45 +32,45 @@ type P struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*P) Kind() *Kind {
+func (*P) Kind() *base.Kind {
 	return &paragraphKind
 }
 
 // Mount creates a paragraph in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *P) Mount(parent Control) (Element, error) {
+func (w *P) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*paragraphElement) Kind() *Kind {
+func (*paragraphElement) Kind() *base.Kind {
 	return &paragraphKind
 }
 
-func (w *paragraphElement) Layout(bc Constraint) Size {
+func (w *paragraphElement) Layout(bc base.Constraints) base.Size {
 	if bc.HasBoundedWidth() {
 		width := bc.ConstrainWidth(w.maxReflowWidth())
 		height := w.MinIntrinsicHeight(width)
-		return Size{width, bc.ConstrainHeight(height)}
+		return base.Size{width, bc.ConstrainHeight(height)}
 	}
 
 	if bc.HasBoundedHeight() {
 		width := w.minReflowWidth()
 		height := w.MinIntrinsicHeight(width)
 		if height <= bc.Max.Height {
-			return Size{width, height}
+			return base.Size{width, height}
 		}
 		width = w.maxReflowWidth()
 		height = w.MinIntrinsicHeight(width)
-		return Size{width, bc.ConstrainHeight(height)}
+		return base.Size{width, bc.ConstrainHeight(height)}
 	}
 
 	width := bc.ConstrainWidth(w.minReflowWidth())
 	height := w.MinIntrinsicHeight(width)
-	return Size{width, bc.ConstrainHeight(height)}
+	return base.Size{width, bc.ConstrainHeight(height)}
 }
 
-func (w *paragraphElement) minReflowWidth() Length {
+func (w *paragraphElement) minReflowWidth() base.Length {
 	if paragraphMaxWidth == 0 {
 		w.measureReflowLimits()
 	}
@@ -74,13 +78,13 @@ func (w *paragraphElement) minReflowWidth() Length {
 	return paragraphMaxWidth / 4
 }
 
-func (w *paragraphElement) maxReflowWidth() Length {
+func (w *paragraphElement) maxReflowWidth() base.Length {
 	if paragraphMaxWidth == 0 {
 		w.measureReflowLimits()
 	}
 	return paragraphMaxWidth
 }
 
-func (w *paragraphElement) UpdateProps(data Widget) error {
+func (w *paragraphElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*P))
 }

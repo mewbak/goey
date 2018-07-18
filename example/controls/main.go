@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"bitbucket.org/rj/goey"
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -35,9 +36,9 @@ func updateWindow() {
 	window.SetChild(renderWindow())
 }
 
-func renderWindow() goey.Widget {
+func renderWindow() base.Widget {
 	// Fixed part at top
-	widgets := []goey.Widget{
+	widgets := []base.Widget{
 		&goey.Checkbox{Text: "Show text of lorem ipsum.", Value: showLorem, OnChange: func(ok bool) {
 			showLorem = ok
 			updateWindow()
@@ -66,11 +67,11 @@ func renderWindow() goey.Widget {
 			&goey.DateInput{Value: time.Now().Add(24 * time.Hour),
 				OnChange: func(v time.Time) { println("date input: ", v.String()) }},
 			&goey.HR{},
-			&goey.HBox{Children: []goey.Widget{
+			&goey.HBox{Children: []base.Widget{
 				&goey.Button{Text: "C1", Default: true},
 				&goey.Button{Text: "C2"},
 			}},
-			&goey.HBox{Children: []goey.Widget{
+			&goey.HBox{Children: []base.Widget{
 				&goey.Button{Text: "D1"},
 				&goey.Button{Text: "D2", Disabled: true},
 				&goey.Button{Text: "D3"},

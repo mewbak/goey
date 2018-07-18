@@ -5,17 +5,18 @@ import (
 	"math"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/cairo"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func (w *Decoration) mount(parent Control) (Element, error) {
+func (w *Decoration) mount(parent base.Control) (base.Element, error) {
 	control, err := gtk.DrawingAreaNew()
 	if err != nil {
 		return nil, err
 	}
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
+	parent.Handle.Add(control)
 
 	retval := &decorationElement{
 		handle: control,
@@ -29,7 +30,7 @@ func (w *Decoration) mount(parent Control) (Element, error) {
 	control.Connect("draw", decorationOnDraw, retval)
 	control.Show()
 
-	child, err := DiffChild(parent, nil, w.Child)
+	child, err := base.DiffChild(parent, nil, w.Child)
 	if err != nil {
 		control.Destroy()
 		return nil, err
@@ -44,10 +45,10 @@ type decorationElement struct {
 	fill   color.RGBA
 	stroke color.RGBA
 	insets Insets
-	radius Length
+	radius base.Length
 
-	child     Element
-	childSize Size
+	child     base.Element
+	childSize base.Size
 }
 
 func decorationOnDestroy(widget *gtk.DrawingArea, mounted *decorationElement) {
@@ -112,7 +113,7 @@ func (w *decorationElement) props() *Decoration {
 	}
 }
 
-func (w *decorationElement) SetBounds(bounds Rectangle) {
+func (w *decorationElement) SetBounds(bounds base.Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 
@@ -134,7 +135,7 @@ func (w *decorationElement) updateProps(data *Decoration) error {
 	if err != nil {
 		return err
 	}
-	w.child, err = DiffChild(Control{parent}, w.child, data.Child)
+	w.child, err = base.DiffChild(base.Control{(*gtk.Container)(unsafe.Pointer(parent))}, w.child, data.Child)
 	if err != nil {
 		return err
 	}

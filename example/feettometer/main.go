@@ -9,9 +9,11 @@
 package main
 
 import (
-	"bitbucket.org/rj/goey"
 	"fmt"
 	"strconv"
+
+	"bitbucket.org/rj/goey"
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -46,16 +48,16 @@ func update() {
 	}
 }
 
-func render() goey.Widget {
+func render() base.Widget {
 	return &goey.Padding{
 		Insets: goey.DefaultInsets(),
 		Child: &goey.Align{Child: &MinSizedBox{Child: &goey.VBox{
 			AlignMain: goey.MainCenter,
-			Children: []goey.Widget{
+			Children: []base.Widget{
 				&goey.HBox{
 					AlignMain:  goey.Homogeneous,
 					AlignCross: goey.CrossCenter,
-					Children: []goey.Widget{
+					Children: []base.Widget{
 						&goey.Empty{},
 						&goey.TextInput{Value: feetValue, OnChange: func(v string) { feetValue = v }, OnEnterKey: func(v string) { feetValue = v; calculate() }},
 						&goey.Label{Text: "feet"},
@@ -63,7 +65,7 @@ func render() goey.Widget {
 				}, &goey.HBox{
 					AlignMain:  goey.Homogeneous,
 					AlignCross: goey.CrossCenter,
-					Children: []goey.Widget{
+					Children: []base.Widget{
 						&goey.Label{Text: "is equivalent to"},
 						&goey.Label{Text: meterValue},
 						&goey.Label{Text: "meters"},
@@ -71,7 +73,7 @@ func render() goey.Widget {
 				}, &goey.HBox{
 					AlignMain:  goey.Homogeneous,
 					AlignCross: goey.CrossCenter,
-					Children: []goey.Widget{
+					Children: []base.Widget{
 						&goey.Empty{},
 						&goey.Empty{},
 						&goey.Button{Text: "Calculate", Default: true, OnClick: calculate},

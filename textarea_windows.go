@@ -7,7 +7,7 @@ import (
 	"github.com/lxn/win"
 )
 
-func (w *TextArea) mount(parent Control) (Element, error) {
+func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	text, err := syscall.UTF16PtrFromString(w.Value)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ type textareaElement struct {
 	minLines int
 }
 
-func (w *textareaElement) Layout(bc Constraint) Size {
+func (w *textareaElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})

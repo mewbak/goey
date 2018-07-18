@@ -17,6 +17,7 @@ import (
 	"os"
 
 	"bitbucket.org/rj/goey"
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -95,7 +96,7 @@ func update() {
 	mainWindow.SetIcon(img)
 }
 
-func render() goey.Widget {
+func render() base.Widget {
 	img, description := selectImage(clickCount)
 
 	return &goey.Padding{
@@ -103,7 +104,7 @@ func render() goey.Widget {
 		Child: &goey.VBox{
 			AlignMain:  goey.MainCenter,
 			AlignCross: goey.CrossCenter,
-			Children: []goey.Widget{
+			Children: []base.Widget{
 				&goey.Button{Text: "Change the colour", OnClick: func() {
 					clickCount++
 					update()

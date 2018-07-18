@@ -21,7 +21,7 @@ func init() {
 	}
 }
 
-func (w *Button) mount(parent Control) (Element, error) {
+func (w *Button) mount(parent base.Control) (base.Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (w *buttonElement) Props() Widget {
 	}
 }
 
-func (w *buttonElement) Layout(bc Constraint) Size {
+func (w *buttonElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})

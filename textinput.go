@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	textInputKind = Kind{"bitbucket.org/rj/goey.TextInput"}
+	textInputKind = base.NewKind("bitbucket.org/rj/goey.TextInput")
 )
 
 // TextInput describes a widget that users input or update a single line of text.
@@ -20,21 +24,21 @@ type TextInput struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*TextInput) Kind() *Kind {
+func (*TextInput) Kind() *base.Kind {
 	return &textInputKind
 }
 
 // Mount creates a text field in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *TextInput) Mount(parent Control) (Element, error) {
+func (w *TextInput) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*textinputElement) Kind() *Kind {
+func (*textinputElement) Kind() *base.Kind {
 	return &textInputKind
 }
 
-func (w *textinputElement) UpdateProps(data Widget) error {
+func (w *textinputElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*TextInput))
 }

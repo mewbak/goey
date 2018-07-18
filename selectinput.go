@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	selectKind = Kind{"bitbucket.org/rj/goey.SelectInput"}
+	selectKind = base.NewKind("bitbucket.org/rj/goey.SelectInput")
 )
 
 // SelectInput describes a widget that users can click to select one from a fixed list of choices.
@@ -17,21 +21,21 @@ type SelectInput struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*SelectInput) Kind() *Kind {
+func (*SelectInput) Kind() *base.Kind {
 	return &selectKind
 }
 
 // Mount creates a button in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *SelectInput) Mount(parent Control) (Element, error) {
+func (w *SelectInput) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)
 }
 
-func (*selectinputElement) Kind() *Kind {
+func (*selectinputElement) Kind() *base.Kind {
 	return &selectKind
 }
 
-func (w *selectinputElement) UpdateProps(data Widget) error {
+func (w *selectinputElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*SelectInput))
 }

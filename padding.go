@@ -1,27 +1,31 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	paddingKind = Kind{"bitbucket.org/rj/goey.Padding"}
+	paddingKind = base.NewKind("bitbucket.org/rj/goey.Padding")
 )
 
 // Insets describe padding that should ba added around a widget.
 type Insets struct {
-	Top    Length
-	Right  Length
-	Bottom Length
-	Left   Length
+	Top    base.Length
+	Right  base.Length
+	Bottom base.Length
+	Left   base.Length
 }
 
 // DefaultInsets returns the (perhaps platform-dependent) default insets for
 // widgets inside of a top-level window.
 func DefaultInsets() Insets {
-	const padding = 11 * DIP
+	const padding = 11 * base.DIP
 	return Insets{padding, padding, padding, padding}
 }
 
 // UniformInsets returns a padding description where the padding is equal on
 // all four sides.
-func UniformInsets(l Length) Insets {
+func UniformInsets(l base.Length) Insets {
 	return Insets{l, l, l, l}
 }
 
@@ -32,18 +36,18 @@ func UniformInsets(l Length) Insets {
 // element as specified by the field Insets.
 type Padding struct {
 	Insets Insets
-	Child  Widget
+	Child  base.Widget
 }
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*Padding) Kind() *Kind {
+func (*Padding) Kind() *base.Kind {
 	return &paddingKind
 }
 
 // Mount creates a button in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
-func (w *Padding) Mount(parent Control) (Element, error) {
+func (w *Padding) Mount(parent base.Control) (base.Element, error) {
 	child, err := mountIfNotNil(parent, w.Child)
 	if err != nil {
 		return nil, err
@@ -57,9 +61,9 @@ func (w *Padding) Mount(parent Control) (Element, error) {
 }
 
 type paddingElement struct {
-	parent    Control
-	child     Element
-	childSize Size
+	parent    base.Control
+	child     base.Element
+	childSize base.Size
 	insets    Insets
 }
 
@@ -70,27 +74,27 @@ func (w *paddingElement) Close() {
 	}
 }
 
-func (*paddingElement) Kind() *Kind {
+func (*paddingElement) Kind() *base.Kind {
 	return &paddingKind
 }
 
-func (w *paddingElement) Layout(bc Constraint) Size {
+func (w *paddingElement) Layout(bc base.Constraints) base.Size {
 	hinset := w.insets.Left + w.insets.Right
 	vinset := w.insets.Top + w.insets.Bottom
 
 	if w.child == nil {
-		return bc.Constrain(Size{hinset, vinset})
+		return bc.Constrain(base.Size{hinset, vinset})
 	}
 
 	innerConstraints := bc.Inset(hinset, vinset)
 	w.childSize = w.child.Layout(innerConstraints)
-	return Size{
+	return base.Size{
 		w.childSize.Width + hinset,
 		w.childSize.Height + vinset,
 	}
 }
 
-func (w *paddingElement) MinIntrinsicHeight(width Length) Length {
+func (w *paddingElement) MinIntrinsicHeight(width base.Length) base.Length {
 	vinset := w.insets.Top + w.insets.Bottom
 
 	if w.child == nil {
@@ -100,7 +104,7 @@ func (w *paddingElement) MinIntrinsicHeight(width Length) Length {
 	return w.child.MinIntrinsicHeight(width) + vinset
 }
 
-func (w *paddingElement) MinIntrinsicWidth(height Length) Length {
+func (w *paddingElement) MinIntrinsicWidth(height base.Length) base.Length {
 	hinset := w.insets.Left + w.insets.Right
 
 	if w.child == nil {
@@ -110,7 +114,7 @@ func (w *paddingElement) MinIntrinsicWidth(height Length) Length {
 	return w.child.MinIntrinsicWidth(height) + hinset
 }
 
-func (w *paddingElement) SetBounds(bounds Rectangle) {
+func (w *paddingElement) SetBounds(bounds base.Rectangle) {
 	if w.child == nil {
 		return
 	}
@@ -123,11 +127,11 @@ func (w *paddingElement) SetBounds(bounds Rectangle) {
 }
 
 func (w *paddingElement) updateProps(data *Padding) (err error) {
-	w.child, err = DiffChild(w.parent, w.child, data.Child)
+	w.child, err = base.DiffChild(w.parent, w.child, data.Child)
 	w.insets = data.Insets
 	return err
 }
 
-func (w *paddingElement) UpdateProps(data Widget) error {
+func (w *paddingElement) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*Padding))
 }

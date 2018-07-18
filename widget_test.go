@@ -2,27 +2,19 @@ package goey
 
 import (
 	"bytes"
-	"fmt"
 	"reflect"
 	"runtime"
 	"sync/atomic"
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
-func ExampleKind_String() {
-	kind := NewKind("bitbucket.org/rj/goey.Example")
-
-	fmt.Println("Kind is", kind.String())
-
-	// Output:
-	// Kind is bitbucket.org/rj/goey.Example
-}
-
 type Proper interface {
-	Props() Widget
+	Props() base.Widget
 }
 
-func equal(t *testing.T, lhs, rhs Widget) bool {
+func equal(t *testing.T, lhs, rhs base.Widget) bool {
 	// On windows, the message EM_GETCUEBANNER does not work unless the manifest
 	// is set correctly.  This cannot be done for the package, since that
 	// manifest will conflict with the manifest of any app.
@@ -39,7 +31,7 @@ func equal(t *testing.T, lhs, rhs Widget) bool {
 	return reflect.DeepEqual(lhs, rhs)
 }
 
-func testingRenderWidgets(t *testing.T, widgets ...Widget) {
+func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
@@ -107,7 +99,7 @@ func testingRenderWidgets(t *testing.T, widgets ...Widget) {
 	}
 }
 
-func testingCloseWidgets(t *testing.T, widgets ...Widget) {
+func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
@@ -164,7 +156,7 @@ func testingCloseWidgets(t *testing.T, widgets ...Widget) {
 	}
 }
 
-func testingCheckFocusAndBlur(t *testing.T, widgets ...Widget) {
+func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 	log := bytes.NewBuffer(nil)
 
 	for i := byte(0); i < 3; i++ {
@@ -219,7 +211,7 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...Widget) {
 	}
 }
 
-func testingCheckClick(t *testing.T, widgets ...Widget) {
+func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 	log := bytes.NewBuffer(nil)
 
 	for i := byte(0); i < 3; i++ {
@@ -277,7 +269,7 @@ func testingCheckClick(t *testing.T, widgets ...Widget) {
 	}
 }
 
-func testingUpdateWidgets(t *testing.T, widgets []Widget, update []Widget) {
+func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.

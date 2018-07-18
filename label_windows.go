@@ -21,7 +21,7 @@ func init() {
 	}
 }
 
-func (w *Label) mount(parent Control) (Element, error) {
+func (w *Label) mount(parent base.Control) (base.Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (w *labelElement) Props() Widget {
 	}
 }
 
-func (w *labelElement) Layout(bc Constraint) Size {
+func (w *labelElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
 	return bc.Constrain(Size{width, height})
@@ -77,7 +77,7 @@ func (w *labelElement) MinIntrinsicWidth(Length) Length {
 	return FromPixelsX(int(width))
 }
 
-func (w *labelElement) SetBounds(bounds Rectangle) {
+func (w *labelElement) SetBounds(bounds base.Rectangle) {
 	w.Control.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't

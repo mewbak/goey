@@ -1,11 +1,13 @@
 package main
 
 import (
-	"bitbucket.org/rj/goey"
 	"fmt"
 	"image"
 	_ "image/png"
 	"os"
+
+	"bitbucket.org/rj/goey"
+	"bitbucket.org/rj/goey/base"
 )
 
 var (
@@ -52,14 +54,14 @@ func updateWindow() {
 	window.SetChildren(renderWindow())
 }
 
-func renderSidebar() goey.Widget {
+func renderSidebar() base.Widget {
 	return &goey.VBox{goey.MainCenter, goey.CrossCenter, []goey.Widget{
 		&goey.Label{Text: "Example Menu"},
 		&goey.Img{Image: gopher},
 	}}
 }
 
-func renderMainbar() goey.Widget {
+func renderMainbar() base.Widget {
 	return &goey.VBox{goey.MainCenter, goey.CrossCenter, []goey.Widget{
 		&goey.Column{[][]goey.Widget{
 			{&goey.Button{Text: "A1"}, &goey.Button{Text: "A2"}, &goey.Button{Text: "A3"}, &goey.Button{Text: "A4"}},

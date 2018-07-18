@@ -23,7 +23,7 @@ func init() {
 	}
 }
 
-func (w *Decoration) mount(parent Control) (Element, error) {
+func (w *Decoration) mount(parent base.Control) (base.Element, error) {
 	if decoration.atom == 0 {
 		var wc win.WNDCLASSEX
 		wc.CbSize = uint32(unsafe.Sizeof(wc))
@@ -167,7 +167,7 @@ func (w *decorationElement) props() *Decoration {
 	}
 }
 
-func (w *decorationElement) SetBounds(bounds Rectangle) {
+func (w *decorationElement) SetBounds(bounds base.Rectangle) {
 	// Update background control position
 	w.Control.SetBounds(bounds)
 
@@ -221,7 +221,7 @@ func (w *decorationElement) updateProps(data *Decoration) error {
 	w.insets = data.Insets
 	w.radius = data.Radius
 
-	child, err := DiffChild(Control{w.hWnd}, w.child, data.Child)
+	child, err := base.DiffChild(Control{w.hWnd}, w.child, data.Child)
 	if err != nil {
 		return err
 	}

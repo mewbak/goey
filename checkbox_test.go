@@ -2,6 +2,8 @@ package goey
 
 import (
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 func TestCheckboxCreate(t *testing.T) {
@@ -35,10 +37,10 @@ func TestCheckboxClick(t *testing.T) {
 }
 
 func TestCheckboxUpdateProps(t *testing.T) {
-	testingUpdateWidgets(t, []Widget{
+	testingUpdateWidgets(t, []base.Widget{
 		&Checkbox{Value: false, Text: "A"},
 		&Checkbox{Value: true, Text: "B", Disabled: true},
-	}, []Widget{
+	}, []base.Widget{
 		&Checkbox{Value: true, Text: "A--", Disabled: true},
 		&Checkbox{Value: false, Text: "B--", Disabled: false},
 	})

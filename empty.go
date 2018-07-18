@@ -1,7 +1,11 @@
 package goey
 
+import (
+	"bitbucket.org/rj/goey/base"
+)
+
 var (
-	emptyKind = Kind{"bitbucket.org/rj/goey.Empty"}
+	emptyKind = base.NewKind("bitbucket.org/rj/goey.Empty")
 )
 
 // Empty describes a widget that is either a horizontal or vertical gap.
@@ -13,13 +17,13 @@ type Empty struct {
 
 // Kind returns the concrete type for use in the Widget interface.
 // Users should not need to use this method directly.
-func (*Empty) Kind() *Kind {
+func (*Empty) Kind() *base.Kind {
 	return &emptyKind
 }
 
 // Mount creates a horiztonal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
-func (w *Empty) Mount(parent Control) (Element, error) {
+func (w *Empty) Mount(parent base.Control) (base.Element, error) {
 	retval := &emptyElement{}
 
 	return retval, nil
@@ -32,37 +36,37 @@ func (w *emptyElement) Close() {
 	// Virtual control, so no resources to release
 }
 
-func (*emptyElement) Kind() *Kind {
+func (*emptyElement) Kind() *base.Kind {
 	return &emptyKind
 }
 
-func (w *emptyElement) Props() Widget {
+func (w *emptyElement) Props() base.Widget {
 	return &Empty{}
 }
 
-func (w *emptyElement) Layout(bc Constraint) Size {
+func (w *emptyElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
-	return bc.Constrain(Size{width,height})
+	return bc.Constrain(base.Size{width, height})
 }
 
-func (w *emptyElement) MinIntrinsicHeight(width Length) Length {
+func (w *emptyElement) MinIntrinsicHeight(width base.Length) base.Length {
 	// Same as static text
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 13 * DIP
+	return 13 * base.DIP
 }
 
-func (w *emptyElement) MinIntrinsicWidth(height Length) Length {
+func (w *emptyElement) MinIntrinsicWidth(height base.Length) base.Length {
 	// Same as static text
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 13 * DIP
+	return 13 * base.DIP
 }
 
-func (w *emptyElement) SetBounds(bounds Rectangle) {
+func (w *emptyElement) SetBounds(bounds base.Rectangle) {
 	// Virtual control, so no resource to resize
 }
 
-func (w *emptyElement) UpdateProps(data Widget) error {
+func (w *emptyElement) UpdateProps(data base.Widget) error {
 	// This widget does not have any properties, so there cannot be anything
 	// to update.
 	return nil

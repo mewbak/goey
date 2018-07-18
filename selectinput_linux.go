@@ -3,6 +3,7 @@ package goey
 import (
 	"unsafe"
 
+	"bitbucket.org/rj/goey/base"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -16,12 +17,12 @@ type selectinputElement struct {
 	onBlur   blurSlot
 }
 
-func (w *SelectInput) mount(parent Control) (Element, error) {
+func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
 	control, err := gtk.ComboBoxTextNew()
 	if err != nil {
 		return nil, err
 	}
-	(*gtk.Container)(unsafe.Pointer(parent.handle)).Add(control)
+	parent.Handle.Add(control)
 	for _, v := range w.Items {
 		control.AppendText(v)
 	}
