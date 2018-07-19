@@ -9,5 +9,6 @@
 // called 'controls', or both.
 //
 // Additionally, this package contains geometric types.  These support the
-// automatic layout of widgets in a platform independent manner.
+// automatic layout of widgets in a platform independent manner.  The layout
+// algorithm is roughly based on Flutter.
 package base

@@ -37,7 +37,8 @@ type Widget interface {
 }
 
 // Element is an interface that wraps any type representing a control, or group
-// of controls, created using the platform GUI.
+// of controls, created using the platform GUI.  An element represents an
+// instantiation of a Widget into visible parts of the GUI.
 type Element interface {
 	// NativeElement provides platform dependent methods.  These should
 	// not be used by client libraries, but exist for the internal implementation

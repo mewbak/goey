@@ -20,7 +20,20 @@ func max(a, b Length) Length {
 }
 
 // Constraints represents box constraints on width and height for the layout of
-// rectangular widgets.
+// rectangular widgets.  For each dimension, the constraints specify the
+// minimum and maximum allowed size for a widget.
+//
+// The constraints in a dimension are called 'tight' if the minimum and
+// maximum values are equal, which essential requires the widget to take a
+// fixed size. On the other hand, if the minimum allowed value is zero, then
+// the constraints on that dimension is 'loose'.
+//
+// A sentinal value can be used to indicate that the maximum size in a
+// dimension is infinite.  The constraints on that dimension are called
+// 'unbounded'.  If the constraints for a dimension are both tight and unbounded,
+// the dimension is 'expanding'.
+//
+// (This type is similar to BoxConstraints type in flutter library rendering)
 type Constraints struct {
 	Min, Max Size
 }
@@ -32,13 +45,13 @@ func Expand() Constraints {
 	return Constraints{Size{Inf, Inf}, Size{Inf, Inf}}
 }
 
-// ExpandHeight creates box constraints with a fixed width and that force
+// ExpandHeight creates box constraints with a fixed width and that forces
 // elements to expand to as high as possible.
 func ExpandHeight(width Length) Constraints {
 	return Constraints{Size{width, Inf}, Size{width, Inf}}
 }
 
-// ExpandWidth creates box constraints with a fixed height and that force
+// ExpandWidth creates box constraints with a fixed height and that forces
 // elements to expand to as wide as possible.
 func ExpandWidth(height Length) Constraints {
 	return Constraints{Size{Inf, height}, Size{Inf, height}}
@@ -223,6 +236,8 @@ func (bc Constraints) LoosenWidth() Constraints {
 
 // Tighten creates a new box constraint with tight width and height
 // requirements matching as closely as possible the passed size.
+// The new constrains will be tight, but will only match the requested size if
+// the size satisfies the original constraints.
 func (bc Constraints) Tighten(size Size) Constraints {
 	bc.Min.Width = size.Width.Clamp(bc.Min.Width, bc.Max.Width)
 	bc.Max.Width = bc.Min.Width
@@ -233,6 +248,8 @@ func (bc Constraints) Tighten(size Size) Constraints {
 
 // TightenHeight creates a new box constraint with a tight height
 // requirements matching as closely as possible the length.
+// The new height constraints will be tight, but will only match the requested
+// height if the height statisfies the original constraints.
 func (bc Constraints) TightenHeight(height Length) Constraints {
 	bc.Min.Height = height.Clamp(bc.Min.Height, bc.Max.Height)
 	bc.Max.Height = bc.Min.Height
@@ -241,6 +258,8 @@ func (bc Constraints) TightenHeight(height Length) Constraints {
 
 // TightenWidth creates a new box constraint with a tight width
 // requirements matching as closely as possible the length.
+// The new width constraints will be tight, but will only match the requested
+// width if the width statisfies the original constraints.
 func (bc Constraints) TightenWidth(width Length) Constraints {
 	bc.Min.Width = width.Clamp(bc.Min.Width, bc.Max.Width)
 	bc.Max.Width = bc.Min.Width

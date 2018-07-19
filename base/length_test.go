@@ -22,6 +22,18 @@ func ExampleLength() {
 	// All is OK with the world.
 }
 
+func ExampleLength_Scale() {
+	// There are 96 DIP in an inch, and 6 pica in a inch, so the following
+	// should work.
+
+	if length := (1 * DIP).Scale(96, 6); length == (1 * PC) {
+		fmt.Printf("The ratio of pica to DIP is 96 to 6.")
+	}
+
+	// Output:
+	// The ratio of pica to DIP is 96 to 6.
+}
+
 func ExampleLength_String() {
 	fmt.Printf("Converting:  1pt is equal to %sdip\n", 1*PT)
 	fmt.Printf("Converting:  1pt is equal to %1.2fdip\n", (1 * PT).DIP())

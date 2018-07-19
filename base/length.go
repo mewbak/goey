@@ -90,7 +90,9 @@ func FromPixelsY(pixels int) Length {
 	return Length(pixels<<6).Scale(96, DPI.Y)
 }
 
-// A Point is an X, Y coordinate pair. The axes increase right and down.
+// A Point is an X, Y coordinate pair. The axes increase right and down.  This
+// type is a close analogy to image.Pixel, except that the coordinate pair is
+// represented by Length rather than int.
 type Point struct {
 	X, Y Length
 }
@@ -119,6 +121,9 @@ func (p Point) Pixels() image.Point {
 // It is well-formed if Min.X <= Max.X and likewise for Y. Points are always
 // well-formed. A rectangle's methods always return well-formed outputs for
 // well-formed inputs.
+//
+// This type is a close analogy to image.Rectangle, except that the coordinates
+// are represented by Length rather than int.
 type Rectangle struct {
 	Min, Max Point
 }
