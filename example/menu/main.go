@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"image/color"
 	_ "image/png"
 	"os"
 
@@ -45,42 +46,47 @@ func createWindow() error {
 	if err != nil {
 		return err
 	}
-	w.SetAlignment(goey.MainCenter, goey.CrossCenter)
 	window = w
 	return nil
 }
 
 func updateWindow() {
-	window.SetChildren(renderWindow())
+	window.SetChild(renderWindow())
 }
 
 func renderSidebar() base.Widget {
-	return &goey.VBox{goey.MainCenter, goey.CrossCenter, []goey.Widget{
-		&goey.Label{Text: "Example Menu"},
-		&goey.Img{Image: gopher},
-	}}
+	return &goey.Decoration{
+		Fill: color.RGBA{128, 255, 128, 255},
+		Child: &goey.Padding{
+			Insets: goey.DefaultInsets(),
+			Child: &goey.VBox{goey.MainCenter, goey.CrossCenter, []base.Widget{
+				&goey.Label{Text: "Example Menu"},
+				&goey.Img{Image: gopher},
+			},
+			},
+		}}
 }
 
 func renderMainbar() base.Widget {
-	return &goey.VBox{goey.MainCenter, goey.CrossCenter, []goey.Widget{
-		&goey.Column{[][]goey.Widget{
-			{&goey.Button{Text: "A1"}, &goey.Button{Text: "A2"}, &goey.Button{Text: "A3"}, &goey.Button{Text: "A4"}},
-			{&goey.Button{Text: "B1"}, &goey.Button{Text: "B2"}, &goey.Button{Text: "B3"}, &goey.Button{Text: "B4"}},
-			{&goey.Button{Text: "C1"}, &goey.Button{Text: "C2"}, &goey.Button{Text: "C3"}, &goey.Button{Text: "C4"}},
-			{&goey.Button{Text: "D1"}, &goey.Button{Text: "D2"}, &goey.Button{Text: "D3"}, &goey.Button{Text: "D4"}},
+	return &goey.VBox{goey.MainCenter, goey.CrossCenter, []base.Widget{
+		&Column{[]base.Widget{
+			&goey.Button{Text: "A1"}, &goey.Button{Text: "A2"}, &goey.Button{Text: "A3"}, &goey.Button{Text: "A4"},
+			&goey.Button{Text: "B1"}, &goey.Button{Text: "B2"}, &goey.Button{Text: "B3"}, &goey.Button{Text: "B4"},
+			&goey.Button{Text: "C1"}, &goey.Button{Text: "C2"}, &goey.Button{Text: "C3"}, &goey.Button{Text: "C4"},
+			&goey.Button{Text: "D1"}, &goey.Button{Text: "D2"}, &goey.Button{Text: "D3"}, &goey.Button{Text: "D4"},
 		}},
 		&goey.HR{},
 		&goey.Button{Text: "Help"},
 	}}
 }
 
-func renderWindow() []goey.Widget {
-	ret := []goey.Widget{&goey.HBox{
-		Children: []goey.Widget{
+func renderWindow() base.Widget {
+	ret := &goey.HBox{
+		Children: []base.Widget{
 			renderSidebar(),
 			renderMainbar(),
 		},
-	}}
+	}
 
 	return ret
 }
