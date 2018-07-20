@@ -88,7 +88,7 @@ func TestVBoxLayout(t *testing.T) {
 			base.Rect(0, 100*DIP, 40*DIP, 126*DIP), base.Rect(0, 137*DIP, 40*DIP, 150*DIP),
 		}},
 		{children, SpaceBetween, Stretch, base.Tight(base.Size{40 * DIP, 150 * DIP}), base.Size{40 * DIP, 150 * DIP}, []base.Rectangle{
-			base.Rect(0, 0, 40*DIP, 26*DIP),base. Rect(0, 137*DIP, 40*DIP, 150*DIP),
+			base.Rect(0, 0, 40*DIP, 26*DIP), base.Rect(0, 137*DIP, 40*DIP, 150*DIP),
 		}},
 	}
 
@@ -97,7 +97,7 @@ func TestVBoxLayout(t *testing.T) {
 			children:     v.children,
 			alignMain:    v.alignMain,
 			alignCross:   v.alignCross,
-			childrenSize: make([]base.Size, len(v.children)),
+			childrenInfo: make([]boxElementInfo, len(v.children)),
 		}
 
 		size := in.Layout(v.constraints)

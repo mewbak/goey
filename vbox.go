@@ -67,6 +67,7 @@ func (*VBox) Kind() *base.Kind {
 func (w *VBox) Mount(parent base.Control) (base.Element, error) {
 	c := make([]base.Element, 0, len(w.Children))
 
+	// Mount all of the children
 	for _, v := range w.Children {
 		mountedChild, err := v.Mount(parent)
 		if err != nil {
@@ -76,17 +77,17 @@ func (w *VBox) Mount(parent base.Control) (base.Element, error) {
 		c = append(c, mountedChild)
 	}
 
+	// Record the flex factor for all children
+	ci, totalFlex := updateFlex(c, w.AlignMain, nil)
+
 	return &vboxElement{
 		parent:       parent,
 		children:     c,
 		alignMain:    w.AlignMain,
 		alignCross:   w.AlignCross,
-		childrenSize: make([]base.Size, len(c)),
+		childrenInfo: ci,
+		totalFlex:    totalFlex,
 	}, nil
-}
-
-func (*vboxElement) Kind() *base.Kind {
-	return &vboxKind
 }
 
 type vboxElement struct {
@@ -95,7 +96,7 @@ type vboxElement struct {
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
 
-	childrenSize []base.Size
+	childrenInfo []boxElementInfo
 	totalHeight  base.Length
 	totalFlex    int
 }
@@ -103,6 +104,11 @@ type vboxElement struct {
 func (w *vboxElement) Close() {
 	base.CloseElements(w.children)
 	w.children = nil
+	w.childrenInfo = nil
+}
+
+func (*vboxElement) Kind() *base.Kind {
+	return &vboxKind
 }
 
 func (w *vboxElement) Layout(bc base.Constraints) base.Size {
@@ -112,26 +118,27 @@ func (w *vboxElement) Layout(bc base.Constraints) base.Size {
 	}
 
 	// Determine the constraints for layout of child elements.
-	cbc := bc.LoosenHeight()
+	cbc := bc
 	if w.alignMain == Homogeneous {
 		count := len(w.children)
 		gap := calculateVGap(nil, nil)
 		cbc.TightenHeight(cbc.Max.Height.Scale(1, count) - gap.Scale(count-1, count))
+	} else {
+		cbc.Min.Height = 0
+		cbc.Max.Height = base.Inf
 	}
 	if w.alignCross == Stretch {
 		if cbc.HasBoundedWidth() {
 			cbc = cbc.TightenWidth(cbc.Max.Width)
 		} else {
-			cbc = cbc.TightenWidth(max(cbc.Min.Width, w.MinIntrinsicWidth(base.Inf)))
+			cbc = cbc.TightenWidth(w.MinIntrinsicWidth(base.Inf))
 		}
 	} else {
 		cbc = cbc.LoosenWidth()
 	}
 
 	height := base.Length(0)
-	minWidth := base.Length(0)
 	previous := base.Element(nil)
-	flex := 0
 	for i, v := range w.children {
 		if i > 0 {
 			if w.alignMain.IsPacked() {
@@ -141,16 +148,31 @@ func (w *vboxElement) Layout(bc base.Constraints) base.Size {
 			}
 			previous = v
 		}
-		w.childrenSize[i] = v.Layout(cbc)
-		minWidth = max(minWidth, w.childrenSize[i].Width)
-		height += w.childrenSize[i].Height
-
-		if expand, ok := v.(*expandElement); ok {
-			flex += expand.factor + 1
-		}
+		size := v.Layout(cbc)
+		w.childrenInfo[i].size = size
+		height += size.Height
 	}
 	w.totalHeight = height
-	w.totalFlex = flex
+
+	// Need to adjust width to any widgets that have flex
+	if w.totalFlex > 0 && bc.HasBoundedHeight() {
+		for i, v := range w.childrenInfo {
+			if v.flex > 0 {
+				oldHeight := v.size.Height
+				fbc := base.TightHeight(v.size.Height + (bc.Max.Height-w.totalHeight).Scale(v.flex, w.totalFlex))
+				fbc.Min.Width = cbc.Min.Width
+				fbc.Max.Width = cbc.Max.Width
+				size := w.children[i].Layout(fbc)
+				w.childrenInfo[i].size = size
+				w.totalHeight += size.Height - oldHeight
+			}
+		}
+	}
+
+	minWidth := w.childrenInfo[0].size.Width
+	for _, v := range w.childrenInfo[1:] {
+		minWidth = max(minWidth, v.size.Width)
+	}
 
 	if w.alignCross == Stretch {
 		return bc.Constrain(base.Size{cbc.Min.Width, height})
@@ -278,17 +300,14 @@ func (w *vboxElement) SetBounds(bounds base.Rectangle) {
 			previous = v
 		}
 
-		dy := w.childrenSize[i].Height
-		if flex, ok := v.(*expandElement); ok {
-			dy += (bounds.Dy() - w.totalHeight).Scale(flex.factor+1, w.totalFlex)
-		}
+		dy := w.childrenInfo[i].size.Height
 		w.setBoundsForChild(i, v, bounds.Min.X, posY, bounds.Max.X, posY+dy)
 		posY += dy + extraGap
 	}
 }
 
 func (w *vboxElement) setBoundsForChild(i int, v base.Element, posX, posY, posX2, posY2 base.Length) {
-	dx := w.childrenSize[i].Width
+	dx := w.childrenInfo[i].size.Width
 	switch w.alignCross {
 	case CrossStart:
 		v.SetBounds(base.Rectangle{
@@ -319,7 +338,7 @@ func (w *vboxElement) updateProps(data *VBox) (err error) {
 	w.alignCross = data.AlignCross
 	w.children, err = base.DiffChildren(w.parent, w.children, data.Children)
 	// Clear cached values
-	w.childrenSize = make([]base.Size, len(w.children))
+	w.childrenInfo, w.totalFlex = updateFlex(w.children, w.alignMain, nil)
 	w.totalHeight = 0
 	return err
 }

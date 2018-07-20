@@ -59,25 +59,22 @@ func (*columnElement) Kind() *base.Kind {
 }
 
 func (w *columnElement) Layout(bc base.Constraints) base.Size {
+	const gap = 11 * base.DIP
+
 	if len(w.children) == 0 {
 		return bc.Constrain(base.Size{})
-	}
-
-	width := bc.Max.Width
-	if !bc.HasBoundedWidth() {
-		width = bc.Min.Width
-		if width == 0 {
-			width = 640 * base.DIP
-		}
 	}
 
 	if w.minWidth == 0 {
 		w.MinIntrinsicWidth(base.Inf)
 	}
 
-	gap := 11 * base.DIP
+	width := bc.Max.Width
+	if !bc.HasBoundedWidth() {
+		width = bc.ConstrainWidth(w.minWidth)
+	}
+
 	columns := int((width + gap) / (w.minWidth + gap))
-	println(width.String(), gap.String(), w.minWidth.String(), columns)
 	cbc := base.TightWidth((width + gap).Scale(1, columns))
 
 	height := base.Length(0)
@@ -99,7 +96,7 @@ func (w *columnElement) Layout(bc base.Constraints) base.Size {
 		w.rowHeights = append(w.rowHeights, rowHeight)
 	}
 
-	return base.Size{bc.Max.Width, bc.ConstrainHeight(height)}
+	return base.Size{width, bc.ConstrainHeight(height)}
 }
 
 func (w *columnElement) MinIntrinsicWidth(height base.Length) base.Length {
@@ -149,18 +146,15 @@ func (w *columnElement) SetBounds(bounds base.Rectangle) {
 	gap := 11 * base.DIP
 	width := bounds.Dx()
 	columns := int((width + gap) / (w.minWidth + gap))
-	println("SetBounds", width.String(), gap.String(), w.minWidth.String(), columns)
 	itemWidth := (width+gap).Scale(1, columns) - gap
 
 	posX := bounds.Min.X
 	posY := bounds.Min.Y
 	rowHeights := w.rowHeights
-	println("len row heights", len(rowHeights))
 	for i, v := range w.children {
 		v.SetBounds(base.Rect(posX, posY, posX+itemWidth, posY+rowHeights[0]))
 		posX += itemWidth + gap
 		if (i+1)%columns == 0 {
-			println("next row", i, len(w.children))
 			posY += rowHeights[0] + gap
 			posX = bounds.Min.X
 			rowHeights = rowHeights[1:]

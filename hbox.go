@@ -33,6 +33,7 @@ func (*HBox) Kind() *base.Kind {
 func (w *HBox) Mount(parent base.Control) (base.Element, error) {
 	c := make([]base.Element, 0, len(w.Children))
 
+	// Mount all of the children
 	for _, v := range w.Children {
 		mountedChild, err := v.Mount(parent)
 		if err != nil {
@@ -42,17 +43,17 @@ func (w *HBox) Mount(parent base.Control) (base.Element, error) {
 		c = append(c, mountedChild)
 	}
 
+	// Record the flex factor for all children
+	ci, totalFlex := updateFlex(c, w.AlignMain, nil)
+
 	return &hboxElement{
 		parent:       parent,
 		children:     c,
 		alignMain:    w.AlignMain,
 		alignCross:   w.AlignCross,
-		childrenSize: make([]base.Size, len(c)),
+		childrenInfo: ci,
+		totalFlex:    totalFlex,
 	}, nil
-}
-
-func (*hboxElement) Kind() *base.Kind {
-	return &hboxKind
 }
 
 type hboxElement struct {
@@ -61,14 +62,24 @@ type hboxElement struct {
 	alignMain  MainAxisAlign
 	alignCross CrossAxisAlign
 
-	childrenSize []base.Size
+	childrenInfo []boxElementInfo
 	totalWidth   base.Length
 	totalFlex    int
+}
+
+type boxElementInfo struct {
+	size base.Size
+	flex int
 }
 
 func (w *hboxElement) Close() {
 	base.CloseElements(w.children)
 	w.children = nil
+	w.childrenInfo = nil
+}
+
+func (*hboxElement) Kind() *base.Kind {
+	return &hboxKind
 }
 
 func (w *hboxElement) Layout(bc base.Constraints) base.Size {
@@ -78,26 +89,27 @@ func (w *hboxElement) Layout(bc base.Constraints) base.Size {
 	}
 
 	// Determine the constraints for layout of child elements.
-	cbc := bc.LoosenWidth()
+	cbc := bc
 	if w.alignMain == Homogeneous {
 		count := len(w.children)
 		gap := calculateHGap(nil, nil)
 		cbc.TightenWidth(cbc.Max.Width.Scale(1, count) - gap.Scale(count-1, count))
+	} else {
+		cbc.Min.Width = 0
+		cbc.Max.Width = base.Inf
 	}
 	if w.alignCross == Stretch {
 		if cbc.HasBoundedHeight() {
 			cbc = cbc.TightenHeight(cbc.Max.Height)
 		} else {
-			cbc = cbc.TightenHeight(max(cbc.Min.Height, w.MinIntrinsicHeight(base.Inf)))
+			cbc = cbc.TightenHeight(w.MinIntrinsicHeight(base.Inf))
 		}
 	} else {
 		cbc = cbc.LoosenHeight()
 	}
 
 	width := base.Length(0)
-	minHeight := base.Length(0)
 	previous := base.Element(nil)
-	flex := 0
 	for i, v := range w.children {
 		if i > 0 {
 			if w.alignMain.IsPacked() {
@@ -107,16 +119,31 @@ func (w *hboxElement) Layout(bc base.Constraints) base.Size {
 			}
 			previous = v
 		}
-		w.childrenSize[i] = v.Layout(cbc)
-		minHeight = max(minHeight, w.childrenSize[i].Height)
-		width += w.childrenSize[i].Width
-
-		if expand, ok := v.(*expandElement); ok {
-			flex += expand.factor + 1
-		}
+		size := v.Layout(cbc)
+		w.childrenInfo[i].size = size
+		width += size.Width
 	}
 	w.totalWidth = width
-	w.totalFlex = flex
+
+	// Need to adjust height to any widgets that have flex
+	if w.totalFlex > 0 && bc.HasBoundedWidth() {
+		for i, v := range w.childrenInfo {
+			if v.flex > 0 {
+				oldWidth := v.size.Width
+				fbc := base.TightWidth(v.size.Width + (bc.Max.Width-w.totalWidth).Scale(v.flex, w.totalFlex))
+				fbc.Min.Height = cbc.Min.Height
+				fbc.Max.Height = cbc.Max.Height
+				size := w.children[i].Layout(fbc)
+				w.childrenInfo[i].size = size
+				w.totalWidth += size.Width - oldWidth
+			}
+		}
+	}
+
+	minHeight := w.childrenInfo[0].size.Height
+	for _, v := range w.childrenInfo[1:] {
+		minHeight = max(minHeight, v.size.Height)
+	}
 
 	if w.alignCross == Stretch {
 		return bc.Constrain(base.Size{width, cbc.Min.Height})
@@ -244,17 +271,14 @@ func (w *hboxElement) SetBounds(bounds base.Rectangle) {
 			previous = v
 		}
 
-		dx := w.childrenSize[i].Width
-		if flex, ok := v.(*expandElement); ok {
-			dx += (bounds.Dx() - w.totalWidth).Scale(flex.factor+1, w.totalFlex)
-		}
+		dx := w.childrenInfo[i].size.Width
 		w.setBoundsForChild(i, v, posX, bounds.Min.Y, posX+dx, bounds.Max.Y)
 		posX += dx + extraGap
 	}
 }
 
 func (w *hboxElement) setBoundsForChild(i int, v base.Element, posX, posY, posX2, posY2 base.Length) {
-	dy := w.childrenSize[i].Height
+	dy := w.childrenInfo[i].size.Height
 	switch w.alignCross {
 	case CrossStart:
 		v.SetBounds(base.Rectangle{
@@ -279,13 +303,34 @@ func (w *hboxElement) setBoundsForChild(i int, v base.Element, posX, posY, posX2
 	}
 }
 
+func updateFlex(c []base.Element, alignMain MainAxisAlign, oldSlice []boxElementInfo) ([]boxElementInfo, int) {
+	ci := []boxElementInfo(nil)
+	if len(c) >= len(oldSlice) {
+		ci = make([]boxElementInfo, len(c))
+	} else {
+		ci = oldSlice[:len(c)]
+	}
+
+	totalFlex := 0
+	for i, v := range c {
+		if elem, ok := v.(*expandElement); ok {
+			ci[i].flex = elem.factor + 1
+			totalFlex += elem.factor + 1
+		}
+	}
+	if alignMain == Homogeneous {
+		totalFlex = 0
+	}
+	return ci, totalFlex
+}
+
 func (w *hboxElement) updateProps(data *HBox) (err error) {
 	// Update properties
 	w.alignMain = data.AlignMain
 	w.alignCross = data.AlignCross
 	w.children, err = base.DiffChildren(w.parent, w.children, data.Children)
 	// Clear cached values
-	w.childrenSize = make([]base.Size, len(w.children))
+	w.childrenInfo, w.totalFlex = updateFlex(w.children, w.alignMain, nil)
 	w.totalWidth = 0
 	return err
 }

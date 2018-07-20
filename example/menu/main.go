@@ -68,7 +68,7 @@ func renderSidebar() base.Widget {
 }
 
 func renderMainbar() base.Widget {
-	return &goey.VBox{goey.MainCenter, goey.CrossCenter, []base.Widget{
+	return &goey.Expand{Child: &goey.VBox{goey.MainCenter, goey.Stretch, []base.Widget{
 		&Column{[]base.Widget{
 			&goey.Button{Text: "A1"}, &goey.Button{Text: "A2"}, &goey.Button{Text: "A3"}, &goey.Button{Text: "A4"},
 			&goey.Button{Text: "B1"}, &goey.Button{Text: "B2"}, &goey.Button{Text: "B3"}, &goey.Button{Text: "B4"},
@@ -77,7 +77,7 @@ func renderMainbar() base.Widget {
 		}},
 		&goey.HR{},
 		&goey.Button{Text: "Help"},
-	}}
+	}}}
 }
 
 func renderWindow() base.Widget {

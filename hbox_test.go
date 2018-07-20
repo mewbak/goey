@@ -100,14 +100,14 @@ func TestHBoxLayout(t *testing.T) {
 			children:     v.children,
 			alignMain:    v.alignMain,
 			alignCross:   v.alignCross,
-			childrenSize: make([]base.Size, len(v.children)),
+			childrenInfo: make([]boxElementInfo, len(v.children)),
 		}
 
 		size := in.Layout(v.constraints)
 		if size != v.size {
 			t.Errorf("Incorrect size on case %d, got %s, want %s", i, size, v.size)
 		}
-		in.SetBounds(base.Rect(0,0,size.Width, size.Height))
+		in.SetBounds(base.Rect(0, 0, size.Width, size.Height))
 		for j, u := range v.bounds {
 			if got := v.children[j].(*mockElement).Bounds; got != u {
 				t.Errorf("Incorrect bounds case %d-%d, got %s, want %s", i, j, got, u)
