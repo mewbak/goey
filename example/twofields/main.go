@@ -2,6 +2,9 @@
 // that demontrates two multiline text fields.  A status bar shows the combined
 // count of characters in both fields, showing how the GUI can be easily kept
 // in sync with changes to data.
+//
+// This example also shows the use of the Expand widget to have some children
+// of the VBox expand and consume any available vertical space.
 package main
 
 import (
@@ -49,7 +52,8 @@ func render() base.Widget {
 		Child: &goey.VBox{
 			Children: []base.Widget{
 				&goey.Label{Text: "This is the most important field:"},
-				&goey.TextArea{Value: text[0], Placeholder: "You should type something here.",
+				&goey.Expand{Factor: 1, Child: &goey.TextArea{Value: text[0],
+					Placeholder: "You should type something here.",
 					OnChange: func(value string) {
 						text[0] = value
 						characterCount[0] = len(value)
@@ -57,9 +61,10 @@ func render() base.Widget {
 					},
 					OnFocus: onfocus(1),
 					OnBlur:  onblur(1),
-				},
+				}},
 				&goey.Label{Text: "This is a secondary field:"},
-				&goey.TextArea{Value: text[1], Placeholder: "...and here.",
+				&goey.Expand{Child: &goey.TextArea{Value: text[1],
+					Placeholder: "...and here.",
 					OnChange: func(value string) {
 						text[1] = value
 						characterCount[1] = len(value)
@@ -67,7 +72,7 @@ func render() base.Widget {
 					},
 					OnFocus: onfocus(2),
 					OnBlur:  onblur(2),
-				},
+				}},
 				&goey.HR{},
 				&goey.Label{Text: "The total character count is:  " + strconv.Itoa(characterCount[0]+characterCount[1])},
 			},

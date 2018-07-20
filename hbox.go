@@ -63,6 +63,7 @@ type hboxElement struct {
 
 	childrenSize []base.Size
 	totalWidth   base.Length
+	totalFlex    int
 }
 
 func (w *hboxElement) Close() {
@@ -96,6 +97,7 @@ func (w *hboxElement) Layout(bc base.Constraints) base.Size {
 	width := base.Length(0)
 	minHeight := base.Length(0)
 	previous := base.Element(nil)
+	flex := 0
 	for i, v := range w.children {
 		if i > 0 {
 			if w.alignMain.IsPacked() {
@@ -108,8 +110,13 @@ func (w *hboxElement) Layout(bc base.Constraints) base.Size {
 		w.childrenSize[i] = v.Layout(cbc)
 		minHeight = max(minHeight, w.childrenSize[i].Height)
 		width += w.childrenSize[i].Width
+
+		if expand, ok := v.(*expandElement); ok {
+			flex += expand.factor + 1
+		}
 	}
 	w.totalWidth = width
+	w.totalFlex = flex
 
 	if w.alignCross == Stretch {
 		return bc.Constrain(base.Size{width, cbc.Min.Height})
@@ -202,25 +209,27 @@ func (w *hboxElement) SetBounds(bounds base.Rectangle) {
 	// of the controls.  We also calculate 'extraGap' which will adjust
 	// spacing of the controls for non-packed alignments.
 	extraGap := base.Length(0)
-	switch w.alignMain {
-	case MainStart:
-		// Do nothing
-	case MainCenter:
-		bounds.Min.X += (bounds.Dx() - w.totalWidth) / 2
-	case MainEnd:
-		bounds.Min.X = bounds.Max.X - w.totalWidth
-	case SpaceAround:
-		extraGap = (bounds.Dx() - w.totalWidth).Scale(1, len(w.children)+1)
-		bounds.Min.X += extraGap
-		extraGap += calculateHGap(nil, nil)
-	case SpaceBetween:
-		if len(w.children) > 1 {
-			extraGap = (bounds.Dx() - w.totalWidth).Scale(1, len(w.children)-1)
-			extraGap += calculateHGap(nil, nil)
-		} else {
-			// There are no controls between which to put the extra space.
-			// The following essentially convert SpaceBetween to SpaceAround
+	if w.totalFlex == 0 {
+		switch w.alignMain {
+		case MainStart:
+			// Do nothing
+		case MainCenter:
 			bounds.Min.X += (bounds.Dx() - w.totalWidth) / 2
+		case MainEnd:
+			bounds.Min.X = bounds.Max.X - w.totalWidth
+		case SpaceAround:
+			extraGap = (bounds.Dx() - w.totalWidth).Scale(1, len(w.children)+1)
+			bounds.Min.X += extraGap
+			extraGap += calculateHGap(nil, nil)
+		case SpaceBetween:
+			if len(w.children) > 1 {
+				extraGap = (bounds.Dx() - w.totalWidth).Scale(1, len(w.children)-1)
+				extraGap += calculateHGap(nil, nil)
+			} else {
+				// There are no controls between which to put the extra space.
+				// The following essentially convert SpaceBetween to SpaceAround
+				bounds.Min.X += (bounds.Dx() - w.totalWidth) / 2
+			}
 		}
 	}
 
@@ -236,6 +245,9 @@ func (w *hboxElement) SetBounds(bounds base.Rectangle) {
 		}
 
 		dx := w.childrenSize[i].Width
+		if flex, ok := v.(*expandElement); ok {
+			dx += (bounds.Dx() - w.totalWidth).Scale(flex.factor+1, w.totalFlex)
+		}
 		w.setBoundsForChild(i, v, posX, bounds.Min.Y, posX+dx, bounds.Max.Y)
 		posX += dx + extraGap
 	}

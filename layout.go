@@ -32,6 +32,16 @@ func calculateVGap(previous base.Element, current base.Element) base.Length {
 	// inferred from the order and type of controls.
 	//
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+
+	// Unwrap and Expand widgets.
+	if expand, ok := previous.(*expandElement); ok {
+		previous = expand.child
+	}
+	if expand, ok := current.(*expandElement); ok {
+		current = expand.child
+	}
+
+	// Apply layout rules.
 	if _, ok := previous.(*labelElement); ok {
 		// Any label immediately preceding any other control will be assumed to
 		// be 'associated'.

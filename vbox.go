@@ -97,6 +97,7 @@ type vboxElement struct {
 
 	childrenSize []base.Size
 	totalHeight  base.Length
+	totalFlex    int
 }
 
 func (w *vboxElement) Close() {
@@ -130,6 +131,7 @@ func (w *vboxElement) Layout(bc base.Constraints) base.Size {
 	height := base.Length(0)
 	minWidth := base.Length(0)
 	previous := base.Element(nil)
+	flex := 0
 	for i, v := range w.children {
 		if i > 0 {
 			if w.alignMain.IsPacked() {
@@ -142,8 +144,13 @@ func (w *vboxElement) Layout(bc base.Constraints) base.Size {
 		w.childrenSize[i] = v.Layout(cbc)
 		minWidth = max(minWidth, w.childrenSize[i].Width)
 		height += w.childrenSize[i].Height
+
+		if expand, ok := v.(*expandElement); ok {
+			flex += expand.factor + 1
+		}
 	}
 	w.totalHeight = height
+	w.totalFlex = flex
 
 	if w.alignCross == Stretch {
 		return bc.Constrain(base.Size{cbc.Min.Width, height})
@@ -236,25 +243,27 @@ func (w *vboxElement) SetBounds(bounds base.Rectangle) {
 	// of the controls.  We also calculate 'extraGap' which will adjust
 	// spacing of the controls for non-packed alignments.
 	extraGap := base.Length(0)
-	switch w.alignMain {
-	case MainStart:
-		// Do nothing
-	case MainCenter:
-		bounds.Min.Y += (bounds.Dy() - w.totalHeight) / 2
-	case MainEnd:
-		bounds.Min.Y = bounds.Max.Y - w.totalHeight
-	case SpaceAround:
-		extraGap = (bounds.Dy() - w.totalHeight).Scale(1, len(w.children)+1)
-		bounds.Min.Y += extraGap
-		extraGap += calculateVGap(nil, nil)
-	case SpaceBetween:
-		if len(w.children) > 1 {
-			extraGap = (bounds.Dy() - w.totalHeight).Scale(1, len(w.children)-1)
-			extraGap += calculateVGap(nil, nil)
-		} else {
-			// There are no controls between which to put the extra space.
-			// The following essentially convert SpaceBetween to SpaceAround
+	if w.totalFlex == 0 {
+		switch w.alignMain {
+		case MainStart:
+			// Do nothing
+		case MainCenter:
 			bounds.Min.Y += (bounds.Dy() - w.totalHeight) / 2
+		case MainEnd:
+			bounds.Min.Y = bounds.Max.Y - w.totalHeight
+		case SpaceAround:
+			extraGap = (bounds.Dy() - w.totalHeight).Scale(1, len(w.children)+1)
+			bounds.Min.Y += extraGap
+			extraGap += calculateVGap(nil, nil)
+		case SpaceBetween:
+			if len(w.children) > 1 {
+				extraGap = (bounds.Dy() - w.totalHeight).Scale(1, len(w.children)-1)
+				extraGap += calculateVGap(nil, nil)
+			} else {
+				// There are no controls between which to put the extra space.
+				// The following essentially convert SpaceBetween to SpaceAround
+				bounds.Min.Y += (bounds.Dy() - w.totalHeight) / 2
+			}
 		}
 	}
 
@@ -270,6 +279,9 @@ func (w *vboxElement) SetBounds(bounds base.Rectangle) {
 		}
 
 		dy := w.childrenSize[i].Height
+		if flex, ok := v.(*expandElement); ok {
+			dy += (bounds.Dy() - w.totalHeight).Scale(flex.factor+1, w.totalFlex)
+		}
 		w.setBoundsForChild(i, v, bounds.Min.X, posY, bounds.Max.X, posY+dy)
 		posY += dy + extraGap
 	}
