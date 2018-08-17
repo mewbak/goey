@@ -23,14 +23,14 @@ func max(a, b Length) Length {
 // rectangular widgets.  For each dimension, the constraints specify the
 // minimum and maximum allowed size for a widget.
 //
-// The constraints in a dimension are called 'tight' if the minimum and
+// The constraints on a dimension are called 'tight' if the minimum and
 // maximum values are equal, which essential requires the widget to take a
 // fixed size. On the other hand, if the minimum allowed value is zero, then
 // the constraints on that dimension is 'loose'.
 //
-// A sentinal value can be used to indicate that the maximum size in a
+// A sentinal value can be used to indicate that the maximum size for a
 // dimension is infinite.  The constraints on that dimension are called
-// 'unbounded'.  If the constraints for a dimension are both tight and unbounded,
+// 'unbounded'.  If the constraints on a dimension are both tight and unbounded,
 // the dimension is 'expanding'.
 //
 // (This type is similar to BoxConstraints type in flutter library rendering)
@@ -189,7 +189,7 @@ func (bc Constraints) IsBounded() bool {
 }
 
 // IsNormalized is true if both the width and height constraints are normalized.
-// A set of constraints are normalized if 0 < Min < Max.
+// A set of constraints are normalized if 0 <= Min <= Max.
 func (bc Constraints) IsNormalized() bool {
 	return bc.Min.Width >= 0.0 &&
 		bc.Min.Width <= bc.Max.Width &&
@@ -211,7 +211,7 @@ func (bc Constraints) IsTight() bool {
 	return bc.HasTightWidth() && bc.HasTightHeight()
 }
 
-// IsZero returns true if the constrain is the zero value.
+// IsZero returns true if the bc is the zero value.
 func (bc Constraints) IsZero() bool {
 	return bc.Min.Width == 0 && bc.Min.Height == 0 && bc.Max.Width == 0 && bc.Max.Height == 0
 }
@@ -223,13 +223,13 @@ func (bc Constraints) Loosen() Constraints {
 }
 
 // LoosenHeight creates a new box constraint with the minimum height
-// requirements removed.
+// requirement removed.
 func (bc Constraints) LoosenHeight() Constraints {
 	return Constraints{Size{bc.Min.Width, 0}, bc.Max}
 }
 
 // LoosenWidth creates a new box constraint with the minimum width
-// requirements removed.
+// requirement removed.
 func (bc Constraints) LoosenWidth() Constraints {
 	return Constraints{Size{0, bc.Min.Height}, bc.Max}
 }

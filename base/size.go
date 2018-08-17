@@ -11,7 +11,7 @@ func FromPixels(x, y int) Size {
 	return Size{FromPixelsX(x), FromPixelsY(y)}
 }
 
-// IsZero returns true if the constrain is the zero value.
+// IsZero returns true if the size is the zero value.
 func (s *Size) IsZero() bool {
 	return s.Width == 0 && s.Height == 0
 }

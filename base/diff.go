@@ -34,11 +34,7 @@ func DiffChild(parent Control, lhs Element, rhs Widget) (Element, error) {
 	// Can we propagate properties rather than mounting a new element?
 	if kind1, kind2 := lhs.Kind(), rhs.Kind(); kind1 == kind2 {
 		err := lhs.UpdateProps(rhs)
-		if err != nil {
-			return lhs, err
-		}
-
-		return lhs, nil
+		return lhs, err
 	}
 
 	// Need to replace the element.

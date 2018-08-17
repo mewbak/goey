@@ -1,10 +1,11 @@
 package base
 
-// Kind identifies the different kind of widgets.  Most widgets have two
+// Kind identifies the different kinds of widgets.  Most widgets have two
 // concrete types associated with their behaviour.  First, there is a type with data
-// to describe the widget when unmounted.  Second, there is a type with a handle
-// to the windowing system when mounted.  Automatic reconciliation of two widget
-// trees relies on Kind to match the unmounted and mounted widgets.
+// to describe the widget when unmounted, which should implement the interface
+// Widget.  Second, there is a type with a handle to the windowing system when
+// mounted, which should implement the interface Element.  Automatic reconciliation
+// of two widget trees relies on Kind to match the unmounted and mounted widgets.
 //
 // Note that comparison of kinds is done by address, and not done using the value of any fields.
 // Any internal state is simply to help with debugging.
@@ -40,7 +41,7 @@ type Widget interface {
 // of controls, created using the platform GUI.  An element represents an
 // instantiation of a Widget into visible parts of the GUI.
 type Element interface {
-	// NativeElement provides platform dependent methods.  These should
+	// NativeElement provides platform-dependent methods.  These should
 	// not be used by client libraries, but exist for the internal implementation
 	// of platform dependent code.
 	NativeElement
