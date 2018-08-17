@@ -137,6 +137,33 @@ func TestConstraints_Inset(t *testing.T) {
 	}
 }
 
+func TestConstraints_IsSatisfiedBy(t *testing.T) {
+	defSize := Size{10 * DIP, 15 * DIP}
+
+	cases := []struct {
+		in   Constraints
+		size Size
+		out  bool
+	}{
+		{Loose(defSize), defSize, true},
+		{Loose(defSize), Size{}, true},
+		{Loose(defSize), Size{Height: defSize.Height}, true},
+		{Loose(defSize), Size{Width: defSize.Width}, true},
+		{Loose(defSize), Size{defSize.Width + 1, defSize.Height + 1}, false},
+		{Tight(defSize), defSize, true},
+		{Tight(defSize), Size{}, false},
+		{Tight(defSize), Size{Height: defSize.Height}, false},
+		{Tight(defSize), Size{Width: defSize.Width}, false},
+		{Tight(defSize), Size{defSize.Width + 1, defSize.Height + 1}, false},
+	}
+
+	for i, v := range cases {
+		if out := v.in.IsSatisfiedBy(v.size); v.out != out {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.out, out)
+		}
+	}
+}
+
 func TestConstraints_Tighten(t *testing.T) {
 	cases := []struct {
 		in   Constraints
