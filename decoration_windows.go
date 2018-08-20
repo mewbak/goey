@@ -264,6 +264,10 @@ func decorationWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uint
 			return win.SendDlgItemMessage(hwnd, int32(win.LOWORD(uint32(wParam))), msg, wParam, lParam)
 		}
 		// Defer to the default window proc
+
+	case win.WM_CTLCOLORSTATIC:
+		win.SetBkMode(win.HDC(wParam), win.TRANSPARENT)
+		return uintptr(win.GetStockObject(win.NULL_BRUSH))
 	}
 
 	// Let the default window proc handle all other messages

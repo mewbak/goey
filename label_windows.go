@@ -79,6 +79,13 @@ func (w *labelElement) MinIntrinsicWidth(base.Length) base.Length {
 }
 
 func (w *labelElement) SetBounds(bounds base.Rectangle) {
+	// Because of descenders in text, we may want to increase the height
+	// of the label.
+	_, height := w.CalcRect(w.text)
+	if h := base.FromPixelsY(int(height)); h > bounds.Dy() {
+		bounds.Max.Y = bounds.Min.Y + h
+	}
+
 	w.Control.SetBounds(bounds)
 
 	// Not certain why this is required.  However, static controls don't
