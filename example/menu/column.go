@@ -21,7 +21,7 @@ func (*Column) Kind() *base.Kind {
 	return &columnKind
 }
 
-// Mount creates a horiztonal layout for child widgets in the GUI.
+// Mount creates a horizontal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
 func (w *Column) Mount(parent base.Control) (base.Element, error) {
 	c := make([]base.Element, 0, len(w.Children))
@@ -77,7 +77,7 @@ func (w *columnElement) Layout(bc base.Constraints) base.Size {
 	columns := int((width + gap) / (w.minWidth + gap))
 	cbc := base.TightWidth((width + gap).Scale(1, columns))
 
-	height := base.Length(0)
+	height := -gap
 	rowHeight := base.Length(0)
 	w.rowHeights = w.rowHeights[:0]
 	for i, v := range w.children {
@@ -86,13 +86,13 @@ func (w *columnElement) Layout(bc base.Constraints) base.Size {
 			rowHeight = tmp.Height
 		}
 		if (i+1)%columns == 0 {
-			height += rowHeight
+			height += rowHeight + gap
 			w.rowHeights = append(w.rowHeights, rowHeight)
 			rowHeight = 0
 		}
 	}
 	if rowHeight > 0 {
-		height += rowHeight
+		height += rowHeight + gap
 		w.rowHeights = append(w.rowHeights, rowHeight)
 	}
 
@@ -139,11 +139,12 @@ func (w *columnElement) MinIntrinsicHeight(width base.Length) base.Length {
 }
 
 func (w *columnElement) SetBounds(bounds base.Rectangle) {
+	const gap = 11 * base.DIP
+
 	if len(w.children) == 0 {
 		return
 	}
 
-	gap := 11 * base.DIP
 	width := bounds.Dx()
 	columns := int((width + gap) / (w.minWidth + gap))
 	itemWidth := (width+gap).Scale(1, columns) - gap

@@ -68,16 +68,19 @@ func renderSidebar() base.Widget {
 }
 
 func renderMainbar() base.Widget {
-	return &goey.Expand{Child: &goey.VBox{goey.MainCenter, goey.Stretch, []base.Widget{
-		&Column{[]base.Widget{
-			&goey.Button{Text: "A1"}, &goey.Button{Text: "A2"}, &goey.Button{Text: "A3"}, &goey.Button{Text: "A4"},
-			&goey.Button{Text: "B1"}, &goey.Button{Text: "B2"}, &goey.Button{Text: "B3"}, &goey.Button{Text: "B4"},
-			&goey.Button{Text: "C1"}, &goey.Button{Text: "C2"}, &goey.Button{Text: "C3"}, &goey.Button{Text: "C4"},
-			&goey.Button{Text: "D1"}, &goey.Button{Text: "D2"}, &goey.Button{Text: "D3"}, &goey.Button{Text: "D4"},
+	return &goey.Expand{Child: &goey.Padding{
+		Insets: goey.DefaultInsets(),
+		Child: &goey.VBox{goey.MainCenter, goey.Stretch, []base.Widget{
+			&Column{[]base.Widget{
+				&goey.Button{Text: "A1"}, &goey.Button{Text: "A2"}, &goey.Button{Text: "A3"}, &goey.Button{Text: "A4"},
+				&goey.Button{Text: "B1"}, &goey.Button{Text: "B2"}, &goey.Button{Text: "B3"}, &goey.Button{Text: "B4"},
+				&goey.Button{Text: "C1"}, &goey.Button{Text: "C2"}, &goey.Button{Text: "C3"}, &goey.Button{Text: "C4"},
+				&goey.Button{Text: "D1"}, &goey.Button{Text: "D2"}, &goey.Button{Text: "D3"}, &goey.Button{Text: "D4"},
+			}},
+			&goey.HR{},
+			&goey.Button{Text: "Help"},
 		}},
-		&goey.HR{},
-		&goey.Button{Text: "Help"},
-	}}}
+	}}
 }
 
 func renderWindow() base.Widget {
