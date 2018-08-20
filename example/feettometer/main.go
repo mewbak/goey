@@ -1,7 +1,18 @@
 // This package provides an example application built using the goey package
-// that rebuilds the classic Tcl/Tk tutorial application.  The example also
-// shows the use of a custom layout container, MinSizedBox, showing that new
-// layouts can be developped outside of the main package, and used portably.
+// that rebuilds the classic Tcl/Tk tutorial application.
+//
+// The example also shows the use of a custom layout container, MinSizedBox,
+// showing that new layouts can be developped outside of the main package,
+// and used portably.  In this case, the layout uses the methods
+// MinIntrinsicHeight and MinIntrinsicWidth to find the minimum acceptable size
+// for the child, and then limits the child to that particular size as long as
+// it meets the layout constraints.
+//
+// The GUI is partially dynamic, in that the conversion from feet to meters is
+// performed whenever the button is pressed.  However, it would be very easy
+// to have the conversion performed continuously as the user types by adding
+// a call to the conversion function included in the OnChange callback of the
+// textbox.
 //
 // The management of scrollbars can be tested by using the environment variable
 // GOEY_SCROLL.  Allowed values are 0 through 3, which enable no scrollbars,

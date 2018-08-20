@@ -14,7 +14,7 @@ type Checkbox struct {
 	Text     string           // Text is a caption for the checkbox.
 	Value    bool             // Is the checkbox checked?
 	Disabled bool             // Disabled is a flag indicating that the user cannot interact with this checkbox.
-	OnChange func(value bool) // OnChange will be called whenever the value (checked or unchcked) changes.
+	OnChange func(value bool) // OnChange will be called whenever the value (checked or unchecked) changes.
 	OnFocus  func()           // OnFocus will be called whenever the checkbox receives the keyboard focus.
 	OnBlur   func()           // OnBlur will be called whenever the checkbox loses the keyboard focus.
 }
@@ -25,8 +25,8 @@ func (*Checkbox) Kind() *base.Kind {
 	return &checkboxKind
 }
 
-// Mount creates a checkbox in the GUI.  The newly created widget
-// will be a child of the widget specified by parent.
+// Mount creates a checkbox control in the GUI.
+//  The newly created widget will be a child of the widget specified by parent.
 func (w *Checkbox) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)

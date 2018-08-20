@@ -9,7 +9,7 @@ import (
 // package.  Because of limited precision, the PT listed here is somewhat smaller
 // than its correct value.
 const (
-	DIP = base.DIP // Device-independenant pixel (1/96 inch)
+	DIP = base.DIP // Device-independent pixel (1/96 inch)
 	PT  = base.PT  // Point (1/72 inch)
 	PC  = base.PC  // Pica (1/6 inch or 12 points)
 )

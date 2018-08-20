@@ -64,11 +64,11 @@ func Run(action func() error) error {
 // running, this function will return an error (ErrNotRunning).  Any error from
 // the callback will also be returned.
 //
-// Because this function involves asynronous communication with the GUI thread,
+// Because this function involves asynchronous communication with the GUI thread,
 // it can deadlock if called from the GUI thread.  It is therefore not safe to
 // use in any event callbacks from widgets.  However, since those callbacks are
-// executing on the GUI thread, the use of Do is also unnecessary in that
-// context.
+// already executing on the GUI thread, the use of Do is also unnecessary in
+// that context.
 //
 // Note, this function contains a race-condition, in that the the action may be
 // scheduled while the event loop is being terminated, in which case the

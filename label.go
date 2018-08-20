@@ -19,8 +19,8 @@ func (*Label) Kind() *base.Kind {
 	return &labelKind
 }
 
-// Mount creates a label in the GUI.  The newly created widget
-// will be a child of the widget specified by parent.
+// Mount creates a label control in the GUI.
+//  The newly created widget will be a child of the widget specified by parent.
 func (w *Label) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)

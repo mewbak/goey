@@ -1,7 +1,7 @@
-// This package provides an example application built using the goey package.
-// that demontrates two multiline text fields.  A status bar shows the combined
-// count of characters in both fields, showing how the GUI can be easily kept
-// in sync with changes to data.
+// This package provides an example application built using the goey package
+// that demonstrates two multiline text fields.  A status bar shows the combined
+// count of characters in both fields, showing how a dynamic GUI can be easily
+// kept in sync with changes to the application's data.
 //
 // This example also shows the use of the Expand widget to have some children
 // of the VBox expand and consume any available vertical space.

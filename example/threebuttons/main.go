@@ -1,10 +1,10 @@
-// This package provides an example application built using the goey package.
-// that demontrates three button with different behaviours.  The top button
+// This package provides an example application built using the goey package
+// that demonstrates three buttons with different behaviours.  The top button
 // maintains a running count of how many times it has been clicked.  The middle
 // button changes the vertical alignment of the buttons.  The bottom button
 // changes the horizontal alignment.
 //
-// The different values for MainAxisAlignemtn and CrossAxisAlignment can be
+// The different values for MainAxisAlignemnt and CrossAxisAlignment can be
 // explored with this example.
 //
 // The management of scrollbars can be tested by using the environment variable
@@ -109,7 +109,7 @@ func render() base.Widget {
 			OnFocus: onfocus(1),
 			OnBlur:  onblur(1),
 		},
-		&goey.Button{Text: "Extra button",
+		&goey.Button{Text: "Cyel main axis align",
 			OnClick: cycleMainAxisAlign,
 			OnFocus: onfocus(2),
 			OnBlur:  onblur(2),

@@ -51,7 +51,7 @@ type Element interface {
 	// Kind returns the concrete type for the Element.
 	// Users should not need to use this method directly.
 	Kind() *Kind
-	// Layout determines the best size for an element that sastisfies the
+	// Layout determines the best size for an element that satisfies the
 	// constraints.
 	Layout(Constraints) Size
 	// MinIntrinsicHeight returns the minimum height that this element requires

@@ -21,7 +21,7 @@ func (*Empty) Kind() *base.Kind {
 	return &emptyKind
 }
 
-// Mount creates a horiztonal layout for child widgets in the GUI.
+// Mount creates a horizontal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
 func (w *Empty) Mount(parent base.Control) (base.Element, error) {
 	retval := &emptyElement{}

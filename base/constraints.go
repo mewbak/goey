@@ -1,7 +1,7 @@
 package base
 
 const (
-	// Inf is a sentinal value indicating an unbounded width or height.
+	// Inf is a sentinel value indicating an unbounded width or height.
 	Inf Length = 0x7fffffff
 )
 
@@ -28,7 +28,7 @@ func max(a, b Length) Length {
 // fixed size. On the other hand, if the minimum allowed value is zero, then
 // the constraints on that dimension is 'loose'.
 //
-// A sentinal value can be used to indicate that the maximum size for a
+// A sentinel value can be used to indicate that the maximum size for a
 // dimension is infinite.  The constraints on that dimension are called
 // 'unbounded'.  If the constraints on a dimension are both tight and unbounded,
 // the dimension is 'expanding'.
@@ -249,7 +249,7 @@ func (bc Constraints) Tighten(size Size) Constraints {
 // TightenHeight creates a new box constraint with a tight height
 // requirements matching as closely as possible the length.
 // The new height constraints will be tight, but will only match the requested
-// height if the height statisfies the original constraints.
+// height if the height satisfies the original constraints.
 func (bc Constraints) TightenHeight(height Length) Constraints {
 	bc.Min.Height = height.Clamp(bc.Min.Height, bc.Max.Height)
 	bc.Max.Height = bc.Min.Height
@@ -259,7 +259,7 @@ func (bc Constraints) TightenHeight(height Length) Constraints {
 // TightenWidth creates a new box constraint with a tight width
 // requirements matching as closely as possible the length.
 // The new width constraints will be tight, but will only match the requested
-// width if the width statisfies the original constraints.
+// width if the width satisfies the original constraints.
 func (bc Constraints) TightenWidth(width Length) Constraints {
 	bc.Min.Width = width.Clamp(bc.Min.Width, bc.Max.Width)
 	bc.Max.Width = bc.Min.Width

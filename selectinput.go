@@ -25,8 +25,8 @@ func (*SelectInput) Kind() *base.Kind {
 	return &selectKind
 }
 
-// Mount creates a button in the GUI.  The newly created widget
-// will be a child of the widget specified by parent.
+// Mount creates a select control (combobox) in the GUI.
+// The newly created widget will be a child of the widget specified by parent.
 func (w *SelectInput) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
 	return w.mount(parent)

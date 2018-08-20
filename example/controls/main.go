@@ -1,3 +1,5 @@
+// This package provides an example application built using the goey package
+// that demonstrates most of the controls that are available.
 package main
 
 import (

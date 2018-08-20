@@ -29,7 +29,7 @@ func UniformInsets(l base.Length) Insets {
 	return Insets{l, l, l, l}
 }
 
-// Padding describes a adds some space around a single child widget.
+// Padding describes a widget that adds some space around a single child widget.
 //
 // The size of the control will match the size of the child element, although
 // padding will be added between the border of the padding and the child

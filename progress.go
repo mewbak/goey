@@ -24,8 +24,8 @@ func (*Progress) Kind() *base.Kind {
 	return &progressKind
 }
 
-// Mount creates a text area control in the GUI.  The newly created widget
-// will be a child of the widget specified by parent.
+// Mount creates a progress control in the GUI.
+// The newly created widget will be a child of the widget specified by parent.
 func (w *Progress) Mount(parent base.Control) (base.Element, error) {
 	// Fill in default values for the range.
 	w.UpdateRange()

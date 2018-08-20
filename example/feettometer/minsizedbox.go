@@ -18,7 +18,7 @@ func (*MinSizedBox) Kind() *base.Kind {
 	return &minsizedboxKind
 }
 
-// Mount creates a button in the GUI.  The newly created widget
+// Mount creates a this child in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
 func (w *MinSizedBox) Mount(parent base.Control) (base.Element, error) {
 	// Mount the child
@@ -50,7 +50,7 @@ func (*minsizedboxElement) Kind() *base.Kind {
 	return &minsizedboxKind
 }
 
-func (w *minsizedboxElement) Layout(bc base.Constraint) base.Size {
+func (w *minsizedboxElement) Layout(bc base.Constraints) base.Size {
 	if w.child == nil {
 		return bc.Constrain(base.Size{})
 	}

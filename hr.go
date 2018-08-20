@@ -8,7 +8,7 @@ var (
 	hrKind = base.NewKind("bitbucket.org/rj/goey.HR")
 )
 
-// HR describes a widget that is a horiztonal separator.
+// HR describes a widget that is a horizontal separator.
 type HR struct {
 }
 
@@ -18,7 +18,7 @@ func (*HR) Kind() *base.Kind {
 	return &hrKind
 }
 
-// Mount creates a horiztonal layout for child widgets in the GUI.
+// Mount creates a horizontal rule control in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
 func (w *HR) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code

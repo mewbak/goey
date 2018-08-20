@@ -59,7 +59,7 @@ func (w *windowImpl) layoutChild(windowSize base.Size) base.Size {
 	// Create the constraints
 	constraints := base.Tight(windowSize)
 
-	// Relax maximum size when scolling is allowed
+	// Relax maximum size when scrolling is allowed
 	if w.horizontalScroll {
 		constraints.Max.Width = base.Inf
 	}

@@ -29,7 +29,7 @@ func (*Img) Kind() *base.Kind {
 	return &imgKind
 }
 
-// Mount creates a horiztonal layout for child widgets in the GUI.
+// Mount creates an image control in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
 func (w *Img) Mount(parent base.Control) (base.Element, error) {
 	// Fill in the height and width if they are left at zero.

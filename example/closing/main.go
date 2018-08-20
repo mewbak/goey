@@ -1,5 +1,5 @@
 // This package provides an example application built using the goey package
-// that demontrates using the OnClosing callback for windows.  Trying to close
+// that demonstrates using the OnClosing callback for windows.  Trying to close
 // the window using the normal method will fail, but the button within the
 // window can be used.
 package main

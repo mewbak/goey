@@ -28,7 +28,7 @@ func (*HBox) Kind() *base.Kind {
 	return &hboxKind
 }
 
-// Mount creates a horiztonal layout for child widgets in the GUI.
+// Mount creates a horizontal layout for child widgets in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
 func (w *HBox) Mount(parent base.Control) (base.Element, error) {
 	c := make([]base.Element, 0, len(w.Children))

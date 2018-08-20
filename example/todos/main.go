@@ -1,3 +1,5 @@
+// This package provides an example application built using the goey package
+// that rebuilds the classic Todos tutorial application.
 package main
 
 import (

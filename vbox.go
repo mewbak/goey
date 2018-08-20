@@ -44,7 +44,7 @@ const (
 
 // VBox describes a layout widget that arranges its child widgets into a column.
 // Children are positioned in order from the top towards the bottom.  The main
-// axis for alignment is therefore vertical, with the cross axis for alignment is horiztonal.
+// axis for alignment is therefore vertical, with the cross axis for alignment is horizontal.
 //
 // The size of the box will try to set a width sufficient to contain all of its
 // children.  Extra space will be distributed according to the value of
