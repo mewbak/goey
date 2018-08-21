@@ -24,7 +24,7 @@ func (*Button) Kind() *base.Kind {
 	return &buttonKind
 }
 
-// Mount creates a button in the GUI.  The newly created widget
+// Mount creates a button control in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
 func (w *Button) Mount(parent base.Control) (base.Element, error) {
 	// Forward to the platform-dependant code
