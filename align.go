@@ -24,8 +24,8 @@ const (
 // Align describes a widget that aligns a single child widget within its borders.
 //
 // The default position is for the child widget to be centered.  To change the
-// position of the child, the horizontal and vertical alignment (HAlign and
-// VAlign) should be adjusted.
+// position of the child, the horizontal and vertical alignment (the fields
+// HAlign and VAlign) should be adjusted.
 //
 // The size of the control depends on the WidthFactor and HeightFactor.  If zero,
 // the widget will try to be as large as possible or match the child, depending
@@ -53,8 +53,8 @@ func mountIfNotNil(parent base.Control, child base.Widget) (base.Element, error)
 	return child.Mount(parent)
 }
 
-// Mount creates a button in the GUI.  The newly created widget
-// will be a child of the widget specified by parent.
+// Mount creates an aligned layout for child widgets in the GUI.
+// The newly created widget will be a child of the widget specified by parent.
 func (w *Align) Mount(parent base.Control) (base.Element, error) {
 	// Mount the child
 	child, err := mountIfNotNil(parent, w.Child)

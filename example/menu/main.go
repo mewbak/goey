@@ -1,3 +1,6 @@
+// This package provides an example application built using the goey package
+// that shows a sidebar an array of buttons.  This is meant to be an example
+// of a corporate portal.
 package main
 
 import (
