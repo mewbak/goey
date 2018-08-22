@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/mock"
 )
 
 func (w *vboxElement) Props() base.Widget {
@@ -70,7 +71,7 @@ func TestVBoxUpdateProps(t *testing.T) {
 }
 
 func TestVBoxLayout(t *testing.T) {
-	children := []base.Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}
+	children := mock.NewList(base.Size{13 * DIP, 26 * DIP}, base.Size{11 * DIP, 13 * DIP})
 
 	cases := []struct {
 		children    []base.Element
@@ -106,7 +107,7 @@ func TestVBoxLayout(t *testing.T) {
 		}
 		in.SetBounds(base.Rect(0, 0, size.Width, size.Height))
 		for j, u := range v.bounds {
-			if got := v.children[j].(*mockElement).Bounds; got != u {
+			if got := v.children[j].(*mock.Element).Bounds(); got != u {
 				t.Errorf("Incorrect bounds case %d-%d, got %s, want %s", i, j, got, u)
 			}
 		}
@@ -114,6 +115,10 @@ func TestVBoxLayout(t *testing.T) {
 }
 
 func TestVBoxMinIntrinsic(t *testing.T) {
+	size := func(w, h base.Length) base.Size {
+		return base.Size{w, h}
+	}
+
 	cases := []struct {
 		children           []base.Element
 		alignMain          MainAxisAlign
@@ -122,14 +127,14 @@ func TestVBoxMinIntrinsic(t *testing.T) {
 		minIntrinsicWidth  base.Length
 	}{
 		{nil, MainStart, Stretch, 0, 0},
-		{[]base.Element{mock(13*DIP, 13*DIP), mock(13*DIP, 13*DIP)}, MainStart, Stretch, 37 * DIP, 13 * DIP},
-		{[]base.Element{mock(13*DIP, 13*DIP), mock(15*DIP, 13*DIP)}, MainStart, Stretch, 37 * DIP, 15 * DIP},
-		{[]base.Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, MainStart, Stretch, 50 * DIP, 13 * DIP},
-		{[]base.Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, MainCenter, Stretch, 50 * DIP, 13 * DIP},
-		{[]base.Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, MainEnd, Stretch, 50 * DIP, 13 * DIP},
-		{[]base.Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, SpaceAround, Stretch, 72 * DIP, 13 * DIP},
-		{[]base.Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, SpaceBetween, Stretch, 50 * DIP, 13 * DIP},
-		{[]base.Element{mock(13*DIP, 26*DIP), mock(11*DIP, 13*DIP)}, Homogeneous, Stretch, (26*2 + 11) * DIP, 13 * DIP},
+		{mock.NewList(size(13*DIP, 13*DIP), size(13*DIP, 13*DIP)), MainStart, Stretch, 37 * DIP, 13 * DIP},
+		{mock.NewList(size(13*DIP, 13*DIP), size(15*DIP, 13*DIP)), MainStart, Stretch, 37 * DIP, 15 * DIP},
+		{mock.NewList(size(13*DIP, 26*DIP), size(11*DIP, 13*DIP)), MainStart, Stretch, 50 * DIP, 13 * DIP},
+		{mock.NewList(size(13*DIP, 26*DIP), size(11*DIP, 13*DIP)), MainCenter, Stretch, 50 * DIP, 13 * DIP},
+		{mock.NewList(size(13*DIP, 26*DIP), size(11*DIP, 13*DIP)), MainEnd, Stretch, 50 * DIP, 13 * DIP},
+		{mock.NewList(size(13*DIP, 26*DIP), size(11*DIP, 13*DIP)), SpaceAround, Stretch, 72 * DIP, 13 * DIP},
+		{mock.NewList(size(13*DIP, 26*DIP), size(11*DIP, 13*DIP)), SpaceBetween, Stretch, 50 * DIP, 13 * DIP},
+		{mock.NewList(size(13*DIP, 26*DIP), size(11*DIP, 13*DIP)), Homogeneous, Stretch, (26*2 + 11) * DIP, 13 * DIP},
 	}
 
 	for i, v := range cases {

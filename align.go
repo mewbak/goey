@@ -94,16 +94,12 @@ func (*alignElement) Kind() *base.Kind {
 }
 
 func (w *alignElement) Layout(bc base.Constraints) base.Size {
-	shrinkWrapWidth := w.widthFactor > 0 || !bc.HasBoundedWidth()
-	shrinkWrapHeight := w.heightFactor > 0 || !bc.HasBoundedHeight()
-
 	if w.child == nil {
-
 		size := base.Size{}
-		if !shrinkWrapWidth {
+		if bc.HasBoundedWidth() {
 			size.Width = base.Inf
 		}
-		if !shrinkWrapHeight {
+		if bc.HasBoundedHeight() {
 			size.Height = base.Inf
 		}
 		return bc.Constrain(size)
@@ -111,10 +107,10 @@ func (w *alignElement) Layout(bc base.Constraints) base.Size {
 
 	size := w.child.Layout(bc.Loosen())
 	w.childSize = size
-	if shrinkWrapWidth && w.widthFactor > 0 {
+	if w.widthFactor > 0 {
 		size.Width = base.Length(float64(size.Width) * w.widthFactor)
 	}
-	if shrinkWrapHeight && w.heightFactor > 0 {
+	if w.heightFactor > 0 {
 		size.Height = base.Length(float64(size.Height) * w.heightFactor)
 	}
 	return bc.Constrain(size)
