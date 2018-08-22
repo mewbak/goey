@@ -13,8 +13,8 @@ func (w *alignElement) Props() base.Widget {
 	}
 
 	return &Align{
-		HAlign:       w.halign,
-		VAlign:       w.valign,
+		HAlign:       w.hAlign,
+		VAlign:       w.vAlign,
 		WidthFactor:  w.widthFactor,
 		HeightFactor: w.heightFactor,
 		Child:        child,

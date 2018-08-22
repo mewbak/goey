@@ -67,8 +67,8 @@ func (w *Align) Mount(parent base.Control) (base.Element, error) {
 		child:        child,
 		widthFactor:  w.WidthFactor,
 		heightFactor: w.HeightFactor,
-		halign:       w.HAlign,
-		valign:       w.VAlign,
+		hAlign:       w.HAlign,
+		vAlign:       w.VAlign,
 	}, nil
 }
 
@@ -76,8 +76,8 @@ type alignElement struct {
 	parent       base.Control
 	child        base.Element
 	childSize    base.Size
-	halign       Alignment
-	valign       Alignment
+	hAlign       Alignment
+	vAlign       Alignment
 	widthFactor  float64
 	heightFactor float64
 }
@@ -149,10 +149,10 @@ func (w *alignElement) SetBounds(bounds base.Rectangle) {
 		return
 	}
 
-	x := bounds.Min.X.Scale(int(w.halign)-int(AlignEnd), int(AlignStart)-int(AlignEnd)) +
-		(bounds.Max.X-w.childSize.Width).Scale(int(w.halign)-int(AlignStart), int(AlignEnd)-int(AlignStart))
-	y := bounds.Min.Y.Scale(int(w.valign)-int(AlignEnd), int(AlignStart)-int(AlignEnd)) +
-		(bounds.Max.Y-w.childSize.Height).Scale(int(w.valign)-int(AlignStart), int(AlignEnd)-int(AlignStart))
+	x := bounds.Min.X.Scale(int(w.hAlign)-int(AlignEnd), int(AlignStart)-int(AlignEnd)) +
+		(bounds.Max.X-w.childSize.Width).Scale(int(w.hAlign)-int(AlignStart), int(AlignEnd)-int(AlignStart))
+	y := bounds.Min.Y.Scale(int(w.vAlign)-int(AlignEnd), int(AlignStart)-int(AlignEnd)) +
+		(bounds.Max.Y-w.childSize.Height).Scale(int(w.vAlign)-int(AlignStart), int(AlignEnd)-int(AlignStart))
 	w.child.SetBounds(base.Rectangle{
 		base.Point{x, y},
 		base.Point{x + w.childSize.Width, y + w.childSize.Height},
@@ -163,8 +163,8 @@ func (w *alignElement) updateProps(data *Align) (err error) {
 	w.child, err = base.DiffChild(w.parent, w.child, data.Child)
 	w.widthFactor = data.WidthFactor
 	w.heightFactor = data.HeightFactor
-	w.halign = data.HAlign
-	w.valign = data.VAlign
+	w.hAlign = data.HAlign
+	w.vAlign = data.VAlign
 	return err
 }
 
