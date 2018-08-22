@@ -169,20 +169,28 @@ func TestConstraints_Tighten(t *testing.T) {
 		in   Constraints
 		size Size
 		out  Constraints
+		outH Constraints
+		outV Constraints
 	}{
-		{Expand(), Size{10 * DIP, 10 * DIP}, Expand()},
-		{ExpandHeight(10 * DIP), Size{10 * DIP, 10 * DIP}, Constraints{Size{10 * DIP, Inf}, Size{10 * DIP, Inf}}},
-		{ExpandWidth(10 * DIP), Size{10 * DIP, 10 * DIP}, Constraints{Size{Inf, 10 * DIP}, Size{Inf, 10 * DIP}}},
-		{Loose(Size{20 * DIP, 25 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 10 * DIP})},
-		{Loose(Size{20 * DIP, 25 * DIP}), Size{30 * DIP, 30 * DIP}, Tight(Size{20 * DIP, 25 * DIP})},
-		{Tight(Size{10 * DIP, 15 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP})},
-		{TightWidth(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{15 * DIP, 10 * DIP})},
-		{TightHeight(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP})},
+		{Expand(), Size{10 * DIP, 10 * DIP}, Expand(), Expand(), Expand()},
+		{ExpandHeight(10 * DIP), Size{10 * DIP, 10 * DIP}, ExpandHeight(10 * DIP), ExpandHeight(10 * DIP), ExpandHeight(10 * DIP)},
+		{ExpandWidth(10 * DIP), Size{10 * DIP, 10 * DIP}, ExpandWidth(10 * DIP), ExpandWidth(10 * DIP), ExpandWidth(10 * DIP)},
+		{Loose(Size{20 * DIP, 25 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 10 * DIP}), Constraints{Size{0, 10 * DIP}, Size{20 * DIP, 10 * DIP}}, Constraints{Size{10 * DIP, 0}, Size{10 * DIP, 25 * DIP}}},
+		{Loose(Size{20 * DIP, 25 * DIP}), Size{30 * DIP, 30 * DIP}, Tight(Size{20 * DIP, 25 * DIP}), Constraints{Size{0, 25 * DIP}, Size{20 * DIP, 25 * DIP}}, Constraints{Size{20 * DIP, 0}, Size{20 * DIP, 25 * DIP}}},
+		{Tight(Size{10 * DIP, 15 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP}), Tight(Size{10 * DIP, 15 * DIP}), Tight(Size{10 * DIP, 15 * DIP})},
+		{TightWidth(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{15 * DIP, 10 * DIP}), Tight(Size{15 * DIP, 10 * DIP}), TightWidth(15 * DIP)},
+		{TightHeight(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP}), TightHeight(15*DIP), Tight(Size{10*DIP,15*DIP})},
 	}
 
 	for i, v := range cases {
 		if out := v.in.Tighten(v.size); out != v.out {
 			t.Errorf("Failed on case %d, want %v, got %v", i, v.out, out)
+		}
+		if out := v.in.TightenHeight(v.size.Height); out != v.outH {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.outH, out)
+		}
+		if out := v.in.TightenWidth(v.size.Width); out != v.outV {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.outV, out)
 		}
 	}
 }
