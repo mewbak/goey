@@ -72,12 +72,6 @@ func (w *checkboxElement) Props() base.Widget {
 	}
 }
 
-func (w *checkboxElement) preferredWidth() base.Length {
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	width, _ := w.CalcRect(w.text)
-	return base.FromPixelsX(int(width) + 17)
-}
-
 func (w *checkboxElement) Layout(bc base.Constraints) base.Size {
 	width := w.MinIntrinsicWidth(0)
 	height := w.MinIntrinsicHeight(0)
