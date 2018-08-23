@@ -5,15 +5,17 @@ import (
 )
 
 var (
-	mockKind = base.NewKind("bitbucket.org/rj/goey/goeytest.Mock")
+	mockKind = base.NewKind("bitbucket.org/rj/goey/mock.Widget")
 )
 
+// New returns a new mock element.
 func New(size base.Size) *Element {
 	return &Element{
 		Size: size,
 	}
 }
 
+// NewList returns a slice of new mock elements.
 func NewList(sizes ...base.Size) []base.Element {
 	ret := make([]base.Element, 0, len(sizes))
 	for _, v := range sizes {
@@ -22,6 +24,7 @@ func NewList(sizes ...base.Size) []base.Element {
 	return ret
 }
 
+// Widget is a mock widget.  When mounted, it will create a mock element.
 type Widget struct {
 	Size base.Size
 }
@@ -39,6 +42,9 @@ func (w *Widget) Mount(parent base.Control) (base.Element, error) {
 	}, nil
 }
 
+// Element is a mock element.
+// Although this is a leaf element (i.e. it does not have any children),
+// there is no control associated with this element.
 type Element struct {
 	Size base.Size
 
@@ -46,6 +52,8 @@ type Element struct {
 	closed bool
 }
 
+// Close removes the widget from the GUI, and frees any associated resources.
+// This is a no-op for a mock element.
 func (w *Element) Close() {
 	if w.closed {
 		panic("Element already closed")
@@ -53,32 +61,43 @@ func (w *Element) Close() {
 	w.closed = true
 }
 
+// Kind returns the concrete type for the Element.
 func (*Element) Kind() *base.Kind {
 	return &mockKind
 }
 
+// Layout determines the best size for an element that satisfies the
+// constraints.  For a mock element, it will try to match the specific
+// size in the field Size.
 func (w *Element) Layout(bc base.Constraints) base.Size {
 	return bc.Constrain(w.Size)
 }
 
+// MinIntrinsicHeight returns the minimum height that this element requires
+// to be correctly displayed.
 func (w *Element) MinIntrinsicHeight(base.Length) base.Length {
 	return w.Size.Height
 }
 
+// MinIntrinsicWidth returns the minimum width that this element requires
+// to be correctly displayed.
 func (w *Element) MinIntrinsicWidth(base.Length) base.Length {
 	return w.Size.Width
 }
 
+// Props recreates the widget description for this element.
 func (w *Element) Props() base.Widget {
 	return &Widget{
 		Size: w.Size,
 	}
 }
 
+// Bounds returns the position of the widget.
 func (w *Element) Bounds() base.Rectangle {
 	return w.bounds
 }
 
+// SetBounds updates the position of the widget.
 func (w *Element) SetBounds(bounds base.Rectangle) {
 	w.bounds = bounds
 }
@@ -88,6 +107,7 @@ func (w *Element) updateProps(data *Widget) error {
 	return nil
 }
 
+// UpdateProps will update the properties of the widget.
 func (w *Element) UpdateProps(data base.Widget) error {
 	return w.updateProps(data.(*Widget))
 }
