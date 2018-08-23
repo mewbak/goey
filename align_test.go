@@ -83,6 +83,7 @@ func TestAlignLayout(t *testing.T) {
 		{sizeZ, 0, 0, base.Tight(size1), size1},
 		{size1, 0, 0, base.Expand().Loosen(), size1},
 		{size2, 0, 0, base.Expand().Loosen(), size2},
+		{sizeZ, 0, 0, base.Expand().Loosen(), sizeZ},
 		{size1, 1, 1, base.Expand().Loosen(), size1},
 		{size2, 1, 1, base.Expand().Loosen(), size2},
 		{size1, 2, 3, base.Expand().Loosen(), base.Size{20 * DIP, 60 * DIP}},
@@ -107,6 +108,7 @@ func TestAlignLayout(t *testing.T) {
 func TestAlignMinIntrinsicSize(t *testing.T) {
 	size1 := base.Size{10 * DIP, 20 * DIP}
 	size2 := base.Size{35 * DIP, 30 * DIP}
+	sizeZ := base.Size{}
 
 	cases := []struct {
 		in           base.Size
@@ -116,8 +118,10 @@ func TestAlignMinIntrinsicSize(t *testing.T) {
 	}{
 		{size1, 0, 0, size1},
 		{size2, 0, 0, size2},
+		{sizeZ, 0, 0, sizeZ},
 		{size1, 1, 1, size1},
 		{size2, 1, 1, size2},
+		{sizeZ, 1, 1, sizeZ},
 		{size1, 2, 3, base.Size{20 * DIP, 60 * DIP}},
 	}
 
@@ -125,7 +129,9 @@ func TestAlignMinIntrinsicSize(t *testing.T) {
 		elem := alignElement{
 			widthFactor:  v.widthFactor,
 			heightFactor: v.heightFactor,
-			child:        mock.New(v.in),
+		}
+		if !v.in.IsZero() {
+			elem.child = mock.New(v.in)
 		}
 
 		if out := elem.MinIntrinsicWidth(base.Inf); out != v.out.Width {
