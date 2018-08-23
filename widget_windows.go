@@ -69,7 +69,7 @@ func (w Control) SetDisabled(value bool) {
 
 // SetBounds is a wrapper around the WIN32 call to MoveWindow.
 func (w *Control) SetBounds(bounds base.Rectangle) {
-	win.MoveWindow(w.hWnd, int32(bounds.Min.X.PixelsX()), int32(bounds.Min.Y.PixelsY()), int32(bounds.Dx().PixelsX()), int32(bounds.Dy().PixelsY()), true)
+	win.MoveWindow(w.hWnd, int32(bounds.Min.X.PixelsX()), int32(bounds.Min.Y.PixelsY()), int32(bounds.Dx().PixelsX()), int32(bounds.Dy().PixelsY()), false)
 }
 
 // SetOrder is a call around SetWindowPos used to ensure that a window appears
@@ -78,7 +78,7 @@ func (w *Control) SetOrder(previous win.HWND) win.HWND {
 	// Note, the argument previous may be 0 when setting the first child.
 	// Fortunately, this corresponds to HWND_TOP, which sets the window
 	// to top of the z-order.
-	win.SetWindowPos(w.hWnd, previous, 0, 0, 0, 0, win.SWP_NOMOVE|win.SWP_NOSIZE)
+	win.SetWindowPos(w.hWnd, previous, 0, 0, 0, 0, win.SWP_NOMOVE|win.SWP_NOSIZE|win.SWP_NOREDRAW|0x400)
 	return w.hWnd
 }
 
