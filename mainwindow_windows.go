@@ -225,7 +225,7 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	// This will set the child for the window.  This will also perform any
 	// layout of the child, which includes calculating the minimum window
 	// size.
-	err = retval.setChild(child)
+	err = retval.SetChild(child)
 	if err != nil {
 		win.DestroyWindow(hwnd)
 		return nil, err
@@ -237,6 +237,10 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	return retval, nil
 }
 
+func (w *windowImpl) control() base.Control {
+	return base.Control{w.hWnd}
+}
+
 func (w *windowImpl) close() {
 	// Want to be able to close windows in Go, even if they have already been
 	// destroyed in the Win32 system
@@ -245,10 +249,6 @@ func (w *windowImpl) close() {
 		w.hWnd = 0
 	}
 	win.OleUninitialize()
-}
-
-func (w *windowImpl) getChild() base.Element {
-	return w.child
 }
 
 // NativeHandle returns the handle to the platform-specific window handle
@@ -265,12 +265,11 @@ func (w *windowImpl) message(m *Message) {
 // setChild updates the child element of the window.  It also updates any
 // cached data linked to the child element, in particular the window's
 // minimum size.  This function will also perform layout on the child.
-func (w *windowImpl) setChild(child base.Widget) (err error) {
-	// Update the child element
-	w.child, err = base.DiffChild(base.Control{w.hWnd}, w.child, child)
+func (w *windowImpl) setChildPost() {
+	// Clear the cache of the minimum window size
 	w.windowMinSize = image.Point{}
-	// Whether or not an error has occured, redo the layout so the children
-	// are placed.
+
+	// Redo the layout so the children are placed.
 	if w.child != nil {
 		// Ensure that tab-order is correct
 		w.child.SetOrder(win.HWND_TOP)
@@ -285,8 +284,6 @@ func (w *windowImpl) setChild(child base.Widget) (err error) {
 		w.verticalScrollPos = 0
 		w.verticalScrollVisible = false
 	}
-	// ... and we're done
-	return err
 }
 
 func (w *windowImpl) setScroll(hscroll, vscroll bool) {

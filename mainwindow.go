@@ -37,18 +37,17 @@ func (w *Window) Close() {
 // Child returns the mounted child for the window.  In general, this
 // method should not be used.
 func (w *Window) Child() base.Element {
-	return w.getChild()
+	return w.child
 }
 
 // children assumes that the direct child of the window is a VBox, and then
 // returns the children of that element.  It is used for testing.
 func (w *Window) children() []base.Element {
-	child := w.getChild()
-	if child == nil {
+	if w.child == nil {
 		return nil
 	}
 
-	if vbox, ok := child.(*vboxElement); ok {
+	if vbox, ok := w.child.(*vboxElement); ok {
 		return vbox.children
 	}
 
@@ -124,8 +123,15 @@ func (w *Window) SetChild(child base.Widget) error {
 		atomic.StoreUintptr(&insideSetChildren, 0)
 	}()
 
-	// Defer to the platform-specific code
-	return w.setChild(child)
+	// Update the child element.
+	newChild, err := base.DiffChild(w.control(), w.child, child)
+
+	// Whether or not there has been an error, we need to run platform-specific
+	// clean-up.  This is to recalculate min window size, update scrollbars, etc.
+	w.child = newChild
+	w.setChildPost()
+
+	return err
 }
 
 // SetIcon changes the icon associated with the window.

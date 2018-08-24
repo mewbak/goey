@@ -133,8 +133,8 @@ func (w *windowImpl) onSize() {
 	w.child.SetBounds(bounds)
 }
 
-func (w *windowImpl) getChild() base.Element {
-	return w.child
+func (w *windowImpl) control() base.Control {
+	return base.Control{&w.layout.Container}
 }
 
 func (mw *windowImpl) close() {
@@ -174,11 +174,8 @@ func get_vscrollbar_width(window *gtk.Window) (base.Length, error) {
 	return vscrollbarWidth, nil
 }
 
-func (w *windowImpl) setChild(child base.Widget) (err error) {
-	// Update the child element
-	w.child, err = base.DiffChild(base.Control{&w.layout.Container}, w.child, child)
-	// Whether or not an error has occured, redo the layout so the children
-	// are placed.
+func (w *windowImpl) setChildPost() {
+	// Redo the layout so the children are placed.
 	if w.child != nil {
 		// Update the global DPI
 		base.DPI.X, base.DPI.Y = 96, 96
@@ -187,9 +184,10 @@ func (w *windowImpl) setChild(child base.Widget) (err error) {
 		w.updateWindowMinSize()
 		// Properties may have changed sizes, so we need to do layout.
 		w.onSize()
+	} else {
+		// Ensure that the scrollbars are hidden.
+		w.scroll.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_NEVER)
 	}
-	// ... and we're done
-	return err
 }
 
 func (w *windowImpl) setScroll(horz, vert bool) {
