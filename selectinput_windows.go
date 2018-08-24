@@ -96,7 +96,7 @@ func (w *selectinputElement) Layout(bc base.Constraints) base.Size {
 
 func (w *selectinputElement) MinIntrinsicHeight(width base.Length) base.Length {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-	return 14 * DIP
+	return 23 * DIP
 }
 
 func (w *selectinputElement) MinIntrinsicWidth(height base.Length) base.Length {
