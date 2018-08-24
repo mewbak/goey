@@ -546,7 +546,7 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 		atomic.AddInt32(&mainWindowCount, 1)
 		// Defer to default window proc
 
-	case win.WM_DESTROY:
+	case win.WM_NCDESTROY:
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
 		if w := windowGetPtr(hwnd); w != nil {
