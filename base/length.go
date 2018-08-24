@@ -18,9 +18,10 @@ var (
 // package.  Because of limited precision, the PT listed here is somewhat smaller
 // than its correct value.
 const (
-	DIP Length = (1 << 6)         // Device-independent pixel (1/96 inch)
-	PT  Length = ((96 << 6) / 72) // Point (1/72 inch)
-	PC  Length = ((96 << 6) / 6)  // Pica (1/6 inch or 12 points)
+	DIP  Length = (1 << 6)         // Device-independent pixel (1/96 inch)
+	PT   Length = ((96 << 6) / 72) // Point (1/72 inch)
+	PC   Length = ((96 << 6) / 6)  // Pica (1/6 inch or 12 points)
+	Inch Length = (96 << 6)        // Inch from a British imperial system of measurements
 )
 
 // Length is a distance measured in device-independent pixels.  There are nominally
@@ -44,6 +45,11 @@ func (v Length) Clamp(min, max Length) Length {
 // DIP returns a float64 with the length measured in device independent pixels.
 func (v Length) DIP() float64 {
 	return float64(v) / (1 << 6)
+}
+
+// Inch returns a float64 with the length measured in inches.
+func (v Length) Inch() float64 {
+	return float64(v) / (96 << 6)
 }
 
 // PT returns a float64 with the length measured in points.

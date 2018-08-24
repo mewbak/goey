@@ -82,19 +82,25 @@ func TestLength(t *testing.T) {
 	t.Logf("Constants PT:  %d", 1*PT)
 	t.Logf("Constants PC:  %d", 1*PC)
 	if rt := (1 * DIP).DIP(); rt != 1 {
-		t.Errorf("Unexpected round-trim for Length, %v =/= %v", rt, 1)
+		t.Errorf("Unexpected round-trip for Length, %v =/= %v", rt, 1)
 	}
 	if rt := (1 * PT).PT(); rt != 1 {
-		t.Errorf("Unexpected round-trim for PT,  %v =/= %v", rt, 1)
+		t.Errorf("Unexpected round-trip for PT,  %v =/= %v", rt, 1)
 	}
 	if rt := (1 * PC).PC(); rt != 1 {
-		t.Errorf("Unexpected round-trim for PT,  %v =/= %v", rt, 1)
+		t.Errorf("Unexpected round-trip for PC,  %v =/= %v", rt, 1)
+	}
+	if rt := (1 * Inch).Inch(); rt != 1 {
+		t.Errorf("Unexpected round-trip for inch,  %v =/= %v", rt, 1)
 	}
 	if rt := (1 * PT) * (1 << 6) / (1 * DIP); rt != 96*(1<<6)/72 {
 		t.Errorf("Unexpected ratio between DIP and PT, %v =/= %v", rt, 96*(1<<6)/72)
 	}
 	if rt := (1 * PC) * (1 << 6) / (1 * DIP); rt != 96*(1<<6)/6 {
 		t.Errorf("Unexpected ratio between DIP and PC, %v =/= %v", rt, 96*(1<<6)/72)
+	}
+	if rt := (1 * Inch) * (1 << 6) / (1 * DIP); rt != 96*(1<<6) {
+		t.Errorf("Unexpected ratio between DIP and inch, %v =/= %v", rt, 96*(1<<6))
 	}
 }
 
