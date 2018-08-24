@@ -101,39 +101,37 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 	}
 	size := w.layoutChild(clientSize)
 
+	// NOTE:  If the visibility of either scrollbar is changed, then a WM_SIZE
+	// messagewill be sent, presumably because the size of the client area will
+	// have changed.  This causes rentrant calls to onSize.  If a scrollbar is
+	// either shown or hidden, then we need to abort layout.
+
 	if w.horizontalScroll && w.verticalScroll {
-		// Show scroll bars if necessary.
-		w.showScrollV(size.Height, clientSize.Height)
-		ok := w.showScrollH(size.Width, clientSize.Width)
-		// Adding horizontal scroll take vertical space, so we need to check
-		// again for vertical scroll.
-		if ok {
-			win.GetClientRect(hwnd, &rect)
-			w.showScrollV(size.Height, base.FromPixelsY(int(rect.Bottom-rect.Top)))
-		}
-	} else if w.verticalScroll {
-		// Show scroll bars if necessary.
+		// Show scroll bars (both horizontal and vertical) if necessary.  Return
+		// flag indicates whether visibility has changed.  We don't need to
+		// worry about interaction of horizontal and vertical scrollbars, as any
+		// change will force an abort and complete recalculation.
 		ok := w.showScrollV(size.Height, clientSize.Height)
 		if ok {
-			rect := win.RECT{}
-			win.GetClientRect(hwnd, &rect)
-			clientSize := base.Size{
-				base.FromPixelsX(int(rect.Right - rect.Left)),
-				base.FromPixelsY(int(rect.Bottom - rect.Top)),
-			}
-			size = w.layoutChild(clientSize)
+			return
+		}
+		ok = w.showScrollH(size.Width, clientSize.Width)
+		if ok {
+			return
+		}
+	} else if w.verticalScroll {
+		// Show scroll bar if necessary.  Return flag indicates whether
+		// visibility has changed.
+		ok := w.showScrollV(size.Height, clientSize.Height)
+		if ok {
+			return
 		}
 	} else if w.horizontalScroll {
-		// Show scroll bars if necessary.
+		// Show scroll bar if necessary.  Return flag indicates whether
+		// visibility has changed.
 		ok := w.showScrollH(size.Width, clientSize.Width)
 		if ok {
-			rect := win.RECT{}
-			win.GetClientRect(hwnd, &rect)
-			clientSize := base.Size{
-				base.FromPixelsX(int(rect.Right - rect.Left)),
-				base.FromPixelsY(int(rect.Bottom - rect.Top)),
-			}
-			size = w.layoutChild(clientSize)
+			return
 		}
 	}
 	w.childSize = size
@@ -303,7 +301,7 @@ func (w *windowImpl) setScroll(hscroll, vscroll bool) {
 		win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.FALSE)
 	}
 
-	// Changing the existance of scrollbar also changes the layout constraints.
+	// Changing the existence of scrollbar also changes the layout constraints.
 	// Need to relayout the child.  If necessary, this will show the scrollbars.
 	w.onSize(w.hWnd)
 }
@@ -379,10 +377,14 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 	}
 }
 
-func (w *windowImpl) showScrollH(width base.Length, clientWidth base.Length) bool {
+func (w *windowImpl) showScrollH(width base.Length, clientWidth base.Length) (flag bool) {
 	if width > clientWidth {
 		if !w.horizontalScrollVisible {
-			// Create the scroll bar
+			// Create the scroll bar.  Any updates to the internal state must
+			// be completed before the call, as this will send a WM_SIZE message
+			// if the size of the client area changes.
+			w.horizontalScrollVisible = true
+			flag = true
 			win2.ShowScrollBar(w.hWnd, win.SB_HORZ, win.TRUE)
 		}
 		si := win.SCROLLINFO{
@@ -396,27 +398,24 @@ func (w *windowImpl) showScrollH(width base.Length, clientWidth base.Length) boo
 		si.FMask = win.SIF_POS
 		win.GetScrollInfo(w.hWnd, win.SB_HORZ, &si)
 		w.horizontalScrollPos = base.FromPixelsX(int(si.NPos))
-
-		if !w.horizontalScrollVisible {
-			w.horizontalScrollVisible = true
-			return true
-		}
-		return false
+		return flag
 	} else if w.horizontalScrollVisible {
-		// Remove the scroll bar
-		win2.ShowScrollBar(w.hWnd, win.SB_HORZ, win.FALSE)
+		// Remove the scroll bar.
 		w.horizontalScrollPos = 0
 		w.horizontalScrollVisible = false
+		win2.ShowScrollBar(w.hWnd, win.SB_HORZ, win.FALSE)
 		return true
 	}
 
 	return false
 }
 
-func (w *windowImpl) showScrollV(height base.Length, clientHeight base.Length) bool {
+func (w *windowImpl) showScrollV(height base.Length, clientHeight base.Length) (flag bool) {
 	if height > clientHeight {
 		if !w.verticalScrollVisible {
-			// Create the scroll bar
+			// Create the scroll bar.
+			w.verticalScrollVisible = true
+			flag = true
 			win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.TRUE)
 		}
 		si := win.SCROLLINFO{
@@ -430,15 +429,12 @@ func (w *windowImpl) showScrollV(height base.Length, clientHeight base.Length) b
 		si.FMask = win.SIF_POS
 		win.GetScrollInfo(w.hWnd, win.SB_VERT, &si)
 		w.verticalScrollPos = base.FromPixelsY(int(si.NPos))
-		if !w.verticalScrollVisible {
-			w.verticalScrollVisible = true
-			return true
-		}
-		return false
+		return flag
 	} else if w.verticalScrollVisible {
-		win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.FALSE)
+		// Remove the scroll bar.
 		w.verticalScrollPos = 0
 		w.verticalScrollVisible = false
+		win2.ShowScrollBar(w.hWnd, win.SB_VERT, win.FALSE)
 		return true
 	}
 
