@@ -2,6 +2,7 @@ package goey
 
 import (
 	"testing"
+	"bitbucket.org/rj/goey/base"
 )
 
 func TestHR(t *testing.T) {
@@ -17,4 +18,14 @@ func TestHRClose(t *testing.T) {
 		&HR{},
 		&HR{},
 	)
+}
+
+func TestHRUpdate(t *testing.T) {
+	testingUpdateWidgets(t, []base.Widget{
+		&HR{},
+		&HR{},
+	}, []base.Widget{
+		&HR{},
+		&HR{},
+	})
 }

@@ -68,8 +68,8 @@ func (w *Img) UpdateDimensions() {
 	if w.Width == 0 && w.Height == 0 {
 		bounds := w.Image.Bounds()
 		// Assume that images are at 92 pixels per inch
-		w.Width = ((1 * DIP) * 92 / 96).Scale(bounds.Dx(), 1)
-		w.Height = ((1 * DIP) * 92 / 96).Scale(bounds.Dy(), 1)
+		w.Width = (1 * Inch).Scale(bounds.Dx(), 92)
+		w.Height = (1 * Inch).Scale(bounds.Dy(), 92)
 	} else if w.Width == 0 {
 		bounds := w.Image.Bounds()
 		w.Width = w.Height.Scale(bounds.Dx(), bounds.Dy())
