@@ -138,19 +138,24 @@ func (w *vboxElement) Layout(bc base.Constraints) base.Size {
 	}
 
 	height := base.Length(0)
+	width := base.Length(0)
 	previous := base.Element(nil)
 	for i, v := range w.children {
+		// Determine what gap needs to be inserted between the elements.
 		if i > 0 {
 			if w.alignMain.IsPacked() {
 				height += calculateVGap(previous, v)
 			} else {
 				height += calculateVGap(nil, nil)
 			}
-			previous = v
 		}
+		previous = v
+
+		// Perform layout of the element.  Track impact on width and height.
 		size := v.Layout(cbc)
 		w.childrenInfo[i].size = size
 		height += size.Height
+		width = max(width, size.Width)
 	}
 	w.totalHeight = height
 
@@ -169,15 +174,10 @@ func (w *vboxElement) Layout(bc base.Constraints) base.Size {
 		}
 	}
 
-	minWidth := w.childrenInfo[0].size.Width
-	for _, v := range w.childrenInfo[1:] {
-		minWidth = max(minWidth, v.size.Width)
-	}
-
 	if w.alignCross == Stretch {
 		return bc.Constrain(base.Size{cbc.Min.Width, height})
 	}
-	return bc.Constrain(base.Size{minWidth, height})
+	return bc.Constrain(base.Size{width, height})
 }
 
 func (w *vboxElement) MinIntrinsicWidth(height base.Length) base.Length {

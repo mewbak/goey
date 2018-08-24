@@ -109,19 +109,24 @@ func (w *hboxElement) Layout(bc base.Constraints) base.Size {
 	}
 
 	width := base.Length(0)
+	height := base.Length(0)
 	previous := base.Element(nil)
 	for i, v := range w.children {
+		// Determine what gap needs to be inserted between the elements.
 		if i > 0 {
 			if w.alignMain.IsPacked() {
 				width += calculateHGap(previous, v)
 			} else {
 				width += calculateHGap(nil, nil)
 			}
-			previous = v
 		}
+		previous = v
+
+		// Perform layout of the element.  Track impact on width and height.
 		size := v.Layout(cbc)
 		w.childrenInfo[i].size = size
 		width += size.Width
+		height = max(height, size.Height)
 	}
 	w.totalWidth = width
 
@@ -140,15 +145,10 @@ func (w *hboxElement) Layout(bc base.Constraints) base.Size {
 		}
 	}
 
-	minHeight := w.childrenInfo[0].size.Height
-	for _, v := range w.childrenInfo[1:] {
-		minHeight = max(minHeight, v.size.Height)
-	}
-
 	if w.alignCross == Stretch {
 		return bc.Constrain(base.Size{width, cbc.Min.Height})
 	}
-	return bc.Constrain(base.Size{width, minHeight})
+	return bc.Constrain(base.Size{width, height})
 }
 
 func (w *hboxElement) MinIntrinsicHeight(width base.Length) base.Length {
