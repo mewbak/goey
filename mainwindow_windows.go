@@ -205,7 +205,6 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 
 	retval := &Window{windowImpl{hWnd: hwnd}}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(&retval.windowImpl)))
-	retval.horizontalScroll, retval.verticalScroll = retval.scrollDefaults()
 
 	// Determine the DPI for this window
 	hdc := win.GetDC(hwnd)
@@ -219,18 +218,6 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	win.GetClientRect(hwnd, &clientRect)
 	retval.windowRectDelta.X = int((windowRect.Right - windowRect.Left) - (clientRect.Right - clientRect.Left))
 	retval.windowRectDelta.Y = int((windowRect.Bottom - windowRect.Top) - (clientRect.Bottom - clientRect.Top))
-
-	// This will set the child for the window.  This will also perform any
-	// layout of the child, which includes calculating the minimum window
-	// size.
-	err = retval.SetChild(child)
-	if err != nil {
-		win.DestroyWindow(hwnd)
-		return nil, err
-	}
-
-	win.ShowWindow(hwnd, win.SW_SHOW /* info.wShowWindow */)
-	win.UpdateWindow(hwnd)
 
 	return retval, nil
 }
@@ -375,6 +362,11 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 		// TODO:  Use ScrollWindow function to reduce flicker during scrolling
 		win.InvalidateRect(w.hWnd, &rect, true)
 	}
+}
+
+func (w *windowImpl) show() {
+	win.ShowWindow(w.hWnd, win.SW_SHOW /* info.wShowWindow */)
+	win.UpdateWindow(w.hWnd)
 }
 
 func (w *windowImpl) showScrollH(width base.Length, clientWidth base.Length) (flag bool) {

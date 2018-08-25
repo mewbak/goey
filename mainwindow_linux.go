@@ -71,14 +71,6 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	app.Connect("destroy", mainwindowOnDestroy, retval)
 	app.Connect("size-allocate", mainwindowOnSizeAllocate, retval)
 	app.SetDefaultSize(400, 400)
-	app.ShowAll()
-	retval.horizontalScroll, retval.verticalScroll = retval.scrollDefaults()
-
-	err = retval.SetChild(child)
-	if err != nil {
-		app.Destroy()
-		return nil, err
-	}
 
 	return retval, nil
 }
@@ -199,6 +191,10 @@ func (w *windowImpl) setScroll(horz, vert bool) {
 	// Redo layout to account for new box constraints, and show
 	// scrollbars if necessary
 	w.onSize()
+}
+
+func (w *windowImpl) show() {
+	w.handle.ShowAll()
 }
 
 func (w *windowImpl) showScrollH(width base.Length, clientWidth base.Length) bool {

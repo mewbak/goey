@@ -26,7 +26,29 @@ type Window struct {
 
 // NewWindow create a new top-level window for the application.
 func NewWindow(title string, child base.Widget) (*Window, error) {
-	return newWindow(title, child)
+	// Create the window
+	w, err := newWindow(title, child)
+	if err != nil {
+		return nil, err
+	}
+
+	// The the default values for the horizontal and vertical scroll.
+	// We want to do this before creating the child so that scrollbars can
+	// be displayed (if necessary) with the relayout for the child.
+	w.horizontalScroll, w.verticalScroll = w.scrollDefaults()
+
+	// Mount the widget, and initialize its layout.
+	newChild, err := child.Mount(w.control())
+	if err != nil {
+		return nil, err
+	}
+	w.child = newChild
+	w.setChildPost()
+
+	// Show the window
+	w.show()
+
+	return w, nil
 }
 
 // Close destroys the window, and releases all associated resources.
