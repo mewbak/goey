@@ -74,12 +74,11 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	app.ShowAll()
 	retval.horizontalScroll, retval.verticalScroll = retval.scrollDefaults()
 
-	err = retval.setChild(child)
+	err = retval.SetChild(child)
 	if err != nil {
 		app.Destroy()
 		return nil, err
 	}
-	retval.setScroll(retval.scrollDefaults())
 
 	return retval, nil
 }
