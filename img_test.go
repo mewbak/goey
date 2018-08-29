@@ -37,6 +37,72 @@ func TestImgClose(t *testing.T) {
 	)
 }
 
+func TestImgMinIntrinsicHeight(t *testing.T) {
+	cases := []struct {
+		width   base.Length
+		height  base.Length
+		atWidth base.Length
+		out     base.Length
+	}{
+		{10 * DIP, 10 * DIP, 10 * DIP, 10 * DIP},
+		{10 * DIP, 10 * DIP, 20 * DIP, 10 * DIP},
+		{10 * DIP, 10 * DIP, base.Inf, 10 * DIP},
+		{10 * DIP, 10 * DIP, 5 * DIP, 5 * DIP},
+		{10 * DIP, 20 * DIP, 10 * DIP, 20 * DIP},
+		{10 * DIP, 20 * DIP, 20 * DIP, 20 * DIP},
+		{10 * DIP, 20 * DIP, base.Inf, 20 * DIP},
+		{10 * DIP, 20 * DIP, 5 * DIP, 10 * DIP},
+		{20 * DIP, 10 * DIP, 10 * DIP, 5 * DIP},
+		{20 * DIP, 10 * DIP, 20 * DIP, 10 * DIP},
+		{20 * DIP, 10 * DIP, base.Inf, 10 * DIP},
+		{20 * DIP, 10 * DIP, 5 * DIP, 5 * DIP / 2},
+	}
+
+	for i, v := range cases {
+		elem := imgElement{
+			width:  v.width,
+			height: v.height,
+		}
+
+		if out := elem.MinIntrinsicHeight(v.atWidth); out != v.out {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.out, out)
+		}
+	}
+}
+
+func TestImgMinIntrinsicWidth(t *testing.T) {
+	cases := []struct {
+		width    base.Length
+		height   base.Length
+		atHeight base.Length
+		out      base.Length
+	}{
+		{10 * DIP, 10 * DIP, 10 * DIP, 10 * DIP},
+		{10 * DIP, 10 * DIP, 20 * DIP, 10 * DIP},
+		{10 * DIP, 10 * DIP, base.Inf, 10 * DIP},
+		{10 * DIP, 10 * DIP, 5 * DIP, 5 * DIP},
+		{20 * DIP, 10 * DIP, 10 * DIP, 20 * DIP},
+		{20 * DIP, 10 * DIP, 20 * DIP, 20 * DIP},
+		{20 * DIP, 10 * DIP, base.Inf, 20 * DIP},
+		{20 * DIP, 10 * DIP, 5 * DIP, 10 * DIP},
+		{10 * DIP, 20 * DIP, 10 * DIP, 5 * DIP},
+		{10 * DIP, 20 * DIP, 20 * DIP, 10 * DIP},
+		{10 * DIP, 20 * DIP, base.Inf, 10 * DIP},
+		{10 * DIP, 20 * DIP, 5 * DIP, 5 * DIP / 2},
+	}
+
+	for i, v := range cases {
+		elem := imgElement{
+			width:  v.width,
+			height: v.height,
+		}
+
+		if out := elem.MinIntrinsicWidth(v.atHeight); out != v.out {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.out, out)
+		}
+	}
+}
+
 func TestImgUpdate(t *testing.T) {
 	bounds := image.Rect(0, 0, 92, 92)
 	images := []*image.RGBA{image.NewRGBA(bounds), image.NewRGBA(bounds), image.NewRGBA(bounds)}
