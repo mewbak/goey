@@ -35,15 +35,18 @@ func NewWindow(title string, child base.Widget) (*Window, error) {
 	// The the default values for the horizontal and vertical scroll.
 	// We want to do this before creating the child so that scrollbars can
 	// be displayed (if necessary) with the relayout for the child.
-	w.horizontalScroll, w.verticalScroll = w.scrollDefaults()
+	w.horizontalScroll, w.verticalScroll = scrollDefaults()
 
 	// Mount the widget, and initialize its layout.
-	newChild, err := child.Mount(w.control())
-	if err != nil {
-		return nil, err
+	if child != nil {
+		newChild, err := child.Mount(w.control())
+		if err != nil {
+			w.Close()
+			return nil, err
+		}
+		w.child = newChild
+		w.setChildPost()
 	}
-	w.child = newChild
-	w.setChildPost()
 
 	// Show the window
 	w.show()
@@ -110,7 +113,7 @@ func (w *Window) Scroll() (horizontal, vertical bool) {
 	return w.horizontalScroll, w.verticalScroll
 }
 
-func (w *Window) scrollDefaults() (horizontal, vertical bool) {
+func scrollDefaults() (horizontal, vertical bool) {
 	env := os.Getenv("GOEY_SCROLL")
 	if env == "" {
 		return false, false

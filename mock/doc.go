@@ -1,5 +1,5 @@
 // Package mock provides a mock widget to be used for testing the layout
-// algorithms of container widget.
+// algorithms of container widgets.
 //
 // Unlike most other widgets, the type for the element is also made public.
 // Container widgets can therefore directly created instances, as if they

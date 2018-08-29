@@ -2,6 +2,8 @@ package goey
 
 import (
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 func TestEmptyCreate(t *testing.T) {
@@ -17,4 +19,14 @@ func TestEmptyClose(t *testing.T) {
 		&Empty{},
 		&Empty{},
 	)
+}
+
+func TestEmptyUpdate(t *testing.T) {
+	testingUpdateWidgets(t, []base.Widget{
+		&Empty{},
+		&Empty{},
+	}, []base.Widget{
+		&Empty{},
+		&Empty{},
+	})
 }
