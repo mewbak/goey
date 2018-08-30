@@ -11,18 +11,14 @@ import (
 
 var (
 	edit struct {
-		className     *uint16
+		className     []uint16
 		oldWindowProc uintptr
 		emptyString   uint16
 	}
 )
 
 func init() {
-	var err error
-	edit.className, err = syscall.UTF16PtrFromString("EDIT")
-	if err != nil {
-		panic(err)
-	}
+	edit.className = []uint16{'E', 'D', 'I', 'T', 0}
 }
 
 func (w *TextInput) mount(parent base.Control) (base.Element, error) {
@@ -41,7 +37,7 @@ func (w *TextInput) mount(parent base.Control) (base.Element, error) {
 	if w.OnEnterKey != nil {
 		style = style | win.ES_MULTILINE
 	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, edit.className, text,
+	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, &edit.className[0], text,
 		style,
 		10, 10, 100, 100,
 		parent.HWnd, win.HMENU(nextControlID()), 0, nil)

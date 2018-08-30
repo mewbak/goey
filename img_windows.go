@@ -112,7 +112,7 @@ func (w *Img) mount(parent base.Control) (base.Element, error) {
 		return nil, err
 	}
 
-	hwnd := win.CreateWindowEx(0, staticClassName, nil,
+	hwnd := win.CreateWindowEx(0, &staticClassName[0], nil,
 		win.WS_CHILD|win.WS_VISIBLE|win.SS_BITMAP|win.SS_LEFT,
 		10, 10, 100, 100,
 		parent.HWnd, 0, 0, nil)

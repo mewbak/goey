@@ -10,17 +10,13 @@ import (
 
 var (
 	hr struct {
-		className *uint16
+		className []uint16
 		atom      win.ATOM
 	}
 )
 
 func init() {
-	var err error
-	hr.className, err = syscall.UTF16PtrFromString("goey_hr")
-	if err != nil {
-		panic(err)
-	}
+	hr.className = []uint16{'G', 'o', 'e', 'y', 'H', 'R', 0}
 }
 
 func registerHRClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, error) {
@@ -30,7 +26,7 @@ func registerHRClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, error) {
 	wc.LpfnWndProc = wndproc
 	wc.HCursor = win.LoadCursor(0, (*uint16)(unsafe.Pointer(uintptr(win.IDC_ARROW))))
 	wc.HbrBackground = win.GetSysColorBrush(win.COLOR_3DFACE)
-	wc.LpszClassName = hr.className
+	wc.LpszClassName = &hr.className[0]
 
 	atom := win.RegisterClassEx(&wc)
 	if atom == 0 {
@@ -52,7 +48,7 @@ func (w *HR) mount(parent base.Control) (base.Element, error) {
 		hr.atom = atom
 	}
 
-	hwnd := win.CreateWindowEx(0, hr.className, nil, win.WS_CHILD|win.WS_VISIBLE,
+	hwnd := win.CreateWindowEx(0, &hr.className[0], nil, win.WS_CHILD|win.WS_VISIBLE,
 		10, 10, 100, 100,
 		parent.HWnd, 0, 0, nil)
 	if hwnd == 0 {

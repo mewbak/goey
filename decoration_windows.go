@@ -11,17 +11,13 @@ import (
 
 var (
 	decoration struct {
-		className *uint16
+		className []uint16
 		atom      win.ATOM
 	}
 )
 
 func init() {
-	var err error
-	decoration.className, err = syscall.UTF16PtrFromString("GoeyBackground")
-	if err != nil {
-		panic(err)
-	}
+	decoration.className = []uint16{'G', 'o', 'e', 'y', 'D', 'e', 'c', 'o', 'r', 'a', 't', 'i', 'o', 'n', 0}
 }
 
 func (w *Decoration) mount(parent base.Control) (base.Element, error) {
@@ -32,7 +28,7 @@ func (w *Decoration) mount(parent base.Control) (base.Element, error) {
 		wc.LpfnWndProc = syscall.NewCallback(decorationWindowProc)
 		wc.HCursor = win.LoadCursor(0, (*uint16)(unsafe.Pointer(uintptr(win.IDC_ARROW))))
 		wc.HbrBackground = win.GetSysColorBrush(win.COLOR_3DFACE)
-		wc.LpszClassName = decoration.className
+		wc.LpszClassName = &decoration.className[0]
 
 		atom := win.RegisterClassEx(&wc)
 		if atom == 0 {
@@ -42,7 +38,7 @@ func (w *Decoration) mount(parent base.Control) (base.Element, error) {
 	}
 
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE)
-	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, decoration.className, nil, style,
+	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, &decoration.className[0], nil, style,
 		10, 10, 100, 100,
 		parent.HWnd, 0, 0, nil)
 	if hwnd == 0 {

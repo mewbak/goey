@@ -14,7 +14,7 @@ func (w *Checkbox) mount(parent base.Control) (base.Element, error) {
 		return nil, err
 	}
 
-	hwnd := win.CreateWindowEx(0, button.className, &text[0],
+	hwnd := win.CreateWindowEx(0, &button.className[0], &text[0],
 		win.WS_CHILD|win.WS_VISIBLE|win.WS_TABSTOP|win.BS_CHECKBOX|win.BS_TEXT|win.BS_NOTIFY,
 		10, 10, 100, 100,
 		parent.HWnd, win.HMENU(nextControlID()), 0, nil)

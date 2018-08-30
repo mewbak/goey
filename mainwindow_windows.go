@@ -14,7 +14,7 @@ import (
 
 var (
 	mainWindow struct {
-		className *uint16
+		className []uint16
 		atom      win.ATOM
 	}
 
@@ -28,11 +28,7 @@ const (
 )
 
 func init() {
-	var err error
-	mainWindow.className, err = syscall.UTF16PtrFromString("goey_mainwindow")
-	if err != nil {
-		panic(err)
-	}
+	mainWindow.className = []uint16{'G', 'o', 'e', 'y', 'M', 'a', 'i', 'n', 'W', 'i', 'n', 'd', 'o', 'w', 0}
 
 	// Determine the mssage font
 	var ncm win.NONCLIENTMETRICS
@@ -72,7 +68,7 @@ func registerMainWindowClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, er
 	wc.LpfnWndProc = wndproc
 	wc.HCursor = win.LoadCursor(0, (*uint16)(unsafe.Pointer(uintptr(win.IDC_ARROW))))
 	wc.HbrBackground = win.GetSysColorBrush(win.COLOR_3DFACE)
-	wc.LpszClassName = mainWindow.className
+	wc.LpszClassName = &mainWindow.className[0]
 
 	atom := win.RegisterClassEx(&wc)
 	if atom == 0 {
@@ -190,7 +186,7 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	if err != nil {
 		return nil, err
 	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, mainWindow.className, windowName, style,
+	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, &mainWindow.className[0], windowName, style,
 		rect.Left, rect.Top, rect.Right-rect.Left, rect.Bottom-rect.Top,
 		win.HWND_DESKTOP, 0, hInstance, nil)
 	if hwnd == 0 {

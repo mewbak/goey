@@ -8,23 +8,15 @@ import (
 )
 
 var (
-	comboboxClassName     *uint16
+	comboboxClassName     = []uint16{'C', 'O', 'M', 'B', 'O', 'B', 'O', 'X', 0}
 	oldComboboxWindowProc uintptr
 )
-
-func init() {
-	var err error
-	comboboxClassName, err = syscall.UTF16PtrFromString("COMBOBOX")
-	if err != nil {
-		panic(err)
-	}
-}
 
 func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
 	if w.Value >= len(w.Items) {
 		w.Value = len(w.Items) - 1
 	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, comboboxClassName, nil,
+	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, &comboboxClassName[0], nil,
 		win.WS_CHILD|win.WS_VISIBLE|win.WS_TABSTOP|win.CBS_DROPDOWNLIST,
 		10, 10, 100, 100,
 		parent.HWnd, win.HMENU(nextControlID()), 0, nil)

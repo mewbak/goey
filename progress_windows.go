@@ -10,22 +10,18 @@ import (
 
 var (
 	progress struct {
-		className     *uint16
+		className     []uint16
 		oldWindowProc uintptr
 	}
 )
 
 func init() {
-	var err error
-	progress.className, err = syscall.UTF16PtrFromString("msctls_progress32")
-	if err != nil {
-		panic(err)
-	}
+	progress.className = []uint16{'m', 's', 'c', 't', 'l', 's', '_', 'p', 'r', 'o', 'g', 'r', 'e', 's', 's', '3', '2', 0}
 }
 
 func (w *Progress) mount(parent base.Control) (base.Element, error) {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE)
-	hwnd := win.CreateWindowEx(0, progress.className, nil, style,
+	hwnd := win.CreateWindowEx(0, &progress.className[0], nil, style,
 		10, 10, 100, 100,
 		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {

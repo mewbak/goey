@@ -27,7 +27,7 @@ func (w *P) mount(parent base.Control) (base.Element, error) {
 		return nil, err
 	}
 
-	hwnd := win.CreateWindowEx(0, staticClassName, &text[0],
+	hwnd := win.CreateWindowEx(0, &staticClassName[0], &text[0],
 		w.calcStyle(),
 		10, 10, 100, 100,
 		parent.HWnd, 0, 0, nil)

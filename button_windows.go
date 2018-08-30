@@ -9,17 +9,13 @@ import (
 
 var (
 	button struct {
-		className     *uint16
+		className     []uint16
 		oldWindowProc uintptr
 	}
 )
 
 func init() {
-	var err error
-	button.className, err = syscall.UTF16PtrFromString("BUTTON")
-	if err != nil {
-		panic(err)
-	}
+	button.className = []uint16{'B', 'U', 'T', 'T', 'O', 'N', 0}
 }
 
 func (w *Button) mount(parent base.Control) (base.Element, error) {
@@ -33,7 +29,7 @@ func (w *Button) mount(parent base.Control) (base.Element, error) {
 		style = style | win.BS_DEFPUSHBUTTON
 	}
 
-	hwnd := win.CreateWindowEx(0, button.className, &text[0], style,
+	hwnd := win.CreateWindowEx(0, &button.className[0], &text[0], style,
 		10, 10, 100, 100,
 		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {

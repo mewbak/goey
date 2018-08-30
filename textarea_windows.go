@@ -18,7 +18,7 @@ func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	if w.ReadOnly {
 		style = style | win.ES_READONLY
 	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, edit.className, text,
+	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, &edit.className[0], text,
 		style,
 		10, 10, 100, 100,
 		parent.HWnd, win.HMENU(nextControlID()), 0, nil)

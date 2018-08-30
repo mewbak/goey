@@ -11,16 +11,12 @@ import (
 )
 
 var (
-	datetimepickClassName     *uint16
+	datetimepickClassName     []uint16
 	oldDateTimePickWindowProc uintptr
 )
 
 func init() {
-	var err error
-	datetimepickClassName, err = syscall.UTF16PtrFromString("SysDateTimePick32")
-	if err != nil {
-		panic(err)
-	}
+	datetimepickClassName = []uint16{'S', 'y', 's', 'D', 'a', 't', 'e', 'T', 'i', 'm', 'e', 'P', 'i', 'c', 'k', '3', '2', 0}
 }
 
 func (w *DateInput) systemTime() win.SYSTEMTIME {
@@ -36,7 +32,7 @@ func (w *DateInput) systemTime() win.SYSTEMTIME {
 
 func (w *DateInput) mount(parent base.Control) (base.Element, error) {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP)
-	hwnd := win.CreateWindowEx(0, datetimepickClassName, nil,
+	hwnd := win.CreateWindowEx(0, &datetimepickClassName[0], nil,
 		style,
 		10, 10, 100, 100,
 		parent.HWnd, 0, 0, nil)

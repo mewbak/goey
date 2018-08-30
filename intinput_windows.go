@@ -19,7 +19,7 @@ func (w *IntInput) mount(parent base.Control) (base.Element, error) {
 	if w.OnEnterKey != nil {
 		style = style | win.ES_MULTILINE
 	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, edit.className, text,
+	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, &edit.className[0], text,
 		style,
 		10, 10, 100, 100,
 		parent.HWnd, win.HMENU(nextControlID()), 0, nil)

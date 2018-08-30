@@ -10,16 +10,12 @@ import (
 )
 
 var (
-	staticClassName     *uint16
+	staticClassName     []uint16
 	oldStaticWindowProc uintptr
 )
 
 func init() {
-	var err error
-	staticClassName, err = syscall.UTF16PtrFromString("STATIC")
-	if err != nil {
-		panic(err)
-	}
+	staticClassName = []uint16{'S', 'T', 'A', 'T', 'I', 'C', 0}
 }
 
 func (w *Label) mount(parent base.Control) (base.Element, error) {
@@ -28,7 +24,7 @@ func (w *Label) mount(parent base.Control) (base.Element, error) {
 		return nil, err
 	}
 
-	hwnd := win.CreateWindowEx(0, staticClassName, &text[0],
+	hwnd := win.CreateWindowEx(0, &staticClassName[0], &text[0],
 		win.WS_CHILD|win.WS_VISIBLE|win.SS_LEFT,
 		10, 10, 100, 100,
 		parent.HWnd, 0, 0, nil)
