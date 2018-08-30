@@ -48,7 +48,7 @@ func (*Padding) Kind() *base.Kind {
 // Mount creates a button in the GUI.  The newly created widget
 // will be a child of the widget specified by parent.
 func (w *Padding) Mount(parent base.Control) (base.Element, error) {
-	child, err := mountIfNotNil(parent, w.Child)
+	child, err := base.Mount(parent, w.Child)
 	if err != nil {
 		return nil, err
 	}
