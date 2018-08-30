@@ -96,21 +96,12 @@ func ExampleWindow_Message() {
 	}
 }
 
-/*func TestWindow_SetAlignment(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping alignment tests")
-	}
-
+func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 	createWindow := func() error {
-
 		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
+			t.Fatalf("Want mainWindowCount==0, got mainWindowCount==%d", c)
 		}
-		mw, err := NewWindow("Test", []Widget{
-			&Button{Text: "Click me!"},
-			&Button{Text: "Or me!"},
-			&Button{Text: "But not me."},
-		})
+		mw, err := NewWindow(t.Name(), nil)
 		if err != nil {
 			t.Fatalf("Failed to create window, %s", err)
 		}
@@ -118,29 +109,13 @@ func ExampleWindow_Message() {
 			t.Fatalf("Unexpected nil for window")
 		}
 		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
+			t.Fatalf("Want mainWindowCount==1, got mainWindowCount==%d", c)
 		}
 
 		go func() {
-			t.Logf("Starting alignment tests")
-			for i := MainStart; i <= SpaceBetween; i++ {
-				for j := Stretch; j <= CrossEnd; j++ {
-					time.Sleep(50 * time.Millisecond)
-					Do(func() error {
-						mw.SetAlignment(i, j)
-						return nil
-					})
-					itmp, jtmp := mw.Alignment()
-					if itmp != i {
-						t.Errorf("Expected main alignment itmp==i, got %d and %d", itmp, i)
-					}
-					if jtmp != j {
-						t.Errorf("Expected cross alignment jtmp==j, got %d and %d", jtmp, j)
-					}
-				}
-			}
-			time.Sleep(50 * time.Millisecond)
-			t.Logf("Stopping alignment tests")
+			t.Logf("Window created, start tests for %s", t.Name())
+			action(t, mw)
+			t.Logf("Stopping tests for %s", t.Name())
 
 			// Note:  No work after this call to Do, since the call to Run may be
 			// terminated when the call to Do returns.
@@ -158,83 +133,44 @@ func ExampleWindow_Message() {
 		t.Fatalf("Failed to run event loop, %s", err)
 	}
 	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
+		t.Fatalf("Want mainWindowCount==0, got mainWindowCount==%d", c)
 	}
-}*/
+}
 
-func TestNewWindow_SetChild(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping alignment tests")
-	}
-
-	createWindow := func() error {
+func TestWindow_SetChild(t *testing.T) {
+	testingWindow(t, func(t *testing.T, mw *Window) {
 		widgets := []base.Widget{}
 
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-		}
-		mw, err := NewWindow("Test", nil)
-		if err != nil {
-			t.Fatalf("Failed to create window, %s", err)
-		}
-		if mw == nil {
-			t.Fatalf("Unexpected nil for window")
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
-		}
-
-		go func() {
-			t.Logf("Starting set children tests")
-			for i := 1; i < 10; i++ {
-				time.Sleep(50 * time.Millisecond)
-				widgets = append(widgets, &Button{Text: "Button " + strconv.Itoa(i)})
-				err := Do(func() error {
-					return mw.SetChild(&VBox{
-						AlignMain:  SpaceBetween,
-						AlignCross: CrossCenter,
-						Children:   widgets,
-					})
-				})
-				if err != nil {
-					t.Logf("Error setting children, %s", err)
-				}
-			}
-			for i := len(widgets); i > 0; i-- {
-				time.Sleep(50 * time.Millisecond)
-				widgets = widgets[:i-1]
-				err := Do(func() error {
-					return mw.SetChild(&VBox{
-						AlignMain:  SpaceBetween,
-						AlignCross: CrossCenter,
-						Children:   widgets,
-					})
-				})
-				if err != nil {
-					t.Logf("Error setting children, %s", err)
-				}
-			}
+		for i := 1; i < 10; i++ {
 			time.Sleep(50 * time.Millisecond)
-			t.Logf("Stopping set children tests")
-
-			// Note:  No work after this call to Do, since the call to Run may be
-			// terminated when the call to Do returns.
-			Do(func() error {
-				mw.Close()
-				return nil
+			widgets = append(widgets, &Button{Text: "Button " + strconv.Itoa(i)})
+			err := Do(func() error {
+				return mw.SetChild(&VBox{
+					AlignMain:  SpaceBetween,
+					AlignCross: CrossCenter,
+					Children:   widgets,
+				})
 			})
-		}()
-
-		return nil
-	}
-
-	err := Run(createWindow)
-	if err != nil {
-		t.Fatalf("Failed to run event loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-	}
+			if err != nil {
+				t.Logf("Error setting children, %s", err)
+			}
+		}
+		for i := len(widgets); i > 0; i-- {
+			time.Sleep(50 * time.Millisecond)
+			widgets = widgets[:i-1]
+			err := Do(func() error {
+				return mw.SetChild(&VBox{
+					AlignMain:  SpaceBetween,
+					AlignCross: CrossCenter,
+					Children:   widgets,
+				})
+			})
+			if err != nil {
+				t.Logf("Error setting children, %s", err)
+			}
+		}
+		time.Sleep(50 * time.Millisecond)
+	})
 }
 
 func makeImage(t *testing.T, index int) image.Image {
@@ -252,118 +188,58 @@ func makeImage(t *testing.T, index int) image.Image {
 }
 
 func TestNewWindow_SetIcon(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping alignment tests")
-	}
+	testingWindow(t, func(t *testing.T, mw *Window) {
+		for i := 0; i < 6; i++ {
+			img := makeImage(t, i)
 
-	createWindow := func() error {
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-		}
-		mw, err := NewWindow("Test", &VBox{MainCenter, CrossCenter, []base.Widget{&Button{Text: "Click me!"}}})
-		if err != nil {
-			t.Fatalf("Failed to create window, %s", err)
-		}
-		if mw == nil {
-			t.Fatalf("Unexpected nil for window")
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
-		}
-
-		go func() {
-			t.Logf("Starting set icon tests")
-			for i := 0; i < 6; i++ {
-				img := makeImage(t, i)
-
-				err := Do(func() error {
-					return mw.SetIcon(img)
-				})
-				if err != nil {
-					t.Errorf("Error calling SetTitle, %s", err)
-				}
-				time.Sleep(50 * time.Millisecond)
-			}
-			t.Logf("Stopping icon tests")
-
-			// Note:  No work after this call to Do, since the call to Run may be
-			// terminated when the call to Do returns.
-			err = Do(func() error {
-				mw.Close()
-				return nil
-			})
-			if err != nil {
-				t.Errorf("Error calling Close, %s", err)
-			}
-		}()
-
-		return nil
-	}
-
-	err := Run(createWindow)
-	if err != nil {
-		t.Fatalf("Failed to run event loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-	}
-}
-
-func TestNewWindow_SetTitle(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping alignment tests")
-	}
-
-	createWindow := func() error {
-
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-		}
-		mw, err := NewWindow("Test", &VBox{Children: []base.Widget{
-			&Button{Text: "Click me!"},
-			&Button{Text: "Or me!"},
-			&Button{Text: "But not me."},
-		}})
-		if err != nil {
-			t.Fatalf("Failed to create window, %s", err)
-		}
-		if mw == nil {
-			t.Fatalf("Unexpected nil for window")
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
-		}
-
-		go func() {
-			t.Logf("Starting set title tests")
-			time.Sleep(50 * time.Millisecond)
 			err := Do(func() error {
-				return mw.SetTitle("Flash!")
+				return mw.SetIcon(img)
 			})
 			if err != nil {
 				t.Errorf("Error calling SetTitle, %s", err)
 			}
-			t.Logf("Stopping alignment tests")
+			time.Sleep(50 * time.Millisecond)
+		}
+	})
+}
 
-			// Note:  No work after this call to Do, since the call to Run may be
-			// terminated when the call to Do returns.
-			err = Do(func() error {
-				mw.Close()
+func TestNewWindow_SetScroll(t *testing.T) {
+	testingWindow(t, func(t *testing.T, mw *Window) {
+		cases := []struct {
+			horizontal, vertical bool
+		}{
+			{false, false},
+			{false, true},
+			{true, false},
+			{true, true},
+		}
+
+		for i, v := range cases {
+			err := Do(func() error {
+				mw.SetScroll(v.horizontal, v.vertical)
+				out1, out2 := mw.Scroll()
+				if out1 != v.horizontal {
+					t.Errorf("Case %d: Returned flag for horizontal scroll does not match, got %v, want %v", i, out1, v.horizontal)
+				}
+				if out2 != v.vertical {
+					t.Errorf("Case %d: Returned flag for vertical scroll does not match, got %v, want %v", i, out2, v.vertical)
+				}
 				return nil
 			})
 			if err != nil {
-				t.Errorf("Error calling Close, %s", err)
+				t.Errorf("Error calling SetTitle, %s", err)
 			}
-		}()
+		}
+	})
+}
 
-		return nil
-	}
-
-	err := Run(createWindow)
-	if err != nil {
-		t.Fatalf("Failed to run event loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-	}
+func TestNewWindow_SetTitle(t *testing.T) {
+	testingWindow(t, func(t *testing.T, mw *Window) {
+		err := Do(func() error {
+			return mw.SetTitle("Flash!")
+		})
+		if err != nil {
+			t.Errorf("Error calling SetTitle, %s", err)
+		}
+	})
 }
