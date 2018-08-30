@@ -122,3 +122,12 @@ func DiffChildren(parent Control, lhs []Element, rhs []Widget) ([]Element, error
 
 	return lhs, nil
 }
+
+// Mount will try to mount a non-nil widget, otherwise it returns nil for the
+// element.
+func Mount(parent Control, widget Widget) (Element, error) {
+	if widget == nil {
+		return nil, nil
+	}
+	return widget.Mount(parent)
+}

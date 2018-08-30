@@ -146,7 +146,7 @@ func TestLength_Pixels(t *testing.T) {
 	}
 }
 
-func TestRect(t *testing.T) {
+func TestRectangle(t *testing.T) {
 	cases := []struct {
 		x0, y0, x1, y1 Length
 		min            Point

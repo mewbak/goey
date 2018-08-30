@@ -1,12 +1,14 @@
 package base
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
 
 type mock struct {
 	kind *Kind
+	err  error
 	Prop int
 }
 
@@ -15,6 +17,12 @@ func (m *mock) Kind() *Kind {
 }
 
 func (m *mock) Mount(parent Control) (Element, error) {
+	// Check if the mock widget is supposed to fail with an error when mounted.
+	if m.err != nil {
+		return nil, m.err
+	}
+
+	// Create the mock element.
 	return &mockElement{
 		kind: m.kind,
 		Prop: m.Prop,
@@ -88,27 +96,38 @@ func TestCloseElements(t *testing.T) {
 func TestDiffChild(t *testing.T) {
 	kind1 := NewKind("bitbucket.org/rj/goey/base.Mock1")
 	kind2 := NewKind("bitbucket.org/rj/goey/base.Mock2")
+	err1 := errors.New("fake error 1 for mounting widget")
+	err2 := errors.New("fake error 2 for mounting widget")
 
 	cases := []struct {
 		lhs       Element
 		rhs       Widget
 		out       Element
+		err       error
 		lhsClosed bool
 	}{
-		{nil, nil, nil, false},
-		{nil, &mock{kind: &kind1}, &mockElement{kind: &kind1}, false},
-		{nil, &mock{kind: &kind1, Prop: 3}, &mockElement{kind: &kind1, Prop: 3}, false},
-		{nil, &mock{kind: &kind2}, &mockElement{kind: &kind2}, false},
-		{nil, &mock{kind: &kind2, Prop: 13}, &mockElement{kind: &kind2, Prop: 13}, false},
-		{&mockElement{kind: &kind1}, nil, nil, true},
-		{&mockElement{kind: &kind1, Prop: 3}, &mock{kind: &kind2, Prop: 13}, &mockElement{kind: &kind2, Prop: 13}, true},
-		{&mockElement{kind: &kind1, Prop: 3}, &mock{kind: &kind1, Prop: 13}, &mockElement{kind: &kind1, Prop: 13}, false},
+		{nil, nil, nil, nil, false},
+		{nil, &mock{kind: &kind1}, &mockElement{kind: &kind1}, nil, false},
+		{nil, &mock{kind: &kind1, Prop: 3}, &mockElement{kind: &kind1, Prop: 3}, nil, false},
+		{nil, &mock{kind: &kind2}, &mockElement{kind: &kind2}, nil, false},
+		{nil, &mock{kind: &kind2, Prop: 13}, &mockElement{kind: &kind2, Prop: 13}, nil, false},
+		{&mockElement{kind: &kind1}, nil, nil, nil, true},
+		{&mockElement{kind: &kind1, Prop: 3}, &mock{kind: &kind2, Prop: 13}, &mockElement{kind: &kind2, Prop: 13}, nil, true},
+		{&mockElement{kind: &kind1, Prop: 3}, &mock{kind: &kind1, Prop: 13}, &mockElement{kind: &kind1, Prop: 13}, nil, false},
+		{nil, &mock{kind: &kind1, err: err1}, nil, err1, false},
+		{nil, &mock{kind: &kind1, err: err2}, nil, err2, false},
+		{&mockElement{kind: &kind1}, &mock{kind: &kind2, err: err1}, &mockElement{kind: &kind1}, err1, false},
+		{&mockElement{kind: &kind1}, &mock{kind: &kind2, err: err2}, &mockElement{kind: &kind1}, err2, false},
 	}
 
 	for i, v := range cases {
 		out, err := DiffChild(Control{}, v.lhs, v.rhs)
-		if err != nil {
-			t.Errorf("Case %d: Unexpected error during DiffChild, %s", i, err)
+		if err != v.err {
+			if v.err == nil {
+				t.Errorf("Case %d: Unexpected error during DiffChild, %s", i, err)
+			} else {
+				t.Errorf("Case %d: Returned error does not match, got %v, want %v", i, err, v.err)
+			}
 		}
 		if !reflect.DeepEqual(out, v.out) {
 			t.Errorf("Case %d: Returned element does not match, got %v, want %v", i, out, v.out)
@@ -122,57 +141,78 @@ func TestDiffChild(t *testing.T) {
 func TestDiffChildren(t *testing.T) {
 	kind1 := NewKind("bitbucket.org/rj/goey/base.Mock1")
 	kind2 := NewKind("bitbucket.org/rj/goey/base.Mock2")
+	err1 := errors.New("fake error 1 for mounting widget")
+	err2 := errors.New("fake error 2 for mounting widget")
 
 	cases := []struct {
 		lhs       []Element
 		rhs       []Widget
 		out       []Element
+		err       error
 		lhsClosed bool
 	}{
-		{nil, nil, nil, false},
-		{nil, []Widget{&mock{kind: &kind1}}, []Element{&mockElement{kind: &kind1}}, false},
-		{nil, []Widget{&mock{kind: &kind1, Prop: 3}}, []Element{&mockElement{kind: &kind1, Prop: 3}}, false},
-		{nil, []Widget{&mock{kind: &kind2}}, []Element{&mockElement{kind: &kind2}}, false},
-		{nil, []Widget{&mock{kind: &kind2, Prop: 13}}, []Element{&mockElement{kind: &kind2, Prop: 13}}, false},
-		{[]Element{}, nil, nil, true},
-		{[]Element{&mockElement{kind: &kind1}}, nil, nil, true},
-		{[]Element{&mockElement{kind: &kind2}}, nil, nil, true},
+		{nil, nil, nil, nil, false},
+		{nil, []Widget{&mock{kind: &kind1}}, []Element{&mockElement{kind: &kind1}}, nil, false},
+		{nil, []Widget{&mock{kind: &kind1, Prop: 3}}, []Element{&mockElement{kind: &kind1, Prop: 3}}, nil, false},
+		{nil, []Widget{&mock{kind: &kind2}}, []Element{&mockElement{kind: &kind2}}, nil, false},
+		{nil, []Widget{&mock{kind: &kind2, Prop: 13}}, []Element{&mockElement{kind: &kind2, Prop: 13}}, nil, false},
+		{nil, []Widget{&mock{kind: &kind1, err: err1}}, nil, err1, false},
+		{nil, []Widget{&mock{kind: &kind1, err: err2}}, nil, err2, false},
+		{[]Element{}, nil, nil, nil, true},
+		{[]Element{&mockElement{kind: &kind1}}, nil, nil, nil, true},
+		{[]Element{&mockElement{kind: &kind2}}, nil, nil, nil, true},
 		{
 			[]Element{&mockElement{kind: &kind1}},
 			[]Widget{&mock{kind: &kind1, Prop: 15}},
 			[]Element{&mockElement{kind: &kind1, Prop: 15}},
-			false,
+			nil, false,
 		},
 		{
 			[]Element{&mockElement{kind: &kind2}},
 			[]Widget{&mock{kind: &kind2, Prop: 16}},
 			[]Element{&mockElement{kind: &kind2, Prop: 16}},
-			false,
+			nil, false,
 		},
 		{
 			[]Element{&mockElement{kind: &kind1}, &mockElement{kind: &kind2, Prop: 17}},
 			[]Widget{&mock{kind: &kind1, Prop: 15}},
 			[]Element{&mockElement{kind: &kind1, Prop: 15}},
-			false,
+			nil, false,
 		},
 		{
 			[]Element{&mockElement{kind: &kind1}},
 			[]Widget{&mock{kind: &kind1, Prop: 15}, &mock{kind: &kind2, Prop: 17}},
 			[]Element{&mockElement{kind: &kind1, Prop: 15}, &mockElement{kind: &kind2, Prop: 17}},
-			false,
+			nil, false,
 		},
 		{
 			[]Element{&mockElement{kind: &kind1, Prop: 123}},
 			[]Widget{&mock{kind: &kind2}},
 			[]Element{&mockElement{kind: &kind2}},
-			true,
+			nil, true,
+		},
+		{
+			[]Element{&mockElement{kind: &kind1}},
+			[]Widget{&mock{kind: &kind2, err: err1}},
+			[]Element{&mockElement{kind: &kind1}},
+			err1, false,
+		},
+		{
+			[]Element{&mockElement{kind: &kind1}},
+			[]Widget{&mock{kind: &kind1}, &mock{kind: &kind1, err: err1}},
+			[]Element{&mockElement{kind: &kind1}},
+			err1, false,
 		},
 	}
 
 	for i, v := range cases {
 		out, err := DiffChildren(Control{}, append([]Element(nil), v.lhs...), v.rhs)
-		if err != nil {
-			t.Errorf("Case %d: Unexpected error during DiffChildren, %s", i, err)
+		if err != v.err {
+			if v.err == nil {
+				t.Errorf("Case %d: Unexpected error during DiffChildren, %s", i, err)
+			} else {
+				t.Errorf("Case %d: Returned error does not match, got %v, want %v", i, err, v.err)
+			}
 		}
 		if !reflect.DeepEqual(out, v.out) {
 			t.Errorf("Case %d: Returned element does not match, got %v, want %v", i, out, v.out)
@@ -190,6 +230,41 @@ func TestDiffChildren(t *testing.T) {
 					t.Errorf("Case %d: Failed to close lhs[%d]", i, j)
 				}
 			}
+		}
+	}
+}
+
+func TestMount(t *testing.T) {
+	kind1 := NewKind("bitbucket.org/rj/goey/base.Mock1")
+	kind2 := NewKind("bitbucket.org/rj/goey/base.Mock2")
+	err1 := errors.New("fake error 1 for mounting widget")
+	err2 := errors.New("fake error 2 for mounting widget")
+
+	cases := []struct {
+		in  Widget
+		out Element
+		err error
+	}{
+		{nil, nil, nil},
+		{&mock{kind: &kind1}, &mockElement{kind: &kind1}, nil},
+		{&mock{kind: &kind1, Prop: 3}, &mockElement{kind: &kind1, Prop: 3}, nil},
+		{&mock{kind: &kind2}, &mockElement{kind: &kind2}, nil},
+		{&mock{kind: &kind2, Prop: 13}, &mockElement{kind: &kind2, Prop: 13}, nil},
+		{&mock{kind: &kind1, err: err1}, nil, err1},
+		{&mock{kind: &kind1, err: err2}, nil, err2},
+	}
+
+	for i, v := range cases {
+		out, err := Mount(Control{}, v.in)
+		if err != v.err {
+			if v.err == nil {
+				t.Errorf("Case %d: Unexpected error during Mount, %s", i, err)
+			} else {
+				t.Errorf("Case %d: Returned error does not match, got %v, want %v", i, err, v.err)
+			}
+		}
+		if !reflect.DeepEqual(out, v.out) {
+			t.Errorf("Case %d: Returned element does not match, got %v, want %v", i, out, v.out)
 		}
 	}
 }
