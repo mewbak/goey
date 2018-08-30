@@ -137,6 +137,43 @@ func TestConstraints_Inset(t *testing.T) {
 	}
 }
 
+func TestConstraints_Loosen(t *testing.T) {
+	size := Size{10 * DIP, 15 * DIP}
+	sizeZ := Size{}
+
+	cases := []struct {
+		in        Constraints
+		out       Constraints
+		outWidth  Constraints
+		outHeight Constraints
+	}{
+		{Tight(size), Constraints{sizeZ, size}, Constraints{Size{0, 15 * DIP}, size}, Constraints{Size{10 * DIP, 0}, size}},
+		{Loose(size), Constraints{sizeZ, size}, Constraints{sizeZ, size}, Constraints{sizeZ, size}},
+	}
+
+	for i, v := range cases {
+		if out := v.in.Loosen(); v.out != out {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.out, out)
+		} else if out.HasTightHeight() {
+			t.Errorf("Failed on case %d, has tight height", i)
+		} else if out.HasTightWidth() {
+			t.Errorf("Failed on case %d, has tight width", i)
+		}
+
+		if out := v.in.LoosenHeight(); v.outHeight != out {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.outHeight, out)
+		} else if out.HasTightHeight() {
+			t.Errorf("Failed on case %d, has tight height", i)
+		}
+
+		if out := v.in.LoosenWidth(); v.outWidth != out {
+			t.Errorf("Failed on case %d, want %v, got %v", i, v.outWidth, out)
+		} else if out.HasTightWidth() {
+			t.Errorf("Failed on case %d, has tight height", i)
+		}
+	}
+}
+
 func TestConstraints_IsSatisfiedBy(t *testing.T) {
 	defSize := Size{10 * DIP, 15 * DIP}
 
@@ -179,7 +216,7 @@ func TestConstraints_Tighten(t *testing.T) {
 		{Loose(Size{20 * DIP, 25 * DIP}), Size{30 * DIP, 30 * DIP}, Tight(Size{20 * DIP, 25 * DIP}), Constraints{Size{0, 25 * DIP}, Size{20 * DIP, 25 * DIP}}, Constraints{Size{20 * DIP, 0}, Size{20 * DIP, 25 * DIP}}},
 		{Tight(Size{10 * DIP, 15 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP}), Tight(Size{10 * DIP, 15 * DIP}), Tight(Size{10 * DIP, 15 * DIP})},
 		{TightWidth(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{15 * DIP, 10 * DIP}), Tight(Size{15 * DIP, 10 * DIP}), TightWidth(15 * DIP)},
-		{TightHeight(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP}), TightHeight(15*DIP), Tight(Size{10*DIP,15*DIP})},
+		{TightHeight(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP}), TightHeight(15 * DIP), Tight(Size{10 * DIP, 15 * DIP})},
 	}
 
 	for i, v := range cases {
