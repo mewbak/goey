@@ -167,5 +167,9 @@ func TestRect(t *testing.T) {
 		if got := out.Dy(); got != v.height {
 			t.Errorf("Error in case %d, want %s, got %s", i, got, v.height)
 		}
+		expected := Point{v.width, v.height}
+		if got := out.Size(); got != expected {
+			t.Errorf("Error in case %d, want %s, got %s", i, got, expected)
+		}
 	}
 }
