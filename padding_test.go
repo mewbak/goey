@@ -1,9 +1,11 @@
 package goey
 
 import (
+	"errors"
 	"testing"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/mock"
 )
 
 func (w *paddingElement) Props() base.Widget {
@@ -19,11 +21,21 @@ func (w *paddingElement) Props() base.Widget {
 }
 
 func TestPaddingCreate(t *testing.T) {
+	// These should all be able to mount without error.
 	testingRenderWidgets(t,
 		&Padding{Child: &Button{Text: "A"}},
 		&Padding{Insets: DefaultInsets(), Child: &Button{Text: "B"}},
 		&Padding{Insets: UniformInsets(48 * DIP), Child: &Button{Text: "C"}},
 		&Padding{},
+	)
+
+	// These should mount with an error.
+	err := errors.New("Mock error 1")
+	testingRenderWidgetsFail(t, err,
+		&Padding{Child: &mock.Widget{Err: err}},
+	)
+	testingRenderWidgetsFail(t, err,
+		&Padding{Insets: DefaultInsets(), Child: &mock.Widget{Err: err}},
 	)
 }
 
@@ -48,4 +60,40 @@ func TestPaddingUpdateProps(t *testing.T) {
 		&Padding{},
 		&Padding{Child: &Button{Text: "CD"}},
 	})
+}
+
+func TestPaddingMinIntrinsicSize(t *testing.T) {
+	size1 := base.Size{10 * DIP, 20 * DIP}
+	size2 := base.Size{15 * DIP, 25 * DIP}
+	sizeZ := base.Size{}
+	insets := Insets{1 * DIP, 2 * DIP, 3 * DIP, 4 * DIP}
+
+	cases := []struct {
+		mockSize base.Size
+		insets   Insets
+		out      base.Size
+	}{
+		{size1, Insets{}, size1},
+		{size2, Insets{}, size2},
+		{sizeZ, Insets{}, sizeZ},
+		{size1, insets, base.Size{16 * DIP, 24 * DIP}},
+		{size2, insets, base.Size{21 * DIP, 29 * DIP}},
+		{sizeZ, insets, base.Size{6 * DIP, 4 * DIP}},
+	}
+
+	for i, v := range cases {
+		elem := paddingElement{
+			insets: v.insets,
+		}
+		if !v.mockSize.IsZero() {
+			elem.child = mock.New(v.mockSize)
+		}
+
+		if out := elem.MinIntrinsicWidth(base.Inf); out != v.out.Width {
+			t.Errorf("Case %d: Returned min intrinsic width does not match, got %v, want %v", i, out, v.out.Width)
+		}
+		if out := elem.MinIntrinsicHeight(base.Inf); out != v.out.Height {
+			t.Errorf("Case %d: Returned min intrinsic width does not match, got %v, want %v", i, out, v.out.Height)
+		}
+	}
 }

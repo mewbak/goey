@@ -27,6 +27,7 @@ func NewList(sizes ...base.Size) []base.Element {
 // Widget is a mock widget.  When mounted, it will create a mock element.
 type Widget struct {
 	Size base.Size
+	Err  error
 }
 
 // Kind returns the concrete type for use in the Widget interface.
@@ -37,6 +38,12 @@ func (*Widget) Kind() *base.Kind {
 
 // Mount creates an mock control.
 func (w *Widget) Mount(parent base.Control) (base.Element, error) {
+	// Check if the widget is supposed to fail when mounted.
+	if w.Err != nil {
+		return nil, w.Err
+	}
+
+	// Create a mock element.
 	return &Element{
 		Size: w.Size,
 	}, nil

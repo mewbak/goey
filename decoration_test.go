@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"errors"
 	"image/color"
 	"testing"
 
@@ -32,6 +33,7 @@ func decorationChildWidget(child base.Element) base.Widget {
 }
 
 func TestDecorationCreate(t *testing.T) {
+	// These should all be able to mount without error.
 	testingRenderWidgets(t,
 		&Decoration{Child: &Button{Text: "A"}},
 		&Decoration{},
@@ -39,6 +41,15 @@ func TestDecorationCreate(t *testing.T) {
 		&Decoration{Fill: black, Stroke: white, Radius: 4 * DIP},
 		&Decoration{Fill: white, Stroke: black},
 		&Decoration{Fill: red},
+	)
+
+	// These should mount with an error.
+	err := errors.New("Mock error 1")
+	testingRenderWidgetsFail(t, err,
+		&Decoration{Child: &mock.Widget{Err: err}},
+	)
+	testingRenderWidgetsFail(t, err,
+		&Decoration{Insets: DefaultInsets(), Child: &mock.Widget{Err: err}},
 	)
 }
 

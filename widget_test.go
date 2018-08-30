@@ -99,6 +99,29 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 	}
 }
 
+func testingRenderWidgetsFail(t *testing.T, outError error, widgets ...base.Widget) {
+	init := func() error {
+		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
+		if window != nil {
+			t.Errorf("Unexpected non-nil window")
+		}
+		if err != outError {
+			if err == nil {
+				t.Errorf("Unexpected nil error, want %s", outError)
+			} else {
+				t.Errorf("Unexpected error, want %v, got %s", outError, err)
+			}
+			return nil
+		}
+		return nil
+	}
+
+	err := Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
+}
+
 func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
