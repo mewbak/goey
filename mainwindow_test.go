@@ -98,8 +98,10 @@ func ExampleWindow_Message() {
 
 func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 	createWindow := func() error {
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Fatalf("Want mainWindowCount==0, got mainWindowCount==%d", c)
+		// Create the window.  Some of the tests here are not expected in
+		// production code, but we can be a little paranoid here.
+		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
+			t.Fatalf("Want mainWindowCount==1, got mainWindowCount==%d", c)
 		}
 		mw, err := NewWindow(t.Name(), nil)
 		if err != nil {
@@ -108,8 +110,8 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 		if mw == nil {
 			t.Fatalf("Unexpected nil for window")
 		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Fatalf("Want mainWindowCount==1, got mainWindowCount==%d", c)
+		if c := atomic.LoadInt32(&mainWindowCount); c != 2 {
+			t.Fatalf("Want mainWindowCount==2, got mainWindowCount==%d", c)
 		}
 
 		go func() {

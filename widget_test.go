@@ -35,9 +35,6 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-		}
 		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
 		if err != nil {
 			t.Errorf("Failed to create window, %s", err)
@@ -45,10 +42,6 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 		}
 		if window == nil {
 			t.Errorf("Unexpected nil for window")
-			return nil
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
 			return nil
 		}
 
@@ -126,9 +119,6 @@ func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-		}
 		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
 		if err != nil {
 			t.Errorf("Failed to create window, %s", err)
@@ -136,10 +126,6 @@ func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
 		}
 		if window == nil {
 			t.Errorf("Unexpected nil for window")
-			return nil
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
 			return nil
 		}
 
@@ -296,9 +282,6 @@ func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Wid
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Fatalf("Want mainWindow==0, got mainWindow==%d", c)
-		}
 		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
 		if err != nil {
 			t.Errorf("Failed to create window, %s", err)
@@ -306,10 +289,6 @@ func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Wid
 		}
 		if window == nil {
 			t.Errorf("Unexpected nil for window")
-			return nil
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
 			return nil
 		}
 

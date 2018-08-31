@@ -57,8 +57,8 @@ func ExampleDo() {
 func TestRun(t *testing.T) {
 	init := func() error {
 		// Verify that the test is starting in the correct state.
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
+			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
 			return nil
 		}
 
@@ -70,8 +70,8 @@ func TestRun(t *testing.T) {
 		if window == nil {
 			t.Fatalf("Unexpected nil for window")
 		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
+		if c := atomic.LoadInt32(&mainWindowCount); c != 2 {
+			t.Fatalf("Want mainWindow==2, got mainWindow==%d", c)
 		}
 
 		go func() {
@@ -163,8 +163,8 @@ func TestRunWithPanic(t *testing.T) {
 func TestRunWithWindowClose(t *testing.T) {
 	// Make sure that error is passed through to caller
 	init := func() error {
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
+			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
 			return nil
 		}
 
@@ -175,8 +175,8 @@ func TestRunWithWindowClose(t *testing.T) {
 		if window == nil {
 			t.Fatalf("Unexpected nil for window")
 		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
+		if c := atomic.LoadInt32(&mainWindowCount); c != 2 {
+			t.Fatalf("Want mainWindow==2, got mainWindow==%d", c)
 		}
 
 		window.Close()
@@ -197,8 +197,8 @@ func TestDo(t *testing.T) {
 
 	init := func() error {
 		// Verify that the test is starting in the correct state.
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
+			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
 			return nil
 		}
 
@@ -211,8 +211,8 @@ func TestDo(t *testing.T) {
 		if window == nil {
 			t.Fatalf("Unexpected nil for window")
 		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Fatalf("Want mainWindow==1, got mainWindow==%d", c)
+		if c := atomic.LoadInt32(&mainWindowCount); c != 2 {
+			t.Fatalf("Want mainWindow==2, got mainWindow==%d", c)
 		}
 
 		go func(window *Window) {
