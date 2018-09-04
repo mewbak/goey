@@ -18,18 +18,21 @@ func init() {
 	button.className = []uint16{'B', 'U', 'T', 'T', 'O', 'N', 0}
 }
 
+func buttonStyle(isDefault bool) uint32 {
+	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | win.BS_PUSHBUTTON | win.BS_TEXT | win.BS_NOTIFY)
+	if isDefault {
+		style = style | win.BS_DEFPUSHBUTTON
+	}
+	return style
+}
+
 func (w *Button) mount(parent base.Control) (base.Element, error) {
 	text, err := syscall.UTF16FromString(w.Text)
 	if err != nil {
 		return nil, err
 	}
 
-	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | win.BS_PUSHBUTTON | win.BS_TEXT | win.BS_NOTIFY)
-	if w.Default {
-		style = style | win.BS_DEFPUSHBUTTON
-	}
-
-	hwnd := win.CreateWindowEx(0, &button.className[0], &text[0], style,
+	hwnd := win.CreateWindowEx(0, &button.className[0], &text[0], buttonStyle(w.Default),
 		10, 10, 100, 100,
 		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
@@ -113,7 +116,7 @@ func (w *buttonElement) updateProps(data *Button) error {
 	w.SetText(data.Text)
 	w.text = text
 	w.SetDisabled(data.Disabled)
-	// TODO:  Update property .Default
+	win.SendMessage(w.hWnd, win.BM_SETSTYLE, uintptr(buttonStyle(data.Default)), win.TRUE)
 	w.onClick = data.OnClick
 	w.onFocus = data.OnFocus
 	w.onBlur = data.OnBlur

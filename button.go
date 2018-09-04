@@ -9,6 +9,9 @@ var (
 )
 
 // Button describes a widget that users can click to initiate an action.
+//
+// Simultaneously setting both disabled and default to true is not supported.
+// It may or may not work, depending on the platform.
 type Button struct {
 	Text     string // Text is a caption for the button.
 	Disabled bool   // Disabled is a flag indicating that the user cannot interact with this button.

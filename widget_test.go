@@ -317,7 +317,7 @@ func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Wid
 							t.Errorf("Wanted data.Kind() == update[%d].Kind(), got %s and %s", i, n1, n2)
 						}
 						if !equal(t, data, update[i]) {
-							t.Errorf("Wanted data == update[i], got %v and %v", data, update[i])
+							t.Errorf("Wanted data == update[%d], got %v and %v", i, data, update[i])
 						}
 					} else {
 						t.Logf("Cannot verify props of child")

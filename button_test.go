@@ -85,7 +85,7 @@ func TestButtonUpdate(t *testing.T) {
 		&Button{Text: "E", Default: true},
 	}, []base.Widget{
 		&Button{Text: "AB"},
-		&Button{Text: "DB", Disabled: false},
-		&Button{Text: "EB", Disabled: true, Default: true},
+		&Button{Text: "DB", Default: true},
+		&Button{Text: "EB", Disabled: true},
 	})
 }
