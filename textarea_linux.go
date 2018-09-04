@@ -36,6 +36,7 @@ func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	control.SetMarginTop(3)    // missing function SetTopMargin
 	control.SetMarginBottom(3) // missing function SetBottomMargin
 	control.SetWrapMode(gtk.WRAP_WORD)
+	control.SetSensitive(!w.Disabled)
 
 	swindow, err := gtk.ScrolledWindowNew(nil, nil)
 	if err != nil {
@@ -182,6 +183,7 @@ func (w *textareaElement) updateProps(data *TextArea) error {
 		w.onChange = nil // temporarily break OnChange to prevent event
 		buffer.SetText(data.Value)
 	}
+	w.handle.SetSensitive(!data.Disabled)
 
 	w.minLines = data.MinLines
 	w.onChange = data.OnChange
