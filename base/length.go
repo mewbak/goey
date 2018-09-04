@@ -21,7 +21,7 @@ const (
 	DIP  Length = (1 << 6)         // Device-independent pixel (1/96 inch)
 	PT   Length = ((96 << 6) / 72) // Point (1/72 inch)
 	PC   Length = ((96 << 6) / 6)  // Pica (1/6 inch or 12 points)
-	Inch Length = (96 << 6)        // Inch from a British imperial system of measurements
+	Inch Length = (96 << 6)        // Inch from the British imperial system of measurements
 )
 
 // Length is a distance measured in device-independent pixels.  There are nominally

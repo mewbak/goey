@@ -156,13 +156,13 @@ func (bc Constraints) HasBoundedWidth() bool {
 }
 
 // HasTightWidth is true if the width is tight (only one value of width
-// satisfies the constraints).
+// satisfies the constraint).
 func (bc Constraints) HasTightWidth() bool {
 	return bc.Min.Width >= bc.Max.Width
 }
 
 // HasTightHeight is true if the height is tight (only one value of height
-// satisfies the constraints).
+// satisfies the constraint).
 func (bc Constraints) HasTightHeight() bool {
 	return bc.Min.Height >= bc.Max.Height
 }

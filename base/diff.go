@@ -55,7 +55,7 @@ func DiffChild(parent Control, lhs Element, rhs Widget) (Element, error) {
 // and will be closed if necessary.  On the other hand, the caller will be
 // responsible for all of the returned elements.  Note that the returned slice
 // of elements may be non-nil even in the presence of an error.  Use
-// CloseChildren if necessary to avoid leaking controls.
+// CloseElements as necessary to avoid leaking controls.
 //
 // DiffChildren will try to reuse the underlying array from lhs for the
 // returned slice.

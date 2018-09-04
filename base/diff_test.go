@@ -2,6 +2,7 @@ package base
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -68,6 +69,30 @@ func (m *mockElement) updateProps(data *mock) error {
 
 func (m *mockElement) UpdateProps(data Widget) error {
 	return m.updateProps(data.(*mock))
+}
+
+func ExampleMount() {
+	// This won't work in real code, as the zero value for a control is not
+	// generally useable.
+	parent := Control{}
+
+	// It is okay to mount a nil widget.
+	elem, err := Mount(parent, nil)
+	if err != nil {
+		panic("Unexpected error!")
+	}
+	fmt.Println("The value of elem is nil...", elem == nil)
+
+	elem, err = Mount(parent, &mock{})
+	if err != nil {
+		panic("Unexpected error!")
+	}
+	fmt.Println("The value of elem is nil...", elem == nil)
+	elem.Close()
+
+	// Output:
+	// The value of elem is nil... true
+	// The value of elem is nil... false
 }
 
 func TestCloseElements(t *testing.T) {

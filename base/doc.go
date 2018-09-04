@@ -8,7 +8,7 @@
 // elements manage child elements, some number of platform-specific resources,
 // called 'controls', or both.
 //
-// Additionally, this package contains geometric types.  These support the
-// automatic layout of widgets in a platform independent manner.  The layout
-// algorithm is roughly based on Flutter.
+// Additionally, this package contains geometric types.  These types support
+// the automatic layout of widgets in a platform independent manner.  The
+// layout algorithm is roughly based on Flutter.
 package base

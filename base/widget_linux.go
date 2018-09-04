@@ -8,7 +8,7 @@ import "github.com/gotk3/gotk3/gtk"
 //
 // Unless developping new widgets, users should not need to use this type.
 //
-// Any method's on this type will be platform specific.
+// Any methods on this type will be platform specific.
 type Control struct {
 	Handle *gtk.Container
 }
