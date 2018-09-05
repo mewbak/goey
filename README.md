@@ -12,22 +12,33 @@ native platform.
 The package can be installed from the command line using the
 [go](https://golang.org/cmd/go/) tool.
 
-     `go get bitbucket.org/rj/goey`
-
-### Windows
-
-To get properly themed controls, a manifest is required. Please look at the
-source code for the example applications for an example. Th manifest needs to
-be compiled with `github.com/akavel/rsrc` to create a .syso that will be
-recognize by the go build program. Additionally, you could use build flags
-(-ldflags="-H windowsgui") to change the type of application built.
+    go get bitbucket.org/rj/goey
 
 ### Linux
- 
+
 Although this package does not use CGO, some of its dependencies do. The build
 machine also requires that GTK+ 3 is installed.  This should be installed before
 issuing `go get` or you will have error message during the building of some 
 of the dependencies.
+
+On Ubuntu:
+
+    sudo apt-get install libgtk-3-dev
+
+## Getting Started
+
+* Package documentation and examples are on [godoc](https://godoc.org/bitbucket.org/rj/goey).
+* Example GUI applications are in the examples folder.
+* A mock widget is provided in the `mock` package 
+  ([documentation](https://godoc.org/bitbucket.org/rj/goey/mock)).
+
+### Windows
+
+To get properly themed controls, a manifest is required. Please look at the
+source code for the example applications for an example. The manifest needs to
+be compiled with `github.com/akavel/rsrc` to create a .syso that will be
+recognize by the go build program. Additionally, you could use build flags
+(`-ldflags="-H windowsgui"`) to change the type of application built.
 
 ## Contribute
 
