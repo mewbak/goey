@@ -25,7 +25,7 @@ func (w *Button) mount(parent base.Control) (base.Element, error) {
 
 	parent.Handle.Add(control)
 	control.SetSensitive(!w.Disabled)
-	control.SetCanDefault(true)
+	control.SetCanDefault(w.Default)
 	if w.Default {
 		control.GrabDefault()
 	}
@@ -70,6 +70,7 @@ func (w *buttonElement) updateProps(data *Button) error {
 	button := w.button()
 	button.SetLabel(data.Text)
 	button.SetSensitive(!data.Disabled)
+	button.SetCanDefault(data.Default)
 	if data.Default {
 		button.GrabDefault()
 	}
