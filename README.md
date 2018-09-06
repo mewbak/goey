@@ -18,7 +18,7 @@ The package can be installed from the command line using the
 
 Although this package does not use CGO, some of its dependencies do. The build
 machine also requires that GTK+ 3 is installed.  This should be installed before
-issuing `go get` or you will have error message during the building of some 
+issuing `go get` or you will have error messages during the building of some
 of the dependencies.
 
 On Ubuntu:
@@ -28,8 +28,9 @@ On Ubuntu:
 ## Getting Started
 
 * Package documentation and examples are on [godoc](https://godoc.org/bitbucket.org/rj/goey).
-* Example GUI applications are in the examples folder.
-* A mock widget is provided in the `mock` package 
+* The minimal GUI example application is [onebutton](https://godoc.org/bitbucket.org/rj/goey/example/onebutton),
+  and additional example applications are in the example folder.
+* A mock widget is provided in the `mock` package
   ([documentation](https://godoc.org/bitbucket.org/rj/goey/mock)).
 
 ### Windows
