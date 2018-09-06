@@ -143,9 +143,6 @@ func (w *windowImpl) onSize(hwnd win.HWND) {
 }
 
 func newWindow(title string, child base.Widget) (*Window, error) {
-	const Width = 640
-	const Height = 480
-
 	hInstance := win.GetModuleHandle(nil)
 	if hInstance == 0 {
 		return nil, syscall.GetLastError()
@@ -170,7 +167,13 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	//	style = win.WS_OVERLAPPED | win.WS_CAPTION | win.WS_MINIMIZEBOX | win.WS_SYSMENU
 	//}
 
-	rect := win.RECT{0, 0, Width, Height}
+	rect := func() win.RECT {
+		w, h := sizeDefaults()
+		return win.RECT{
+			Right:  int32(w),
+			Bottom: int32(h),
+		}
+	}()
 	win.AdjustWindowRect(&rect, win.WS_OVERLAPPEDWINDOW, false)
 
 	var clientRect win.RECT
@@ -290,7 +293,7 @@ func (w *windowImpl) setScroll(hscroll, vscroll bool) {
 }
 
 func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
-	// Get all the vertial scroll bar information.
+	// Get all of the scroll bar information.
 	si := win.SCROLLINFO{FMask: win.SIF_ALL}
 	si.CbSize = uint32(unsafe.Sizeof(si))
 	win.GetScrollInfo(w.hWnd, direction, &si)
@@ -306,7 +309,7 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 	case win.SB_BOTTOM:
 		si.NPos = si.NMax
 
-	// User clicked the top arrow.
+	// User clicked the top or left arrow.
 	case win.SB_LINEUP:
 		if direction == win.SB_HORZ {
 			si.NPos -= int32((13 * DIP).PixelsX())
@@ -314,7 +317,7 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 			si.NPos -= int32((13 * DIP).PixelsY())
 		}
 
-	// User clicked the bottom arrow.
+	// User clicked the bottom or right arrow.
 	case win.SB_LINEDOWN:
 		if direction == win.SB_HORZ {
 			si.NPos += int32((13 * DIP).PixelsX())
@@ -322,11 +325,12 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 			si.NPos += int32((13 * DIP).PixelsY())
 		}
 
-	// User clicked the scroll bar shaft above the scroll box.
+	// User clicked the scroll bar shaft above or to the left of the scroll box.
 	case win.SB_PAGEUP:
 		si.NPos -= int32(si.NPage)
 
-	// User clicked the scroll bar shaft below the scroll box.
+	// User clicked the scroll bar shaft below or to the right of the scroll
+	// box.
 	case win.SB_PAGEDOWN:
 		si.NPos += int32(si.NPage)
 
@@ -348,14 +352,14 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 		} else {
 			w.verticalScrollPos = base.FromPixelsY(int(si.NPos))
 		}
-		rect := win.RECT{}
-		win.GetClientRect(w.hWnd, &rect)
 		w.child.SetBounds(base.Rectangle{
 			base.Point{-w.horizontalScrollPos, -w.verticalScrollPos},
 			base.Point{w.childSize.Width - w.horizontalScrollPos, w.childSize.Height - w.verticalScrollPos},
 		})
 
 		// TODO:  Use ScrollWindow function to reduce flicker during scrolling
+		rect := win.RECT{}
+		win.GetClientRect(w.hWnd, &rect)
 		win.InvalidateRect(w.hWnd, &rect, true)
 	}
 }

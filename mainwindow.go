@@ -6,6 +6,7 @@ import (
 	"image"
 	"os"
 	"strconv"
+	"strings"
 	"sync/atomic"
 
 	"bitbucket.org/rj/goey/base"
@@ -181,4 +182,31 @@ func (w *Window) SetScroll(horizontal, vertical bool) {
 // SetTitle changes the caption in the title bar for the main window.
 func (w *Window) SetTitle(title string) error {
 	return w.setTitle(title)
+}
+
+func sizeDefaults() (uint, uint) {
+	const DEF_WIDTH = 640
+	const DEF_HEIGHT = 480
+
+	env := os.Getenv("GOEY_SIZE")
+	if env == "" {
+		return DEF_WIDTH, DEF_HEIGHT
+	}
+
+	parts := strings.Split(env, "x")
+	if len(parts) != 2 {
+		return DEF_WIDTH, DEF_HEIGHT
+	}
+
+	width, err := strconv.ParseUint(parts[0], 10, 64)
+	if err != nil {
+		return DEF_WIDTH, DEF_HEIGHT
+	}
+
+	height, err := strconv.ParseUint(parts[1], 10, 64)
+	if err != nil {
+		return DEF_WIDTH, DEF_HEIGHT
+	}
+
+	return uint(width), uint(height)
 }
