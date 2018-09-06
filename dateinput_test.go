@@ -1,9 +1,9 @@
 package goey
 
 import (
+	"bitbucket.org/rj/goey/base"
 	"testing"
 	"time"
-	"bitbucket.org/rj/goey/base"
 )
 
 func TestDateInputCreate(t *testing.T) {

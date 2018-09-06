@@ -119,7 +119,7 @@ func (w *textareaElement) Layout(bc base.Constraints) base.Size {
 		_, width := w.handle.GetPreferredWidth()
 		_, height := w.handle.GetPreferredHeight()
 		return bc.Constrain(base.Size{
-			base.FromPixelsX(width), 
+			base.FromPixelsX(width),
 			base.FromPixelsY(height),
 		})
 	}

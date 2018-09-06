@@ -1,8 +1,8 @@
 package goey
 
 import (
-	"testing"
 	"bitbucket.org/rj/goey/base"
+	"testing"
 )
 
 func TestHR(t *testing.T) {

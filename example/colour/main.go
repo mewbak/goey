@@ -25,9 +25,9 @@ var (
 	clickCount int
 
 	colors = [3]color.RGBA{
-		color.RGBA{0xff, 0, 0, 0xff},
-		color.RGBA{0, 0xff, 0, 0xff},
-		color.RGBA{0, 0, 0xff, 0xff},
+		{0xff, 0, 0, 0xff},
+		{0, 0xff, 0, 0xff},
+		{0, 0, 0xff, 0xff},
 	}
 	colorNames = [3]string{
 		"Red", "Green", "Blue",
