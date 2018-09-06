@@ -99,7 +99,11 @@ func bitmapToImage(hdc win.HDC, hbitmap win.HBITMAP) image.Image {
 		for i := 0; i < len(buffer); i += 4 {
 			buffer[i+0], buffer[i+2] = buffer[i+2], buffer[i+0]
 		}
-		return &image.RGBA{buffer, int(bmi.BmiHeader.BiWidth * 4), image.Rect(0, 0, int(bmi.BmiHeader.BiWidth), int(bmi.BmiHeader.BiHeight))}
+		return &image.RGBA{
+			Pix:    buffer,
+			Stride: int(bmi.BmiHeader.BiWidth * 4),
+			Rect:   image.Rect(0, 0, int(bmi.BmiHeader.BiWidth), int(bmi.BmiHeader.BiHeight)),
+		}
 	}
 
 	return nil

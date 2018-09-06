@@ -44,9 +44,9 @@ func pixbufToImage(pixbuf *gdk.Pixbuf) image.Image {
 
 	if cs == gdk.COLORSPACE_RGB && alpha && bps == 8 {
 		return &image.RGBA{
-			pixbuf.GetPixels(),
-			pixbuf.GetRowstride(),
-			image.Rect(0, 0, pixbuf.GetWidth(), pixbuf.GetHeight()),
+			Pix:    pixbuf.GetPixels(),
+			Stride: pixbuf.GetRowstride(),
+			Rect:   image.Rect(0, 0, pixbuf.GetWidth(), pixbuf.GetHeight()),
 		}
 	}
 
