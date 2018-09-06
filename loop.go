@@ -33,7 +33,7 @@ var (
 // elements.
 //
 // The parameter action takes a closure that can be used to initialize the GUI.
-// Any futher modifications to the GUI also need to be scheduled on the GUI
+// Any further modifications to the GUI also need to be scheduled on the GUI
 // thread, which can be done using the function Do.
 func Run(action func() error) error {
 	// Pin the GUI message loop to a single thread

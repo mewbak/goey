@@ -19,6 +19,7 @@ type Control struct {
 	handle *gtk.Widget
 }
 
+// Close removes the element from the GUI, and frees any associated resources.
 func (w *Control) Close() {
 	if w.handle != nil {
 		w.handle.Destroy()
@@ -26,10 +27,13 @@ func (w *Control) Close() {
 	}
 }
 
+// Handle returns the platform-native handle for the control.
 func (w *Control) Handle() *gtk.Widget {
 	return w.handle
 }
 
+// Layout determines the best size for an element that satisfies the
+// constraints.
 func (w *Control) Layout(bc base.Constraints) base.Size {
 	if !bc.HasBoundedWidth() && !bc.HasBoundedHeight() {
 		// No need to worry about breaking the constraints.  We can take as
@@ -62,6 +66,8 @@ func (w *Control) Layout(bc base.Constraints) base.Size {
 	return bc.Constrain(base.Size{base.FromPixelsX(width), base.FromPixelsX(height1)})
 }
 
+// MinIntrinsicHeight returns the minimum height that this element requires
+// to be correctly displayed.
 func (w *Control) MinIntrinsicHeight(width base.Length) base.Length {
 	if width != base.Inf {
 		height, _ := syscall.WidgetGetPreferredHeightForWidth(w.handle, width.PixelsX())
@@ -71,11 +77,14 @@ func (w *Control) MinIntrinsicHeight(width base.Length) base.Length {
 	return base.FromPixelsY(height)
 }
 
+// MinIntrinsicWidth returns the minimum width that this element requires
+// to be correctly displayed.
 func (w *Control) MinIntrinsicWidth(base.Length) base.Length {
 	width, _ := w.handle.GetPreferredWidth()
 	return base.FromPixelsX(width)
 }
 
+// SetBounds updates the position of the widget.
 func (w *Control) SetBounds(bounds base.Rectangle) {
 	pixels := bounds.Pixels()
 	if pixels.Dx() <= 0 || pixels.Dy() <= 0 {

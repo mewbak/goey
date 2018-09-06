@@ -46,7 +46,7 @@ type Element interface {
 	// of platform dependent code.
 	NativeElement
 
-	// Close removes the widget from the GUI, and frees any associated resources.
+	// Close removes the element from the GUI, and frees any associated resources.
 	Close()
 	// Kind returns the concrete type for the Element.
 	// Users should not need to use this method directly.

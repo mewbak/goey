@@ -77,7 +77,7 @@ func (w *IntInput) wrapOnChange() func(string) {
 		if err != nil {
 			// This case should not occur, as the control should prevent invalid
 			// strings from being entered.
-			// TODO:  What reporting shoudl be done here?
+			// TODO:  What reporting should be done here?
 			return
 		}
 		// With conversion completed, call original callback.
