@@ -50,11 +50,11 @@ func loadImage(filename string) (image.Image, error) {
 func selectImage(index int) (image.Image, string) {
 	if clickCount%4 == 3 {
 		return gopher, "Image of the Go gopher."
-	} else {
-		img := image.NewRGBA(image.Rect(0, 0, 100, 100))
-		draw.Draw(img, img.Bounds(), image.NewUniform(colors[index%4]), image.Point{}, draw.Src)
-		return img, colorNames[index%4]
 	}
+
+	img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	draw.Draw(img, img.Bounds(), image.NewUniform(colors[index%4]), image.Point{}, draw.Src)
+	return img, colorNames[index%4]
 }
 
 func main() {
