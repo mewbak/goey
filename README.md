@@ -48,6 +48,8 @@ Feedback and PRs welcome.
 In particular, if anyone has the expertise to provide a port for MacOS, that
 would provide support for all major desktop operating systems.
 
+[![Go Report Card](https://goreportcard.com/badge/bitbucket.org/rj/goey)](https://goreportcard.com/report/bitbucket.org/rj/goey)
+
 ## License
 
 BSD © Robert Johnstone
