@@ -14,8 +14,8 @@ var (
 // If both Min and Max are zero, then Max will be updated to 100.  Other cases
 // where Min == Max are not allowed.
 type Progress struct {
-	Value    int
-	Min, Max int
+	Value    int // Value is the current value to be displayed
+	Min, Max int // Min and Max set the range of Value
 }
 
 // Kind returns the concrete type for use in the Widget interface.

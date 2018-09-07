@@ -11,7 +11,7 @@ var (
 // TextInput describes a widget that users input or update a single line of text.
 // The model for the value is a string value.
 type TextInput struct {
-	Value       string             // Values is the current string for the field
+	Value       string             // Value is the current string for the field
 	Placeholder string             // Placeholder is a descriptive text that can be displayed when the field is empty
 	Disabled    bool               // Disabled is a flag indicating that the user cannot interact with this field
 	Password    bool               // Password is a flag indicating that the characters should be hidden
