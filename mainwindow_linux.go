@@ -70,7 +70,10 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	app.SetBorderWidth(0)
 	app.Connect("destroy", mainwindowOnDestroy, retval)
 	app.Connect("size-allocate", mainwindowOnSizeAllocate, retval)
-	app.SetDefaultSize(400, 400)
+	app.SetDefaultSize(func() (int, int) {
+		w, h := sizeDefaults()
+		return int(w), int(h)
+	}())
 
 	return retval, nil
 }
