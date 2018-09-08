@@ -11,7 +11,7 @@ var (
 // IntInput describes a widget that users input or update a single integer value.
 // The model for the value is a int64.
 type IntInput struct {
-	Value       int64              // Values is the current string for the field
+	Value       int64              // Value is the current value for the field
 	Placeholder string             // Placeholder is a descriptive text that can be displayed when the field is empty
 	Disabled    bool               // Disabled is a flag indicating that the user cannot interact with this field
 	OnChange    func(value int64)  // OnChange will be called whenever the user changes the value for this field

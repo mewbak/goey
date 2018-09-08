@@ -596,7 +596,16 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 		// Defer to the default window proc
 
 	case win.WM_HSCROLL:
-		windowGetPtr(hwnd).setScrollPos(win.SB_HORZ, wParam)
+		if lParam == 0 {
+			// Message was sent by a standard scroll bar.  Need to adjust the
+			// scroll position for the window.
+			windowGetPtr(hwnd).setScrollPos(win.SB_HORZ, wParam)
+		} else {
+			// Message was sent by a child window.  As for all other controls
+			// that notify the parent, resend to the child with the expectation
+			// that the child has been subclassed.
+			win.SendMessage(win.HWND(lParam), win.WM_HSCROLL, wParam, 0)
+		}
 		return 0
 
 	case win.WM_VSCROLL:

@@ -10,8 +10,7 @@ import (
 )
 
 var (
-	staticClassName     []uint16
-	oldStaticWindowProc uintptr
+	staticClassName []uint16
 )
 
 func init() {
