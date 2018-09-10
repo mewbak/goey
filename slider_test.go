@@ -61,9 +61,6 @@ func ExampleSlider() {
 	} else {
 		fmt.Println("OK")
 	}
-
-	// Output:
-	// OK
 }
 
 func TestSliderCreate(t *testing.T) {

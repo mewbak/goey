@@ -10,7 +10,7 @@ import (
 type textareaElement struct {
 	handle *gtk.TextView
 	buffer *gtk.TextBuffer
-	frame  *gtk.Frame
+	frame  *gtk.ScrolledWindow
 
 	minLines int
 	onChange func(string)
@@ -47,23 +47,14 @@ func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	}
 	swindow.Add(control)
 	swindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+	swindow.SetShadowType(gtk.SHADOW_IN)
 	swindow.SetVExpand(true)
-
-	frame, err := gtk.FrameNew("")
-	if err != nil {
-		swindow.RefSink()
-		swindow.Destroy()
-		swindow.Unref()
-		return nil, err
-	}
-	frame.SetShadowType(gtk.SHADOW_ETCHED_IN)
-	frame.Add(swindow)
-	parent.Handle.Add(frame)
+	parent.Handle.Add(swindow)
 
 	retval := &textareaElement{
 		handle:   control,
 		buffer:   buffer,
-		frame:    frame,
+		frame:    swindow,
 		onChange: w.OnChange,
 		minLines: minlinesDefault(w.MinLines),
 	}
@@ -78,7 +69,7 @@ func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	}
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
-	frame.ShowAll()
+	swindow.ShowAll()
 
 	return retval, nil
 }
