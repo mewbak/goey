@@ -107,26 +107,38 @@ func (w *textareaElement) Handle() *gtk.Widget {
 
 func (w *textareaElement) Layout(bc base.Constraints) base.Size {
 	if !bc.HasBoundedWidth() {
+		if bc.Min.Width > 0 {
+			width := bc.Min.Width
+			height := w.MinIntrinsicHeight(width)
+			return bc.Constrain(base.Size{width, height})
+		}
+
 		_, width := w.handle.GetPreferredWidth()
-		_, height := w.handle.GetPreferredHeight()
+		height := w.MinIntrinsicHeight(base.Inf)
 		return bc.Constrain(base.Size{
 			base.FromPixelsX(width),
-			base.FromPixelsY(height),
+			height,
 		})
 	}
 
 	width := bc.Max.Width
-	_, height := syscall.WidgetGetPreferredHeightForWidth(&w.frame.Widget, width.PixelsX())
-	return bc.Constrain(base.Size{width, base.FromPixelsX(height)})
+	height := w.MinIntrinsicHeight(width)
+	return bc.Constrain(base.Size{width, height})
 }
 
 func (w *textareaElement) MinIntrinsicHeight(width base.Length) base.Length {
+	// This won't respond correctly to changes in font size on GTK, but
+	// we need to establish a height to set minlines.
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
+	const lineHeight = 16 * DIP
+	minHeight := 23*DIP + lineHeight.Scale(w.minLines-1, 1)
+
 	if width != base.Inf {
 		height, _ := syscall.WidgetGetPreferredHeightForWidth(&w.frame.Widget, width.PixelsX())
-		return base.FromPixelsY(height)
+		return max(minHeight, base.FromPixelsY(height))
 	}
 	height, _ := w.frame.GetPreferredHeight()
-	return base.FromPixelsY(height)
+	return max(minHeight, base.FromPixelsY(height))
 }
 
 func (w *textareaElement) MinIntrinsicWidth(base.Length) base.Length {
