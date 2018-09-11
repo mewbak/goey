@@ -131,16 +131,25 @@ func (w *hboxElement) Layout(bc base.Constraints) base.Size {
 	w.totalWidth = width
 
 	// Need to adjust height to any widgets that have flex
-	if w.totalFlex > 0 && bc.HasBoundedWidth() {
-		for i, v := range w.childrenInfo {
-			if v.flex > 0 {
-				oldWidth := v.size.Width
-				fbc := base.TightWidth(v.size.Width + (bc.Max.Width-w.totalWidth).Scale(v.flex, w.totalFlex))
-				fbc.Min.Height = cbc.Min.Height
-				fbc.Max.Height = cbc.Max.Height
-				size := w.children[i].Layout(fbc)
-				w.childrenInfo[i].size = size
-				w.totalWidth += size.Width - oldWidth
+	if w.totalFlex > 0 {
+		extraWidth := base.Length(0)
+		if bc.HasBoundedWidth() && bc.Max.Width > w.totalWidth {
+			extraWidth = bc.Max.Width - w.totalWidth
+		} else if bc.Min.Width > w.totalWidth {
+			extraWidth = bc.Min.Width - w.totalWidth
+		}
+
+		if extraWidth > 0 {
+			for i, v := range w.childrenInfo {
+				if v.flex > 0 {
+					oldWidth := v.size.Width
+					fbc := base.TightWidth(v.size.Width + extraWidth.Scale(v.flex, w.totalFlex))
+					fbc.Min.Height = cbc.Min.Height
+					fbc.Max.Height = cbc.Max.Height
+					size := w.children[i].Layout(fbc)
+					w.childrenInfo[i].size = size
+					w.totalWidth += size.Width - oldWidth
+				}
 			}
 		}
 	}

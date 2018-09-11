@@ -52,7 +52,7 @@ func render() base.Widget {
 		Child: &goey.VBox{
 			Children: []base.Widget{
 				&goey.Label{Text: "This is the most important field:"},
-				&goey.Expand{Factor: 1, Child: &goey.TextArea{Value: text[0],
+				&goey.Expand{Child: &goey.TextArea{Value: text[0],
 					Placeholder: "You should type something here.",
 					OnChange: func(value string) {
 						text[0] = value

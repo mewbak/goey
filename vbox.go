@@ -160,16 +160,25 @@ func (w *vboxElement) Layout(bc base.Constraints) base.Size {
 	w.totalHeight = height
 
 	// Need to adjust width to any widgets that have flex
-	if w.totalFlex > 0 && bc.HasBoundedHeight() {
-		for i, v := range w.childrenInfo {
-			if v.flex > 0 {
-				oldHeight := v.size.Height
-				fbc := base.TightHeight(v.size.Height + (bc.Max.Height-w.totalHeight).Scale(v.flex, w.totalFlex))
-				fbc.Min.Width = cbc.Min.Width
-				fbc.Max.Width = cbc.Max.Width
-				size := w.children[i].Layout(fbc)
-				w.childrenInfo[i].size = size
-				w.totalHeight += size.Height - oldHeight
+	if w.totalFlex > 0 {
+		extraHeight := base.Length(0)
+		if bc.HasBoundedHeight() && bc.Max.Height > w.totalHeight {
+			extraHeight = bc.Max.Height - w.totalHeight
+		} else if bc.Min.Height > w.totalHeight {
+			extraHeight = bc.Min.Height - w.totalHeight
+		}
+
+		if extraHeight > 0 {
+			for i, v := range w.childrenInfo {
+				if v.flex > 0 {
+					oldHeight := v.size.Height
+					fbc := base.TightHeight(v.size.Height + extraHeight.Scale(v.flex, w.totalFlex))
+					fbc.Min.Width = cbc.Min.Width
+					fbc.Max.Width = cbc.Max.Width
+					size := w.children[i].Layout(fbc)
+					w.childrenInfo[i].size = size
+					w.totalHeight += size.Height - oldHeight
+				}
 			}
 		}
 	}
