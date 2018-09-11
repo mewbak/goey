@@ -32,6 +32,7 @@ func (m *mock) Mount(parent Control) (Element, error) {
 
 type mockElement struct {
 	kind   *Kind
+	err    error
 	Closed bool
 	Prop   int
 }
@@ -62,6 +63,9 @@ func (m *mockElement) SetBounds(bounds Rectangle) {
 func (m *mockElement) updateProps(data *mock) error {
 	if m.kind != data.kind {
 		panic("Mismatched kinds")
+	}
+	if m.err != nil {
+		return m.err
 	}
 	m.Prop = data.Prop
 	return nil
@@ -131,18 +135,27 @@ func TestDiffChild(t *testing.T) {
 		err       error
 		lhsClosed bool
 	}{
+		// Trivial case
 		{nil, nil, nil, nil, false},
+		// Mount
 		{nil, &mock{kind: &kind1}, &mockElement{kind: &kind1}, nil, false},
 		{nil, &mock{kind: &kind1, Prop: 3}, &mockElement{kind: &kind1, Prop: 3}, nil, false},
 		{nil, &mock{kind: &kind2}, &mockElement{kind: &kind2}, nil, false},
 		{nil, &mock{kind: &kind2, Prop: 13}, &mockElement{kind: &kind2, Prop: 13}, nil, false},
+		// Remove existing element
 		{&mockElement{kind: &kind1}, nil, nil, nil, true},
+		// Replace existing element
 		{&mockElement{kind: &kind1, Prop: 3}, &mock{kind: &kind2, Prop: 13}, &mockElement{kind: &kind2, Prop: 13}, nil, true},
+		// Update existing element
 		{&mockElement{kind: &kind1, Prop: 3}, &mock{kind: &kind1, Prop: 13}, &mockElement{kind: &kind1, Prop: 13}, nil, false},
+		// Fail to mount
 		{nil, &mock{kind: &kind1, err: err1}, nil, err1, false},
 		{nil, &mock{kind: &kind1, err: err2}, nil, err2, false},
+		// Fail to replace
 		{&mockElement{kind: &kind1}, &mock{kind: &kind2, err: err1}, &mockElement{kind: &kind1}, err1, false},
 		{&mockElement{kind: &kind1}, &mock{kind: &kind2, err: err2}, &mockElement{kind: &kind1}, err2, false},
+		// Fail to update
+		{&mockElement{kind: &kind1, err: err1}, &mock{kind: &kind1, Prop: 4}, &mockElement{kind: &kind1, err: err1}, err1, false},
 	}
 
 	for i, v := range cases {
@@ -176,16 +189,20 @@ func TestDiffChildren(t *testing.T) {
 		err       error
 		lhsClosed bool
 	}{
+		// Trivial case
 		{nil, nil, nil, nil, false},
+		// Mount
 		{nil, []Widget{&mock{kind: &kind1}}, []Element{&mockElement{kind: &kind1}}, nil, false},
 		{nil, []Widget{&mock{kind: &kind1, Prop: 3}}, []Element{&mockElement{kind: &kind1, Prop: 3}}, nil, false},
 		{nil, []Widget{&mock{kind: &kind2}}, []Element{&mockElement{kind: &kind2}}, nil, false},
 		{nil, []Widget{&mock{kind: &kind2, Prop: 13}}, []Element{&mockElement{kind: &kind2, Prop: 13}}, nil, false},
 		{nil, []Widget{&mock{kind: &kind1, err: err1}}, nil, err1, false},
 		{nil, []Widget{&mock{kind: &kind1, err: err2}}, nil, err2, false},
+		// Remove existing elements
 		{[]Element{}, nil, nil, nil, true},
 		{[]Element{&mockElement{kind: &kind1}}, nil, nil, nil, true},
 		{[]Element{&mockElement{kind: &kind2}}, nil, nil, nil, true},
+		// Update existing element
 		{
 			[]Element{&mockElement{kind: &kind1}},
 			[]Widget{&mock{kind: &kind1, Prop: 15}},
@@ -198,34 +215,46 @@ func TestDiffChildren(t *testing.T) {
 			[]Element{&mockElement{kind: &kind2, Prop: 16}},
 			nil, false,
 		},
+		// Remove extra elements
 		{
 			[]Element{&mockElement{kind: &kind1}, &mockElement{kind: &kind2, Prop: 17}},
 			[]Widget{&mock{kind: &kind1, Prop: 15}},
 			[]Element{&mockElement{kind: &kind1, Prop: 15}},
 			nil, false,
 		},
+		// Mount new elements
 		{
 			[]Element{&mockElement{kind: &kind1}},
 			[]Widget{&mock{kind: &kind1, Prop: 15}, &mock{kind: &kind2, Prop: 17}},
 			[]Element{&mockElement{kind: &kind1, Prop: 15}, &mockElement{kind: &kind2, Prop: 17}},
 			nil, false,
 		},
+		// Replace existing element
 		{
 			[]Element{&mockElement{kind: &kind1, Prop: 123}},
 			[]Widget{&mock{kind: &kind2}},
 			[]Element{&mockElement{kind: &kind2}},
 			nil, true,
 		},
+		// Fail to replace existing element
 		{
 			[]Element{&mockElement{kind: &kind1}},
 			[]Widget{&mock{kind: &kind2, err: err1}},
 			[]Element{&mockElement{kind: &kind1}},
 			err1, false,
 		},
+		// Fail to add new element
 		{
 			[]Element{&mockElement{kind: &kind1}},
 			[]Widget{&mock{kind: &kind1}, &mock{kind: &kind1, err: err1}},
 			[]Element{&mockElement{kind: &kind1}},
+			err1, false,
+		},
+		// Fail to update existing element
+		{
+			[]Element{&mockElement{kind: &kind1}, &mockElement{kind: &kind2, err: err1}},
+			[]Widget{&mock{kind: &kind1}, &mock{kind: &kind2, Prop: 1}},
+			[]Element{&mockElement{kind: &kind1}, &mockElement{kind: &kind2, err: err1}},
 			err1, false,
 		},
 	}
