@@ -41,6 +41,15 @@ be compiled with `github.com/akavel/rsrc` to create a .syso that will be
 recognize by the go build program. Additionally, you could use build flags
 (`-ldflags="-H windowsgui"`) to change the type of application built.
 
+## Screenshots
+
+| Windows    | Linux (GTK)|
+|:----------:|:----------:|
+|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/onebutton/onebutton_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/onebutton/onebutton_linux.png)|
+|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/twofields/twofields_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/twofields/twofields_linux.png)|
+|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/decoration/decoration_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/decoration/decoration_linux.png)|
+|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/colour/colour_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/colour/colour_linux.png)|
+
 ## Contribute
 
 Feedback and PRs welcome.

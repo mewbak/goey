@@ -37,7 +37,7 @@ func main() {
 }
 
 func createWindow() error {
-	mw, err := goey.NewWindow("One Button", render())
+	mw, err := goey.NewWindow("Decoration", render())
 	if err != nil {
 		return err
 	}
