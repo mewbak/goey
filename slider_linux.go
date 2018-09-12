@@ -118,7 +118,6 @@ func (w *sliderElement) MinIntrinsicWidth(base.Length) base.Length {
 	if limit := base.FromPixelsX(width); limit < 160*DIP {
 		return 160 * DIP
 	}
-	println("MinIntrinsicWidth", width, base.FromPixelsX(width).String())
 	return base.FromPixelsX(width)
 }
 
