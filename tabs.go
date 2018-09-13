@@ -40,6 +40,9 @@ func (*Tabs) Kind() *base.Kind {
 // The newly created widget will be a child of the widget specified by parent.
 func (w *Tabs) Mount(parent base.Control) (base.Element, error) {
 	// Ensure that the Value is a useable index.
+	if w.Value < 0 {
+		w.Value = 0
+	}
 	w.UpdateValue()
 	// Forward to the platform-dependant code
 	return w.mount(parent)

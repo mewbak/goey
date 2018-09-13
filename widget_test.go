@@ -52,14 +52,14 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 			} else {
 				for i := range children {
 					if n1, n2 := children[i].Kind(), widgets[i].Kind(); n1 != n2 {
-						t.Errorf("Wanted children[%d].Kind() == widgets[%d].Kind(), got %s and %s", i, i, n1, n2)
+						t.Errorf("Wanted children[%d].Kind() == widgets[%d].Kind(), got %s, want %s", i, i, n1, n2)
 					} else if widget, ok := children[i].(Proper); ok {
 						data := widget.Props()
 						if n1, n2 := data.Kind(), widgets[i].Kind(); n1 != n2 {
-							t.Errorf("Wanted data.Kind() == widgets[%d].Kind(), got %s and %s", i, n1, n2)
+							t.Errorf("Wanted data.Kind() == widgets[%d].Kind(), got %s, want %s", i, n1, n2)
 						}
 						if !equal(t, data, widgets[i]) {
-							t.Errorf("Wanted data == widgets[%d], got %v and %v", i, data, widgets[i])
+							t.Errorf("Wanted data == widgets[%d], got %v, want %v", i, data, widgets[i])
 						}
 					} else {
 						t.Logf("Cannot verify props of child")
