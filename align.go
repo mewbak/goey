@@ -87,18 +87,7 @@ func (*alignElement) Kind() *base.Kind {
 }
 
 func (w *alignElement) Layout(bc base.Constraints) base.Size {
-	if w.child == nil {
-		size := base.Size{}
-		if bc.HasBoundedWidth() {
-			size.Width = base.Inf
-		}
-		if bc.HasBoundedHeight() {
-			size.Height = base.Inf
-		}
-		return bc.Constrain(size)
-	}
-
-	size := w.child.Layout(bc.Loosen())
+	size := base.Layout(w.child, bc.Loosen())
 	w.childSize = size
 	if w.widthFactor > 0 {
 		size.Width = base.Length(float64(size.Width) * w.widthFactor)

@@ -109,7 +109,7 @@ func render() base.Widget {
 			OnFocus: onfocus(1),
 			OnBlur:  onblur(1),
 		},
-		&goey.Button{Text: "Cyel main axis align",
+		&goey.Button{Text: "Cycle main axis align",
 			OnClick: cycleMainAxisAlign,
 			OnFocus: onfocus(2),
 			OnBlur:  onblur(2),

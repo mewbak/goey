@@ -1,7 +1,7 @@
 package base
 
 const (
-	// Inf is a sentinel value indicating an unbounded width or height.
+	// Inf is a sentinel value indicating an unbounded (or infinite) length.
 	Inf Length = 0x7fffffff
 )
 
@@ -30,31 +30,32 @@ func max(a, b Length) Length {
 //
 // A sentinel value can be used to indicate that the maximum size for a
 // dimension is infinite.  The constraints on that dimension are called
-// 'unbounded'.  If the constraints on a dimension are both tight and unbounded,
-// the dimension is 'expanding'.
+// 'unbounded'.
 //
 // (This type is similar to BoxConstraints type in flutter library rendering)
 type Constraints struct {
 	Min, Max Size
 }
 
-// Expand creates box constraints that force elements to expand to as large as
-// possible.  The constraints for both width and height will be tight and
+// Expand creates box constraints that allows elements to expand to as large as
+// possible.  The constraints for both width and height will be loose and
 // unbounded.
 func Expand() Constraints {
-	return Constraints{Size{Inf, Inf}, Size{Inf, Inf}}
+	return Constraints{Size{0, 0}, Size{Inf, Inf}}
 }
 
 // ExpandHeight creates box constraints with a fixed width and that forces
-// elements to expand to as high as possible.
+// elements to expand to as high as possible.  The constraint for width will
+// be tight.  The constraint for height will be loose and unbounded.
 func ExpandHeight(width Length) Constraints {
-	return Constraints{Size{width, Inf}, Size{width, Inf}}
+	return Constraints{Size{width, 0}, Size{width, Inf}}
 }
 
 // ExpandWidth creates box constraints with a fixed height and that forces
-// elements to expand to as wide as possible.
+// elements to expand to as wide as possible.  The constraint for width will
+// be loose and unbounded.  The constraint for height will be tight.
 func ExpandWidth(height Length) Constraints {
-	return Constraints{Size{Inf, height}, Size{Inf, height}}
+	return Constraints{Size{0, height}, Size{Inf, height}}
 }
 
 // Loose creates box constraints that forbid sizes larger than the given size.
@@ -198,12 +199,15 @@ func (bc Constraints) IsNormalized() bool {
 }
 
 // IsSatisfiedBy returns true if the passed size satisfies the both the width
-// and height constraints.
+// and height constraints.  Additionally, both width and height must be finite
+// (i.e. not equal to the sentinal value Inf).
 func (bc Constraints) IsSatisfiedBy(size Size) bool {
 	return bc.Min.Width <= size.Width &&
 		size.Width <= bc.Max.Width &&
 		bc.Min.Height <= size.Height &&
-		size.Height <= bc.Max.Height
+		size.Height <= bc.Max.Height &&
+		size.Width != Inf &&
+		size.Height != Inf
 }
 
 // IsTight returns true if both the width and height are tightly constrained.

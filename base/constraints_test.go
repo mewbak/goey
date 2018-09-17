@@ -10,9 +10,9 @@ func TestConstraints(t *testing.T) {
 		isNormalized, isTight, hasTightWidth, hasTightHeight bool
 		isBounded, hasBoundedWidth, hasBoundedHeight         bool
 	}{
-		{Expand(), true, true, true, true, false, false, false},
-		{ExpandHeight(10 * DIP), true, true, true, true, false, true, false},
-		{ExpandWidth(10 * DIP), true, true, true, true, false, false, true},
+		{Expand(), true, false, false, false, false, false, false},
+		{ExpandHeight(10 * DIP), true, false, true, false, false, true, false},
+		{ExpandWidth(10 * DIP), true, false, false, true, false, false, true},
 		{Loose(Size{10 * DIP, 15 * DIP}), true, false, false, false, true, true, true},
 		{Tight(Size{10 * DIP, 15 * DIP}), true, true, true, true, true, true, true},
 		{TightWidth(10 * DIP), true, false, true, false, false, true, false},
@@ -202,6 +202,8 @@ func TestConstraints_IsSatisfiedBy(t *testing.T) {
 }
 
 func TestConstraints_Tighten(t *testing.T) {
+	size1 := Size{10 * DIP, 10 * DIP}
+
 	cases := []struct {
 		in   Constraints
 		size Size
@@ -209,14 +211,14 @@ func TestConstraints_Tighten(t *testing.T) {
 		outH Constraints
 		outV Constraints
 	}{
-		{Expand(), Size{10 * DIP, 10 * DIP}, Expand(), Expand(), Expand()},
-		{ExpandHeight(10 * DIP), Size{10 * DIP, 10 * DIP}, ExpandHeight(10 * DIP), ExpandHeight(10 * DIP), ExpandHeight(10 * DIP)},
-		{ExpandWidth(10 * DIP), Size{10 * DIP, 10 * DIP}, ExpandWidth(10 * DIP), ExpandWidth(10 * DIP), ExpandWidth(10 * DIP)},
-		{Loose(Size{20 * DIP, 25 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 10 * DIP}), Constraints{Size{0, 10 * DIP}, Size{20 * DIP, 10 * DIP}}, Constraints{Size{10 * DIP, 0}, Size{10 * DIP, 25 * DIP}}},
+		{Expand(), size1, Tight(size1), ExpandWidth(size1.Height), ExpandHeight(size1.Width)},
+		{ExpandHeight(10 * DIP), size1, Tight(size1), Tight(size1), ExpandHeight(10 * DIP)},
+		{ExpandWidth(10 * DIP), size1, Tight(size1), ExpandWidth(10 * DIP), Tight(size1)},
+		{Loose(Size{20 * DIP, 25 * DIP}), size1, Tight(size1), Constraints{Size{0, 10 * DIP}, Size{20 * DIP, 10 * DIP}}, Constraints{Size{10 * DIP, 0}, Size{10 * DIP, 25 * DIP}}},
 		{Loose(Size{20 * DIP, 25 * DIP}), Size{30 * DIP, 30 * DIP}, Tight(Size{20 * DIP, 25 * DIP}), Constraints{Size{0, 25 * DIP}, Size{20 * DIP, 25 * DIP}}, Constraints{Size{20 * DIP, 0}, Size{20 * DIP, 25 * DIP}}},
-		{Tight(Size{10 * DIP, 15 * DIP}), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP}), Tight(Size{10 * DIP, 15 * DIP}), Tight(Size{10 * DIP, 15 * DIP})},
-		{TightWidth(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{15 * DIP, 10 * DIP}), Tight(Size{15 * DIP, 10 * DIP}), TightWidth(15 * DIP)},
-		{TightHeight(15 * DIP), Size{10 * DIP, 10 * DIP}, Tight(Size{10 * DIP, 15 * DIP}), TightHeight(15 * DIP), Tight(Size{10 * DIP, 15 * DIP})},
+		{Tight(Size{10 * DIP, 15 * DIP}), size1, Tight(Size{10 * DIP, 15 * DIP}), Tight(Size{10 * DIP, 15 * DIP}), Tight(Size{10 * DIP, 15 * DIP})},
+		{TightWidth(15 * DIP), size1, Tight(Size{15 * DIP, 10 * DIP}), Tight(Size{15 * DIP, 10 * DIP}), TightWidth(15 * DIP)},
+		{TightHeight(15 * DIP), size1, Tight(Size{10 * DIP, 15 * DIP}), TightHeight(15 * DIP), Tight(Size{10 * DIP, 15 * DIP})},
 	}
 
 	for i, v := range cases {
