@@ -45,8 +45,8 @@ func (m *mockElement) Kind() *Kind {
 	return m.kind
 }
 
-func (m *mockElement) Layout(Constraints) Size {
-	return Size{}
+func (m *mockElement) Layout(bc Constraints) Size {
+	return bc.Constrain(Size{})
 }
 func (m *mockElement) MinIntrinsicHeight(width Length) Length {
 	return 0
@@ -284,6 +284,33 @@ func TestDiffChildren(t *testing.T) {
 					t.Errorf("Case %d: Failed to close lhs[%d]", i, j)
 				}
 			}
+		}
+	}
+}
+
+func TestLayout(t *testing.T) {
+	size1 := Size{96 * DIP, 2 * 96 * DIP}
+	cases := []struct {
+		in  Element
+		bc  Constraints
+		out Size
+	}{
+		{nil, Tight(size1), size1},
+		{nil, Loose(size1), size1},
+		{nil, TightWidth(size1.Width), Size{size1.Width, 0}},
+		{nil, TightHeight(size1.Height), Size{0, size1.Height}},
+		{nil, Expand(), Size{}},
+		{&mockElement{}, Tight(size1), size1},
+		{&mockElement{}, Loose(size1), Size{}},
+		{&mockElement{}, TightWidth(size1.Width), Size{size1.Width, 0}},
+		{&mockElement{}, TightHeight(size1.Height), Size{0, size1.Height}},
+		{&mockElement{}, Expand(), Size{}},
+	}
+
+	for i, v := range cases {
+		out := Layout(v.in, v.bc)
+		if out != v.out {
+			t.Errorf("Case %d: Returned size does not match, got %v, want %v", i, out, v.out)
 		}
 	}
 }

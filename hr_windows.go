@@ -25,7 +25,7 @@ func registerHRClass(hInst win.HINSTANCE, wndproc uintptr) (win.ATOM, error) {
 	wc.HInstance = hInst
 	wc.LpfnWndProc = wndproc
 	wc.HCursor = win.LoadCursor(0, (*uint16)(unsafe.Pointer(uintptr(win.IDC_ARROW))))
-	wc.HbrBackground = win.GetSysColorBrush(win.COLOR_3DFACE)
+	wc.HbrBackground = (win.HBRUSH)(win.GetStockObject(win.NULL_BRUSH))
 	wc.LpszClassName = &hr.className[0]
 
 	atom := win.RegisterClassEx(&wc)
@@ -84,6 +84,7 @@ func hrWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (re
 		ps := win.PAINTSTRUCT{}
 		rect := win.RECT{}
 		hdc := win.BeginPaint(hwnd, &ps)
+		win.SetBkMode(hdc, win.TRANSPARENT)
 		win.GetClientRect(hwnd, &rect)
 		win.MoveToEx(hdc, int(rect.Left), int(rect.Top+rect.Bottom)/2, nil)
 		win.LineTo(hdc, rect.Right, (rect.Top+rect.Bottom)/2)

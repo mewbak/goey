@@ -612,6 +612,10 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 		windowGetPtr(hwnd).setScrollPos(win.SB_VERT, wParam)
 		return 0
 
+	case win.WM_CTLCOLORSTATIC:
+		win.SetBkMode(win.HDC(wParam), win.TRANSPARENT)
+		return uintptr(win.GetStockObject(win.NULL_BRUSH))
+
 	case win.WM_COMMAND:
 		if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE {
 			return win.SendDlgItemMessage(hwnd, int32(win.LOWORD(uint32(wParam))), msg, wParam, lParam)

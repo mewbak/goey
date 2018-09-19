@@ -59,7 +59,10 @@ func sliderOnChangeValue(widget *gtk.Scale, scroll int, value float64, mounted *
 		value = mounted.max
 	}
 	if value != mounted.value {
+		mounted.value = value
+		widget.SetValue(value)
 		mounted.onChange(value)
+		widget.QueueDraw()
 	}
 	return true
 }

@@ -12,10 +12,12 @@ type tabsElement struct {
 	value    int
 	child    base.Element
 	widgets  []TabItem
+	insets   Insets
 	onChange func(int)
 
+	cachedInsets base.Point
 	cachedBounds base.Rectangle
-	cachedSize   base.Size
+	cachedTabsW  base.Length
 }
 
 func tabsAppendChildren(handle *gtk.Notebook, children []TabItem) error {
@@ -72,6 +74,7 @@ func (w *Tabs) mount(parent base.Control) (base.Element, error) {
 		child:    child,
 		value:    w.Value,
 		widgets:  w.Children,
+		insets:   w.Insets,
 		onChange: w.OnChange,
 	}
 
@@ -126,12 +129,38 @@ func (w *tabsElement) Close() {
 	}
 }
 
+func (w *tabsElement) controlInsets() base.Point {
+	if w.cachedInsets.Y == 0 {
+		h1, _ := w.handle.GetPreferredHeight()
+		// How should the offset between the notebook widget and the contained
+		// page be measured?
+		w.cachedInsets = base.Point{
+			X: 0,
+			Y: base.FromPixelsY(h1),
+		}
+	}
+
+	return w.cachedInsets
+}
+
+func (w *tabsElement) controlTabsMinWidth() base.Length {
+	if w.cachedTabsW == 0 {
+		w1, _ := w.handle.GetPreferredWidth()
+		w.cachedTabsW = base.FromPixelsX(w1)
+	}
+	return w.cachedTabsW
+}
+
 func (w *tabsElement) mountPage(page int) error {
 	parent := getTabParent(w.handle, page)
 	child, err := w.widgets[page].Child.Mount(parent)
 	if err != nil {
 		return err
 	}
+	child.Layout(base.Tight(base.Size{
+		Width:  w.cachedBounds.Dx(),
+		Height: w.cachedBounds.Dy(),
+	}))
 	child.SetBounds(w.cachedBounds)
 
 	if w.child != nil {
@@ -139,63 +168,6 @@ func (w *tabsElement) mountPage(page int) error {
 	}
 	w.child = child
 	return nil
-}
-
-func (w *tabsElement) minSize() base.Size {
-	if w.cachedSize.Height == 0 {
-		w1, _ := w.handle.GetPreferredWidth()
-		h1, _ := w.handle.GetPreferredHeight()
-		// How should the offset between the notebook widget and the contained
-		// page be measured?
-		w.cachedSize = base.Size{
-			Width:  base.FromPixelsX(w1),
-			Height: base.FromPixelsY(h1),
-		}
-	}
-
-	return w.cachedSize
-}
-
-func (w *tabsElement) Layout(bc base.Constraints) base.Size {
-	tabsSize := w.minSize()
-
-	if w.child == nil {
-		return bc.Constrain(tabsSize)
-	}
-
-	size := w.child.Layout(bc.Inset(0, tabsSize.Height))
-	return base.Size{
-		Width:  max(size.Width, tabsSize.Width),
-		Height: size.Height + tabsSize.Height,
-	}
-}
-
-func (w *tabsElement) MinIntrinsicHeight(width base.Length) base.Length {
-	tabsSize := w.minSize()
-
-	if w.child == nil {
-		return tabsSize.Height
-	}
-
-	if width == base.Inf {
-		return w.child.MinIntrinsicHeight(base.Inf) + tabsSize.Height
-	}
-
-	return w.child.MinIntrinsicHeight(width)
-}
-
-func (w *tabsElement) MinIntrinsicWidth(height base.Length) base.Length {
-	tabsSize := w.minSize()
-
-	if w.child == nil {
-		return tabsSize.Width
-	}
-
-	if height == base.Inf {
-		return w.child.MinIntrinsicWidth(base.Inf)
-	}
-
-	return w.child.MinIntrinsicWidth(height - tabsSize.Height)
 }
 
 func (w *tabsElement) Props() base.Widget {
@@ -221,13 +193,21 @@ func (w *tabsElement) SetBounds(bounds base.Rectangle) {
 
 	if w.child != nil {
 		// Determine the bounds for the child widget
-		tabsSize := w.minSize()
-		w.cachedBounds = base.Rectangle{
-			Max: base.Point{bounds.Dx(), bounds.Dy() - tabsSize.Height},
+		insets := w.controlInsets()
+		insets.X += w.insets.Left + w.insets.Right
+		insets.Y += w.insets.Top + w.insets.Bottom
+		bounds = base.Rectangle{
+			Max: base.Point{bounds.Dx() - insets.X, bounds.Dy() - insets.Y},
 		}
 
+		// Offset
+		offset := base.Point{w.insets.Left, w.insets.Top}
+		bounds.Min = bounds.Min.Add(offset)
+		bounds.Max = bounds.Max.Add(offset)
+
 		// Update bounds for the child
-		w.child.SetBounds(w.cachedBounds)
+		w.cachedBounds = bounds
+		w.child.SetBounds(bounds)
 	}
 }
 

@@ -123,6 +123,27 @@ func DiffChildren(parent Control, lhs []Element, rhs []Widget) ([]Element, error
 	return lhs, nil
 }
 
+// Layout will layout a non-nil element, otherwise is will return a default
+// size respecting the layout contraints.
+func Layout(elem Element, bc Constraints) Size {
+	if elem == nil {
+		if bc.IsBounded() {
+			return bc.Max
+		} else if bc.HasBoundedWidth() {
+			return Size{bc.Max.Width, bc.Min.Height}
+		} else if bc.HasBoundedHeight() {
+			return Size{bc.Min.Width, bc.Max.Height}
+		}
+		return bc.Min
+	}
+
+	size := elem.Layout(bc)
+	if !bc.IsSatisfiedBy(size) {
+		panic("Error in element layout, size does not satisfy constraints")
+	}
+	return size
+}
+
 // Mount will try to mount a non-nil widget, otherwise it returns nil for the
 // element.
 func Mount(parent Control, widget Widget) (Element, error) {

@@ -74,6 +74,7 @@ func (w *Tabs) mount(parent base.Control) (base.Element, error) {
 		child:    child,
 		parent:   parent,
 		value:    w.Value,
+		insets:   w.Insets,
 		widgets:  w.Children,
 		onChange: w.OnChange,
 	}
@@ -90,6 +91,7 @@ type tabsElement struct {
 	child    base.Element
 	parent   base.Control
 	value    int
+	insets   Insets
 	widgets  []TabItem
 	onChange func(int)
 
@@ -97,7 +99,7 @@ type tabsElement struct {
 	cachedBounds base.Rectangle
 }
 
-func (w *tabsElement) insets() base.Point {
+func (w *tabsElement) controlInsets() base.Point {
 	if w.cachedInsets.Y == 0 {
 		rect := win.RECT{}
 
@@ -111,49 +113,9 @@ func (w *tabsElement) insets() base.Point {
 	return w.cachedInsets
 }
 
-func (w *tabsElement) Layout(bc base.Constraints) base.Size {
-	insets := w.insets()
-
-	if w.child == nil {
-		return bc.Constrain(base.Size{
-			Width:  insets.X,
-			Height: insets.Y,
-		})
-	}
-
-	size := w.child.Layout(bc.Inset(insets.X, insets.Y))
-	return base.Size{
-		Width:  size.Width + insets.X,
-		Height: size.Height + insets.Y,
-	}
-}
-
-func (w *tabsElement) MinIntrinsicHeight(width base.Length) base.Length {
-	insets := w.insets()
-
-	if w.child == nil {
-		return insets.Y
-	}
-
-	if width == base.Inf {
-		return w.child.MinIntrinsicHeight(base.Inf) + insets.Y
-	}
-
-	return w.child.MinIntrinsicHeight(width - insets.X)
-}
-
-func (w *tabsElement) MinIntrinsicWidth(height base.Length) base.Length {
-	insets := w.insets()
-
-	if w.child == nil {
-		return insets.X
-	}
-
-	if height == base.Inf {
-		return w.child.MinIntrinsicWidth(base.Inf) + insets.X
-	}
-
-	return w.child.MinIntrinsicWidth(height - insets.Y)
+func (w *tabsElement) controlTabsMinWidth() base.Length {
+	// No API to get this information has been found.
+	return 75 * DIP
 }
 
 func (w *tabsElement) Props() base.Widget {
@@ -198,6 +160,11 @@ func (w *tabsElement) SetBounds(bounds base.Rectangle) {
 			Min: bounds.Min.Add(base.Point{base.FromPixelsX(int(rect.Left)), base.FromPixelsY(int(rect.Top))}),
 			Max: bounds.Max.Add(base.Point{base.FromPixelsX(int(rect.Right)), base.FromPixelsY(int(rect.Bottom))}),
 		}
+		// Offset to handle insets
+		w.cachedBounds.Min.X += w.insets.Left
+		w.cachedBounds.Min.Y += w.insets.Top
+		w.cachedBounds.Max.X -= w.insets.Right
+		w.cachedBounds.Max.Y -= w.insets.Bottom
 
 		// Update bounds for the child
 		w.child.SetBounds(w.cachedBounds)
@@ -291,16 +258,24 @@ func tabsWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (
 	case win.WM_NOTIFY:
 		if n := (*win.NMHDR)(unsafe.Pointer(lParam)); true {
 			if n.Code == uint32(0x100000000+win.TCN_SELCHANGE) {
-				if w := tabsGetPtr(hwnd); w.onChange != nil {
-					cursel := int(win.SendMessage(hwnd, win.TCM_GETCURSEL, 0, 0))
-					w.onChange(cursel)
+				cursel := int(win.SendMessage(hwnd, win.TCM_GETCURSEL, 0, 0))
+				if w := tabsGetPtr(hwnd); w.value != cursel {
+					if w.onChange != nil {
+						w.onChange(cursel)
+					}
 					if w.value != cursel {
 						child, err := base.DiffChild(w.parent, w.child, w.widgets[cursel].Child)
 						if err != nil {
 							panic("Unhandled error!")
 						}
 						if child != nil {
-							w.child.SetBounds(w.cachedBounds)
+							child.SetOrder(w.hWnd)
+							child.Layout(base.Tight(base.Size{
+								Width:  w.cachedBounds.Dx(),
+								Height: w.cachedBounds.Dy(),
+							}))
+							child.SetBounds(w.cachedBounds)
+							win.InvalidateRect(win.GetParent(w.hWnd), nil, false)
 						}
 						w.child = child
 						w.value = cursel

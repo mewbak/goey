@@ -20,6 +20,7 @@ var (
 type Tabs struct {
 	Value    int       // Index of the selected tab
 	Children []TabItem // Description of the tabs
+	Insets   Insets    // Space between edge of element and the child element.
 
 	OnChange func(int) // OnChange will be called whenever the user selects a different tab
 }
@@ -60,11 +61,70 @@ func (*tabsElement) Kind() *base.Kind {
 	return &tabsKind
 }
 
+func (w *tabsElement) Layout(bc base.Constraints) base.Size {
+	insets := w.controlInsets()
+	insets.X += w.insets.Left + w.insets.Right
+	insets.Y += w.insets.Top + w.insets.Bottom
+
+	if w.child == nil {
+		return bc.Constrain(base.Size{
+			Width:  insets.X,
+			Height: insets.Y,
+		})
+	}
+
+	size := w.child.Layout(bc.Inset(insets.X, insets.Y))
+	return base.Size{
+		Width:  size.Width + insets.X,
+		Height: size.Height + insets.Y,
+	}
+}
+
+func (w *tabsElement) MinIntrinsicHeight(width base.Length) base.Length {
+	insets := w.controlInsets()
+	insets.X += w.insets.Left + w.insets.Right
+	insets.Y += w.insets.Top + w.insets.Bottom
+
+	if w.child == nil {
+		return insets.Y
+	}
+
+	if width == base.Inf {
+		return w.child.MinIntrinsicHeight(base.Inf) + insets.Y
+	}
+
+	return w.child.MinIntrinsicHeight(width - insets.X)
+}
+
+func (w *tabsElement) MinIntrinsicWidth(height base.Length) base.Length {
+	insets := w.controlInsets()
+	insets.X += w.insets.Left + w.insets.Right
+	insets.Y += w.insets.Top + w.insets.Bottom
+
+	if w.child == nil {
+		return insets.X
+	}
+
+	if height == base.Inf {
+		return max(
+			w.controlTabsMinWidth(),
+			w.child.MinIntrinsicWidth(base.Inf)+insets.X,
+		)
+	}
+
+	return max(
+		w.controlTabsMinWidth(),
+		w.child.MinIntrinsicWidth(height-insets.Y),
+	)
+}
+
 func (w *tabsElement) UpdateProps(data base.Widget) error {
 	// Cast to correct type.
 	tabs := data.(*Tabs)
 	// Ensure that the Value is a useable index.
 	tabs.UpdateValue()
-	// Forward to the platform-dependant code
+	// Update properties.
+	// Forward to the platform-dependant code where necessary.
+	w.insets = tabs.Insets
 	return w.updateProps(tabs)
 }
