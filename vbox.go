@@ -172,9 +172,7 @@ func (w *vboxElement) Layout(bc base.Constraints) base.Size {
 			for i, v := range w.childrenInfo {
 				if v.flex > 0 {
 					oldHeight := v.size.Height
-					fbc := base.TightHeight(v.size.Height + extraHeight.Scale(v.flex, w.totalFlex))
-					fbc.Min.Width = cbc.Min.Width
-					fbc.Max.Width = cbc.Max.Width
+					fbc := cbc.TightenHeight(v.size.Height + extraHeight.Scale(v.flex, w.totalFlex))
 					size := w.children[i].Layout(fbc)
 					w.childrenInfo[i].size = size
 					w.totalHeight += size.Height - oldHeight

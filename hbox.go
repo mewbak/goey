@@ -143,9 +143,7 @@ func (w *hboxElement) Layout(bc base.Constraints) base.Size {
 			for i, v := range w.childrenInfo {
 				if v.flex > 0 {
 					oldWidth := v.size.Width
-					fbc := base.TightWidth(v.size.Width + extraWidth.Scale(v.flex, w.totalFlex))
-					fbc.Min.Height = cbc.Min.Height
-					fbc.Max.Height = cbc.Max.Height
+					fbc := cbc.TightenWidth(v.size.Width + extraWidth.Scale(v.flex, w.totalFlex))
 					size := w.children[i].Layout(fbc)
 					w.childrenInfo[i].size = size
 					w.totalWidth += size.Width - oldWidth

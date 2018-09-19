@@ -35,8 +35,8 @@ func UniformInsets(l base.Length) Insets {
 // padding will be added between the border of the padding and the child
 // element as specified by the field Insets.
 type Padding struct {
-	Insets Insets
-	Child  base.Widget
+	Insets Insets      // Space between edge of element and the child element.
+	Child  base.Widget // Child widget.
 }
 
 // Kind returns the concrete type for use in the Widget interface.

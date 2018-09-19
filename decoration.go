@@ -21,7 +21,7 @@ type Decoration struct {
 	Stroke color.RGBA  // Stroke colour used to draw outline.
 	Insets Insets      // Space between border of the decoration and the child element.
 	Radius base.Length // Radius of the widgets corners.
-	Child  base.Widget // Child.
+	Child  base.Widget // Child widget.
 }
 
 // Kind returns the concrete type for use in the Widget interface.
