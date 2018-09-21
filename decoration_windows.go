@@ -263,7 +263,11 @@ func decorationWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uint
 
 	case win.WM_CTLCOLORSTATIC:
 		win.SetBkMode(win.HDC(wParam), win.TRANSPARENT)
-		return uintptr(win.GetStockObject(win.NULL_BRUSH))
+		return uintptr(decorationGetPtr(hwnd).hBrush)
+
+	case win.WM_CTLCOLORBTN:
+		win.SetBkMode(win.HDC(wParam), win.TRANSPARENT)
+		return uintptr(decorationGetPtr(hwnd).hBrush)
 	}
 
 	// Let the default window proc handle all other messages
