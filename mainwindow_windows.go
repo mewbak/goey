@@ -189,6 +189,7 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	if err != nil {
 		return nil, err
 	}
+	const WS_EX_COMPOSITED = 0x02000000
 	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, &mainWindow.className[0], windowName, style,
 		rect.Left, rect.Top, rect.Right-rect.Left, rect.Bottom-rect.Top,
 		win.HWND_DESKTOP, 0, hInstance, nil)
