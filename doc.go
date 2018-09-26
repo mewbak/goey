@@ -7,6 +7,11 @@
 // The minimal GUI example application is bitbucket.org/rj/goey/example/onebutton,
 // and additional example applications are in the example folder.
 //
+// Screenshots
+//
+// There are screenshots of some of the example applications linked in the
+// README, located at https://bitbucket.org/rj/goey/src/default/README.md.
+//
 // Windows
 //
 // To get properly themed controls, a manifest is required.  Please
