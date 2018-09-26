@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"image/color"
 	"syscall"
 	"unsafe"
 
@@ -12,6 +13,8 @@ var (
 	tabs struct {
 		className     []uint16
 		oldWindowProc uintptr
+		hbrush        win.HBRUSH
+		hbrushFlag    bool
 	}
 )
 
@@ -21,7 +24,7 @@ func init() {
 
 func (w *Tabs) mount(parent base.Control) (base.Element, error) {
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE)
-	hwnd := win.CreateWindowEx(0, &tabs.className[0], nil, style,
+	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, &tabs.className[0], nil, style,
 		10, 10, 100, 100,
 		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
 	if hwnd == 0 {
@@ -59,9 +62,9 @@ func (w *Tabs) mount(parent base.Control) (base.Element, error) {
 	if len(w.Children) > 0 {
 		err := error(nil)
 		if w.Value >= 0 {
-			child, err = base.Mount(parent, w.Children[w.Value].Child)
+			child, err = base.Mount(base.Control{hwnd}, w.Children[w.Value].Child)
 		} else {
-			child, err = base.Mount(parent, w.Children[0].Child)
+			child, err = base.Mount(base.Control{hwnd}, w.Children[0].Child)
 		}
 		if err != nil {
 			win.DestroyWindow(hwnd)
@@ -97,6 +100,7 @@ type tabsElement struct {
 
 	cachedInsets base.Point
 	cachedBounds base.Rectangle
+	hbrush       win.HBRUSH
 }
 
 func (w *tabsElement) controlInsets() base.Point {
@@ -151,6 +155,10 @@ func (w *tabsElement) SetOrder(previous win.HWND) win.HWND {
 
 func (w *tabsElement) SetBounds(bounds base.Rectangle) {
 	w.Control.SetBounds(bounds)
+	if w.hbrush != 0 {
+		win.DeleteObject(win.HGDIOBJ(w.hbrush))
+		w.hbrush = 0
+	}
 
 	if w.child != nil {
 		// Determine the bounds for the child widget
@@ -161,10 +169,10 @@ func (w *tabsElement) SetBounds(bounds base.Rectangle) {
 			Max: bounds.Max.Add(base.Point{base.FromPixelsX(int(rect.Right)), base.FromPixelsY(int(rect.Bottom))}),
 		}
 		// Offset to handle insets
-		w.cachedBounds.Min.X += w.insets.Left
-		w.cachedBounds.Min.Y += w.insets.Top
-		w.cachedBounds.Max.X -= w.insets.Right
-		w.cachedBounds.Max.Y -= w.insets.Bottom
+		w.cachedBounds.Min.X += w.insets.Left - bounds.Min.X
+		w.cachedBounds.Min.Y += w.insets.Top - bounds.Min.Y
+		w.cachedBounds.Max.X -= w.insets.Right + bounds.Min.X
+		w.cachedBounds.Max.Y -= w.insets.Bottom + bounds.Min.Y
 
 		// Update bounds for the child
 		w.child.SetBounds(w.cachedBounds)
@@ -247,13 +255,106 @@ func (w *tabsElement) updateProps(data *Tabs) error {
 	return nil
 }
 
+func tabsBackgroundBrush(hwnd win.HWND, hdc win.HDC) (win.HBRUSH, bool, error) {
+	// If there is a global brush that can be used for all tab controls,
+	// use that brush
+	if tabs.hbrush != 0 {
+		return tabs.hbrush, true, nil
+	}
+
+	// We need to print the client area for the tab control to a bitmap, which
+	// can be used to create a brush.
+	cr := win.RECT{}
+	win.GetClientRect(hwnd, &cr)
+
+	// Configure a device context to capture contents of the control
+	cdc := win.CreateCompatibleDC(hdc)
+	if cdc == 0 {
+		return 0, false, syscall.GetLastError()
+	}
+	defer func() {
+		win.DeleteDC(cdc)
+	}()
+	hbitmap := win.CreateCompatibleBitmap(hdc, cr.Right-cr.Left, cr.Bottom-cr.Top)
+	if hbitmap == 0 {
+		return 0, false, syscall.GetLastError()
+	}
+	defer func() {
+		win.DeleteObject(win.HGDIOBJ(hbitmap))
+	}()
+	win.SelectObject(cdc, win.HGDIOBJ(hbitmap))
+
+	// Get bitmap of the control
+	win.SendMessage(hwnd, win.WM_PRINTCLIENT, uintptr(cdc), win.PRF_CLIENT)
+
+	// If possible, better to use a solid brush that does not need to be
+	// generated everytime the size of the control is changed.
+	if !tabs.hbrushFlag {
+		tabs.hbrushFlag = true
+
+		// Is the current bitmap a constant colour in the client area
+		win.SendMessage(hwnd, win.TCM_ADJUSTRECT, win.FALSE, uintptr(unsafe.Pointer(&cr)))
+		if clr := win.GetPixel(cdc, cr.Left, cr.Top); clr == win.GetPixel(cdc, (cr.Left+cr.Right)/2, cr.Top) && clr == win.GetPixel(cdc, cr.Left, (cr.Top+cr.Bottom)/2) {
+			hbrush := createBrush(color.RGBA{
+				R: uint8(clr & 0xFF),
+				G: uint8((clr >> 8) & 0xFF),
+				B: uint8((clr >> 16) & 0xFF),
+				A: 0xFF,
+			})
+			tabs.hbrush = hbrush
+			return hbrush, true, nil
+		}
+	}
+
+	// Convert the bitmap to a brush
+	brush := win.CreatePatternBrush(hbitmap)
+	if brush == 0 {
+		return 0, false, syscall.GetLastError()
+	}
+
+	return brush, false, nil
+}
+
 func tabsWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (result uintptr) {
 	switch msg {
 	case win.WM_DESTROY:
 		// Make sure that the data structure on the Go-side does not point to a non-existent
 		// window.
+		if brush := tabsGetPtr(hwnd).hbrush; brush != 0 {
+			win.DeleteObject(win.HGDIOBJ(brush))
+
+		}
 		tabsGetPtr(hwnd).hWnd = 0
 		// Defer to the old window proc
+
+	case win.WM_CTLCOLORSTATIC:
+		win.SetBkMode(win.HDC(wParam), win.TRANSPARENT)
+		w := tabsGetPtr(hwnd)
+		if w.hbrush == 0 {
+			if hbrush, solid, err := tabsBackgroundBrush(hwnd, win.HDC(wParam)); err != nil {
+				panic(err)
+			} else if solid {
+				return uintptr(hbrush)
+			} else {
+				w.hbrush = hbrush
+			}
+		}
+		// Set offset for the brush
+		cr := win.RECT{}
+		win.GetWindowRect(win.HWND(lParam), &cr)
+		origin := win.POINT{cr.Left, cr.Top}
+		win.ScreenToClient(hwnd, &origin)
+		win.SetBrushOrgEx(win.HDC(wParam), -origin.X, -origin.Y, nil)
+		return uintptr(w.hbrush)
+
+	case win.WM_HSCROLL:
+		if lParam != 0 {
+			// Message was sent by a child window.  As for all other controls
+			// that notify the parent, resend to the child with the expectation
+			// that the child has been subclassed.
+			return win.SendMessage(win.HWND(lParam), win.WM_HSCROLL, wParam, 0)
+		}
+		// Defer to default window proc
 
 	case win.WM_NOTIFY:
 		if n := (*win.NMHDR)(unsafe.Pointer(lParam)); true {
