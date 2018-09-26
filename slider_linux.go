@@ -40,7 +40,7 @@ func (w *Slider) mount(parent base.Control) (base.Element, error) {
 	}
 
 	control.Connect("destroy", sliderOnDestroy, retval)
-	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "change-value", sliderOnChangeValue, retval)
+	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "value-changed", sliderOnChangeValue, retval)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
 	control.Show()
@@ -52,19 +52,12 @@ func sliderOnDestroy(widget *gtk.Scale, mounted *sliderElement) {
 	mounted.handle = nil
 }
 
-func sliderOnChangeValue(widget *gtk.Scale, scroll int, value float64, mounted *sliderElement) bool {
-	if value < mounted.min {
-		value = mounted.min
-	} else if value > mounted.max {
-		value = mounted.max
-	}
+func sliderOnChangeValue(widget *gtk.Scale, mounted *sliderElement) {
+	value := widget.GetValue()
 	if value != mounted.value {
 		mounted.value = value
-		widget.SetValue(value)
 		mounted.onChange(value)
-		widget.QueueDraw()
 	}
-	return true
 }
 
 func (w *sliderElement) Props() base.Widget {
@@ -137,7 +130,7 @@ func (w *sliderElement) updateProps(data *Slider) error {
 	pb.SetValue(data.Value)
 	pb.SetSensitive(!data.Disabled)
 	w.onChange = data.OnChange
-	w.shChange = setSignalHandler(w.handle, w.shChange, w.onChange != nil, "change-value", sliderOnChangeValue, w)
+	w.shChange = setSignalHandler(w.handle, w.shChange, w.onChange != nil, "value-changed", sliderOnChangeValue, w)
 	w.onFocus.Set(w.handle, data.OnFocus)
 	w.onBlur.Set(w.handle, data.OnBlur)
 	return nil
