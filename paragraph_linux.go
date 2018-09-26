@@ -27,6 +27,21 @@ func (a TextAlignment) native() gtk.Justification {
 	panic("not reachable")
 }
 
+func (a TextAlignment) halign() gtk.Align {
+	switch a {
+	case JustifyLeft:
+		return gtk.ALIGN_START
+	case JustifyCenter:
+		return gtk.ALIGN_CENTER
+	case JustifyRight:
+		return gtk.ALIGN_END
+	case JustifyFull:
+		return gtk.ALIGN_START
+	}
+
+	panic("not reachable")
+}
+
 func (w *P) mount(parent base.Control) (base.Element, error) {
 	handle, err := gtk.LabelNew(w.Text)
 	if err != nil {
@@ -35,6 +50,7 @@ func (w *P) mount(parent base.Control) (base.Element, error) {
 	handle.SetSingleLineMode(false)
 	parent.Handle.Add(handle)
 	handle.SetJustify(w.Align.native())
+	handle.SetHAlign(w.Align.halign())
 	handle.SetLineWrap(true)
 
 	retval := &paragraphElement{Control{&handle.Widget}}
@@ -112,5 +128,6 @@ func (w *paragraphElement) updateProps(data *P) error {
 	label := w.label()
 	label.SetText(data.Text)
 	label.SetJustify(data.Align.native())
+	label.SetHAlign(data.Align.halign())
 	return nil
 }

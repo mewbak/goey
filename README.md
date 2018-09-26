@@ -49,6 +49,9 @@ recognize by the go build program. Additionally, you could use build flags
 |![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/twofields/twofields_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/twofields/twofields_linux.png)|
 |![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/decoration/decoration_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/decoration/decoration_linux.png)|
 |![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/colour/colour_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/colour/colour_linux.png)|
+|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls1_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls1_linux.png)|
+|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls2_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls2_linux.png)|
+|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls3_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls3_linux.png)|
 
 ## Contribute
 

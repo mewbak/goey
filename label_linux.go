@@ -19,7 +19,7 @@ func (w *Label) mount(parent base.Control) (base.Element, error) {
 	handle.SetSingleLineMode(false)
 	parent.Handle.Add(handle)
 	handle.SetJustify(gtk.JUSTIFY_LEFT)
-	handle.SetXAlign(0)
+	handle.SetHAlign(gtk.ALIGN_START)
 	handle.SetLineWrap(false)
 	handle.Show()
 
