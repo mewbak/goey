@@ -24,9 +24,12 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 		cocoa.Init()
 	})
 
+	// Update the global DPI
+	base.DPI.X, base.DPI.Y = 96, 96
+
 	println("newWindow")
 	w, h := sizeDefaults()
-	handle := cocoa.NewWindow(title, w, h )
+	handle := cocoa.NewWindow(title, w, h)
 	atomic.AddInt32(&mainWindowCount, 1)
 	return &Window{windowImpl{
 		handle: handle,
@@ -34,7 +37,7 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 }
 
 func (w *windowImpl) control() base.Control {
-	return base.Control{w.handle.Uintptr()}
+	return base.Control{w.handle}
 }
 
 func (w *windowImpl) close() {
@@ -42,9 +45,9 @@ func (w *windowImpl) close() {
 		w.handle.Close()
 		w.handle = nil
 
-	if newval:= atomic.AddInt32(&mainWindowCount, -1); newval==0 {
-		cocoa.Stop()
-	}
+		if newval := atomic.AddInt32(&mainWindowCount, -1); newval == 0 {
+			cocoa.Stop()
+		}
 
 	}
 }
@@ -52,9 +55,33 @@ func (w *windowImpl) close() {
 func (w *windowImpl) message(m *Message) {
 }
 
+func (w *windowImpl) onSize() {
+	if w.child == nil {
+		return
+	}
+
+	// Update the global DPI
+	base.DPI.X, base.DPI.Y = 96, 96
+
+	width, height := w.handle.ContentSize()
+	clientSize := base.Size{base.FromPixelsX(width), base.FromPixelsY(height)}
+	size := w.layoutChild(clientSize)
+	bounds := base.Rectangle{
+		base.Point{}, base.Point{size.Width, size.Height},
+	}
+	w.child.SetBounds(bounds)
+}
+
 func (w *windowImpl) setChildPost() {
 	// Redo the layout so the children are placed.
 	if w.child != nil {
+		// Update the global DPI
+		base.DPI.X, base.DPI.Y = 96, 96
+
+		// Constrain window size
+		//w.updateWindowMinSize()
+		// Properties may have changed sizes, so we need to do layout.
+		w.onSize()
 	} else {
 	}
 }

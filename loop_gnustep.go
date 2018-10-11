@@ -12,7 +12,7 @@ var (
 )
 
 func run() error {
-	
+
 	// Don't want to run GUI init unless the program actually gets
 	// around to starting the GUI.
 	initCocoa.Do(func() {

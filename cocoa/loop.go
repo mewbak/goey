@@ -9,7 +9,7 @@ import "C"
 import "sync"
 
 func Init() {
-	C.init();
+	C.init()
 }
 
 func Run() error {

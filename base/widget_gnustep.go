@@ -3,7 +3,7 @@
 package base
 
 import (
-    "bitbucket.org/rj/goey/cocoa"
+	"bitbucket.org/rj/goey/cocoa"
 )
 
 // Control is an opaque type used as a platform-specific handle to a control
