@@ -7,16 +7,16 @@ extern void thunkDo();
 extern void stop();
 
 /* Window */
-extern void* windowNew(char const* title, unsigned width, unsigned height);
-extern void windowClose(void* handle);
-extern int windowContentSize(void* handle, int* h);
+extern void* windowNew( char const* title, unsigned width, unsigned height );
+extern void windowClose( void* handle );
+extern int windowContentSize( void* handle, int* h );
 
 /* Control */
-extern void controlSetEnabled(void* handle, BOOL value);
-extern void controlSetBounds(void* handle, int x, int y, int dx, int dy);
+extern void controlSetEnabled( void* handle, BOOL value );
+extern void controlSetBounds( void* handle, int x, int y, int dx, int dy );
 
 /* Button */
-extern void* buttonNew(void* window, char const* title);
-extern void buttonClose(void* handle);
-extern void buttonOnClick(void* handle);
-extern void buttonSetTitle(void* handle, char const* title);
+extern void* buttonNew( void* window, char const* title );
+extern void buttonClose( void* handle );
+extern void buttonOnClick( void* handle );
+extern void buttonSetTitle( void* handle, char const* title );

@@ -1,6 +1,6 @@
-#import <Cocoa/Cocoa.h>
 #include "_cgo_export.h"
 #include "cocoa.h"
+#import <Cocoa/Cocoa.h>
 
 void init() {
 	NSString* quitString = [[NSString alloc] initWithUTF8String:"Quit "];
@@ -18,8 +18,8 @@ void init() {
 	id appName = [[NSProcessInfo processInfo] processName];
 	id quitTitle = [quitString stringByAppendingString:appName];
 	id quitMenuItem = [[[NSMenuItem alloc] initWithTitle:quitTitle
-	action:@selector(terminate:) keyEquivalent:qString]
-	  	autorelease];
+	                                              action:@selector( terminate: )
+	                                       keyEquivalent:qString] autorelease];
 	[appMenu addItem:quitMenuItem];
 	[appMenuItem setSubmenu:appMenu];
 }
@@ -34,20 +34,20 @@ void stop() {
 }
 
 @interface DoActionOperation : NSOperation {
-	void*	action;
-	void*	err;
+	void* action;
+	void* err;
 }
 @end
 
 @implementation DoActionOperation
 
--(id)init {
-   self = [super init];
-   return self;
+- (id)init {
+	self = [super init];
+	return self;
 }
 
--(id)main {
-	printf("Ta da...\n");
+- (id)main {
+	printf( "Ta da...\n" );
 	callbackDo();
 }
 
@@ -56,8 +56,8 @@ void stop() {
 void thunkDo() {
 	[NSAutoreleasePool new];
 
-	//DoActionEvent* event = [[DoActionEvent alloc] init:action Err:err];
-	//SEL sel = @selector(call);
+	// DoActionEvent* event = [[DoActionEvent alloc] init:action Err:err];
+	// SEL sel = @selector(call);
 	//[event performSelectorOnMainThread:sel];
 
 	NSOperation* operation = [[DoActionOperation alloc] init];
