@@ -32,11 +32,6 @@ void* buttonNew( void* window, char const* title ) {
 	return control;
 }
 
-void buttonClose( void* handle ) {
-	NSButton* control = handle;
-	[control release];
-}
-
 void buttonSetTitle( void* handle, char const* title ) {
 	NSString* nsTitle = [[NSString alloc] initWithUTF8String:title];
 	[(NSButton*)handle setTitle:nsTitle];

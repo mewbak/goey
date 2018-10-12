@@ -18,6 +18,10 @@ func toBOOL(b bool) C.BOOL {
 	return C.NO
 }
 
+func (c *Control) Close() {
+	C.controlClose(unsafe.Pointer(c))
+}
+
 func (c *Control) IntrinsicContentSize() (int, int) {
 	var h C.int
 	w := C.controlIntrinsicContentSize(unsafe.Pointer(c), &h)

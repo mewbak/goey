@@ -16,14 +16,17 @@ extern void viewSetFrame( void* handle, int x, int y, int dx, int dy );
 
 /* Control */
 extern void controlSetEnabled( void* handle, BOOL value );
+extern void controlClose( void* handle );
 extern int controlIntrinsicContentSize( void* handle, int* h );
 
 /* Button */
 extern void* buttonNew( void* window, char const* title );
-extern void buttonClose( void* handle );
 extern void buttonOnClick( void* handle );
 extern void buttonSetTitle( void* handle, char const* title );
 
 /* Text */
 extern void* textNew( void* window, char const* text );
 extern void textClose( void* handle );
+
+/* TextField */
+extern void* textfieldNew( void* window, char const* text );

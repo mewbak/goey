@@ -34,7 +34,7 @@ func NewButton(window *Window, title string) *Button {
 }
 
 func (w *Button) Close() {
-	C.buttonClose(unsafe.Pointer(w))
+	C.controlClose(unsafe.Pointer(w))
 	delete(buttonCallbacks, unsafe.Pointer(w))
 }
 
