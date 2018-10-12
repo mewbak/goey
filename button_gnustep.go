@@ -29,15 +29,21 @@ func (w *buttonElement) Close() {
 }
 
 func (w *buttonElement) Layout(bc base.Constraints) base.Size {
-	return bc.Constrain(base.Size{100 * base.DIP, 17 * base.DIP})
+	px, h := w.control.IntrinsicContentSize()
+	return bc.Constrain(base.Size{
+		base.FromPixelsX(px),
+		base.FromPixelsY(h),
+	})
 }
 
 func (w *buttonElement) MinIntrinsicHeight(width base.Length) base.Length {
-	return 17 * base.DIP
+	_, h := w.control.IntrinsicContentSize()
+	return base.FromPixelsY(h)
 }
 
 func (w *buttonElement) MinIntrinsicWidth(base.Length) base.Length {
-	return 100 * base.DIP
+	px, _ := w.control.IntrinsicContentSize()
+	return base.FromPixelsX(px)
 }
 
 func (w *buttonElement) SetBounds(bounds base.Rectangle) {

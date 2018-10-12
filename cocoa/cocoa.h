@@ -14,6 +14,7 @@ extern int windowContentSize( void* handle, int* h );
 /* Control */
 extern void controlSetEnabled( void* handle, BOOL value );
 extern void controlSetBounds( void* handle, int x, int y, int dx, int dy );
+extern int controlIntrinsicContentSize( void* handle, int* h );
 
 /* Button */
 extern void* buttonNew( void* window, char const* title );
