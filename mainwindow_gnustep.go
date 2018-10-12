@@ -15,6 +15,8 @@ type windowImpl struct {
 	child            base.Element
 	horizontalScroll bool
 	verticalScroll   bool
+	
+	onClosing func() bool
 }
 
 func newWindow(title string, child base.Widget) (*Window, error) {
@@ -31,9 +33,12 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	w, h := sizeDefaults()
 	handle := cocoa.NewWindow(title, w, h)
 	atomic.AddInt32(&mainWindowCount, 1)
-	return &Window{windowImpl{
+	retval := &Window{windowImpl{
 		handle: handle,
-	}}, nil
+	}}
+	handle.SetCallbacks((*windowCallbacks)(&retval.windowImpl))
+	
+	return retval, nil
 }
 
 func (w *windowImpl) control() base.Control {
@@ -44,11 +49,6 @@ func (w *windowImpl) close() {
 	if w.handle != nil {
 		w.handle.Close()
 		w.handle = nil
-
-		if newval := atomic.AddInt32(&mainWindowCount, -1); newval == 0 {
-			cocoa.Stop()
-		}
-
 	}
 }
 
@@ -100,6 +100,7 @@ func (w *windowImpl) setIcon(img image.Image) error {
 }
 
 func (w *windowImpl) setOnClosing(callback func() bool) {
+	w.onClosing = callback
 }
 
 func (w *windowImpl) setTitle(value string) error {
@@ -107,4 +108,20 @@ func (w *windowImpl) setTitle(value string) error {
 }
 
 func (w *windowImpl) updateWindowMinSize() {
+}
+
+type windowCallbacks windowImpl 
+
+func (w *windowCallbacks) OnClosing() bool {
+	if w.onClosing!=nil {
+		return w.onClosing()
+	}
+	return false
+}
+
+func (w *windowCallbacks) OnClose() {
+	w.handle = nil
+	if newval := atomic.AddInt32(&mainWindowCount, -1); newval == 0 {
+		cocoa.Stop()
+	}
 }

@@ -7,6 +7,7 @@ package cocoa
 import "C"
 import "unsafe"
 
+// Button is a wrapper for a NSButton.
 type Button struct {
 	Control
 	private int

@@ -7,9 +7,19 @@ package cocoa
 import "C"
 import "unsafe"
 
+// Window is a wrapper for a NSWindow.
 type Window struct {
 	private int
 }
+
+type WindowCallbacks interface {
+	OnClosing() bool
+	OnClose()
+}
+
+var (
+	windowCallbacks = make(map[unsafe.Pointer]WindowCallbacks)
+)
 
 func NewWindow(title string, width, height uint) *Window {
 	ctitle := C.CString(title)
@@ -31,13 +41,23 @@ func (w *Window) ContentSize() (int, int) {
 	return int(px), int(h)
 }
 
+func (w *Window) SetCallbacks(cb WindowCallbacks) {
+	windowCallbacks[unsafe.Pointer(w)] = cb
+}
+
 //export windowShouldClose
 func windowShouldClose(handle unsafe.Pointer) bool {
-	println("windowShouldClose", handle)
+	if cb := windowCallbacks[handle]; cb != nil {
+		return !cb.OnClosing()
+	}
+	
 	return true
 }
 
 //export windowWillClose
 func windowWillClose(handle unsafe.Pointer) {
-	println("windowWillClose", handle)
+	if cb := windowCallbacks[handle]; cb != nil {
+		cb.OnClose()
+	}
+	delete( windowCallbacks, handle )
 }
