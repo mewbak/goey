@@ -2,11 +2,6 @@
 #include "cocoa.h"
 #import <Cocoa/Cocoa.h>
 
-@interface GoeyButton : NSButton
-- (void)onclick;
-- (BOOL)becomeFirstResponder;
-@end
-
 @implementation NSButton ( Goey )
 
 - (void)onclick {

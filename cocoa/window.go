@@ -30,3 +30,14 @@ func (w *Window) ContentSize() (int, int) {
 	px := C.windowContentSize(unsafe.Pointer(w), &h)
 	return int(px), int(h)
 }
+
+//export windowShouldClose
+func windowShouldClose(handle unsafe.Pointer) bool {
+	println("windowShouldClose", handle)
+	return true
+}
+
+//export windowWillClose
+func windowWillClose(handle unsafe.Pointer) {
+	println("windowWillClose", handle)
+}

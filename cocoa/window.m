@@ -1,3 +1,4 @@
+#include "_cgo_export.h"
 #include "cocoa.h"
 #import <Cocoa/Cocoa.h>
 
@@ -5,7 +6,37 @@
 	( NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | \
 	  NSResizableWindowMask )
 
+@implementation NSWindow ( Goey )
+
+- (BOOL)windowShouldClose:(id)sender {
+	if ( windowShouldClose( sender ) != 0 ) {
+		return YES;
+	}
+	return NO;
+}
+
+@end
+
+@interface MyWindowDelegate : NSObject <NSWindowDelegate>
+- (void)windowWillClose:(NSNotification*)aNotification;
+@end
+
+@implementation MyWindowDelegate
+
+- (void)windowWillClose:(NSNotification*)notification {
+	NSWindow* window = [notification object];
+	windowWillClose( window );
+}
+
+@end
+
 void* windowNew( char const* title, unsigned width, unsigned height ) {
+	// Make sure that we have a delegate
+	static MyWindowDelegate* delegate = 0;
+	if ( !delegate ) {
+		delegate = [[MyWindowDelegate alloc] init];
+	}
+
 	NSString* appName = [[NSString alloc] initWithUTF8String:title];
 
 	NSWindow* window =
@@ -14,6 +45,7 @@ void* windowNew( char const* title, unsigned width, unsigned height ) {
 	                                   backing:NSBackingStoreBuffered
 	                                     defer:NO] autorelease];
 	[window cascadeTopLeftFromPoint:NSMakePoint( 20, 20 )];
+	[window setDelegate:delegate];
 	[window setTitle:appName];
 	[window makeKeyAndOrderFront:nil];
 	return window;
