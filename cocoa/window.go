@@ -13,8 +13,9 @@ type Window struct {
 }
 
 type WindowCallbacks interface {
-	OnClosing() bool
-	OnClose()
+	OnShouldClose() bool
+	OnWillClose()
+	OnDidResize()
 }
 
 var (
@@ -48,7 +49,7 @@ func (w *Window) SetCallbacks(cb WindowCallbacks) {
 //export windowShouldClose
 func windowShouldClose(handle unsafe.Pointer) bool {
 	if cb := windowCallbacks[handle]; cb != nil {
-		return !cb.OnClosing()
+		return cb.OnShouldClose()
 	}
 	
 	return true
@@ -57,7 +58,14 @@ func windowShouldClose(handle unsafe.Pointer) bool {
 //export windowWillClose
 func windowWillClose(handle unsafe.Pointer) {
 	if cb := windowCallbacks[handle]; cb != nil {
-		cb.OnClose()
+		cb.OnWillClose()
 	}
 	delete( windowCallbacks, handle )
+}
+
+//export windowDidResize
+func windowDidResize(handle unsafe.Pointer) {
+	if cb := windowCallbacks[handle]; cb != nil {
+		cb.OnDidResize()
+	}
 }

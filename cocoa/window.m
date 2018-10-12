@@ -19,6 +19,7 @@
 
 @interface MyWindowDelegate : NSObject <NSWindowDelegate>
 - (void)windowWillClose:(NSNotification*)aNotification;
+- (void)windowDidResize:(NSNotification*)aNotification;
 @end
 
 @implementation MyWindowDelegate
@@ -26,6 +27,11 @@
 - (void)windowWillClose:(NSNotification*)notification {
 	NSWindow* window = [notification object];
 	windowWillClose( window );
+}
+
+- (void)windowDidResize:(NSNotification*)notification {
+	NSWindow* window = [notification object];
+	windowDidResize( window );
 }
 
 @end

@@ -15,7 +15,7 @@ type windowImpl struct {
 	child            base.Element
 	horizontalScroll bool
 	verticalScroll   bool
-	
+
 	onClosing func() bool
 }
 
@@ -37,7 +37,7 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 		handle: handle,
 	}}
 	handle.SetCallbacks((*windowCallbacks)(&retval.windowImpl))
-	
+
 	return retval, nil
 }
 
@@ -110,18 +110,23 @@ func (w *windowImpl) setTitle(value string) error {
 func (w *windowImpl) updateWindowMinSize() {
 }
 
-type windowCallbacks windowImpl 
+type windowCallbacks windowImpl
 
-func (w *windowCallbacks) OnClosing() bool {
-	if w.onClosing!=nil {
-		return w.onClosing()
+func (w *windowCallbacks) OnShouldClose() bool {
+	if w.onClosing != nil {
+		return !w.onClosing()
 	}
-	return false
+	return true
 }
 
-func (w *windowCallbacks) OnClose() {
+func (w *windowCallbacks) OnWillClose() {
 	w.handle = nil
 	if newval := atomic.AddInt32(&mainWindowCount, -1); newval == 0 {
 		cocoa.Stop()
 	}
+}
+
+func (w *windowCallbacks) OnDidResize() {
+	impl := (*windowImpl)(w)
+	impl.onSize()
 }
