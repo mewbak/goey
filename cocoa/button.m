@@ -33,7 +33,6 @@ void* buttonNew( void* window, char const* title ) {
 }
 
 void buttonClose( void* handle ) {
-	printf( "closeWindow\n" );
 	NSButton* control = handle;
 	[control release];
 }

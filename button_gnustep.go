@@ -48,7 +48,7 @@ func (w *buttonElement) MinIntrinsicWidth(base.Length) base.Length {
 
 func (w *buttonElement) SetBounds(bounds base.Rectangle) {
 	px := bounds.Pixels()
-	w.control.SetBounds(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
+	w.control.SetFrame(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
 }
 
 func (w *buttonElement) updateProps(data *Button) error {
