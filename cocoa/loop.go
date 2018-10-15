@@ -14,7 +14,6 @@ func Init() {
 
 func Run() error {
 	// Run the event loop.
-	println("run")
 	C.run()
 	return nil
 }
@@ -42,6 +41,5 @@ func callbackDo() {
 }
 
 func Stop() {
-	println("stop")
 	C.stop()
 }

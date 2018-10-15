@@ -7,9 +7,24 @@ import (
 )
 
 func testingClick(t *testing.T, w *Window, i int) {
-	panic("")
+	// Check the size
+	child := w.child.(*vboxElement).children[i]
+	if elem, ok := child.(*buttonElement); ok {
+		elem.control.PerformClick()
+		//} else if elem, ok := child.(*checkboxElement); ok {
+		//	elem.checkbutton().Clicked()
+	} else {
+		panic("Unsupported widget in testingClick")
+	}
 }
 
 func testingSetFocus(t *testing.T, w *Window, i int) {
-	panic("")
+	child := w.child.(*vboxElement).children[i]
+	if elem, ok := child.(*buttonElement); ok {
+		w.handle.MakeFirstResponder(&elem.control.Control)
+		//} else if elem, ok := child.(*checkboxElement); ok {
+		//	elem.checkbutton().Clicked()
+	} else {
+		panic("Unsupported widget in testingClick")
+	}
 }

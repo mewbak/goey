@@ -14,6 +14,7 @@ type buttonElement struct {
 func (w *Button) mount(parent base.Control) (base.Element, error) {
 	control := cocoa.NewButton(parent.Handle, w.Text)
 	control.SetCallbacks(w.OnClick, w.OnFocus, w.OnBlur)
+	control.SetEnabled(!w.Disabled)
 
 	retval := &buttonElement{
 		control: control,
@@ -46,6 +47,20 @@ func (w *buttonElement) MinIntrinsicWidth(base.Length) base.Length {
 	return base.FromPixelsX(px)
 }
 
+func (w *buttonElement) Props() base.Widget {
+	text := w.control.Title()
+	disabled := !w.control.IsEnabled()
+	onclick, onfocus, onblur := w.control.Callbacks()
+
+	return &Button{
+		Text:     text,
+		Disabled: disabled,
+		OnClick:  onclick,
+		OnFocus:  onfocus,
+		OnBlur:   onblur,
+	}
+}
+
 func (w *buttonElement) SetBounds(bounds base.Rectangle) {
 	px := bounds.Pixels()
 	w.control.SetFrame(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
@@ -53,5 +68,7 @@ func (w *buttonElement) SetBounds(bounds base.Rectangle) {
 
 func (w *buttonElement) updateProps(data *Button) error {
 	w.control.SetTitle(data.Text)
+	w.control.SetEnabled(!data.Disabled)
+	w.control.SetCallbacks(data.OnClick, data.OnFocus, data.OnBlur)
 	return nil
 }

@@ -22,6 +22,11 @@ func (c *Control) Close() {
 	C.controlClose(unsafe.Pointer(c))
 }
 
+func (c *Control) IsEnabled() bool {
+	rc := C.controlIsEnabled(unsafe.Pointer(c))
+	return rc != 0
+}
+
 func (c *Control) IntrinsicContentSize() (int, int) {
 	var h C.int
 	w := C.controlIntrinsicContentSize(unsafe.Pointer(c), &h)

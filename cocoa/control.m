@@ -1,6 +1,10 @@
 #include "cocoa.h"
 #import <Cocoa/Cocoa.h>
 
+BOOL controlIsEnabled( void* handle ) {
+	return [(NSControl*)handle isEnabled];
+}
+
 void controlSetEnabled( void* handle, BOOL value ) {
 	[(NSControl*)handle setEnabled:value];
 }

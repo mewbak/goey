@@ -42,6 +42,10 @@ func (w *Window) ContentSize() (int, int) {
 	return int(px), int(h)
 }
 
+func (w *Window) MakeFirstResponder(c *Control) {
+	C.windowMakeFirstResponder(unsafe.Pointer(w), unsafe.Pointer(c))
+}
+
 func (w *Window) SetCallbacks(cb WindowCallbacks) {
 	windowCallbacks[unsafe.Pointer(w)] = cb
 }
@@ -51,7 +55,7 @@ func windowShouldClose(handle unsafe.Pointer) bool {
 	if cb := windowCallbacks[handle]; cb != nil {
 		return cb.OnShouldClose()
 	}
-	
+
 	return true
 }
 
@@ -60,7 +64,7 @@ func windowWillClose(handle unsafe.Pointer) {
 	if cb := windowCallbacks[handle]; cb != nil {
 		cb.OnWillClose()
 	}
-	delete( windowCallbacks, handle )
+	delete(windowCallbacks, handle)
 }
 
 //export windowDidResize

@@ -69,3 +69,10 @@ int windowContentSize( void* handle, int* h ) {
 	*h = frame.size.height;
 	return frame.size.width;
 }
+
+void windowMakeFirstResponder( void* handle1, void* handle2 ) {
+	NSWindow* w = (NSWindow*)handle1;
+	NSControl* c = (NSControl*)handle2;
+
+	[w makeFirstResponder:c];
+}

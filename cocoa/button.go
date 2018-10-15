@@ -38,12 +38,26 @@ func (w *Button) Close() {
 	delete(buttonCallbacks, unsafe.Pointer(w))
 }
 
+func (w *Button) PerformClick() {
+	C.buttonPerformClick(unsafe.Pointer(w))
+}
+
+func (w *Button) Callbacks() (func(), func(), func()) {
+	cb := buttonCallbacks[unsafe.Pointer(w)]
+	return cb.onClick, cb.onFocus, cb.onBlur
+}
+
 func (w *Button) SetCallbacks(onclick func(), onfocus func(), onblur func()) {
 	buttonCallbacks[unsafe.Pointer(w)] = buttonCallback{
 		onClick: onclick,
 		onFocus: onfocus,
 		onBlur:  onblur,
 	}
+}
+
+func (w *Button) Title() string {
+	//cstring := C.buttonTitle(unsafe.Pointer(w))
+	return "" //C.GoString(cstring)
 }
 
 func (w *Button) SetTitle(title string) {
@@ -64,10 +78,14 @@ func buttonOnClick(handle unsafe.Pointer) {
 
 //export buttonOnFocus
 func buttonOnFocus(handle unsafe.Pointer) {
-	println("focus!", handle)
+	if cb := buttonCallbacks[handle]; cb.onFocus != nil {
+		cb.onFocus()
+	}
 }
 
 //export buttonOnBlur
 func buttonOnBlur(handle unsafe.Pointer) {
-	println("blur!", handle)
+	if cb := buttonCallbacks[handle]; cb.onBlur != nil {
+		cb.onBlur()
+	}
 }

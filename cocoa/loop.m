@@ -47,7 +47,6 @@ void stop() {
 }
 
 - (id)main {
-	printf( "Ta da...\n" );
 	callbackDo();
 }
 
