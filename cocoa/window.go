@@ -50,6 +50,10 @@ func (w *Window) SetCallbacks(cb WindowCallbacks) {
 	windowCallbacks[unsafe.Pointer(w)] = cb
 }
 
+func (w *Window) SetMinSize(width, height int) {
+	C.windowSetMinSize(unsafe.Pointer(w), C.int(width), C.int(height))
+}
+
 //export windowShouldClose
 func windowShouldClose(handle unsafe.Pointer) bool {
 	if cb := windowCallbacks[handle]; cb != nil {

@@ -76,3 +76,11 @@ void windowMakeFirstResponder( void* handle1, void* handle2 ) {
 
 	[w makeFirstResponder:c];
 }
+
+void windowSetMinSize( void* handle, int width, int height ) {
+	NSWindow* w = (NSWindow*)handle;
+	
+	// Adjust size from content to outer frame
+	NSRect adjusted = [NSWindow frameRectForContentRect:NSMakeRect(0,0,width,height) styleMask:[w styleMask]];
+	[w setMinSize:NSMakeSize(NSWidth(adjusted), NSHeight(adjusted))];
+}

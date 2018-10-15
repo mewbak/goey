@@ -11,6 +11,7 @@ extern void* windowNew( char const* title, unsigned width, unsigned height );
 extern void windowClose( void* handle );
 extern int windowContentSize( void* handle, int* h );
 extern void windowMakeFirstResponder( void* handle, void* control );
+extern void windowSetMinSize( void* handle, int width, int height );
 
 /* View */
 extern void viewSetFrame( void* handle, int x, int y, int dx, int dy );

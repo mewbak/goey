@@ -3,7 +3,7 @@
 
 void* textNew( void* window, char const* text ) {
 	NSString* nsText = [[NSString alloc] initWithUTF8String:text];
-	
+
 	// Create the text view
 	NSText* control = [[NSText alloc] init];
 	[control setText:nsText];
