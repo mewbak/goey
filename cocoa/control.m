@@ -10,6 +10,7 @@ void controlSetEnabled( void* handle, BOOL value ) {
 }
 
 void controlClose( void* handle ) {
+	assert( [(id)handle isKindOfClass:[NSControl class]] );
 	[(NSControl*)handle release];
 }
 

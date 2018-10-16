@@ -24,7 +24,10 @@ extern int controlIntrinsicContentSize( void* handle, int* h );
 
 /* Button */
 extern void* buttonNew( void* window, char const* title );
+extern void* buttonNewCheck( void* window, char const* title );
 extern void buttonPerformClick( void* handle );
+extern BOOL buttonState( void* handle );
+extern void buttonSetState( void* handle, BOOL checked );
 extern char const* buttonTitle( void* handle );
 extern void buttonSetTitle( void* handle, char const* title );
 

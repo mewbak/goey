@@ -14,6 +14,11 @@
 	buttonOnClick( self );
 }
 
+- (void)onchange {
+	NSInteger s = [self state];
+	buttonOnChange( self, s == NSOnState );
+}
+
 - (BOOL)becomeFirstResponder {
 	BOOL rc = [super becomeFirstResponder];
 	if ( rc ) {
@@ -33,6 +38,8 @@
 @end
 
 void* buttonNew( void* window, char const* title ) {
+	assert( [(id)window isKindOfClass:[NSWindow class]] );
+
 	NSString* nsTitle = [[NSString alloc] initWithUTF8String:title];
 
 	// Create the button
@@ -49,8 +56,38 @@ void* buttonNew( void* window, char const* title ) {
 	return control;
 }
 
+void* buttonNewCheck( void* window, char const* title ) {
+	assert( [(id)window isKindOfClass:[NSWindow class]] );
+
+	NSString* nsTitle = [[NSString alloc] initWithUTF8String:title];
+
+	// Create the button
+	GButton* control = [[GButton alloc] init];
+	[control setButtonType:NSSwitchButton];
+	[control setTitle:nsTitle];
+	[control setTarget:control];
+	[control setAction:@selector( onchange )];
+
+	// Add the button as the view for the window
+	NSView* cv = [(NSWindow*)window contentView];
+	[cv addSubview:control];
+
+	// Return handle to the control
+	return control;
+}
+
 void buttonPerformClick( void* handle ) {
-	[[(NSButton*)handle cell] performClick:nil];
+	[[(GButton*)handle cell] performClick:nil];
+}
+
+BOOL buttonState( void* handle ) {
+	NSInteger s = [(GButton*)handle state];
+	return s == NSOnState;
+}
+
+void buttonSetState( void* handle, BOOL state ) {
+	NSInteger s = state ? NSOnState : NSOffState;
+	[(GButton*)handle setState:s];
 }
 
 char const* buttonTitle( void* handle ) {

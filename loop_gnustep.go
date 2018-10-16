@@ -3,8 +3,9 @@
 package goey
 
 import (
-	"bitbucket.org/rj/goey/cocoa"
 	"sync"
+
+	"bitbucket.org/rj/goey/cocoa"
 )
 
 var (
@@ -24,7 +25,5 @@ func run() error {
 }
 
 func do(action func() error) error {
-	println("do")
-	defer func() { println("enddo") }()
 	return cocoa.Do(action)
 }

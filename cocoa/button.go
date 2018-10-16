@@ -14,9 +14,10 @@ type Button struct {
 }
 
 type buttonCallback struct {
-	onClick func()
-	onFocus func()
-	onBlur  func()
+	onClick  func()
+	onChange func(bool)
+	onFocus  func()
+	onBlur   func()
 }
 
 var (
@@ -33,6 +34,17 @@ func NewButton(window *Window, title string) *Button {
 	return (*Button)(handle)
 }
 
+func NewCheckButton(window *Window, title string, value bool) *Button {
+	ctitle := C.CString(title)
+	defer func() {
+		C.free(unsafe.Pointer(ctitle))
+	}()
+
+	handle := C.buttonNewCheck(unsafe.Pointer(window), ctitle)
+	C.buttonSetState(unsafe.Pointer(handle), toBOOL(value))
+	return (*Button)(handle)
+}
+
 func (w *Button) Close() {
 	C.controlClose(unsafe.Pointer(w))
 	delete(buttonCallbacks, unsafe.Pointer(w))
@@ -42,17 +54,26 @@ func (w *Button) PerformClick() {
 	C.buttonPerformClick(unsafe.Pointer(w))
 }
 
-func (w *Button) Callbacks() (func(), func(), func()) {
+func (w *Button) Callbacks() (func(), func(bool), func(), func()) {
 	cb := buttonCallbacks[unsafe.Pointer(w)]
-	return cb.onClick, cb.onFocus, cb.onBlur
+	return cb.onClick, cb.onChange, cb.onFocus, cb.onBlur
 }
 
-func (w *Button) SetCallbacks(onclick func(), onfocus func(), onblur func()) {
+func (w *Button) SetCallbacks(onclick func(), onchange func(bool), onfocus func(), onblur func()) {
 	buttonCallbacks[unsafe.Pointer(w)] = buttonCallback{
-		onClick: onclick,
-		onFocus: onfocus,
-		onBlur:  onblur,
+		onClick:  onclick,
+		onChange: onchange,
+		onFocus:  onfocus,
+		onBlur:   onblur,
 	}
+}
+
+func (w *Button) State() bool {
+	return C.buttonState(unsafe.Pointer(w)) != 0
+}
+
+func (w *Button) SetState(value bool) {
+	C.buttonSetState(unsafe.Pointer(w), toBOOL(value))
 }
 
 func (w *Button) Title() string {
@@ -73,6 +94,13 @@ func (w *Button) SetTitle(title string) {
 func buttonOnClick(handle unsafe.Pointer) {
 	if cb := buttonCallbacks[handle]; cb.onClick != nil {
 		cb.onClick()
+	}
+}
+
+//export buttonOnChange
+func buttonOnChange(handle unsafe.Pointer, value bool) {
+	if cb := buttonCallbacks[handle]; cb.onChange != nil {
+		cb.onChange(value)
 	}
 }
 
