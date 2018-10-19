@@ -56,7 +56,7 @@ void* buttonNew( void* window, char const* title ) {
 	return control;
 }
 
-void* buttonNewCheck( void* window, char const* title ) {
+void* buttonNewCheck( void* window, char const* title, bool_t value ) {
 	assert( [(id)window isKindOfClass:[NSWindow class]] );
 
 	NSString* nsTitle = [[NSString alloc] initWithUTF8String:title];
@@ -66,6 +66,7 @@ void* buttonNewCheck( void* window, char const* title ) {
 	[control setButtonType:NSSwitchButton];
 	[control setTitle:nsTitle];
 	[control setTarget:control];
+    [control setState:value];
 	[control setAction:@selector( onchange )];
 
 	// Add the button as the view for the window
@@ -80,12 +81,12 @@ void buttonPerformClick( void* handle ) {
 	[[(GButton*)handle cell] performClick:nil];
 }
 
-BOOL buttonState( void* handle ) {
+bool_t buttonState( void* handle ) {
 	NSInteger s = [(GButton*)handle state];
 	return s == NSOnState;
 }
 
-void buttonSetState( void* handle, BOOL state ) {
+void buttonSetState( void* handle, bool_t state ) {
 	NSInteger s = state ? NSOnState : NSOffState;
 	[(GButton*)handle setState:s];
 }

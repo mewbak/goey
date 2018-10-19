@@ -40,8 +40,7 @@ func NewCheckButton(window *Window, title string, value bool) *Button {
 		C.free(unsafe.Pointer(ctitle))
 	}()
 
-	handle := C.buttonNewCheck(unsafe.Pointer(window), ctitle)
-	C.buttonSetState(unsafe.Pointer(handle), toBOOL(value))
+	handle := C.buttonNewCheck(unsafe.Pointer(window), ctitle, toBool(value))
 	return (*Button)(handle)
 }
 
@@ -69,11 +68,12 @@ func (w *Button) SetCallbacks(onclick func(), onchange func(bool), onfocus func(
 }
 
 func (w *Button) State() bool {
-	return C.buttonState(unsafe.Pointer(w)) != 0
+	rc := C.buttonState(unsafe.Pointer(w))
+	return int(rc) != 0
 }
 
 func (w *Button) SetState(value bool) {
-	C.buttonSetState(unsafe.Pointer(w), toBOOL(value))
+	C.buttonSetState(unsafe.Pointer(w), toBool(value))
 }
 
 func (w *Button) Title() string {

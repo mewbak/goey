@@ -8,8 +8,9 @@ package cocoa
 import "C"
 import "sync"
 
-func Init() {
+func Init() error {
 	C.init()
+	return nil
 }
 
 func Run() error {
@@ -20,7 +21,7 @@ func Run() error {
 
 var (
 	thunkAction func() error
-	thunkErr    chan error
+	thunkErr    error
 	thunkMutex  sync.Mutex
 )
 
@@ -29,15 +30,13 @@ func Do(action func() error) error {
 	defer thunkMutex.Unlock()
 
 	thunkAction = action
-	thunkErr = make(chan error, 1)
 	C.thunkDo()
-	return <-thunkErr
+	return thunkErr
 }
 
 //export callbackDo
 func callbackDo() {
-	err := thunkAction()
-	thunkErr <- err
+	thunkErr = thunkAction()
 }
 
 func Stop() {

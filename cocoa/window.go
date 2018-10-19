@@ -37,9 +37,8 @@ func (w *Window) Close() {
 }
 
 func (w *Window) ContentSize() (int, int) {
-	var h C.int
-	px := C.windowContentSize(unsafe.Pointer(w), &h)
-	return int(px), int(h)
+	size := C.windowContentSize(unsafe.Pointer(w))
+	return int(size.width), int(size.height)
 }
 
 func (w *Window) MakeFirstResponder(c *Control) {

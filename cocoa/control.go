@@ -11,11 +11,11 @@ type Control struct {
 	private int
 }
 
-func toBOOL(b bool) C.BOOL {
+func toBool(b bool) C.bool_t {
 	if b {
-		return C.YES
+		return 1
 	}
-	return C.NO
+	return 0
 }
 
 func (c *Control) Close() {
@@ -28,11 +28,10 @@ func (c *Control) IsEnabled() bool {
 }
 
 func (c *Control) IntrinsicContentSize() (int, int) {
-	var h C.int
-	w := C.controlIntrinsicContentSize(unsafe.Pointer(c), &h)
-	return int(w), int(h)
+	size := C.controlIntrinsicContentSize(unsafe.Pointer(c))
+	return int(size.width), int(size.height)
 }
 
 func (c *Control) SetEnabled(enabled bool) {
-	C.controlSetEnabled(unsafe.Pointer(c), toBOOL(enabled))
+	C.controlSetEnabled(unsafe.Pointer(c), toBool(enabled))
 }

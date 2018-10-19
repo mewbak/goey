@@ -47,22 +47,48 @@ static void initApplication() {
 	[appMenuItem setSubmenu:appMenu];
 }
 
+static NSAutoreleasePool* pool = 0;
+
 void init() {
+    assert( !pool );
+
 	detachAThread();
+
+    printf("init\t%p\n", [NSThread currentThread] ); fflush(stdout);
 
 	// This is a global release pool that we will keep around.  This will still
 	// cause leaks, but until we identify where the autoreleasepool is required,
 	// this will get us running.
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-	initApplication();
+	pool = [[NSAutoreleasePool alloc] init];
+    assert( pool );
+    if ( !NSApp ) {
+    	initApplication();
+    }
 }
 
 void run() {
+    assert( [NSThread isMultiThreaded] );
+    assert( NSApp && ![NSApp isRunning] );
+
+    printf("run\t%p\n", [NSThread currentThread] ); fflush(stdout);
+
 	[NSApp activateIgnoringOtherApps:YES];
 	[NSApp run];
+
+    printf("run*\t%p\n", [NSThread currentThread] ); fflush(stdout);
+
+    //assert( [pool retainCount]==1 );
+    //[pool release];
+    pool = 0;
+
 }
 
 void stop() {
+    assert( [NSThread isMultiThreaded] );
+    assert( NSApp && [NSApp isRunning] );
+    
+    printf("stop\t%p\n", [NSThread currentThread] ); fflush(stdout);
+
 	[NSApp stop:nil];
 }
 
@@ -80,18 +106,32 @@ void stop() {
 }
 
 - (id)main {
+    printf("cb\t%p\n", [NSThread currentThread] ); fflush(stdout);
+
 	callbackDo();
 }
 
 @end
 
 void thunkDo() {
-	assert( [NSThread isMultiThreaded] );
+    assert( [NSThread isMultiThreaded] );
+    assert( [NSThread currentThread] );
+    assert( NSApp );
+    
+    printf("do\t%p\n", [NSThread currentThread] );
+
 	NSAutoreleasePool* pool = [NSAutoreleasePool new];
+
+    while ( ![NSApp isRunning] ) {
+        [NSThread sleepForTimeInterval:0.001];
+    }
+
+    printf("do*\t%p\n", [NSThread currentThread] ); fflush(stdout);
 
 	NSOperation* operation = [[DoActionOperation alloc] init];
 	NSOperationQueue* targetQueue = [NSOperationQueue mainQueue];
 	[targetQueue addOperation:operation];
+    [operation waitUntilFinished];
 	[operation release];
 
 	[pool release];

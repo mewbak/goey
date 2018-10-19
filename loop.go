@@ -50,12 +50,17 @@ func Run(action func() error) error {
 		atomic.StoreUint32(&isRunning, 0)
 	}()
 
+	err := run_init()
+	if err != nil {
+		return err
+	}
+
 	// Since we have now locked the OS thread, we can call the initial action.
 	// We want to hold a reference to a virtual window by increasing the
 	// count to prevent a premature exit if any windows are created and then
 	// destroyed during the initialization.  To handle any panics, the call
 	// to action needs to be wrapped in a function.
-	err := func(action func() error) error {
+	err = func(action func() error) error {
 		atomic.AddInt32(&mainWindowCount, 1)
 		defer func() {
 			atomic.AddInt32(&mainWindowCount, -1)

@@ -62,12 +62,13 @@ void windowClose( void* handle ) {
 	[window close];
 }
 
-int windowContentSize( void* handle, int* h ) {
+nssize_t windowContentSize( void* handle ) {
 	NSUInteger style = [(NSWindow*)handle styleMask];
 	NSRect frame = [(NSWindow*)handle frame];
 	frame = [NSWindow contentRectForFrameRect:frame styleMask:style];
-	*h = frame.size.height;
-	return frame.size.width;
+
+    nssize_t ret = { frame.size.width, frame.size.height };
+	return ret;
 }
 
 void windowMakeFirstResponder( void* handle1, void* handle2 ) {

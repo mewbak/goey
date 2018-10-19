@@ -1,11 +1,11 @@
 #include "cocoa.h"
 #import <Cocoa/Cocoa.h>
 
-BOOL controlIsEnabled( void* handle ) {
+bool_t controlIsEnabled( void* handle ) {
 	return [(NSControl*)handle isEnabled];
 }
 
-void controlSetEnabled( void* handle, BOOL value ) {
+void controlSetEnabled( void* handle, bool_t value ) {
 	[(NSControl*)handle setEnabled:value];
 }
 
@@ -14,13 +14,13 @@ void controlClose( void* handle ) {
 	[(NSControl*)handle release];
 }
 
-int controlIntrinsicContentSize( void* handle, int* h ) {
+nssize_t controlIntrinsicContentSize( void* handle ) {
 	// Note that accessing the cell is deprecated, but GNUstep does not have
 	// the newer methods needed to gather this information.
 	NSCell* cell = [(NSControl*)handle cell];
 	NSSize size = [cell cellSize];
 
 	// Return the values
-	*h = size.height;
-	return size.width;
+    nssize_t ret = { size.width, size.height };
+    return ret;
 }
