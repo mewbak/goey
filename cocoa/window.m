@@ -37,6 +37,9 @@
 @end
 
 void* windowNew( char const* title, unsigned width, unsigned height ) {
+	assert( [NSThread isMainThread] );
+	assert( title );
+
 	// Make sure that we have a delegate
 	static MyWindowDelegate* delegate = 0;
 	if ( !delegate ) {
@@ -67,7 +70,7 @@ nssize_t windowContentSize( void* handle ) {
 	NSRect frame = [(NSWindow*)handle frame];
 	frame = [NSWindow contentRectForFrameRect:frame styleMask:style];
 
-    nssize_t ret = { frame.size.width, frame.size.height };
+	nssize_t ret = {frame.size.width, frame.size.height};
 	return ret;
 }
 

@@ -21,6 +21,6 @@ nssize_t controlIntrinsicContentSize( void* handle ) {
 	NSSize size = [cell cellSize];
 
 	// Return the values
-    nssize_t ret = { size.width, size.height };
-    return ret;
+	nssize_t ret = {size.width, size.height};
+	return ret;
 }

@@ -9,15 +9,16 @@
 typedef unsigned bool_t;
 
 typedef struct nssize_tag {
-    int32_t width; 
-    int32_t height;
+	int32_t width;
+	int32_t height;
 } nssize_t;
 
 /* Event loop */
-extern void init();
-extern void run();
-extern void thunkDo();
-extern void stop();
+extern void init( void );
+extern void run( void );
+extern void thunkDo( void );
+extern void stop( void );
+extern bool_t isMainThread( void );
 
 /* Window */
 extern void* windowNew( char const* title, unsigned width, unsigned height );

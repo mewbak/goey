@@ -20,11 +20,7 @@ type windowImpl struct {
 }
 
 func newWindow(title string, child base.Widget) (*Window, error) {
-	// Don't want to run GUI init unless the program actually gets
-	// around to starting the GUI.
-	initCocoa.Do(func() {
-		cocoa.Init()
-	})
+	main_loop_init()
 
 	// Update the global DPI
 	base.DPI.X, base.DPI.Y = 96, 96

@@ -66,7 +66,7 @@ void* buttonNewCheck( void* window, char const* title, bool_t value ) {
 	[control setButtonType:NSSwitchButton];
 	[control setTitle:nsTitle];
 	[control setTarget:control];
-    [control setState:value];
+	[control setState:value];
 	[control setAction:@selector( onchange )];
 
 	// Add the button as the view for the window

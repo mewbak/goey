@@ -42,3 +42,7 @@ func callbackDo() {
 func Stop() {
 	C.stop()
 }
+
+func IsMainThread() bool {
+	return C.isMainThread() != 0
+}

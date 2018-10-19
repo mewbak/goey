@@ -50,44 +50,41 @@ static void initApplication() {
 static NSAutoreleasePool* pool = 0;
 
 void init() {
-    assert( !pool );
+	assert( !pool );
+	assert( !NSApp );
+	assert( [NSThread isMainThread] );
 
 	detachAThread();
-
-    printf("init\t%p\n", [NSThread currentThread] ); fflush(stdout);
+	assert( [NSThread isMultiThreaded] );
 
 	// This is a global release pool that we will keep around.  This will still
 	// cause leaks, but until we identify where the autoreleasepool is required,
 	// this will get us running.
 	pool = [[NSAutoreleasePool alloc] init];
-    assert( pool );
-    if ( !NSApp ) {
-    	initApplication();
-    }
+	assert( pool );
+	initApplication();
+	assert( NSApp && ![NSApp isRunning] );
 }
 
 void run() {
-    assert( [NSThread isMultiThreaded] );
-    assert( NSApp && ![NSApp isRunning] );
-
-    printf("run\t%p\n", [NSThread currentThread] ); fflush(stdout);
+	assert( [NSThread isMultiThreaded] );
+	assert( [NSThread isMainThread] );
+	assert( NSApp && ![NSApp isRunning] );
+	assert( pool );
 
 	[NSApp activateIgnoringOtherApps:YES];
 	[NSApp run];
 
-    printf("run*\t%p\n", [NSThread currentThread] ); fflush(stdout);
-
-    //assert( [pool retainCount]==1 );
-    //[pool release];
-    pool = 0;
-
+	printf( "run %p %lu\n", pool, [pool retainCount] );
+	assert( [pool retainCount] == 1 );
+	//[pool release];  // this causes a SIGSEGV, why?
+	pool = 0;
 }
 
 void stop() {
-    assert( [NSThread isMultiThreaded] );
-    assert( NSApp && [NSApp isRunning] );
-    
-    printf("stop\t%p\n", [NSThread currentThread] ); fflush(stdout);
+	assert( [NSThread isMultiThreaded] );
+	assert( [NSThread isMainThread] );
+	assert( NSApp && [NSApp isRunning] );
 
 	[NSApp stop:nil];
 }
@@ -106,7 +103,9 @@ void stop() {
 }
 
 - (id)main {
-    printf("cb\t%p\n", [NSThread currentThread] ); fflush(stdout);
+	assert( [NSThread isMultiThreaded] );
+	assert( [NSThread isMainThread] );
+	assert( NSApp && [NSApp isRunning] );
 
 	callbackDo();
 }
@@ -114,25 +113,23 @@ void stop() {
 @end
 
 void thunkDo() {
-    assert( [NSThread isMultiThreaded] );
-    assert( [NSThread currentThread] );
-    assert( NSApp );
-    
-    printf("do\t%p\n", [NSThread currentThread] );
+	assert( [NSThread isMultiThreaded] );
+	assert( ![NSThread isMainThread] );
+	assert( NSApp );
+
+	while ( ![NSApp isRunning] ) {
+		[NSThread sleepForTimeInterval:0.001];
+	}
 
 	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-
-    while ( ![NSApp isRunning] ) {
-        [NSThread sleepForTimeInterval:0.001];
-    }
-
-    printf("do*\t%p\n", [NSThread currentThread] ); fflush(stdout);
-
 	NSOperation* operation = [[DoActionOperation alloc] init];
 	NSOperationQueue* targetQueue = [NSOperationQueue mainQueue];
 	[targetQueue addOperation:operation];
-    [operation waitUntilFinished];
+	[operation waitUntilFinished];
 	[operation release];
-
 	[pool release];
+}
+
+bool_t isMainThread( void ) {
+	return [NSThread isMainThread];
 }
