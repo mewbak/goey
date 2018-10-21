@@ -16,9 +16,11 @@ typedef struct nssize_tag {
 /* Event loop */
 extern void init( void );
 extern void run( void );
-extern void thunkDo( void );
+extern void do_thunk( void );
 extern void stop( void );
 extern bool_t isMainThread( void );
+
+extern void trace( char const* func );
 
 /* Window */
 extern void* windowNew( char const* title, unsigned width, unsigned height );

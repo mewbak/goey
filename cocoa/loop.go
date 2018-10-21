@@ -30,7 +30,7 @@ func Do(action func() error) error {
 	defer thunkMutex.Unlock()
 
 	thunkAction = action
-	C.thunkDo()
+	C.do_thunk()
 	return thunkErr
 }
 

@@ -3,17 +3,20 @@
 package goey
 
 import (
-	"bitbucket.org/rj/goey/cocoa"
 	"runtime"
 	"sync"
+
+	"bitbucket.org/rj/goey/cocoa"
 )
 
 var (
-	cocoaInit      sync.Once
-	mainLoopLaunch = make(chan struct{}, 0)
+	cocoaInit sync.Once
 )
 
 func init() {
+	if !cocoa.IsMainThread() {
+		panic("not main tread")
+	}
 	runtime.LockOSThread()
 }
 

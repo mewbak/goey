@@ -37,6 +37,8 @@
 @end
 
 void* windowNew( char const* title, unsigned width, unsigned height ) {
+	trace( __func__ );
+
 	assert( [NSThread isMainThread] );
 	assert( title );
 
@@ -49,10 +51,10 @@ void* windowNew( char const* title, unsigned width, unsigned height ) {
 	NSString* appName = [[NSString alloc] initWithUTF8String:title];
 
 	NSWindow* window =
-	    [[[NSWindow alloc] initWithContentRect:NSMakeRect( 0, 0, width, height )
-	                                 styleMask:STYLE_MASK
-	                                   backing:NSBackingStoreBuffered
-	                                     defer:NO] autorelease];
+	    [[NSWindow alloc] initWithContentRect:NSMakeRect( 0, 0, width, height )
+	                                styleMask:STYLE_MASK
+	                                  backing:NSBackingStoreBuffered
+	                                    defer:NO];
 	[window cascadeTopLeftFromPoint:NSMakePoint( 20, 20 )];
 	[window setDelegate:delegate];
 	[window setTitle:appName];
@@ -61,8 +63,13 @@ void* windowNew( char const* title, unsigned width, unsigned height ) {
 }
 
 void windowClose( void* handle ) {
-	NSWindow* window = handle;
-	[window close];
+	trace( __func__ );
+
+	assert( [NSThread isMainThread] );
+	assert( handle );
+
+	// This call to close the window should also release.
+	[(NSWindow*)handle close];
 }
 
 nssize_t windowContentSize( void* handle ) {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"runtime"
 	"sync/atomic"
+	"testing"
 )
 
 var (
@@ -20,7 +21,10 @@ var (
 )
 
 var (
-	isRunning uint32
+	isRunning      uint32
+	isTesting      uint32
+	testingActions chan func()
+	testingSync    chan struct{}
 )
 
 // Run locks the OS thread to act as a GUI thread, and then iterates over the
@@ -36,6 +40,18 @@ var (
 // Any further modifications to the GUI also need to be scheduled on the GUI
 // thread, which can be done using the function Do.
 func Run(action func() error) error {
+	// This exists to support the examples.  They should be written like normal
+	// user code, and so need to call Run, not RunTest.  However, that code
+	// still needs to be dispatched to the event loop.
+	if atomic.LoadUint32(&isTesting) != 0 {
+		err := error(nil)
+		testingActions <- func() {
+			err = Run(action)
+		}
+		<-testingSync
+		return err
+	}
+
 	// Pin the GUI message loop to a single thread
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
@@ -74,6 +90,17 @@ func Run(action func() error) error {
 
 	// Defer to platform-specific code.
 	return run()
+}
+
+// RunTest runs the passed function on the main thread.  This code is meant to
+// be used in conjunction with TestMain (see package testing).
+func RunTest(t *testing.T, action func()) {
+	if atomic.LoadUint32(&isTesting) == 0 {
+		panic("This function is only meant to be called in testing")
+	}
+
+	testingActions <- action
+	<-testingSync
 }
 
 // Do runs the passed function on the GUI thread.  If the event loop is not

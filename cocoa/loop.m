@@ -17,6 +17,8 @@
 @end
 
 static void detachAThread() {
+	trace( __func__ );
+
 	// We need to make sure that Cocoa is running multithreaded.  Otherwise,
 	// use of autopool from other threads will not work propertly.  The notes
 	// for NSAutoreleasePool indicate that we need to detach a thread to
@@ -27,6 +29,8 @@ static void detachAThread() {
 }
 
 static void initApplication() {
+	trace( __func__ );
+
 	NSString* quitString = [[NSString alloc] initWithUTF8String:"Quit "];
 	NSString* qString = [[NSString alloc] initWithUTF8String:"q"];
 
@@ -50,6 +54,8 @@ static void initApplication() {
 static NSAutoreleasePool* pool = 0;
 
 void init() {
+	trace( __func__ );
+
 	assert( !pool );
 	assert( !NSApp );
 	assert( [NSThread isMainThread] );
@@ -67,6 +73,8 @@ void init() {
 }
 
 void run() {
+	trace( __func__ );
+
 	assert( [NSThread isMultiThreaded] );
 	assert( [NSThread isMainThread] );
 	assert( NSApp && ![NSApp isRunning] );
@@ -74,14 +82,17 @@ void run() {
 
 	[NSApp activateIgnoringOtherApps:YES];
 	[NSApp run];
-
-	printf( "run %p %lu\n", pool, [pool retainCount] );
-	assert( [pool retainCount] == 1 );
-	//[pool release];  // this causes a SIGSEGV, why?
-	pool = 0;
 }
 
-void stop() {
+@interface DoStop : NSObject
+- (void)main;
+@end
+
+@implementation DoStop
+
+- (void)main {
+	trace( __func__ );
+
 	assert( [NSThread isMultiThreaded] );
 	assert( [NSThread isMainThread] );
 	assert( NSApp && [NSApp isRunning] );
@@ -89,20 +100,31 @@ void stop() {
 	[NSApp stop:nil];
 }
 
-@interface DoActionOperation : NSOperation {
-	void* action;
-	void* err;
-}
 @end
 
-@implementation DoActionOperation
+void stop() {
+	trace( __func__ );
 
-- (id)init {
-	self = [super init];
-	return self;
+	assert( [NSThread isMultiThreaded] );
+	assert( [NSThread isMainThread] );
+	assert( NSApp && [NSApp isRunning] );
+
+	id thunk = [[DoStop alloc] init];
+	[thunk performSelectorOnMainThread:@selector( main )
+	                        withObject:nil
+	                     waitUntilDone:NO];
+	[thunk release];
 }
 
-- (id)main {
+@interface DoThunk : NSObject
+- (void)main;
+@end
+
+@implementation DoThunk
+
+- (void)main {
+	trace( __func__ );
+
 	assert( [NSThread isMultiThreaded] );
 	assert( [NSThread isMainThread] );
 	assert( NSApp && [NSApp isRunning] );
@@ -112,7 +134,9 @@ void stop() {
 
 @end
 
-void thunkDo() {
+void do_thunk() {
+	trace( __func__ );
+
 	assert( [NSThread isMultiThreaded] );
 	assert( ![NSThread isMainThread] );
 	assert( NSApp );
@@ -121,15 +145,15 @@ void thunkDo() {
 		[NSThread sleepForTimeInterval:0.001];
 	}
 
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-	NSOperation* operation = [[DoActionOperation alloc] init];
-	NSOperationQueue* targetQueue = [NSOperationQueue mainQueue];
-	[targetQueue addOperation:operation];
-	[operation waitUntilFinished];
-	[operation release];
-	[pool release];
+	id thunk = [[DoThunk alloc] init];
+	[thunk performSelectorOnMainThread:@selector( main )
+	                        withObject:nil
+	                     waitUntilDone:YES];
+	[thunk release];
 }
 
 bool_t isMainThread( void ) {
+	trace( __func__ );
+
 	return [NSThread isMainThread];
 }
