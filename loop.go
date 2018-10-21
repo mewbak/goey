@@ -52,10 +52,6 @@ func Run(action func() error) error {
 		return err
 	}
 
-	// Pin the GUI message loop to a single thread
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
-
 	// Want to gate entry into the GUI loop so that only one thread may enter
 	// at a time.  Since this is supposed to be non-blocking, we can't use
 	// a sync.Mutex without a TryLock method.
@@ -65,6 +61,19 @@ func Run(action func() error) error {
 	defer func() {
 		atomic.StoreUint32(&isRunning, 0)
 	}()
+
+	// Pin the GUI message loop to a single thread
+	runtime.LockOSThread()
+	// The following deferred call to UnlockOSThread works fine on WIN32 and
+	// on Linux, where it is paired with the above LockOSThread.  It would
+	// also work with GNUstep on Go 1.10, where the behaviour of this pair
+	// was changed.  However, on GNUstep with Go 1.9 or earlier, the following
+	// call will break testing this the calls do not nest, and a call to
+	// LockOSThread is done at the package init.
+	// Refer to https://golang.org/doc/go1.10
+	if runtime.GOOS == "windows" {
+		defer runtime.UnlockOSThread()
+	}
 
 	// Since we have now locked the OS thread, we can call the initial action.
 	// We want to hold a reference to a virtual window by increasing the
