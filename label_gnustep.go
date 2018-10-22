@@ -47,6 +47,6 @@ func (w *labelElement) SetBounds(bounds base.Rectangle) {
 }
 
 func (w *labelElement) updateProps(data *Label) error {
-	//w.control.SetTitle(data.Text)
+	w.control.SetText(data.Text)
 	return nil
 }

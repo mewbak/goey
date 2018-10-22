@@ -63,7 +63,7 @@ func (w *Window) SetTitle(title string) {
 }
 
 func (w *Window) Title() string {
-    return C.GoString(C.windowTitle(unsafe.Pointer(w)))
+	return C.GoString(C.windowTitle(unsafe.Pointer(w)))
 }
 
 //export windowShouldClose

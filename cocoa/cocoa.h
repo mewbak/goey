@@ -57,8 +57,18 @@ extern void buttonSetTitle( void* handle, char const* title );
 /* Text */
 extern void* textNew( void* window, char const* text );
 extern void textClose( void* handle );
+extern void* textSetText( void* handle, char const* text );
 
 /* TextField */
 extern void* textfieldNew( void* window, char const* text );
+
+/* Image */
+extern void* imageNewFromRGBA( void* imageData, int width, int height );
+extern void* imageNewFromGray( void* imageData, int width, int height );
+extern void imageClose( void* handle );
+
+/* ImageView */
+
+extern void* imageviewNew( void* window, void* image );
 
 #endif

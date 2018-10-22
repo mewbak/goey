@@ -2,12 +2,10 @@
 #import <Cocoa/Cocoa.h>
 
 void* textNew( void* window, char const* text ) {
-	NSString* nsText = [[NSString alloc] initWithUTF8String:text];
-
 	// Create the text view
 	NSText* control = [[NSText alloc] init];
-	[control setText:nsText];
 	[control setDrawsBackground:NO];
+	textSetText( control, text );
 
 	// Add the control as the view for the window
 	NSView* cv = [(NSWindow*)window contentView];
@@ -19,4 +17,10 @@ void* textNew( void* window, char const* text ) {
 void textClose( void* handle ) {
 	NSText* control = handle;
 	[control release];
+}
+
+void* textSetText( void* handle, char const* text ) {
+	NSString* nsText = [[NSString alloc] initWithUTF8String:text];
+	[(NSText*)handle setText:nsText];
+	[nsText release];
 }
