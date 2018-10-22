@@ -243,8 +243,10 @@ func TestNewWindow_SetTitle(t *testing.T) {
 				return err
 			}
 
-			if got := mw.Title(); got != "Flash!" {
-				t.Errorf("Failed to set title correct, got %s", got)
+			if got, err := mw.Title(); err != nil {
+				t.Errorf("Failed to get title, got error %s", err)
+			} else if got != "Flash!" {
+				t.Errorf("Failed to set title correctly, got %s", got)
 			}
 			return nil
 		})

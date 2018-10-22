@@ -255,6 +255,10 @@ func (w *windowImpl) setTitle(value string) error {
 	return nil
 }
 
+func (w *windowImpl) title() (string, error) {
+	return w.handle.GetTitle()
+}
+
 func (w *windowImpl) updateWindowMinSize() {
 
 	// Determine the extra width and height required for borders, title bar,

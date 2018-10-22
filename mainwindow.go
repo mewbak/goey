@@ -185,7 +185,7 @@ func (w *Window) SetTitle(title string) error {
 }
 
 // Title returns the current caption in the title bar for the window.
-func (w *Window) Title() string {
+func (w *Window) Title() (string, error) {
 	return w.title()
 }
 

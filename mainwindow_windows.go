@@ -452,8 +452,8 @@ func (w *windowImpl) setTitle(value string) error {
 	return Control{w.hWnd}.SetText(value)
 }
 
-func (w *windowImpl) title() string {
-	return win2.GetWindowText(w.hWnd)
+func (w *windowImpl) title() (string, error) {
+	return win2.GetWindowText(w.hWnd), nil
 }
 
 func (w *windowImpl) updateGlobalDPI() {
