@@ -238,7 +238,15 @@ func TestNewWindow_SetScroll(t *testing.T) {
 func TestNewWindow_SetTitle(t *testing.T) {
 	testingWindow(t, func(t *testing.T, mw *Window) {
 		err := Do(func() error {
-			return mw.SetTitle("Flash!")
+			err := mw.SetTitle("Flash!")
+			if err != nil {
+				return err
+			}
+
+			if got := mw.Title(); got != "Flash!" {
+				t.Errorf("Failed to set title correct, got %s", got)
+			}
+			return nil
 		})
 		if err != nil {
 			t.Errorf("Error calling SetTitle, %s", err)

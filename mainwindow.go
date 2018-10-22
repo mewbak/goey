@@ -179,9 +179,14 @@ func (w *Window) SetScroll(horizontal, vertical bool) {
 	w.setScroll(horizontal, vertical)
 }
 
-// SetTitle changes the caption in the title bar for the main window.
+// SetTitle changes the caption in the title bar for the window.
 func (w *Window) SetTitle(title string) error {
 	return w.setTitle(title)
+}
+
+// Title returns the current caption in the title bar for the window.
+func (w *Window) Title() string {
+	return w.title()
 }
 
 func sizeDefaults() (uint, uint) {

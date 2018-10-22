@@ -452,6 +452,10 @@ func (w *windowImpl) setTitle(value string) error {
 	return Control{w.hWnd}.SetText(value)
 }
 
+func (w *windowImpl) title() string {
+	return win2.GetWindowText(w.hWnd)
+}
+
 func (w *windowImpl) updateGlobalDPI() {
 	base.DPI = image.Point{int(float32(w.dpi.X) * Scale), int(float32(w.dpi.Y) * Scale)}
 }
