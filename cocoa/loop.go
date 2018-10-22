@@ -1,7 +1,7 @@
 package cocoa
 
 /*
-#cgo CFLAGS: -x objective-c -I/usr/include/GNUstep
+#cgo CFLAGS: -x objective-c -DNTRACE -I/usr/include/GNUstep
 #cgo LDFLAGS: -lgnustep-gui -lgnustep-base -lobjc
 #include "cocoa.h"
 */

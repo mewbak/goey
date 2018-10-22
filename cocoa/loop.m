@@ -17,7 +17,7 @@
 @end
 
 static void detachAThread() {
-	trace( __func__ );
+	TRACE();
 
 	// We need to make sure that Cocoa is running multithreaded.  Otherwise,
 	// use of autopool from other threads will not work propertly.  The notes
@@ -29,7 +29,7 @@ static void detachAThread() {
 }
 
 static void initApplication() {
-	trace( __func__ );
+	TRACE();
 
 	NSString* quitString = [[NSString alloc] initWithUTF8String:"Quit "];
 	NSString* qString = [[NSString alloc] initWithUTF8String:"q"];
@@ -54,7 +54,7 @@ static void initApplication() {
 static NSAutoreleasePool* pool = 0;
 
 void init() {
-	trace( __func__ );
+	TRACE();
 
 	assert( !pool );
 	assert( !NSApp );
@@ -73,7 +73,7 @@ void init() {
 }
 
 void run() {
-	trace( __func__ );
+	TRACE();
 
 	assert( [NSThread isMultiThreaded] );
 	assert( [NSThread isMainThread] );
@@ -91,7 +91,7 @@ void run() {
 @implementation DoStop
 
 - (void)main {
-	trace( __func__ );
+	TRACE();
 
 	assert( [NSThread isMultiThreaded] );
 	assert( [NSThread isMainThread] );
@@ -103,7 +103,7 @@ void run() {
 @end
 
 void stop() {
-	trace( __func__ );
+	TRACE();
 
 	assert( [NSThread isMultiThreaded] );
 	assert( [NSThread isMainThread] );
@@ -123,7 +123,7 @@ void stop() {
 @implementation DoThunk
 
 - (void)main {
-	trace( __func__ );
+	TRACE();
 
 	assert( [NSThread isMultiThreaded] );
 	assert( [NSThread isMainThread] );
@@ -135,7 +135,7 @@ void stop() {
 @end
 
 void do_thunk() {
-	trace( __func__ );
+	TRACE();
 
 	assert( [NSThread isMultiThreaded] );
 	assert( ![NSThread isMainThread] );
@@ -153,7 +153,7 @@ void do_thunk() {
 }
 
 bool_t isMainThread( void ) {
-	trace( __func__ );
+	TRACE();
 
 	return [NSThread isMainThread];
 }

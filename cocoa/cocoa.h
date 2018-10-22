@@ -21,6 +21,11 @@ extern void stop( void );
 extern bool_t isMainThread( void );
 
 extern void trace( char const* func );
+#ifdef NTRACE
+#define TRACE() ( (void)0 )
+#else
+#define TRACEx) trace(__func__)
+#endif
 
 /* Window */
 extern void* windowNew( char const* title, unsigned width, unsigned height );

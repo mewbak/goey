@@ -37,7 +37,7 @@
 @end
 
 void* windowNew( char const* title, unsigned width, unsigned height ) {
-	trace( __func__ );
+	TRACE();
 
 	assert( [NSThread isMainThread] );
 	assert( title );
@@ -63,7 +63,7 @@ void* windowNew( char const* title, unsigned width, unsigned height ) {
 }
 
 void windowClose( void* handle ) {
-	trace( __func__ );
+	TRACE();
 
 	assert( [NSThread isMainThread] );
 	assert( handle );
