@@ -56,6 +56,10 @@ func (w *checkboxElement) checkbutton() *gtk.CheckButton {
 	return (*gtk.CheckButton)(unsafe.Pointer(w.handle))
 }
 
+func (w *checkboxElement) Click() {
+	w.checkbutton().Clicked()
+}
+
 func (w *checkboxElement) Props() base.Widget {
 	checkbutton := w.checkbutton()
 	text, err := checkbutton.GetLabel()

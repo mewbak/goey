@@ -61,6 +61,10 @@ type checkboxElement struct {
 	onBlur   func()
 }
 
+func (w *checkboxElement) Click() {
+	win.SendMessage(w.hWnd, win.BM_CLICK, 0, 0)
+}
+
 func (w *checkboxElement) Props() base.Widget {
 	return &Checkbox{
 		Text:     w.Control.Text(),

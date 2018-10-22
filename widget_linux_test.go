@@ -11,16 +11,6 @@ type Handler interface {
 	Handle() *gtk.Widget
 }
 
-func testingClick(t *testing.T, w *Window, i int) {
-	// Check the size
-	child := w.child.(*vboxElement).children[i]
-	if elem, ok := child.(*buttonElement); ok {
-		elem.button().Clicked()
-	} else if elem, ok := child.(*checkboxElement); ok {
-		elem.checkbutton().Clicked()
-	}
-}
-
 func testingSetFocus(t *testing.T, w *Window, i int) {
 	// Check the size
 	handle := w.child.(*vboxElement).children[i].(Handler).Handle()

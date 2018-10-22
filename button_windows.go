@@ -76,6 +76,10 @@ type buttonElement struct {
 	onBlur  func()
 }
 
+func (w *buttonElement) Click() {
+	win.SendMessage(w.hWnd, win.BM_CLICK, 0, 0)
+}
+
 func (w *buttonElement) Props() base.Widget {
 	return &Button{
 		Text:     w.Control.Text(),

@@ -49,6 +49,10 @@ func (w *buttonElement) button() *gtk.Button {
 	return (*gtk.Button)(unsafe.Pointer(w.handle))
 }
 
+func (w *buttonElement) Click() {
+	w.button().Clicked()
+}
+
 func (w *buttonElement) Props() base.Widget {
 	button := w.button()
 	text, err := button.GetLabel()

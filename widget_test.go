@@ -14,6 +14,10 @@ type Proper interface {
 	Props() base.Widget
 }
 
+type Clickable interface {
+	Click()
+}
+
 func equal(t *testing.T, lhs, rhs base.Widget) bool {
 	// On windows, the message EM_GETCUEBANNER does not work unless the manifest
 	// is set correctly.  This cannot be done for the package, since that
@@ -247,7 +251,13 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 			// Run the actions, which are counted.
 			for i := 0; i < 3; i++ {
 				err := Do(func() error {
-					testingClick(t, window, i)
+					// Find the child element to be clicked
+					child := window.child.(*vboxElement).children[i]
+					if elem, ok := child.(Clickable); ok {
+						elem.Click()
+					} else {
+						t.Errorf("Failed to click the control")
+					}
 					return nil
 				})
 				if err != nil {
