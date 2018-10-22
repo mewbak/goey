@@ -130,13 +130,15 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 		return nil
 	}
 
-	err := Run(createWindow)
-	if err != nil {
-		t.Fatalf("Failed to run event loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Fatalf("Want mainWindowCount==0, got mainWindowCount==%d", c)
-	}
+	RunTest(t, func() {
+		err := Run(createWindow)
+		if err != nil {
+			t.Fatalf("Failed to run event loop, %s", err)
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Fatalf("Want mainWindowCount==0, got mainWindowCount==%d", c)
+		}
+	})
 }
 
 func TestWindow_SetChild(t *testing.T) {
@@ -198,7 +200,7 @@ func TestNewWindow_SetIcon(t *testing.T) {
 				return mw.SetIcon(img)
 			})
 			if err != nil {
-				t.Errorf("Error calling SetTitle, %s", err)
+				t.Errorf("Error calling SetIcon, %s", err)
 			}
 			time.Sleep(50 * time.Millisecond)
 		}

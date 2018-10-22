@@ -1,0 +1,28 @@
+package cocoa
+
+/*
+#include "cocoa.h"
+#include <stdlib.h>
+*/
+import "C"
+import "unsafe"
+
+// Text is a wrapper for a NSText.
+type Text struct {
+	View
+	private int
+}
+
+func NewText(window *Window, title string) *Text {
+	ctitle := C.CString(title)
+	defer func() {
+		C.free(unsafe.Pointer(ctitle))
+	}()
+
+	handle := C.textNew(unsafe.Pointer(window), ctitle)
+	return (*Text)(handle)
+}
+
+func (w *Text) Close() {
+	C.textClose(unsafe.Pointer(w))
+}

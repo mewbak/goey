@@ -87,13 +87,15 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	err := Run(init)
-	if err != nil {
-		t.Errorf("Failed to run GUI loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-	}
+	RunTest(t, func() {
+		err := Run(init)
+		if err != nil {
+			t.Errorf("Failed to run GUI loop, %s", err)
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		}
+	})
 }
 
 func testingRenderWidgetsFail(t *testing.T, outError error, widgets ...base.Widget) {
@@ -113,10 +115,12 @@ func testingRenderWidgetsFail(t *testing.T, outError error, widgets ...base.Widg
 		return nil
 	}
 
-	err := Run(init)
-	if err != nil {
-		t.Errorf("Failed to run GUI loop, %s", err)
-	}
+	RunTest(t, func() {
+		err := Run(init)
+		if err != nil {
+			t.Errorf("Failed to run GUI loop, %s", err)
+		}
+	})
 }
 
 func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
@@ -160,13 +164,15 @@ func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	err := Run(init)
-	if err != nil {
-		t.Errorf("Failed to run GUI loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-	}
+	RunTest(t, func() {
+		err := Run(init)
+		if err != nil {
+			t.Errorf("Failed to run GUI loop, %s", err)
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		}
+	})
 }
 
 func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
@@ -214,14 +220,16 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	err := Run(init)
-	if err != nil {
-		t.Errorf("Failed to run GUI loop, %s", err)
-	}
-	const want = "fabafbbbfcbc"
-	if s := log.String(); s != want {
-		t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
-	}
+	RunTest(t, func() {
+		err := Run(init)
+		if err != nil {
+			t.Errorf("Failed to run GUI loop, %s", err)
+		}
+		const want = "fabafbbbfcbc"
+		if s := log.String(); s != want {
+			t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
+		}
+	})
 }
 
 func testingCheckClick(t *testing.T, widgets ...base.Widget) {
@@ -278,14 +286,16 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	err := Run(init)
-	if err != nil {
-		t.Errorf("Failed to run GUI loop, %s", err)
-	}
-	const want = "cacbcc"
-	if s := log.String(); s != want {
-		t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
-	}
+	RunTest(t, func() {
+		err := Run(init)
+		if err != nil {
+			t.Errorf("Failed to run GUI loop, %s", err)
+		}
+		const want = "cacbcc"
+		if s := log.String(); s != want {
+			t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
+		}
+	})
 }
 
 func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Widget) {
@@ -351,11 +361,13 @@ func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Wid
 		return nil
 	}
 
-	err := Run(init)
-	if err != nil {
-		t.Errorf("Failed to run GUI loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-	}
+	RunTest(t, func() {
+		err := Run(init)
+		if err != nil {
+			t.Errorf("Failed to run GUI loop, %s", err)
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		}
+	})
 }
