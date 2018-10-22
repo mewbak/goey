@@ -99,6 +99,7 @@ func (w *windowImpl) setOnClosing(callback func() bool) {
 }
 
 func (w *windowImpl) setTitle(value string) error {
+	w.handle.SetTitle(value)
 	return nil
 }
 

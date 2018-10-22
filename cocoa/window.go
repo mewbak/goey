@@ -53,6 +53,15 @@ func (w *Window) SetMinSize(width, height int) {
 	C.windowSetMinSize(unsafe.Pointer(w), C.int(width), C.int(height))
 }
 
+func (w *Window) SetTitle(title string) {
+	ctitle := C.CString(title)
+	defer func() {
+		C.free(unsafe.Pointer(ctitle))
+	}()
+
+	C.windowSetTitle(unsafe.Pointer(w), ctitle)
+}
+
 //export windowShouldClose
 func windowShouldClose(handle unsafe.Pointer) bool {
 	if cb := windowCallbacks[handle]; cb != nil {

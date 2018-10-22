@@ -200,7 +200,7 @@ func TestNewWindow_SetIcon(t *testing.T) {
 				return mw.SetIcon(img)
 			})
 			if err != nil {
-				t.Errorf("Error calling SetTitle, %s", err)
+				t.Errorf("Error calling SetIcon, %s", err)
 			}
 			time.Sleep(50 * time.Millisecond)
 		}

@@ -33,6 +33,7 @@ extern void windowClose( void* handle );
 extern nssize_t windowContentSize( void* handle );
 extern void windowMakeFirstResponder( void* handle, void* control );
 extern void windowSetMinSize( void* handle, int width, int height );
+extern void windowSetTitle( void* handle, char const* title );
 
 /* View */
 extern void viewSetFrame( void* handle, int x, int y, int dx, int dy );

@@ -73,6 +73,9 @@ void windowClose( void* handle ) {
 }
 
 nssize_t windowContentSize( void* handle ) {
+	assert( [NSThread isMainThread] );
+	assert( handle );
+
 	NSUInteger style = [(NSWindow*)handle styleMask];
 	NSRect frame = [(NSWindow*)handle frame];
 	frame = [NSWindow contentRectForFrameRect:frame styleMask:style];
@@ -82,6 +85,9 @@ nssize_t windowContentSize( void* handle ) {
 }
 
 void windowMakeFirstResponder( void* handle1, void* handle2 ) {
+	assert( [NSThread isMainThread] );
+	assert( handle1 );
+
 	NSWindow* w = (NSWindow*)handle1;
 	NSControl* c = (NSControl*)handle2;
 
@@ -89,10 +95,22 @@ void windowMakeFirstResponder( void* handle1, void* handle2 ) {
 }
 
 void windowSetMinSize( void* handle, int width, int height ) {
+	assert( [NSThread isMainThread] );
+	assert( handle );
+
 	NSWindow* w = (NSWindow*)handle;
 
 	// Adjust size from content to outer frame
 	NSRect frame = NSMakeRect( 0, 0, width, height );
 	frame = [NSWindow frameRectForContentRect:frame styleMask:[w styleMask]];
 	[w setMinSize:NSMakeSize( NSWidth( frame ), NSHeight( frame ) )];
+}
+
+void windowSetTitle( void* handle, char const* title ) {
+	assert( [NSThread isMainThread] );
+	assert( handle );
+
+	NSString* wtitle = [[NSString alloc] initWithUTF8String:title];
+	[(NSWindow*)handle setTitle:wtitle];
+	[wtitle release];
 }
