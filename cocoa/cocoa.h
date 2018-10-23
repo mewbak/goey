@@ -33,6 +33,7 @@ extern void windowClose( void* handle );
 extern nssize_t windowContentSize( void* handle );
 extern void windowMakeFirstResponder( void* handle, void* control );
 extern void windowSetMinSize( void* handle, int width, int height );
+extern void windowSetIconImage( void* handle, void* nsimage );
 extern void windowSetTitle( void* handle, char const* title );
 extern char const* windowTitle( void* handle );
 
@@ -62,8 +63,10 @@ extern void* textSetText( void* handle, char const* text );
 extern void* textfieldNew( void* window, char const* text );
 
 /* Image */
-extern void* imageNewFromRGBA( uint8_t* imageData, int width, int height );
-extern void* imageNewFromGray( uint8_t* imageData, int width, int height );
+extern void* imageNewFromRGBA( uint8_t* imageData, int width, int height,
+                               int stride );
+extern void* imageNewFromGray( uint8_t* imageData, int width, int height,
+                               int stride );
 extern void imageClose( void* handle );
 
 /* ImageView */

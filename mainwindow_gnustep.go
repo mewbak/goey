@@ -91,6 +91,7 @@ func (w *windowImpl) show() {
 }
 
 func (w *windowImpl) setIcon(img image.Image) error {
+	w.handle.SetIcon(img)
 	return nil
 }
 

@@ -5,6 +5,7 @@ package cocoa
 #include <stdlib.h>
 */
 import "C"
+import "image"
 import "unsafe"
 
 // Window is a wrapper for a NSWindow.
@@ -51,6 +52,17 @@ func (w *Window) SetCallbacks(cb WindowCallbacks) {
 
 func (w *Window) SetMinSize(width, height int) {
 	C.windowSetMinSize(unsafe.Pointer(w), C.int(width), C.int(height))
+}
+
+func (w *Window) SetIcon(img image.Image) error {
+	nsi, err := imageToNSImage(img)
+	if err != nil {
+		return err
+	}
+
+	C.windowSetIconImage(unsafe.Pointer(w), nsi)
+	C.imageClose(nsi)
+	return nil
 }
 
 func (w *Window) SetTitle(title string) {

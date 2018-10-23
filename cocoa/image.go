@@ -15,23 +15,19 @@ type ImageView struct {
 	private int
 }
 
-func imageToNSImage(prop image.Image) (unsafe.Pointer, []byte, error) {
+func imageToNSImage(prop image.Image) (unsafe.Pointer, error) {
 	if img, ok := prop.(*image.RGBA); ok {
-		// Create a copy of the backing for the pixel data
-		buffer := append([]uint8(nil), img.Pix...)
 		// Create the NSImage
 		handle := C.imageNewFromRGBA(
-			(*C.uint8_t)(unsafe.Pointer(&buffer[0])),
-			C.int(img.Rect.Dx()), C.int(img.Rect.Dy()))
-		return handle, buffer, nil
+			(*C.uint8_t)(unsafe.Pointer(&img.Pix[0])),
+			C.int(img.Rect.Dx()), C.int(img.Rect.Dy()), C.int(img.Stride))
+		return handle, nil
 	} else if img, ok := prop.(*image.Gray); ok {
-		// Create a copy of the backing for the pixel data
-		buffer := append([]uint8(nil), img.Pix...)
 		// Create the NSImage
 		handle := C.imageNewFromGray(
-			(*C.uint8_t)(unsafe.Pointer(&buffer[0])),
-			C.int(img.Rect.Dx()), C.int(img.Rect.Dy()))
-		return handle, buffer, nil
+			(*C.uint8_t)(unsafe.Pointer(&img.Pix[0])),
+			C.int(img.Rect.Dx()), C.int(img.Rect.Dy()), C.int(img.Stride))
+		return handle, nil
 	}
 
 	// Create a new image in RGBA format
@@ -39,33 +35,31 @@ func imageToNSImage(prop image.Image) (unsafe.Pointer, []byte, error) {
 	img := image.NewRGBA(bounds)
 	draw.Draw(img, bounds, prop, bounds.Min, draw.Src)
 
-	// Create the bitmap
-	// Create a copy of the backing for the pixel data
-	buffer := append([]uint8(nil), img.Pix...)
 	// Create the NSImage
 	handle := C.imageNewFromRGBA(
-		(*C.uint8_t)(unsafe.Pointer(&buffer[0])),
-		C.int(img.Rect.Dx()), C.int(img.Rect.Dy()))
-	return handle, buffer, nil
+		(*C.uint8_t)(unsafe.Pointer(&img.Pix[0])),
+		C.int(img.Rect.Dx()), C.int(img.Rect.Dy()), C.int(img.Stride))
+	return handle, nil
 }
 
-func NewImageView(window *Window, prop image.Image) (*ImageView, []byte, error) {
-	image, buffer, err := imageToNSImage(prop)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	control := C.imageviewNew(unsafe.Pointer(window), image)
-	C.imageClose(image)
-	return (*ImageView)(control), buffer, nil
-}
-
-func (w *ImageView) SetImage(prop image.Image) ([]byte, error) {
-	image, buffer, err := imageToNSImage(prop)
+func NewImageView(window *Window, prop image.Image) (*ImageView, error) {
+	image, err := imageToNSImage(prop)
 	if err != nil {
 		return nil, err
 	}
 
+	control := C.imageviewNew(unsafe.Pointer(window), image)
+	C.imageClose(image)
+	return (*ImageView)(control), nil
+}
+
+func (w *ImageView) SetImage(prop image.Image) error {
+	image, err := imageToNSImage(prop)
+	if err != nil {
+		return err
+	}
+
 	C.imageviewSetImage(unsafe.Pointer(w), image)
-	return buffer, nil
+	C.imageClose(image)
+	return nil
 }

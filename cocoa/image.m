@@ -2,11 +2,12 @@
 #import <Cocoa/Cocoa.h>
 #include <assert.h>
 
-void* imageNewFromRGBA( uint8_t* imageData, int width, int height ) {
+void* imageNewFromRGBA( uint8_t* imageData, int width, int height,
+                        int stride ) {
 	assert( imageData );
 
-	NSImageRep* imagerep =
-	    [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:&imageData
+	NSBitmapImageRep* imagerep =
+	    [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
 	                                            pixelsWide:width
 	                                            pixelsHigh:height
 	                                         bitsPerSample:8
@@ -18,17 +19,31 @@ void* imageNewFromRGBA( uint8_t* imageData, int width, int height ) {
 	                                          bitsPerPixel:32];
 	assert( imagerep );
 
+	// Copy over the image data.
+	if ( [imagerep bytesPerRow] == stride ) {
+		// Check for overflow
+		assert( width * height > width && width * height > height );
+		assert( ( width * height * 4 ) > width * height );
+		// Copy the data
+		assert( [imagerep bitmapData] );
+		memcpy( [imagerep bitmapData], imageData, width * height * 4 );
+	} else {
+		assert( false ); // not implemented
+	}
+
+	// Create the image
 	NSImage* image = [[NSImage alloc] initWithSize:NSMakeSize( width, height )];
 	assert( image );
 	[image addRepresentation:imagerep];
 	return image;
 }
 
-void* imageNewFromGray( uint8_t* imageData, int width, int height ) {
+void* imageNewFromGray( uint8_t* imageData, int width, int height,
+                        int stride ) {
 	assert( imageData );
 
-	NSImageRep* imagerep =
-	    [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:&imageData
+	NSBitmapImageRep* imagerep =
+	    [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
 	                                            pixelsWide:width
 	                                            pixelsHigh:height
 	                                         bitsPerSample:8
@@ -39,6 +54,18 @@ void* imageNewFromGray( uint8_t* imageData, int width, int height ) {
 	                                           bytesPerRow:width
 	                                          bitsPerPixel:8];
 	assert( imagerep );
+
+	// Copy over the image data.
+	if ( [imagerep bytesPerRow] == stride ) {
+		// Check for overflow
+		assert( width * height > width && width * height > height );
+		assert( ( width * height * 4 ) > width * height );
+		// Copy the data
+		assert( [imagerep bitmapData] );
+		memcpy( [imagerep bitmapData], imageData, width * height * 4 );
+	} else {
+		assert( false ); // not implemented
+	}
 
 	NSImage* image = [[NSImage alloc] initWithSize:NSMakeSize( width, height )];
 	assert( image );

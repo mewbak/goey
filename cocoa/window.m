@@ -106,6 +106,14 @@ void windowSetMinSize( void* handle, int width, int height ) {
 	[w setMinSize:NSMakeSize( NSWidth( frame ), NSHeight( frame ) )];
 }
 
+void windowSetIconImage( void* handle, void* nsimage ) {
+	assert( [NSThread isMainThread] );
+	assert( handle );
+	assert( nsimage );
+
+	[NSApp setApplicationIconImage:(NSImage*)nsimage];
+}
+
 void windowSetTitle( void* handle, char const* title ) {
 	assert( [NSThread isMainThread] );
 	assert( handle );
