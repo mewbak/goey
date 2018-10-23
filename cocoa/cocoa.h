@@ -38,11 +38,11 @@ extern char const* windowTitle( void* handle );
 
 /* View */
 extern void viewSetFrame( void* handle, int x, int y, int dx, int dy );
+extern void viewClose( void* handle );
 
 /* Control */
 extern bool_t controlIsEnabled( void* handle );
 extern void controlSetEnabled( void* handle, bool_t value );
-extern void controlClose( void* handle );
 extern nssize_t controlIntrinsicContentSize( void* handle );
 
 /* Button */
@@ -56,7 +56,6 @@ extern void buttonSetTitle( void* handle, char const* title );
 
 /* Text */
 extern void* textNew( void* window, char const* text );
-extern void textClose( void* handle );
 extern void* textSetText( void* handle, char const* text );
 
 /* TextField */

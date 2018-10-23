@@ -14,11 +14,6 @@ void* textNew( void* window, char const* text ) {
 	return control;
 }
 
-void textClose( void* handle ) {
-	NSText* control = handle;
-	[control release];
-}
-
 void* textSetText( void* handle, char const* text ) {
 	NSString* nsText = [[NSString alloc] initWithUTF8String:text];
 	[(NSText*)handle setText:nsText];

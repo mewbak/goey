@@ -45,7 +45,7 @@ func NewCheckButton(window *Window, title string, value bool) *Button {
 }
 
 func (w *Button) Close() {
-	C.controlClose(unsafe.Pointer(w))
+	C.viewClose(unsafe.Pointer(w))
 	delete(buttonCallbacks, unsafe.Pointer(w))
 }
 

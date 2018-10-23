@@ -9,11 +9,6 @@ void controlSetEnabled( void* handle, bool_t value ) {
 	[(NSControl*)handle setEnabled:value];
 }
 
-void controlClose( void* handle ) {
-	assert( [(id)handle isKindOfClass:[NSControl class]] );
-	[(NSControl*)handle release];
-}
-
 nssize_t controlIntrinsicContentSize( void* handle ) {
 	// Note that accessing the cell is deprecated, but GNUstep does not have
 	// the newer methods needed to gather this information.

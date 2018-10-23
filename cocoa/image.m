@@ -62,7 +62,7 @@ void* imageviewNew( void* window, void* image ) {
 	// Create the control
 	NSImageView* control = [[NSImageView alloc] init];
 	[control setImage:(NSImage*)image];
-    [control setImageScaling:NSImageScaleAxesIndependently];
+	[control setImageScaling:NSImageScaleAxesIndependently];
 
 	// Add the button as the view for the window
 	NSView* cv = [(NSWindow*)window contentView];

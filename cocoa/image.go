@@ -60,10 +60,6 @@ func NewImageView(window *Window, prop image.Image) (*ImageView, []byte, error) 
 	return (*ImageView)(control), buffer, nil
 }
 
-func (w *ImageView) Close() {
-	C.controlClose(unsafe.Pointer(w))
-}
-
 func (w *ImageView) SetImage(prop image.Image) ([]byte, error) {
 	image, buffer, err := imageToNSImage(prop)
 	if err != nil {

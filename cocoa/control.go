@@ -18,10 +18,6 @@ func toBool(b bool) C.bool_t {
 	return 0
 }
 
-func (c *Control) Close() {
-	C.controlClose(unsafe.Pointer(c))
-}
-
 func (c *Control) IsEnabled() bool {
 	rc := C.controlIsEnabled(unsafe.Pointer(c))
 	return rc != 0

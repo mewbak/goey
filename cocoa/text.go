@@ -23,10 +23,6 @@ func NewText(window *Window, title string) *Text {
 	return (*Text)(handle)
 }
 
-func (w *Text) Close() {
-	C.textClose(unsafe.Pointer(w))
-}
-
 func (w *Text) SetText(text string) {
 	ctext := C.CString(text)
 	defer func() {
