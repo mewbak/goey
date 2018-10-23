@@ -236,8 +236,17 @@ func TestDo(t *testing.T) {
 				}
 			}
 
-			// Close the window
+			// Check for an error return
 			err := Do(func() error {
+				// Some example error
+				return ErrNotRunning
+			})
+			if err != ErrNotRunning {
+				t.Errorf("Error in Do, expected %v, got %v", ErrNotRunning, err)
+			}
+
+			// Close the window
+			err = Do(func() error {
 				window.Close()
 				return nil
 			})
