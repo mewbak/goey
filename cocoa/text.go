@@ -13,7 +13,7 @@ type Text struct {
 	private int
 }
 
-func NewText(window *Window, title string) *Text {
+func NewText(window *View, title string) *Text {
 	ctitle := C.CString(title)
 	defer func() {
 		C.free(unsafe.Pointer(ctitle))

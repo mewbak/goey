@@ -53,11 +53,13 @@ func (w *checkboxElement) MinIntrinsicWidth(base.Length) base.Length {
 
 func (w *checkboxElement) Props() base.Widget {
 	text := w.control.Title()
+	value := w.control.State()
 	disabled := !w.control.IsEnabled()
 	_, onchange, onfocus, onblur := w.control.Callbacks()
 
 	return &Checkbox{
 		Text:     text,
+		Value:    value,
 		Disabled: disabled,
 		OnChange: onchange,
 		OnFocus:  onfocus,

@@ -37,41 +37,37 @@
 
 @end
 
-void* buttonNew( void* window, char const* title ) {
-	assert( [(id)window isKindOfClass:[NSWindow class]] );
-
-	NSString* nsTitle = [[NSString alloc] initWithUTF8String:title];
+void* buttonNew( void* superview, char const* title ) {
+	assert( superview && [(id)superview isKindOfClass:[NSView class]] );
+	assert( title );
 
 	// Create the button
 	GButton* control = [[GButton alloc] init];
-	[control setTitle:nsTitle];
+	buttonSetTitle( control, title );
 	[control setTarget:control];
 	[control setAction:@selector( onclick )];
 
 	// Add the button as the view for the window
-	NSView* cv = [(NSWindow*)window contentView];
-	[cv addSubview:control];
+	[(NSView*)superview addSubview:control];
 
 	// Return handle to the control
 	return control;
 }
 
-void* buttonNewCheck( void* window, char const* title, bool_t value ) {
-	assert( [(id)window isKindOfClass:[NSWindow class]] );
-
-	NSString* nsTitle = [[NSString alloc] initWithUTF8String:title];
+void* buttonNewCheck( void* superview, char const* title, bool_t value ) {
+	assert( superview && [(id)superview isKindOfClass:[NSView class]] );
+	assert( title );
 
 	// Create the button
 	GButton* control = [[GButton alloc] init];
-	[control setButtonType:NSSwitchButton];
-	[control setTitle:nsTitle];
+	buttonSetTitle( control, title );
 	[control setTarget:control];
-	[control setState:value];
 	[control setAction:@selector( onchange )];
+	[control setButtonType:NSSwitchButton];
+	[control setState:value];
 
 	// Add the button as the view for the window
-	NSView* cv = [(NSWindow*)window contentView];
-	[cv addSubview:control];
+	[(NSView*)superview addSubview:control];
 
 	// Return handle to the control
 	return control;
@@ -97,6 +93,10 @@ char const* buttonTitle( void* handle ) {
 }
 
 void buttonSetTitle( void* handle, char const* title ) {
+	assert( handle && [(id)handle isKindOfClass:[GButton class]] );
+	assert( title );
+
 	NSString* nsTitle = [[NSString alloc] initWithUTF8String:title];
 	[(GButton*)handle setTitle:nsTitle];
+	[nsTitle release];
 }

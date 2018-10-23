@@ -12,6 +12,7 @@ import (
 
 type windowImpl struct {
 	handle           *cocoa.Window
+	contentView      *cocoa.View
 	child            base.Element
 	horizontalScroll bool
 	verticalScroll   bool
@@ -29,7 +30,8 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 	handle := cocoa.NewWindow(title, w, h)
 	atomic.AddInt32(&mainWindowCount, 1)
 	retval := &Window{windowImpl{
-		handle: handle,
+		handle:      handle,
+		contentView: handle.ContentView(),
 	}}
 	handle.SetCallbacks((*windowCallbacks)(&retval.windowImpl))
 
@@ -37,7 +39,7 @@ func newWindow(title string, child base.Widget) (*Window, error) {
 }
 
 func (w *windowImpl) control() base.Control {
-	return base.Control{w.handle}
+	return base.Control{w.contentView}
 }
 
 func (w *windowImpl) close() {

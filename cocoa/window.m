@@ -87,11 +87,20 @@ nssize_t windowContentSize( void* handle ) {
 	return ret;
 }
 
-void windowMakeFirstResponder( void* handle1, void* handle2 ) {
+void* windowContentView( void* handle ) {
 	assert( [NSThread isMainThread] );
-	assert( handle1 );
+	assert( handle );
+	assert( [(id)handle isKindOfClass:[NSWindow class]] );
 
-	NSWindow* w = (NSWindow*)handle1;
+	return [(NSWindow*)handle contentView];
+}
+
+void windowMakeFirstResponder( void* window, void* handle2 ) {
+	assert( [NSThread isMainThread] );
+	assert( window );
+	assert( [(id)window isKindOfClass:[NSWindow class]] );
+
+	NSWindow* w = (NSWindow*)window;
 	NSControl* c = (NSControl*)handle2;
 
 	[w makeFirstResponder:c];

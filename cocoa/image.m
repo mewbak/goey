@@ -80,11 +80,9 @@ void imageClose( void* image ) {
 	[(NSImage*)image release];
 }
 
-void* imageviewNew( void* window, void* image ) {
-	assert( window );
-	assert( [(id)window isKindOfClass:[NSWindow class]] );
-	assert( image );
-	assert( [(id)image isKindOfClass:[NSImage class]] );
+void* imageviewNew( void* superview, void* image ) {
+	assert( superview && [(id)superview isKindOfClass:[NSView class]] );
+	assert( image && [(id)image isKindOfClass:[NSImage class]] );
 
 	// Create the control
 	NSImageView* control = [[NSImageView alloc] init];
@@ -92,8 +90,7 @@ void* imageviewNew( void* window, void* image ) {
 	[control setImageScaling:NSImageScaleAxesIndependently];
 
 	// Add the button as the view for the window
-	NSView* cv = [(NSWindow*)window contentView];
-	[cv addSubview:control];
+	[(NSView*)superview addSubview:control];
 
 	// Return handle to the control
 	return control;

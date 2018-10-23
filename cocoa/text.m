@@ -1,20 +1,25 @@
 #include "cocoa.h"
 #import <Cocoa/Cocoa.h>
 
-void* textNew( void* window, char const* text ) {
+void* textNew( void* superview, char const* text ) {
+	assert( superview && [(id)superview isKindOfClass:[NSView class]] );
+	assert( text );
+
 	// Create the text view
 	NSText* control = [[NSText alloc] init];
 	[control setDrawsBackground:NO];
 	textSetText( control, text );
 
 	// Add the control as the view for the window
-	NSView* cv = [(NSWindow*)window contentView];
-	[cv addSubview:control];
+	[(NSView*)superview addSubview:control];
 
 	return control;
 }
 
-void* textSetText( void* handle, char const* text ) {
+void textSetText( void* handle, char const* text ) {
+	assert( handle && [(id)handle isKindOfClass:[NSText class]] );
+	assert( text );
+
 	NSString* nsText = [[NSString alloc] initWithUTF8String:text];
 	[(NSText*)handle setText:nsText];
 	[nsText release];

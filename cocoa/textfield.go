@@ -13,7 +13,7 @@ type TextField struct {
 	private int
 }
 
-func NewTextField(window *Window, title string) *TextField {
+func NewTextField(window *View, title string) *TextField {
 	ctitle := C.CString(title)
 	defer func() {
 		C.free(unsafe.Pointer(ctitle))

@@ -42,6 +42,10 @@ func (w *Window) ContentSize() (int, int) {
 	return int(size.width), int(size.height)
 }
 
+func (w *Window) ContentView() *View {
+	return (*View)(C.windowContentView(unsafe.Pointer(w)))
+}
+
 func (w *Window) MakeFirstResponder(c *Control) {
 	C.windowMakeFirstResponder(unsafe.Pointer(w), unsafe.Pointer(c))
 }

@@ -14,7 +14,7 @@ import (
 //
 // Any methods on this type will be platform specific.
 type Control struct {
-	Handle *cocoa.Window
+	Handle *cocoa.View
 }
 
 // NativeElement contains platform-specific methods that all widgets

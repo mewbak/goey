@@ -24,7 +24,7 @@ var (
 	buttonCallbacks = make(map[unsafe.Pointer]buttonCallback)
 )
 
-func NewButton(window *Window, title string) *Button {
+func NewButton(window *View, title string) *Button {
 	ctitle := C.CString(title)
 	defer func() {
 		C.free(unsafe.Pointer(ctitle))
@@ -34,7 +34,7 @@ func NewButton(window *Window, title string) *Button {
 	return (*Button)(handle)
 }
 
-func NewCheckButton(window *Window, title string, value bool) *Button {
+func NewCheckButton(window *View, title string, value bool) *Button {
 	ctitle := C.CString(title)
 	defer func() {
 		C.free(unsafe.Pointer(ctitle))

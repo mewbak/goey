@@ -42,7 +42,7 @@ func imageToNSImage(prop image.Image) (unsafe.Pointer, error) {
 	return handle, nil
 }
 
-func NewImageView(window *Window, prop image.Image) (*ImageView, error) {
+func NewImageView(window *View, prop image.Image) (*ImageView, error) {
 	image, err := imageToNSImage(prop)
 	if err != nil {
 		return nil, err
