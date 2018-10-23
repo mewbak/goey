@@ -63,12 +63,12 @@ extern void* textSetText( void* handle, char const* text );
 extern void* textfieldNew( void* window, char const* text );
 
 /* Image */
-extern void* imageNewFromRGBA( void* imageData, int width, int height );
-extern void* imageNewFromGray( void* imageData, int width, int height );
+extern void* imageNewFromRGBA( uint8_t* imageData, int width, int height );
+extern void* imageNewFromGray( uint8_t* imageData, int width, int height );
 extern void imageClose( void* handle );
 
 /* ImageView */
-
 extern void* imageviewNew( void* window, void* image );
+extern void imageviewSetImage( void* control, void* image );
 
 #endif
