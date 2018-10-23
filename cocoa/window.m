@@ -68,6 +68,9 @@ void windowClose( void* handle ) {
 	assert( [NSThread isMainThread] );
 	assert( handle );
 
+	// This will send a blur message to any controls that currently have focus.
+	[(NSWindow*)handle makeFirstResponder:NULL];
+
 	// This call to close the window should also release.
 	[(NSWindow*)handle close];
 }
