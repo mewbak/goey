@@ -17,7 +17,7 @@ type decorationElement struct {
 }
 
 func (w *Decoration) mount(parent base.Control) (base.Element, error) {
-	control := cocoa.NewDecoration(parent.Handle)
+	control := cocoa.NewDecoration(parent.Handle, w.Fill, w.Stroke)
 
 	retval := &decorationElement{
 		control: control,
@@ -52,7 +52,6 @@ func (w *decorationElement) props() *Decoration {
 
 func (w *decorationElement) SetBounds(bounds base.Rectangle) {
 	px := bounds.Pixels()
-	println("SetBounds", px.Dx(), px.Dy())
 	w.control.SetFrame(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
 
 	if w.child != nil {
@@ -61,13 +60,21 @@ func (w *decorationElement) SetBounds(bounds base.Rectangle) {
 
 		bounds.Min.X = w.insets.Left
 		bounds.Min.Y = w.insets.Top
-		bounds.Max.X = width - w.insets.Left - w.insets.Right
-		bounds.Max.Y = height - w.insets.Top - w.insets.Bottom
-		println("SetBounds", px.Dx(), px.Dy())
+		bounds.Max.X = width - w.insets.Right
+		bounds.Max.Y = height - w.insets.Bottom
 		w.child.SetBounds(bounds)
 	}
 }
 
 func (w *decorationElement) updateProps(data *Decoration) error {
+	child, err := base.DiffChild(base.Control{&w.control.View}, w.child, data.Child)
+	if err != nil {
+		return err
+	}
+	w.child = child
+
+	w.control.SetBorderRadius(data.Radius.PixelsX(), data.Radius.PixelsY())
+	w.control.SetFillColor(data.Fill)
+	w.control.SetStrokeColor(data.Stroke)
 	return nil
 }

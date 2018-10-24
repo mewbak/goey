@@ -13,6 +13,10 @@ typedef struct nssize_tag {
 	int32_t height;
 } nssize_t;
 
+typedef struct nscolor_tag {
+	uint8_t r, g, b, a;
+} nscolor_t;
+
 /* Event loop */
 extern void init( void );
 extern void run( void );
@@ -57,7 +61,10 @@ extern char const* buttonTitle( void* handle );
 extern void buttonSetTitle( void* handle, char const* title );
 
 /* Decoration */
-extern void* decorationNew( void* superview );
+extern void* decorationNew( void* superview, nscolor_t fill, nscolor_t stroke );
+extern void decorationSetBorderRadius( void* control, nssize_t radius );
+extern void decorationSetFillColor( void* control, nscolor_t fill );
+extern void decorationSetStrokeColor( void* control, nscolor_t stroke );
 
 /* Text */
 extern void* textNew( void* superview, char const* text );
