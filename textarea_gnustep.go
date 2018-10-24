@@ -13,6 +13,9 @@ type textareaElement struct {
 
 func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	control := cocoa.NewTextField(parent.Handle, w.Value)
+	control.SetValue(w.Value)
+	control.SetPlaceholder(w.Placeholder)
+	control.SetCallbacks(w.OnChange, w.OnFocus, w.OnBlur)
 
 	retval := &textareaElement{
 		control: control,

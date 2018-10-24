@@ -1,5 +1,3 @@
-// +build !gnustep
-
 package goey
 
 import (

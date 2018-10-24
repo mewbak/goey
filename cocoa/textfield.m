@@ -2,13 +2,49 @@
 #include "cocoa.h"
 #import <Cocoa/Cocoa.h>
 
+@interface GTextField : NSTextField <NSTextFieldDelegate>
+- (BOOL)becomeFirstResponder;
+- (BOOL)resignFirstResponder;
+- (void)controlTextDidChange:(NSNotification*)obj;
+@end
+
+@implementation GTextField
+
+- (void)controlTextDidChange:(NSNotification*)obj {
+	NSString* v = [self stringValue];
+	textfieldOnChange( self, [v cStringUsingEncoding:NSUTF8StringEncoding] );
+}
+
+- (BOOL)becomeFirstResponder {
+	BOOL rc = [super becomeFirstResponder];
+	if ( rc ) {
+		printf( "become\n" );
+		textfieldOnFocus( self );
+	}
+	return rc;
+}
+
+- (BOOL)resignFirstResponder {
+	BOOL rc = [super resignFirstResponder];
+	if ( rc ) {
+		printf( "resign\n" );
+		textfieldOnBlur( self );
+	}
+	return rc;
+}
+
+@end
+
 void* textfieldNew( void* superview, char const* text ) {
 	assert( superview && [(id)superview isKindOfClass:[NSView class]] );
 	assert( text );
 
 	// Create the button
-	NSTextField* control = [[NSTextField alloc] init];
-	textfieldSetTitle( control, text );
+	GTextField* control = [[GTextField alloc] init];
+	textfieldSetValue( control, text );
+	[control setEditable:YES];
+	//[control setUsesSingleLineMode:YES];
+	[control setDelegate:control];
 
 	// Add the button as the view for the window
 	[(NSView*)superview addSubview:control];
@@ -17,11 +53,20 @@ void* textfieldNew( void* superview, char const* text ) {
 	return control;
 }
 
-void textfieldSetTitle( void* handle, char const* text ) {
-	assert( handle && [(id)handle isKindOfClass:[NSTextField class]] );
+void textfieldSetValue( void* handle, char const* text ) {
+	assert( handle && [(id)handle isKindOfClass:[GTextField class]] );
 	assert( text );
 
 	NSString* title = [[NSString alloc] initWithUTF8String:text];
-	[(NSTextField*)handle setTitleWithMnemonic:title];
+	[(GTextField*)handle setStringValue:title];
+	[title release];
+}
+
+void textfieldSetPlaceholder( void* handle, char const* text ) {
+	assert( handle && [(id)handle isKindOfClass:[GTextField class]] );
+	assert( text );
+
+	NSString* title = [[NSString alloc] initWithUTF8String:text];
+	[[(GTextField*)handle cell] setPlaceholderString:title];
 	[title release];
 }

@@ -48,8 +48,6 @@ void* windowNew( char const* title, unsigned width, unsigned height ) {
 		delegate = [[MyWindowDelegate alloc] init];
 	}
 
-	NSString* appName = [[NSString alloc] initWithUTF8String:title];
-
 	NSWindow* window =
 	    [[NSWindow alloc] initWithContentRect:NSMakeRect( 0, 0, width, height )
 	                                styleMask:STYLE_MASK
@@ -57,7 +55,7 @@ void* windowNew( char const* title, unsigned width, unsigned height ) {
 	                                    defer:NO];
 	[window cascadeTopLeftFromPoint:NSMakePoint( 20, 20 )];
 	[window setDelegate:delegate];
-	[window setTitle:appName];
+	windowSetTitle( window, title );
 	[window makeKeyAndOrderFront:nil];
 	return window;
 }

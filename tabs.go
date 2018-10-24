@@ -1,5 +1,3 @@
-// +build !gnustep
-
 package goey
 
 import (
@@ -64,59 +62,56 @@ func (*tabsElement) Kind() *base.Kind {
 }
 
 func (w *tabsElement) Layout(bc base.Constraints) base.Size {
-	insets := w.controlInsets()
-	insets.X += w.insets.Left + w.insets.Right
-	insets.Y += w.insets.Top + w.insets.Bottom
+	xInset := w.insets.Left + w.insets.Right
+	yInset := w.insets.Top + w.insets.Bottom
 
 	if w.child == nil {
 		return bc.Constrain(base.Size{
-			Width:  insets.X,
-			Height: insets.Y,
+			Width:  xInset,
+			Height: yInset,
 		})
 	}
 
-	size := w.child.Layout(bc.Inset(insets.X, insets.Y))
+	size := w.child.Layout(bc.Inset(xInset, yInset))
 	return base.Size{
-		Width:  size.Width + insets.X,
-		Height: size.Height + insets.Y,
+		Width:  size.Width + xInset,
+		Height: size.Height + yInset,
 	}
 }
 
 func (w *tabsElement) MinIntrinsicHeight(width base.Length) base.Length {
-	insets := w.controlInsets()
-	insets.X += w.insets.Left + w.insets.Right
-	insets.Y += w.insets.Top + w.insets.Bottom
+	xInset := w.insets.Left + w.insets.Right
+	yInset := w.insets.Top + w.insets.Bottom
 
 	if w.child == nil {
-		return insets.Y
+		return yInset
 	}
 
 	if width == base.Inf {
-		return w.child.MinIntrinsicHeight(base.Inf) + insets.Y
+		return w.child.MinIntrinsicHeight(base.Inf) + yInset
 	}
 
-	return w.child.MinIntrinsicHeight(width - insets.X)
+	return w.child.MinIntrinsicHeight(width - xInset)
 }
 
 func (w *tabsElement) MinIntrinsicWidth(height base.Length) base.Length {
-	insets := w.controlInsets()
-	insets.X += w.insets.Left + w.insets.Right
-	insets.Y += w.insets.Top + w.insets.Bottom
+	xInset := w.insets.Left + w.insets.Right
+	yInset := w.insets.Top + w.insets.Bottom
 
 	if w.child == nil {
-		return insets.X
+		return xInset
 	}
 
 	if height == base.Inf {
 		return max(
 			w.controlTabsMinWidth(),
-			w.child.MinIntrinsicWidth(base.Inf)+insets.X,
+			w.child.MinIntrinsicWidth(base.Inf)+xInset,
 		)
 	}
 
 	return max(
 		w.controlTabsMinWidth(),
-		w.child.MinIntrinsicWidth(height-insets.Y),
+		w.child.MinIntrinsicWidth(height-yInset),
 	)
 }
 
@@ -127,6 +122,6 @@ func (w *tabsElement) UpdateProps(data base.Widget) error {
 	tabs.UpdateValue()
 	// Update properties.
 	// Forward to the platform-dependant code where necessary.
-	w.insets = tabs.Insets
+	w.setInsets(tabs.Insets)
 	return w.updateProps(tabs)
 }

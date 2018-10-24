@@ -6,6 +6,7 @@
 - (BOOL)becomeFirstResponder;
 - (BOOL)resignFirstResponder;
 - (void)onclick;
+- (void)onchange;
 @end
 
 @implementation GButton

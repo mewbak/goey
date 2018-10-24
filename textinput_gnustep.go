@@ -13,6 +13,9 @@ type textinputElement struct {
 
 func (w *TextInput) mount(parent base.Control) (base.Element, error) {
 	control := cocoa.NewTextField(parent.Handle, w.Value)
+	control.SetValue(w.Value)
+	control.SetPlaceholder(w.Placeholder)
+	control.SetCallbacks(w.OnChange, w.OnFocus, w.OnBlur)
 
 	retval := &textinputElement{
 		control: control,
@@ -51,5 +54,8 @@ func (w *textinputElement) SetBounds(bounds base.Rectangle) {
 }
 
 func (w *textinputElement) updateProps(data *TextInput) error {
+	w.control.SetValue(data.Value)
+	w.control.SetPlaceholder(data.Placeholder)
+	w.control.SetCallbacks(data.OnChange, data.OnFocus, data.OnBlur)
 	return nil
 }

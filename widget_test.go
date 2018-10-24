@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"bitbucket.org/rj/goey/base"
 )
@@ -75,6 +76,9 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 		}
 
 		go func(window *Window) {
+			if testing.Verbose() {
+				time.Sleep(5000 * time.Millisecond)
+			}
 			err := Do(func() error {
 				window.Close()
 				return nil

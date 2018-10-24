@@ -66,13 +66,24 @@ extern void decorationSetBorderRadius( void* control, nssize_t radius );
 extern void decorationSetFillColor( void* control, nscolor_t fill );
 extern void decorationSetStrokeColor( void* control, nscolor_t stroke );
 
+/* TabView */
+extern void* tabviewNew( void* superview );
+extern void tabviewAddItem( void* control, char const* text );
+extern void tabviewSelectItem( void* control, int index );
+extern nssize_t tabviewContentOrigin( void* control );
+extern nssize_t tabviewContentInsets( void* control );
+
 /* Text */
 extern void* textNew( void* superview, char const* text );
 extern void textSetText( void* handle, char const* text );
 
 /* TextField */
 extern void* textfieldNew( void* superview, char const* text );
-extern void textfieldSetTitle( void* handle, char const* text );
+extern void textfieldSetValue( void* handle, char const* text );
+extern void textfieldSetPlaceholder( void* handle, char const* text );
+
+extern void* textviewNew( void* superview, char const* text );
+extern void textviewSetValue( void* handle, char const* text );
 
 /* Image */
 extern void* imageNewFromRGBA( uint8_t* imageData, int width, int height,
