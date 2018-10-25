@@ -13,6 +13,7 @@ type paragraphElement struct {
 
 func (w *P) mount(parent base.Control) (base.Element, error) {
 	control := cocoa.NewText(parent.Handle, w.Text)
+	control.SetAlignment(int(w.Align))
 
 	retval := &labelElement{
 		control: control,
@@ -46,5 +47,6 @@ func (w *paragraphElement) SetBounds(bounds base.Rectangle) {
 
 func (w *paragraphElement) updateProps(data *P) error {
 	w.control.SetText(data.Text)
+	w.control.SetAlignment(int(w.Align))
 	return nil
 }
