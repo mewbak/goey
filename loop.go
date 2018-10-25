@@ -4,6 +4,7 @@ import (
 	"errors"
 	"runtime"
 	"sync/atomic"
+	"testing"
 )
 
 var (
@@ -20,7 +21,10 @@ var (
 )
 
 var (
-	isRunning uint32
+	isRunning      uint32
+	isTesting      uint32
+	testingActions chan func()
+	testingSync    chan struct{}
 )
 
 // Run locks the OS thread to act as a GUI thread, and then iterates over the
@@ -36,9 +40,17 @@ var (
 // Any further modifications to the GUI also need to be scheduled on the GUI
 // thread, which can be done using the function Do.
 func Run(action func() error) error {
-	// Pin the GUI message loop to a single thread
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
+	// This exists to support the examples.  They should be written like normal
+	// user code, and so need to call Run, not RunTest.  However, that code
+	// still needs to be dispatched to the event loop.
+	if atomic.LoadUint32(&isTesting) != 0 {
+		err := error(nil)
+		testingActions <- func() {
+			err = Run(action)
+		}
+		<-testingSync
+		return err
+	}
 
 	// Want to gate entry into the GUI loop so that only one thread may enter
 	// at a time.  Since this is supposed to be non-blocking, we can't use
@@ -49,6 +61,19 @@ func Run(action func() error) error {
 	defer func() {
 		atomic.StoreUint32(&isRunning, 0)
 	}()
+
+	// Pin the GUI message loop to a single thread
+	runtime.LockOSThread()
+	// The following deferred call to UnlockOSThread works fine on WIN32 and
+	// on Linux, where it is paired with the above LockOSThread.  It would
+	// also work with GNUstep on Go 1.10, where the behaviour of this pair
+	// was changed.  However, on GNUstep with Go 1.9 or earlier, the following
+	// call will break testing this the calls do not nest, and a call to
+	// LockOSThread is done at the package init.
+	// Refer to https://golang.org/doc/go1.10
+	if runtime.GOOS == "windows" {
+		defer runtime.UnlockOSThread()
+	}
 
 	// Since we have now locked the OS thread, we can call the initial action.
 	// We want to hold a reference to a virtual window by increasing the
@@ -74,6 +99,17 @@ func Run(action func() error) error {
 
 	// Defer to platform-specific code.
 	return run()
+}
+
+// RunTest runs the passed function on the main thread.  This code is meant to
+// be used in conjunction with TestMain (see package testing).
+func RunTest(t *testing.T, action func()) {
+	if atomic.LoadUint32(&isTesting) == 0 {
+		panic("This function is only meant to be called in testing")
+	}
+
+	testingActions <- action
+	<-testingSync
 }
 
 // Do runs the passed function on the GUI thread.  If the event loop is not
@@ -102,13 +138,4 @@ func Do(action func() error) error {
 
 	// Defer to platform-specific code.
 	return do(action)
-}
-
-// Loop runs one interation of the event loop.  This function's use by user code
-// should be very rare.
-//
-// This function is only safe to call on the GUI thread.
-func Loop(blocking bool) error {
-	// Defer to platform-specific code.
-	return loop(blocking)
 }

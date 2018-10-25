@@ -117,6 +117,9 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 		go func() {
 			t.Logf("Window created, start tests for %s", t.Name())
 			action(t, mw)
+			if testing.Verbose() {
+				time.Sleep(500 * time.Millisecond)
+			}
 			t.Logf("Stopping tests for %s", t.Name())
 
 			// Note:  No work after this call to Do, since the call to Run may be
@@ -130,13 +133,15 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 		return nil
 	}
 
-	err := Run(createWindow)
-	if err != nil {
-		t.Fatalf("Failed to run event loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Fatalf("Want mainWindowCount==0, got mainWindowCount==%d", c)
-	}
+	RunTest(t, func() {
+		err := Run(createWindow)
+		if err != nil {
+			t.Fatalf("Failed to run event loop, %s", err)
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Fatalf("Want mainWindowCount==0, got mainWindowCount==%d", c)
+		}
+	})
 }
 
 func TestWindow_SetChild(t *testing.T) {
@@ -144,7 +149,11 @@ func TestWindow_SetChild(t *testing.T) {
 		widgets := []base.Widget{}
 
 		for i := 1; i < 10; i++ {
-			time.Sleep(50 * time.Millisecond)
+			if testing.Verbose() {
+				time.Sleep(250 * time.Millisecond)
+			} else {
+				time.Sleep(50 * time.Millisecond)
+			}
 			widgets = append(widgets, &Button{Text: "Button " + strconv.Itoa(i)})
 			err := Do(func() error {
 				return mw.SetChild(&VBox{
@@ -198,7 +207,7 @@ func TestNewWindow_SetIcon(t *testing.T) {
 				return mw.SetIcon(img)
 			})
 			if err != nil {
-				t.Errorf("Error calling SetTitle, %s", err)
+				t.Errorf("Error calling SetIcon, %s", err)
 			}
 			time.Sleep(50 * time.Millisecond)
 		}

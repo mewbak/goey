@@ -18,6 +18,7 @@ var (
 	ErrSetChildrenNotReentrant = errors.New("method SetChild is not reentrant")
 
 	insideSetChildren uintptr
+	mainWindowCount   int32
 )
 
 // Window represents a top-level window that contain other widgets.
@@ -161,6 +162,9 @@ func (w *Window) SetChild(child base.Widget) error {
 }
 
 // SetIcon changes the icon associated with the window.
+//
+// On Cocoa, individual windows do not have icons.  Instead, there is a single
+// icon for the entire application.
 func (w *Window) SetIcon(img image.Image) error {
 	return w.setIcon(img)
 }

@@ -96,13 +96,15 @@ func TestRun(t *testing.T) {
 		return nil
 	}
 
-	err := Run(init)
-	if err != nil {
-		t.Errorf("Unexpected error in call to Run")
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-	}
+	RunTest(t, func() {
+		err := Run(init)
+		if err != nil {
+			t.Errorf("Unexpected error in call to Run")
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		}
+	})
 }
 
 func TestRunWithError(t *testing.T) {
@@ -113,51 +115,56 @@ func TestRunWithError(t *testing.T) {
 		return errors.New(errorString)
 	}
 
-	err := Run(init)
-	if err == nil {
-		t.Errorf("Unexpected success, no error returned")
-	} else if s := err.Error(); errorString != s {
-		t.Errorf("Unexpected error, want %s, got %s", errorString, s)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-	}
+	RunTest(t, func() {
+		err := Run(init)
+		if err == nil {
+			t.Errorf("Unexpected success, no error returned")
+		} else if s := err.Error(); errorString != s {
+			t.Errorf("Unexpected error, want %s, got %s", errorString, s)
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		}
+	})
 }
 
 func TestRunWithPanic(t *testing.T) {
 	const errorString = "No luck"
-	defer func() {
-		r := recover()
-		if r != nil {
-			if s, ok := r.(string); !ok {
-				t.Errorf("Unexpected recover, %v", r)
-			} else if s != errorString {
-				t.Errorf("Unexpected recover, %s", s)
+
+	RunTest(t, func() {
+		defer func() {
+			r := recover()
+			if r != nil {
+				if s, ok := r.(string); !ok {
+					t.Errorf("Unexpected recover, %v", r)
+				} else if s != errorString {
+					t.Errorf("Unexpected recover, %s", s)
+				}
+			} else {
+				t.Errorf("Missing panic")
 			}
-		} else {
-			t.Errorf("Missing panic")
+
+			// Make sure that window count is properly maintained.
+			if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+				t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+			}
+		}()
+
+		// Make sure that error is passed through to caller
+		init := func() error {
+			panic(errorString)
 		}
 
-		// Make sure that window count is properly maintained.
+		err := Run(init)
+		if err == nil {
+			t.Errorf("Unexpected success, no error returned")
+		} else if s := err.Error(); errorString != s {
+			t.Errorf("Unexpected error, want %s, got %s", errorString, s)
+		}
 		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
 			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
 		}
-	}()
-
-	// Make sure that error is passed through to caller
-	init := func() error {
-		panic(errorString)
-	}
-
-	err := Run(init)
-	if err == nil {
-		t.Errorf("Unexpected success, no error returned")
-	} else if s := err.Error(); errorString != s {
-		t.Errorf("Unexpected error, want %s, got %s", errorString, s)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-	}
+	})
 }
 
 func TestRunWithWindowClose(t *testing.T) {
@@ -183,13 +190,15 @@ func TestRunWithWindowClose(t *testing.T) {
 		return nil
 	}
 
-	err := Run(init)
-	if err != nil {
-		t.Errorf("Unexpected error in call to Run")
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-	}
+	RunTest(t, func() {
+		err := Run(init)
+		if err != nil {
+			t.Errorf("Unexpected error in call to Run")
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		}
+	})
 }
 
 func TestDo(t *testing.T) {
@@ -227,8 +236,17 @@ func TestDo(t *testing.T) {
 				}
 			}
 
-			// Close the window
+			// Check for an error return
 			err := Do(func() error {
+				// Some example error
+				return ErrNotRunning
+			})
+			if err != ErrNotRunning {
+				t.Errorf("Error in Do, expected %v, got %v", ErrNotRunning, err)
+			}
+
+			// Close the window
+			err = Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -240,16 +258,18 @@ func TestDo(t *testing.T) {
 		return nil
 	}
 
-	err := Run(init)
-	if err != nil {
-		t.Errorf("Failed to run GUI loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-	}
-	if c := atomic.LoadUint32(&count); c != 10 {
-		t.Errorf("Want count=10, got count==%d", c)
-	}
+	RunTest(t, func() {
+		err := Run(init)
+		if err != nil {
+			t.Errorf("Failed to run GUI loop, %s", err)
+		}
+		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
+			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		}
+		if c := atomic.LoadUint32(&count); c != 10 {
+			t.Errorf("Want count=10, got count==%d", c)
+		}
+	})
 }
 
 func TestDoFailure(t *testing.T) {
