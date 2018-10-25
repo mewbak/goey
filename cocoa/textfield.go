@@ -66,9 +66,7 @@ func (w *TextField) SetPlaceholder(text string) {
 
 //export textfieldOnChange
 func textfieldOnChange(handle unsafe.Pointer, text *C.char) {
-	println("textfieldOnChange", handle, C.GoString(text))
 	if cb := textfieldCallbacks[handle]; cb.onChange != nil {
-		println("found")
 		cb.onChange(C.GoString(text))
 	}
 }

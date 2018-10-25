@@ -82,6 +82,7 @@ extern void* textfieldNew( void* superview, char const* text );
 extern void textfieldSetValue( void* handle, char const* text );
 extern void textfieldSetPlaceholder( void* handle, char const* text );
 
+/* TextView */
 extern void* textviewNew( void* superview, char const* text );
 extern void textviewSetValue( void* handle, char const* text );
 

@@ -12,13 +12,14 @@
 
 - (void)controlTextDidChange:(NSNotification*)obj {
 	NSString* v = [self stringValue];
-	textfieldOnChange( self, [v cStringUsingEncoding:NSUTF8StringEncoding] );
+	// Drop const, not representable in Go type system
+	textfieldOnChange( self,
+	                   (char*)[v cStringUsingEncoding:NSUTF8StringEncoding] );
 }
 
 - (BOOL)becomeFirstResponder {
 	BOOL rc = [super becomeFirstResponder];
 	if ( rc ) {
-		printf( "become\n" );
 		textfieldOnFocus( self );
 	}
 	return rc;
@@ -27,7 +28,6 @@
 - (BOOL)resignFirstResponder {
 	BOOL rc = [super resignFirstResponder];
 	if ( rc ) {
-		printf( "resign\n" );
 		textfieldOnBlur( self );
 	}
 	return rc;

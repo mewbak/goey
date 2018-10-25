@@ -12,7 +12,7 @@ void viewSetFrame( void* handle, int x, int y, int dx, int dy ) {
 	assert( handle && [(id)handle isKindOfClass:[NSView class]] );
 	assert( dx >= 0 && dy >= 0 );
 
-	NSRect frame = NSMakeRect( x, y, dx, dy );
+	NSRect frame = NSMakeRect( x, -y - dy, dx, dy );
 	[(NSView*)handle setFrame:frame];
 	[(NSView*)handle display];
 }
