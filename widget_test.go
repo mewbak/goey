@@ -18,6 +18,10 @@ type Clickable interface {
 	Click()
 }
 
+type Focusable interface {
+	TakeFocus() bool
+}
+
 func equal(t *testing.T, lhs, rhs base.Widget) bool {
 	// On windows, the message EM_GETCUEBANNER does not work unless the manifest
 	// is set correctly.  This cannot be done for the package, since that
@@ -193,7 +197,16 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 			// Run the actions, which are counted.
 			for i := 0; i < 3; i++ {
 				err := Do(func() error {
-					testingSetFocus(t, window, i)
+					// Find the child element to be clicked
+					child := window.child.(*vboxElement).children[i]
+					if elem, ok := child.(Focusable); ok {
+						ok := elem.TakeFocus()
+						if !ok {
+							t.Errorf("Failed to set focus on the control")
+						}
+					} else {
+						t.Errorf("Control does not support TakeFocus")
+					}
 					return nil
 				})
 				if err != nil {
@@ -256,7 +269,7 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 					if elem, ok := child.(Clickable); ok {
 						elem.Click()
 					} else {
-						t.Errorf("Failed to click the control")
+						t.Errorf("Control does not support Click")
 					}
 					return nil
 				})

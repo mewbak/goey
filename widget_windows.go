@@ -72,6 +72,17 @@ func (w *Control) SetBounds(bounds base.Rectangle) {
 	win.MoveWindow(w.hWnd, int32(bounds.Min.X.PixelsX()), int32(bounds.Min.Y.PixelsY()), int32(bounds.Dx().PixelsX()), int32(bounds.Dy().PixelsY()), false)
 }
 
+// TakeFocus is a wrapper around SetFocus.
+func (w *Control) TakeFocus() bool {
+	// If the control already has focus, we avoid the call to SetFocus.  This
+	// is to debounce the event callbacks.
+	if win.GetFocus() == w.hWnd {
+		return true
+	}
+
+	return win.SetFocus(w.hWnd) != 0
+}
+
 // SetOrder is a call around SetWindowPos used to ensure that a window appears
 // in the correct order.
 func (w *Control) SetOrder(previous win.HWND) win.HWND {
