@@ -47,6 +47,6 @@ func (w *paragraphElement) SetBounds(bounds base.Rectangle) {
 
 func (w *paragraphElement) updateProps(data *P) error {
 	w.control.SetText(data.Text)
-	w.control.SetAlignment(int(w.Align))
+	w.control.SetAlignment(int(data.Align))
 	return nil
 }

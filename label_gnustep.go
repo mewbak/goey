@@ -46,6 +46,12 @@ func (w *labelElement) SetBounds(bounds base.Rectangle) {
 	w.control.SetFrame(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
 }
 
+func (w *labelElement) Props() base.Widget {
+	return &Label{
+		Text: w.control.Text(),
+	}
+}
+
 func (w *labelElement) updateProps(data *Label) error {
 	w.control.SetText(data.Text)
 	return nil

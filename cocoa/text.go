@@ -35,3 +35,8 @@ func (w *Text) SetText(text string) {
 
 	C.textSetText(unsafe.Pointer(w), ctext)
 }
+
+func (w *Text) Text() string {
+	ctext := C.textText(unsafe.Pointer(w))
+	return C.GoString(ctext)
+}

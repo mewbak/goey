@@ -90,7 +90,7 @@ void buttonSetState( void* handle, bool_t state ) {
 
 char const* buttonTitle( void* handle ) {
 	NSString* title = [(GButton*)handle title];
-	return [title cString];
+	return [title cStringUsingEncoding:NSUTF8StringEncoding];
 }
 
 void buttonSetTitle( void* handle, char const* title ) {

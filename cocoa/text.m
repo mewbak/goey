@@ -45,3 +45,10 @@ void textSetAlignment( void* handle, int align ) {
 		break;
 	}
 }
+
+char const* textText( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[NSText class]] );
+
+	NSString* text = [(NSText*)handle text];
+	return [text cStringUsingEncoding:NSUTF8StringEncoding];
+}

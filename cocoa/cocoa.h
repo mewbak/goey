@@ -80,6 +80,7 @@ extern nssize_t tabviewContentInsets( void* control );
 extern void* textNew( void* superview, char const* text );
 extern void textSetText( void* handle, char const* text );
 extern void textSetAlignment( void* handle, int align );
+extern char const* textText( void *handle );
 
 /* TextField */
 extern void* textfieldNew( void* superview, char const* text );
