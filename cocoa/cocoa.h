@@ -66,6 +66,9 @@ extern void decorationSetBorderRadius( void* control, nssize_t radius );
 extern void decorationSetFillColor( void* control, nscolor_t fill );
 extern void decorationSetStrokeColor( void* control, nscolor_t stroke );
 
+/* HR */
+extern void* hrNew( void* superview );
+
 /* TabView */
 extern void* tabviewNew( void* superview );
 extern void tabviewAddItem( void* control, char const* text );

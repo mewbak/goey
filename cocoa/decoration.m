@@ -23,7 +23,6 @@
 	NSRect frame = [self frame];
 	frame.origin.x = 0;
 	frame.origin.y = 0;
-	printf( "fill %p %p\n", self.fillColor, self.strokeColor );
 	if ( self.borderRadius.width > 0 ) {
 		NSBezierPath* path =
 		    [NSBezierPath bezierPathWithRoundedRect:frame
