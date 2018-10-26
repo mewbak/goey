@@ -16,6 +16,32 @@
 
 @end
 
+@interface GApplicationDelegate : NSObject <NSApplicationDelegate>
+- (NSApplicationTerminateReply)applicationShouldTerminate:
+    (NSApplication*)sender;
+@end
+
+@implementation GApplicationDelegate
+
+- (NSApplicationTerminateReply)applicationShouldTerminate:
+    (NSApplication*)sender {
+	// Will try to close all of the windows.
+	NSArray* windows = [sender windows];
+	assert( windows );
+
+	int i;
+	for ( i = 0; i < [windows count]; ++i ) {
+		NSWindow* w = [windows objectAtIndex:i];
+		assert( w );
+		[w performClose:self];
+	}
+
+	// Only close if all of the windows are closed.
+	return [[sender windows] count] == 0 ? NSTerminateNow : NSTerminateCancel;
+}
+
+@end
+
 static void detachAThread() {
 	TRACE();
 
@@ -31,11 +57,17 @@ static void detachAThread() {
 static void initApplication() {
 	TRACE();
 
+	static GApplicationDelegate* delegate = 0;
+	if ( !delegate ) {
+		delegate = [[GApplicationDelegate alloc] init];
+	}
+
 	NSString* quitString = [[NSString alloc] initWithUTF8String:"Quit "];
 	NSString* qString = [[NSString alloc] initWithUTF8String:"q"];
 
 	[NSApplication sharedApplication];
 	//[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+	[NSApp setDelegate:delegate];
 
 	id menubar = [[NSMenu new] autorelease];
 	id appMenuItem = [[NSMenuItem new] autorelease];
