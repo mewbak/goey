@@ -17,12 +17,6 @@
 
 @end
 
-static void adjustContentOrigin( NSWindow* window ) {
-	NSView* cv = window.contentView;
-	CGFloat h = cv.frame.size.height;
-	[cv setBoundsOrigin:NSMakePoint( 0, -h )];
-}
-
 @interface MyWindowDelegate : NSObject <NSWindowDelegate>
 - (void)windowWillClose:(NSNotification*)aNotification;
 - (void)windowDidResize:(NSNotification*)aNotification;
@@ -37,7 +31,6 @@ static void adjustContentOrigin( NSWindow* window ) {
 
 - (void)windowDidResize:(NSNotification*)notification {
 	NSWindow* window = [notification object];
-	adjustContentOrigin( window );
 	windowDidResize( window );
 }
 
@@ -64,7 +57,6 @@ void* windowNew( char const* title, unsigned width, unsigned height ) {
 	[window setDelegate:delegate];
 	windowSetTitle( window, title );
 	[window makeKeyAndOrderFront:nil];
-	adjustContentOrigin( window );
 	return window;
 }
 

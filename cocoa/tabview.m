@@ -31,8 +31,13 @@ void* tabviewNew( void* superview ) {
 		delegate = [[MyTabViewDelegate alloc] init];
 	}
 
-	// Create the button
-	NSTabView* control = [[NSTabView alloc] init];
+	// Create the button.
+    // A default frame is required.  Otherwise, we get errors about negative
+    // size frames when tabs are created, which have their own content views.
+    // Also required for the bounds of those frames to be correctely
+    // initialized.
+	NSTabView* control =
+	    [[NSTabView alloc] initWithFrame:NSMakeRect( 0, 0, 200, 200 )];
 	[control setDelegate:delegate];
 
 	// Add the button as the view for the window
@@ -59,12 +64,14 @@ void tabviewSelectItem( void* control, int index ) {
 	[(NSTabView*)control selectTabViewItemAtIndex:index];
 }
 
-nssize_t tabviewContentOrigin( void* control ) {
+void* tabviewContentView( void* control, int index ) {
 	assert( control && [(id)control isKindOfClass:[NSTabView class]] );
 
-	NSRect cr = [(NSTabView*)control contentRect];
-	nssize_t ret = {cr.origin.x, cr.origin.y};
-	return ret;
+	NSTabViewItem* item = [(NSTabView*)control selectedTabViewItem];
+	assert( item );
+	NSView* cv = [item view];
+	assert( cv );
+	return cv;
 }
 
 nssize_t tabviewContentInsets( void* control ) {

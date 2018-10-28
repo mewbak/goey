@@ -62,8 +62,9 @@ func (*tabsElement) Kind() *base.Kind {
 }
 
 func (w *tabsElement) Layout(bc base.Constraints) base.Size {
-	xInset := w.insets.Left + w.insets.Right
-	yInset := w.insets.Top + w.insets.Bottom
+	xInset, yInset := w.contentInsets()
+	xInset += w.insets.Left + w.insets.Right
+	yInset += w.insets.Top + w.insets.Bottom
 
 	if w.child == nil {
 		return bc.Constrain(base.Size{
@@ -122,6 +123,6 @@ func (w *tabsElement) UpdateProps(data base.Widget) error {
 	tabs.UpdateValue()
 	// Update properties.
 	// Forward to the platform-dependant code where necessary.
-	w.setInsets(tabs.Insets)
+	w.insets = tabs.Insets
 	return w.updateProps(tabs)
 }

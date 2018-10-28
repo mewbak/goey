@@ -74,7 +74,7 @@ extern void* hrNew( void* superview );
 extern void* tabviewNew( void* superview );
 extern void tabviewAddItem( void* control, char const* text );
 extern void tabviewSelectItem( void* control, int index );
-extern nssize_t tabviewContentOrigin( void* control );
+extern void* tabviewContentView( void* control, int index );
 extern nssize_t tabviewContentInsets( void* control );
 
 /* Text */

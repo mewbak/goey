@@ -44,9 +44,9 @@ func (w *TabView) SelectItem(index int) {
 	C.tabviewSelectItem(unsafe.Pointer(w), C.int(index))
 }
 
-func (w *TabView) ContentOrigin() (int, int) {
-	origin := C.tabviewContentOrigin(unsafe.Pointer(w))
-	return int(origin.width), int(origin.height)
+func (w *TabView) ContentView(index int) *View {
+	view := C.tabviewContentView(unsafe.Pointer(w), C.int(index))
+	return (*View)(view)
 }
 
 func (w *TabView) ContentInsets() (int, int) {
@@ -54,7 +54,7 @@ func (w *TabView) ContentInsets() (int, int) {
 	return int(size.width), int(size.height)
 }
 
-func (w *Window) SetOnChange(cb func(int)) {
+func (w *TabView) SetOnChange(cb func(int)) {
 	tabviewCallbacks[unsafe.Pointer(w)] = tabviewCallback{
 		onChange: cb,
 	}
