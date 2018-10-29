@@ -35,9 +35,19 @@ func (w *Progress) Mount(parent base.Control) (base.Element, error) {
 }
 
 // UpdateRange sets a default range when Min and Max are uninitialized.
+// It will also clamp Value to the range.
 func (w *Progress) UpdateRange() {
+	// Fill in a default range if none has been specified.
 	if w.Min == 0 && w.Max == 0 {
 		w.Max = 100
+	}
+
+	// Clamp value to the range
+	if w.Value > w.Max {
+		w.Value = w.Max
+	}
+	if w.Value < w.Min {
+		w.Value = w.Min
 	}
 }
 
