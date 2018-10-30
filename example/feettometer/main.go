@@ -2,7 +2,7 @@
 // that rebuilds the classic Tcl/Tk tutorial application.
 //
 // The example also shows the use of a custom layout container, MinSizedBox,
-// showing that new layouts can be developped outside of the main package,
+// showing that new layouts can be developed outside of the main package,
 // and used portably.  In this case, the layout uses the methods
 // MinIntrinsicHeight and MinIntrinsicWidth to find the minimum acceptable size
 // for the child, and then limits the child to that particular size as long as
