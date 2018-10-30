@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"reflect"
 	"runtime"
-	"sync/atomic"
 	"testing"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/loop"
 )
 
 type Proper interface {
@@ -79,7 +79,7 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 		}
 
 		go func(window *Window) {
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -91,12 +91,9 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	err := Run(init)
+	err := loop.Run(init)
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
 	}
 }
 
@@ -117,7 +114,7 @@ func testingRenderWidgetsFail(t *testing.T, outError error, widgets ...base.Widg
 		return nil
 	}
 
-	err := Run(init)
+	err := loop.Run(init)
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
 	}
@@ -152,7 +149,7 @@ func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
 		}
 
 		go func(window *Window) {
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -164,12 +161,9 @@ func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	err := Run(init)
+	err := loop.Run(init)
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
 	}
 }
 
@@ -196,7 +190,7 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 		go func(window *Window) {
 			// Run the actions, which are counted.
 			for i := 0; i < 3; i++ {
-				err := Do(func() error {
+				err := loop.Do(func() error {
 					// Find the child element to be clicked
 					child := window.child.(*vboxElement).children[i]
 					if elem, ok := child.(Focusable); ok {
@@ -212,7 +206,7 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 			}
 
 			// Close the window
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -224,7 +218,7 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	err := Run(init)
+	err := loop.Run(init)
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
 	}
@@ -260,7 +254,7 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 		go func(window *Window) {
 			// Run the actions, which are counted.
 			for i := 0; i < 3; i++ {
-				err := Do(func() error {
+				err := loop.Do(func() error {
 					// Find the child element to be clicked
 					child := window.child.(*vboxElement).children[i]
 					if elem, ok := child.(Clickable); ok {
@@ -276,7 +270,7 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 			}
 
 			// Close the window
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -288,7 +282,7 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	err := Run(init)
+	err := loop.Run(init)
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
 	}
@@ -349,7 +343,7 @@ func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Wid
 		}
 
 		go func(window *Window) {
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -361,11 +355,8 @@ func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Wid
 		return nil
 	}
 
-	err := Run(init)
+	err := loop.Run(init)
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
-	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
 	}
 }

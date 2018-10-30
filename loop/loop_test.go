@@ -1,4 +1,4 @@
-package goey
+package loop
 
 import (
 	"errors"
@@ -11,17 +11,13 @@ func ExampleRun() {
 	// This init function will be used to create a window on the GUI thread.
 	init := func() error {
 		// Create an empty window.
-		window, err := NewWindow("Test", nil)
-		if err != nil {
-			fmt.Println("Error:", err)
-			return err
-		}
+		AddLockCount(1)
 
 		go func() {
 			// Because of goroutine, we are now off the GUI thread.
 			// Schedule an action.
 			err := Do(func() error {
-				window.Close()
+				AddLockCount(-1)
 				fmt.Println("...like tears in rain")
 				return nil
 			})
@@ -57,21 +53,15 @@ func ExampleDo() {
 func TestRun(t *testing.T) {
 	init := func() error {
 		// Verify that the test is starting in the correct state.
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
+		if c := atomic.LoadInt32(&lockCount); c != 1 {
+			t.Errorf("Want lockCount==1, got lockCount==%d", c)
 			return nil
 		}
 
 		// Create window and verify.
-		window, err := NewWindow("Test", nil)
-		if err != nil {
-			t.Fatalf("Fail in call to NewWindow, %s", err)
-		}
-		if window == nil {
-			t.Fatalf("Unexpected nil for window")
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 2 {
-			t.Fatalf("Want mainWindow==2, got mainWindow==%d", c)
+		AddLockCount(1)
+		if c := atomic.LoadInt32(&lockCount); c != 2 {
+			t.Fatalf("Want lockCount==2, got lockCount==%d", c)
 		}
 
 		go func() {
@@ -85,7 +75,7 @@ func TestRun(t *testing.T) {
 
 			// Close the window.  This should stop the GUI loop.
 			err = Do(func() error {
-				window.Close()
+				AddLockCount(-1)
 				return nil
 			})
 			if err != nil {
@@ -100,8 +90,8 @@ func TestRun(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unexpected error in call to Run")
 	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+	if c := atomic.LoadInt32(&lockCount); c != 0 {
+		t.Errorf("Want lockCount==0, got lockCount==%d", c)
 	}
 }
 
@@ -119,8 +109,8 @@ func TestRunWithError(t *testing.T) {
 	} else if s := err.Error(); errorString != s {
 		t.Errorf("Unexpected error, want %s, got %s", errorString, s)
 	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+	if c := atomic.LoadInt32(&lockCount); c != 0 {
+		t.Errorf("Want lockCount==0, got lockCount==%d", c)
 	}
 }
 
@@ -139,8 +129,8 @@ func TestRunWithPanic(t *testing.T) {
 		}
 
 		// Make sure that window count is properly maintained.
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+		if c := atomic.LoadInt32(&lockCount); c != 0 {
+			t.Errorf("Want lockCount==0, got lockCount==%d", c)
 		}
 	}()
 
@@ -155,31 +145,25 @@ func TestRunWithPanic(t *testing.T) {
 	} else if s := err.Error(); errorString != s {
 		t.Errorf("Unexpected error, want %s, got %s", errorString, s)
 	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+	if c := atomic.LoadInt32(&lockCount); c != 0 {
+		t.Errorf("Want lockCount==0, got lockCount==%d", c)
 	}
 }
 
 func TestRunWithWindowClose(t *testing.T) {
 	// Make sure that error is passed through to caller
 	init := func() error {
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
+		if c := atomic.LoadInt32(&lockCount); c != 1 {
+			t.Errorf("Want lockCount==1, got lockCount==%d", c)
 			return nil
 		}
 
-		window, err := NewWindow("Test", nil)
-		if err != nil {
-			t.Fatalf("Fail in call to NewWindow, %s", err)
-		}
-		if window == nil {
-			t.Fatalf("Unexpected nil for window")
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 2 {
-			t.Fatalf("Want mainWindow==2, got mainWindow==%d", c)
+		AddLockCount(1)
+		if c := atomic.LoadInt32(&lockCount); c != 2 {
+			t.Fatalf("Want lockCount==2, got lockCount==%d", c)
 		}
 
-		window.Close()
+		AddLockCount(-1)
 		return nil
 	}
 
@@ -187,8 +171,8 @@ func TestRunWithWindowClose(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unexpected error in call to Run")
 	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+	if c := atomic.LoadInt32(&lockCount); c != 0 {
+		t.Errorf("Want lockCount==0, got lockCount==%d", c)
 	}
 }
 
@@ -197,25 +181,19 @@ func TestDo(t *testing.T) {
 
 	init := func() error {
 		// Verify that the test is starting in the correct state.
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Errorf("Want mainWindow==1, got mainWindow==%d", c)
+		if c := atomic.LoadInt32(&lockCount); c != 1 {
+			t.Errorf("Want lockCount==1, got lockCount==%d", c)
 			return nil
 		}
 
 		// Create window and verify.
 		// We need at least one window open to maintain GUI loop.
-		window, err := NewWindow("TestDo", nil)
-		if err != nil {
-			t.Errorf("Failed to create window, %s", err)
-		}
-		if window == nil {
-			t.Fatalf("Unexpected nil for window")
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 2 {
-			t.Fatalf("Want mainWindow==2, got mainWindow==%d", c)
+		AddLockCount(1)
+		if c := atomic.LoadInt32(&lockCount); c != 2 {
+			t.Fatalf("Want lockCount==2, got lockCount==%d", c)
 		}
 
-		go func(window *Window) {
+		go func() {
 			// Run the actions, which are counted.
 			for i := 0; i < 10; i++ {
 				err := Do(func() error {
@@ -229,13 +207,13 @@ func TestDo(t *testing.T) {
 
 			// Close the window
 			err := Do(func() error {
-				window.Close()
+				AddLockCount(-1)
 				return nil
 			})
 			if err != nil {
 				t.Errorf("Error in Do, %s", err)
 			}
-		}(window)
+		}()
 
 		return nil
 	}
@@ -244,8 +222,8 @@ func TestDo(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
 	}
-	if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-		t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
+	if c := atomic.LoadInt32(&lockCount); c != 0 {
+		t.Errorf("Want lockCount==0, got lockCount==%d", c)
 	}
 	if c := atomic.LoadUint32(&count); c != 10 {
 		t.Errorf("Want count=10, got count==%d", c)

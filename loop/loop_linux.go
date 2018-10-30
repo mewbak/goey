@@ -1,4 +1,4 @@
-package goey
+package loop
 
 import (
 	"github.com/gotk3/gotk3/glib"
@@ -7,6 +7,14 @@ import (
 
 func init() {
 	gtk.Init(nil)
+}
+
+func initRun() error {
+	// Do nothing
+}
+
+func terminateRun() {
+	// Do nothing
 }
 
 func run() error {
@@ -28,4 +36,8 @@ func loop(blocking bool) error {
 		return ErrQuit
 	}
 	return nil
+}
+
+func stop() {
+	gtk.MainQuit()
 }

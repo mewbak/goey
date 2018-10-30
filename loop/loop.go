@@ -1,4 +1,4 @@
-package goey
+package loop
 
 import (
 	"errors"
@@ -21,6 +21,7 @@ var (
 
 var (
 	isRunning uint32
+	lockCount int32
 )
 
 // Run locks the OS thread to act as a GUI thread, and then iterates over the
@@ -50,15 +51,22 @@ func Run(action func() error) error {
 		atomic.StoreUint32(&isRunning, 0)
 	}()
 
+	// Platform specific initialization ahead of running any user actions.
+	err := initRun()
+	if err != nil {
+		return err
+	}
+	defer terminateRun()
+
 	// Since we have now locked the OS thread, we can call the initial action.
 	// We want to hold a reference to a virtual window by increasing the
 	// count to prevent a premature exit if any windows are created and then
 	// destroyed during the initialization.  To handle any panics, the call
 	// to action needs to be wrapped in a function.
-	err := func(action func() error) error {
-		atomic.AddInt32(&mainWindowCount, 1)
+	err = func(action func() error) error {
+		atomic.AddInt32(&lockCount, 1)
 		defer func() {
-			atomic.AddInt32(&mainWindowCount, -1)
+			atomic.AddInt32(&lockCount, -1)
 		}()
 		return action()
 	}(action)
@@ -68,7 +76,7 @@ func Run(action func() error) error {
 
 	// Check that there is at least on top-level window still open.  Otherwise,
 	// there is not point in running the GUI event loop.
-	if c := atomic.LoadInt32(&mainWindowCount); c <= 0 {
+	if c := atomic.LoadInt32(&lockCount); c <= 0 {
 		return nil
 	}
 
@@ -104,11 +112,10 @@ func Do(action func() error) error {
 	return do(action)
 }
 
-// Loop runs one interation of the event loop.  This function's use by user code
-// should be very rare.
-//
-// This function is only safe to call on the GUI thread.
-func Loop(blocking bool) error {
-	// Defer to platform-specific code.
-	return loop(blocking)
+// AddLockCount is used to track the number of top-level GUI elements that are
+// created.  When the count falls back to zero, the event loop will terminate.
+func AddLockCount(delta int32) {
+	if newval := atomic.AddInt32(&lockCount, delta); newval == 0 {
+		stop()
+	}
 }

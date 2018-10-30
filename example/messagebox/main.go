@@ -7,6 +7,7 @@ import (
 
 	"bitbucket.org/rj/goey"
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/loop"
 )
 
 var (
@@ -14,7 +15,7 @@ var (
 )
 
 func main() {
-	err := goey.Run(createWindow)
+	err := loop.Run(createWindow)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}

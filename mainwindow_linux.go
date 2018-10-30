@@ -6,13 +6,13 @@ import (
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/loop"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 var (
-	mainWindowCount int32
 	vscrollbarWidth base.Length
 )
 
@@ -42,11 +42,12 @@ type windowImpl struct {
 }
 
 func newWindow(title string, child base.Widget) (*Window, error) {
+	// Create a new GTK window
 	app, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
 		return nil, err
 	}
-	atomic.AddInt32(&mainWindowCount, 1)
+	loop.AddLockCount(1)
 
 	scroll, err := gtk.ScrolledWindowNew(nil, nil)
 	if err != nil {
@@ -319,10 +320,11 @@ func (w *windowImpl) updateWindowMinSize() {
 }
 
 func mainwindowOnDestroy(widget *gtk.Window, mw *Window) {
+	// Clear handle from the struct so that we dont' risk pointing to a
+	// non existent window.
 	mw.handle = nil
-	if c := atomic.AddInt32(&mainWindowCount, -1); c == 0 {
-		gtk.MainQuit()
-	}
+	// Release lock count on the GUI event loop.
+	loop.AddLockCount(-1)
 }
 
 func mainwindowOnSizeAllocate(widget *gtk.Window, rect uintptr, mw *Window) {
