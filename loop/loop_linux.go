@@ -11,6 +11,7 @@ func init() {
 
 func initRun() error {
 	// Do nothing
+	return nil
 }
 
 func terminateRun() {
@@ -28,14 +29,6 @@ func do(action func() error) error {
 		err <- action()
 	})
 	return <-err
-}
-
-func loop(blocking bool) error {
-	rc := gtk.MainIterationDo(blocking)
-	if rc {
-		return ErrQuit
-	}
-	return nil
 }
 
 func stop() {

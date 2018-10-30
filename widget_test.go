@@ -194,9 +194,12 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 					// Find the child element to be clicked
 					child := window.child.(*vboxElement).children[i]
 					if elem, ok := child.(Focusable); ok {
-						elem.TakeFocus()
+						ok := elem.TakeFocus()
+						if !ok {
+							t.Errorf("Failed to set focus on the control")
+						}
 					} else {
-						t.Errorf("Failed to click the control")
+						t.Errorf("Control does not support TakeFocus")
 					}
 					return nil
 				})
@@ -260,7 +263,7 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 					if elem, ok := child.(Clickable); ok {
 						elem.Click()
 					} else {
-						t.Errorf("Failed to click the control")
+						t.Errorf("Control does not support Click")
 					}
 					return nil
 				})

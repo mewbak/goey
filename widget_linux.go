@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"time"
 	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gdk"
@@ -30,6 +31,21 @@ func (w *Control) Close() {
 // Handle returns the platform-native handle for the control.
 func (w *Control) Handle() *gtk.Widget {
 	return w.handle
+}
+
+// TakeFocus is a wrapper around GrabFocus.
+func (w *Control) TakeFocus() bool {
+	// Check that the control can grab focus
+	if !w.handle.GetCanFocus() {
+		return false
+	}
+
+	w.handle.GrabFocus()
+	// Note sure why the call to sleep is required, but there may be a debounce
+	// provided by the system.  Without this call to sleep, the controls never
+	// get the focus events.
+	time.Sleep(250 * time.Millisecond)
+	return w.handle.IsFocus()
 }
 
 // TakeFocus is a wrapper around GrabFocus.
