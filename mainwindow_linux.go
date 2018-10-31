@@ -2,7 +2,6 @@ package goey
 
 import (
 	"image"
-	"sync/atomic"
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"

@@ -48,21 +48,6 @@ func (w *Control) TakeFocus() bool {
 	return w.handle.IsFocus()
 }
 
-// TakeFocus is a wrapper around GrabFocus.
-func (w *Control) TakeFocus() bool {
-	// Check that the control can grab focus
-	if !w.handle.GetCanFocus() {
-		return false
-	}
-
-	handle.GrabFocus()
-	// Note sure why the call to sleep is required, but there may be a debounce
-	// provided by the system.  Without this call to sleep, the controls never
-	// get the focus events.
-	time.Sleep(250 * time.Millisecond)
-	return w.handle.IsFocus()
-}
-
 // Layout determines the best size for an element that satisfies the
 // constraints.
 func (w *Control) Layout(bc base.Constraints) base.Size {
