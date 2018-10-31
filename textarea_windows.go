@@ -9,38 +9,17 @@ import (
 )
 
 func (w *TextArea) mount(parent base.Control) (base.Element, error) {
-	text, err := syscall.UTF16PtrFromString(w.Value)
+	// Create the control
+	hwnd, _, err := createControlWindow(win.WS_EX_CLIENTEDGE, &edit.className[0], w.Value, w.style(), parent.HWnd)
 	if err != nil {
 		return nil, err
 	}
-
-	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | win.ES_LEFT | win.ES_MULTILINE | win.ES_WANTRETURN | win.ES_AUTOVSCROLL)
-	if w.ReadOnly {
-		style = style | win.ES_READONLY
-	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, &edit.className[0], text,
-		style,
-		10, 10, 100, 100,
-		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
-		return nil, err
-	}
-
-	// Set the font for the window
-	if hMessageFont != 0 {
-		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
-	}
-
 	if w.Disabled {
 		win.EnableWindow(hwnd, false)
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &edit.oldWindowProc, syscall.NewCallback(textinputWindowProc))
+	subclassWindowProcedure(hwnd, &edit.oldWindowProc, textinputWindowProc)
 
 	// Create placeholder, if required.
 	if w.Value == "" && w.Placeholder != "" {
@@ -64,6 +43,14 @@ func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
+}
+
+func (w *TextArea) style() uint32 {
+	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | win.ES_LEFT | win.ES_MULTILINE | win.ES_WANTRETURN | win.ES_AUTOVSCROLL)
+	if w.ReadOnly {
+		style = style | win.ES_READONLY
+	}
+	return style
 }
 
 type textareaElement struct {

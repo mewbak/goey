@@ -1,12 +1,12 @@
 package goey
 
 import (
-	"time"
 	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/syscall"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
+	"time"
 )
 
 // Control is an opaque type used as a platform-specific handle to a control

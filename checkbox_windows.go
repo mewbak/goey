@@ -1,7 +1,6 @@
 package goey
 
 import (
-	"syscall"
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
@@ -9,37 +8,21 @@ import (
 )
 
 func (w *Checkbox) mount(parent base.Control) (base.Element, error) {
-	text, err := syscall.UTF16FromString(w.Text)
+	// Create the control.
+	const STYLE = win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | win.BS_CHECKBOX | win.BS_TEXT | win.BS_NOTIFY
+	hwnd, text, err := createControlWindow(0, &button.className[0], w.Text, STYLE, parent.HWnd)
 	if err != nil {
-		return nil, err
-	}
-
-	hwnd := win.CreateWindowEx(0, &button.className[0], &text[0],
-		win.WS_CHILD|win.WS_VISIBLE|win.WS_TABSTOP|win.BS_CHECKBOX|win.BS_TEXT|win.BS_NOTIFY,
-		10, 10, 100, 100,
-		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
 		return nil, err
 	}
 	if w.Value {
 		win.SendMessage(hwnd, win.BM_SETCHECK, win.BST_CHECKED, 0)
 	}
-
-	// Set the font for the window
-	if hMessageFont != 0 {
-		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
-	}
-
 	if w.Disabled {
 		win.EnableWindow(hwnd, false)
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &button.oldWindowProc, syscall.NewCallback(checkboxWindowProc))
+	subclassWindowProcedure(hwnd, &button.oldWindowProc, checkboxWindowProc)
 
 	retval := &checkboxElement{
 		Control:  Control{hwnd},

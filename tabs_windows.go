@@ -23,21 +23,11 @@ func init() {
 }
 
 func (w *Tabs) mount(parent base.Control) (base.Element, error) {
-	style := uint32(win.WS_CHILD | win.WS_VISIBLE)
-	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, &tabs.className[0], nil, style,
-		10, 10, 100, 100,
-		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
+	// Create the control
+	const STYLE = win.WS_CHILD | win.WS_VISIBLE
+	hwnd, _, err := createControlWindow(win.WS_EX_CONTROLPARENT, &tabs.className[0], "", STYLE, parent.HWnd)
+	if err != nil {
 		return nil, err
-	}
-
-	// Set the font for the window
-	if hMessageFont != 0 {
-		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
 	}
 
 	for i, v := range w.Children {
@@ -84,7 +74,7 @@ func (w *Tabs) mount(parent base.Control) (base.Element, error) {
 
 	// Subclass the window procedure
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
-	subclassWindowProcedure(hwnd, &tabs.oldWindowProc, syscall.NewCallback(tabsWindowProc))
+	subclassWindowProcedure(hwnd, &tabs.oldWindowProc, tabsWindowProc)
 
 	return retval, nil
 }

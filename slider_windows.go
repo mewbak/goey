@@ -1,7 +1,6 @@
 package goey
 
 import (
-	"syscall"
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
@@ -26,23 +25,12 @@ func (w *Slider) mount(parent base.Control) (base.Element, error) {
 	const TBM_SETPAGESIZE = win.WM_USER + 21
 	const TBM_SETLINESIZE = win.WM_USER + 23
 
-	hwnd := win.CreateWindowEx(0, &slider.className[0], nil,
-		win.WS_CHILD|win.WS_VISIBLE|win.WS_TABSTOP|TBS_HORZ|TBS_AUTOTICKS,
-		10, 10, 100, 100,
-		parent.HWnd, 0, 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
+	// Create the control
+	const STYLE = win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | TBS_HORZ | TBS_AUTOTICKS
+	hwnd, _, err := createControlWindow(0, &slider.className[0], "", STYLE, parent.HWnd)
+	if err != nil {
 		return nil, err
 	}
-
-	// Set the font for the window
-	if hMessageFont != 0 {
-		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
-	}
-
 	if w.Disabled {
 		win.EnableWindow(hwnd, false)
 	}
@@ -54,7 +42,7 @@ func (w *Slider) mount(parent base.Control) (base.Element, error) {
 	win.SendMessage(hwnd, win.TBM_SETPOS, win.TRUE, currentValue)
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &slider.oldWindowProc, syscall.NewCallback(sliderWindowProc))
+	subclassWindowProcedure(hwnd, &slider.oldWindowProc, sliderWindowProc)
 
 	retval := &sliderElement{
 		Control:      Control{hwnd},

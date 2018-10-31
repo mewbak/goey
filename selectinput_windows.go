@@ -13,18 +13,9 @@ var (
 )
 
 func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
-	if w.Value >= len(w.Items) {
-		w.Value = len(w.Items) - 1
-	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, &comboboxClassName[0], nil,
-		win.WS_CHILD|win.WS_VISIBLE|win.WS_TABSTOP|win.CBS_DROPDOWNLIST,
-		10, 10, 100, 100,
-		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
+	const STYLE = win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | win.CBS_DROPDOWNLIST
+	hwnd, _, err := createControlWindow(win.WS_EX_CLIENTEDGE, &comboboxClassName[0], "", STYLE, parent.HWnd)
+	if err != nil {
 		return nil, err
 	}
 
@@ -56,7 +47,7 @@ func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &oldComboboxWindowProc, syscall.NewCallback(comboboxWindowProc))
+	subclassWindowProcedure(hwnd, &oldComboboxWindowProc, comboboxWindowProc)
 
 	retval := &selectinputElement{
 		Control:       Control{hwnd},

@@ -1,7 +1,6 @@
 package goey
 
 import (
-	"syscall"
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
@@ -20,24 +19,14 @@ func init() {
 }
 
 func (w *Progress) mount(parent base.Control) (base.Element, error) {
+	// Create the control.
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE)
-	hwnd := win.CreateWindowEx(0, &progress.className[0], nil, style,
-		10, 10, 100, 100,
-		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
+	hwnd, _, err := createControlWindow(0, &progress.className[0], "", style, parent.HWnd)
+	if err != nil {
 		return nil, err
 	}
 	win.SendMessage(hwnd, win.PBM_SETRANGE32, uintptr(w.Min), uintptr(w.Max))
 	win.SendMessage(hwnd, win.PBM_SETPOS, uintptr(w.Value), 0)
-
-	// Set the font for the window
-	if hMessageFont != 0 {
-		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
-	}
 
 	retval := &progressElement{
 		Control: Control{hwnd},
