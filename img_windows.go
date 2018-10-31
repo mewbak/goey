@@ -3,7 +3,6 @@ package goey
 import (
 	"image"
 	"image/draw"
-	"syscall"
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
@@ -116,17 +115,9 @@ func (w *Img) mount(parent base.Control) (base.Element, error) {
 		return nil, err
 	}
 
-	hwnd := win.CreateWindowEx(0, &staticClassName[0], nil,
-		win.WS_CHILD|win.WS_VISIBLE|win.SS_BITMAP|win.SS_LEFT,
-		10, 10, 100, 100,
-		parent.HWnd, 0, 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
-		return nil, err
-	}
+	// Create the control
+	const STYLE = win.WS_CHILD | win.WS_VISIBLE | win.SS_BITMAP | win.SS_LEFT
+	hwnd, _, err := createControlWindow(0, &staticClassName[0], "", STYLE, parent.HWnd)
 	win.SendMessage(hwnd, win2.STM_SETIMAGE, win.IMAGE_BITMAP, uintptr(hbitmap))
 
 	retval := &imgElement{

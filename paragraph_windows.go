@@ -22,26 +22,10 @@ func (w *P) calcStyle() uint32 {
 }
 
 func (w *P) mount(parent base.Control) (base.Element, error) {
-	text, err := syscall.UTF16FromString(w.Text)
+	// Create the control.
+	hwnd, text, err := createControlWindow(0, &staticClassName[0], w.Text, w.calcStyle(), parent.HWnd)
 	if err != nil {
 		return nil, err
-	}
-
-	hwnd := win.CreateWindowEx(0, &staticClassName[0], &text[0],
-		w.calcStyle(),
-		10, 10, 100, 100,
-		parent.HWnd, 0, 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
-		return nil, err
-	}
-
-	// Set the font for the window
-	if hMessageFont != 0 {
-		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
 	}
 
 	retval := &paragraphElement{Control: Control{hwnd}, text: text}

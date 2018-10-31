@@ -115,7 +115,10 @@ func createControlWindow(exStyle uint32, classname *uint16, text string, style u
 	// Determine a unique ID for this control.  This is needed because
 	// WM_COMMAND messages only report the control ID, not the HWND, so this
 	// is the only to identify the source of those controls.
-	nextControlID := atomic.AddUint32(&currentControlID, 1)
+	nextControlID := uint32(0)
+	if classname != &staticClassName[0] {
+		nextControlID = atomic.AddUint32(&currentControlID, 1)
+	}
 
 	// Get the text for the control.  There may be extra work here if the
 	// string is empty, but that is not expected to be common.
