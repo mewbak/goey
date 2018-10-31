@@ -114,6 +114,10 @@ func Do(action func() error) error {
 
 // AddLockCount is used to track the number of top-level GUI elements that are
 // created.  When the count falls back to zero, the event loop will terminate.
+//
+// Users should not typically need to call this function.  Top-level GUI
+// elements, such as windows, will increment and decrement the count as they
+// are created and destroyed.
 func AddLockCount(delta int32) {
 	if newval := atomic.AddInt32(&lockCount, delta); newval == 0 {
 		stop()
