@@ -17,26 +17,32 @@ type buttonElement struct {
 }
 
 func (w *Button) mount(parent base.Control) (base.Element, error) {
+	// Create the control
 	control, err := gtk.ButtonNewWithLabel(w.Text)
 	if err != nil {
 		return nil, err
 	}
 	control.AddEvents(int(gdk.FOCUS_CHANGE_MASK))
-
 	parent.Handle.Add(control)
+
+	// Update properties on the control
 	control.SetSensitive(!w.Disabled)
 	control.SetCanDefault(w.Default)
 	if w.Default {
 		control.GrabDefault()
 	}
+	control.Show()
 
-	retval := &buttonElement{Control: Control{&control.Widget}}
+	// Create the element
+	retval := &buttonElement{
+		Control: Control{&control.Widget},
+	}
 
+	// Connect all callbacks for the events
 	control.Connect("destroy", buttonOnDestroy, retval)
 	retval.onClick.Set(&control.Widget, w.OnClick)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
-	control.Show()
 
 	return retval, nil
 }

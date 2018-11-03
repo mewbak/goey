@@ -1,14 +1,15 @@
 package goey
 
 import (
-	"bitbucket.org/rj/goey/base"
 	"testing"
 	"time"
+
+	"bitbucket.org/rj/goey/base"
 )
 
 func TestDateInputCreate(t *testing.T) {
-	v1 := time.Date(2006, time.January, 2, 15, 4, 5, 0, time.Local)
-	v2 := time.Date(2007, time.January, 2, 15, 4, 5, 0, time.Local)
+	v1 := time.Date(2006, time.January, 2, 0, 0, 0, 0, time.Local)
+	v2 := time.Date(2007, time.January, 2, 0, 0, 0, 0, time.Local)
 
 	testingRenderWidgets(t,
 		&DateInput{Value: v1},
@@ -40,8 +41,8 @@ func TestDateInputEvents(t *testing.T) {
 }
 
 func TestDateInputUpdateProps(t *testing.T) {
-	v1 := time.Date(2006, time.January, 2, 15, 4, 5, 0, time.Local)
-	v2 := time.Date(2007, time.January, 2, 15, 4, 5, 0, time.Local)
+	v1 := time.Date(2006, time.January, 2, 0, 0, 0, 0, time.Local)
+	v2 := time.Date(2007, time.January, 2, 0, 0, 0, 0, time.Local)
 
 	testingUpdateWidgets(t, []base.Widget{
 		&DateInput{Value: v1},

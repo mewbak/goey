@@ -19,24 +19,30 @@ type dateinputElement struct {
 }
 
 func (w *DateInput) mount(parent base.Control) (base.Element, error) {
+	// Create the control
 	control, err := gtk.CalendarNew()
 	if err != nil {
 		return nil, err
 	}
-	(*gtk.Container)(unsafe.Pointer(parent.Handle)).Add(control)
+	parent.Handle.Add(control)
+
+	// Update properties on the control
 	control.SelectMonth(uint(w.Value.Month())-1, uint(w.Value.Year()))
 	control.SelectDay(uint(w.Value.Day()))
+	control.SetSensitive(!w.Disabled)
+	control.Show()
 
+	// Create the element
 	retval := &dateinputElement{
 		Control:  Control{&control.Widget},
 		onChange: w.OnChange,
 	}
 
+	// Connect all callbacks for the events
 	control.Connect("destroy", dateinputOnDestroy, retval)
 	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "day-selected", dateinputOnChanged, retval)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
-	control.Show()
 
 	return retval, nil
 }
@@ -57,16 +63,32 @@ func dateinputOnDestroy(widget *gtk.Calendar, mounted *dateinputElement) {
 func (w *dateinputElement) calendar() *gtk.Calendar {
 	return (*gtk.Calendar)(unsafe.Pointer(w.handle))
 }
+
+func (w *dateinputElement) Props() base.Widget {
+	control := w.calendar()
+	year, month, day := control.GetDate()
+
+	return &DateInput{
+		Value:    time.Date(int(year), time.Month(month+1), int(day), 0, 0, 0, 0, time.Local),
+		Disabled: !control.GetSensitive(),
+		OnChange: w.onChange,
+		OnFocus:  w.onFocus.callback,
+		OnBlur:   w.onBlur.callback,
+	}
+
+}
+
 func (w *dateinputElement) updateProps(data *DateInput) error {
 	handle := w.calendar()
 
 	w.onChange = nil // temporarily break OnChange to prevent event
 	handle.SelectMonth(uint(data.Value.Month())-1, uint(data.Value.Year()))
 	handle.SelectDay(uint(data.Value.Day()))
+	handle.SetSensitive(!data.Disabled)
 	w.onChange = data.OnChange
-	//w.shChange = setSignalHandler(&w.handle.Widget, w.shChange, data.OnChange != nil, "value-changed", intinputOnChanged, w)
-	w.onFocus.Set(&handle.Widget, data.OnFocus)
-	w.onBlur.Set(&handle.Widget, data.OnBlur)
+	w.shChange = setSignalHandler(w.handle, w.shChange, data.OnChange != nil, "day-selected", dateinputOnChanged, w)
+	w.onFocus.Set(w.handle, data.OnFocus)
+	w.onBlur.Set(w.handle, data.OnBlur)
 
 	return nil
 }

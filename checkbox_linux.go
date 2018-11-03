@@ -18,24 +18,29 @@ type checkboxElement struct {
 }
 
 func (w *Checkbox) mount(parent base.Control) (base.Element, error) {
+	// Create the control
 	control, err := gtk.CheckButtonNewWithLabel(w.Text)
 	if err != nil {
 		return nil, err
 	}
 	parent.Handle.Add(control)
+
+	// Update properties on the control
 	control.SetActive(w.Value)
 	control.SetSensitive(!w.Disabled)
+	control.Show()
 
+	// Create the element
 	retval := &checkboxElement{
 		Control:  Control{&control.Widget},
 		onChange: w.OnChange,
 	}
 
+	// Connect all callbacks for the events
 	control.Connect("destroy", checkboxOnDestroy, retval)
 	retval.shClick = setSignalHandler(&control.Widget, 0, w.OnChange != nil, "clicked", checkboxOnClick, retval)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
-	control.Show()
 
 	return retval, nil
 }
