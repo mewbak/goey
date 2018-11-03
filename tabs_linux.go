@@ -195,7 +195,7 @@ func (w *tabsElement) SetBounds(bounds base.Rectangle) {
 
 	if w.child != nil {
 		// Determine the bounds for the child widget
-		insets := w.controlInsets()
+		insets := w.contentInsets()
 		insets.X += w.insets.Left + w.insets.Right
 		insets.Y += w.insets.Top + w.insets.Bottom
 		bounds = base.Rectangle{

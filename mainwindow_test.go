@@ -6,11 +6,11 @@ import (
 	"image/color"
 	"image/draw"
 	"strconv"
-	"sync/atomic"
 	"testing"
 	"time"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/loop"
 )
 
 func ExampleNewWindow() {
@@ -38,7 +38,7 @@ func ExampleNewWindow() {
 
 			// Note:  No work after this call to Do, since the call to Run may be
 			// terminated when the call to Do returns.
-			Do(func() error {
+			loop.Do(func() error {
 				mw.Close()
 				return nil
 			})
@@ -48,7 +48,7 @@ func ExampleNewWindow() {
 	}
 
 	// Start the GUI thread.
-	err := Run(createWindow)
+	err := loop.Run(createWindow)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
@@ -74,13 +74,13 @@ func ExampleWindow_Message() {
 		// directly.
 		go func() {
 			// Show the error message.
-			Do(func() error {
+			loop.Do(func() error {
 				return mw.Message("This is an example message.").WithInfo().Show()
 			})
 
 			// Note:  No work after this call to Do, since the call to Run may be
 			// terminated when the call to Do returns.
-			Do(func() error {
+			loop.Do(func() error {
 				mw.Close()
 				return nil
 			})
@@ -90,7 +90,7 @@ func ExampleWindow_Message() {
 	}
 
 	// Start the GUI thread.
-	err := Run(createWindow)
+	err := loop.Run(createWindow)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
@@ -100,18 +100,12 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 	createWindow := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
-		if c := atomic.LoadInt32(&mainWindowCount); c != 1 {
-			t.Fatalf("Want mainWindowCount==1, got mainWindowCount==%d", c)
-		}
 		mw, err := NewWindow(t.Name(), nil)
 		if err != nil {
 			t.Fatalf("Failed to create window, %s", err)
 		}
 		if mw == nil {
 			t.Fatalf("Unexpected nil for window")
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 2 {
-			t.Fatalf("Want mainWindowCount==2, got mainWindowCount==%d", c)
 		}
 
 		go func() {
@@ -124,7 +118,7 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 
 			// Note:  No work after this call to Do, since the call to Run may be
 			// terminated when the call to Do returns.
-			Do(func() error {
+			loop.Do(func() error {
 				mw.Close()
 				return nil
 			})
@@ -133,15 +127,14 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 		return nil
 	}
 
-	RunTest(t, func() {
-		err := Run(createWindow)
-		if err != nil {
-			t.Fatalf("Failed to run event loop, %s", err)
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Fatalf("Want mainWindowCount==0, got mainWindowCount==%d", c)
-		}
-	})
+	err := loop.Run(createWindow)
+	if err != nil {
+		t.Fatalf("Failed to run event loop, %s", err)
+	}
+}
+
+func TestMain(m *testing.M) {
+	loop.TestMain(m)
 }
 
 func TestWindow_SetChild(t *testing.T) {
@@ -155,7 +148,7 @@ func TestWindow_SetChild(t *testing.T) {
 				time.Sleep(50 * time.Millisecond)
 			}
 			widgets = append(widgets, &Button{Text: "Button " + strconv.Itoa(i)})
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				return mw.SetChild(&VBox{
 					AlignMain:  SpaceBetween,
 					AlignCross: CrossCenter,
@@ -169,7 +162,7 @@ func TestWindow_SetChild(t *testing.T) {
 		for i := len(widgets); i > 0; i-- {
 			time.Sleep(50 * time.Millisecond)
 			widgets = widgets[:i-1]
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				return mw.SetChild(&VBox{
 					AlignMain:  SpaceBetween,
 					AlignCross: CrossCenter,
@@ -203,7 +196,7 @@ func TestNewWindow_SetIcon(t *testing.T) {
 		for i := 0; i < 6; i++ {
 			img := makeImage(t, i)
 
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				return mw.SetIcon(img)
 			})
 			if err != nil {
@@ -226,7 +219,7 @@ func TestNewWindow_SetScroll(t *testing.T) {
 		}
 
 		for i, v := range cases {
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				mw.SetScroll(v.horizontal, v.vertical)
 				out1, out2 := mw.Scroll()
 				if out1 != v.horizontal {
@@ -246,7 +239,7 @@ func TestNewWindow_SetScroll(t *testing.T) {
 
 func TestNewWindow_SetTitle(t *testing.T) {
 	testingWindow(t, func(t *testing.T, mw *Window) {
-		err := Do(func() error {
+		err := loop.Do(func() error {
 			err := mw.SetTitle("Flash!")
 			if err != nil {
 				return err

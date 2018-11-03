@@ -3,11 +3,11 @@ package goey
 import (
 	"fmt"
 	"image"
-	"sync/atomic"
 	"syscall"
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/loop"
 	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
 )
@@ -18,9 +18,7 @@ var (
 		atom      win.ATOM
 	}
 
-	mainWindowCount int32
-	hMessageFont    win.HFONT
-	activeWindow    uintptr
+	hMessageFont win.HFONT
 )
 
 const (
@@ -533,7 +531,7 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 	switch msg {
 	case win.WM_CREATE:
 		// Maintain count of open windows.
-		atomic.AddInt32(&mainWindowCount, 1)
+		loop.AddLockCount(1)
 		// Defer to default window proc
 
 	case win.WM_NCDESTROY:
@@ -543,12 +541,10 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 			w.hWnd = 0
 		}
 		// Make sure we are no longer linked to as the active window
-		atomic.CompareAndSwapUintptr(&activeWindow, uintptr(hwnd), 0)
+		loop.SetActiveWindow(0)
 		// If this is the last main window visible, post the quit message so that the
 		// message loop terminates.
-		if newval := atomic.AddInt32(&mainWindowCount, -1); newval == 0 {
-			win.PostQuitMessage(0)
-		}
+		loop.AddLockCount(-1)
 		// Defer to the default window proc
 
 	case win.WM_CLOSE:
@@ -561,7 +557,7 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 
 	case win.WM_ACTIVATE:
 		if wParam != 0 {
-			atomic.StoreUintptr(&activeWindow, uintptr(hwnd))
+			loop.SetActiveWindow(hwnd)
 		}
 		// Defer to the default window proc
 

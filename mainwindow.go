@@ -18,7 +18,6 @@ var (
 	ErrSetChildrenNotReentrant = errors.New("method SetChild is not reentrant")
 
 	insideSetChildren uintptr
-	mainWindowCount   int32
 )
 
 // Window represents a top-level window that contain other widgets.

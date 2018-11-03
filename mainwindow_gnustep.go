@@ -4,10 +4,10 @@ package goey
 
 import (
 	"image"
-	"sync/atomic"
 
 	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/cocoa"
+	"bitbucket.org/rj/goey/loop"
 )
 
 type windowImpl struct {
@@ -21,14 +21,12 @@ type windowImpl struct {
 }
 
 func newWindow(title string, child base.Widget) (*Window, error) {
-	main_loop_init()
-
 	// Update the global DPI
 	base.DPI.X, base.DPI.Y = 96, 96
 
 	w, h := sizeDefaults()
 	handle := cocoa.NewWindow(title, w, h)
-	atomic.AddInt32(&mainWindowCount, 1)
+	loop.AddLockCount(1)
 	retval := &Window{windowImpl{
 		handle:      handle,
 		contentView: handle.ContentView(),
@@ -179,9 +177,7 @@ func (w *windowCallbacks) OnShouldClose() bool {
 
 func (w *windowCallbacks) OnWillClose() {
 	w.handle = nil
-	if newval := atomic.AddInt32(&mainWindowCount, -1); newval == 0 {
-		cocoa.Stop()
-	}
+	loop.AddLockCount(-1)
 }
 
 func (w *windowCallbacks) OnDidResize() {

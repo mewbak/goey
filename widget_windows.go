@@ -29,10 +29,6 @@ var (
 	currentControlID uint32 = 100
 )
 
-func nextControlID() uint32 {
-	return atomic.AddUint32(&currentControlID, 1)
-}
-
 // Control is an opaque type used as a platform-specific handle to a control
 // created using the platform GUI.  As an example, this will refer to a HWND
 // when targeting Windows, but a *GtkWidget when targeting GTK.
@@ -115,13 +111,49 @@ func (w *Control) Close() {
 	}
 }
 
-func subclassWindowProcedure(hWnd win.HWND, oldWindowProc *uintptr, newWindowProc uintptr) {
+func createControlWindow(exStyle uint32, classname *uint16, text string, style uint32, parent win.HWND) (win.HWND, []uint16, error) {
+	// Determine a unique ID for this control.  This is needed because
+	// WM_COMMAND messages only report the control ID, not the HWND, so this
+	// is the only to identify the source of those controls.
+	nextControlID := uint32(0)
+	if classname != &staticClassName[0] {
+		nextControlID = atomic.AddUint32(&currentControlID, 1)
+	}
+
+	// Get the text for the control.  There may be extra work here if the
+	// string is empty, but that is not expected to be common.
+	utftext, err := syscall.UTF16FromString(text)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	// Create the control.
+	hwnd := win.CreateWindowEx(exStyle, classname, &utftext[0], style,
+		win.CW_USEDEFAULT, win.CW_USEDEFAULT, win.CW_USEDEFAULT, win.CW_USEDEFAULT,
+		parent, win.HMENU(nextControlID), 0, nil)
+	if hwnd == 0 {
+		err := syscall.GetLastError()
+		if err == nil {
+			return 0, nil, syscall.EINVAL
+		}
+		return 0, nil, err
+	}
+
+	// Set the font for the window
+	if hMessageFont != 0 {
+		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
+	}
+
+	return hwnd, utftext, nil
+}
+
+func subclassWindowProcedure(hWnd win.HWND, oldWindowProc *uintptr, newWindowProc func(win.HWND, uint32, uintptr, uintptr) uintptr) {
 	// We need a copy of the address of the old window proc when subclassing.
 	// Unhandled messages need to be forwarded.
 	if *oldWindowProc == 0 {
 		*oldWindowProc = win.GetWindowLongPtr(hWnd, win.GWLP_WNDPROC)
 	} else {
-		// Paranoia.  Windows creates with the same class should have the same
+		// Paranoia.  Windows created with the same class should have the same
 		// window proc set, but just in case we will double check.
 		tmp := win.GetWindowLongPtr(hWnd, win.GWLP_WNDPROC)
 		if tmp != *oldWindowProc {
@@ -130,5 +162,5 @@ func subclassWindowProcedure(hWnd win.HWND, oldWindowProc *uintptr, newWindowPro
 	}
 
 	// Subclass the window by setting a new window proc.
-	win.SetWindowLongPtr(hWnd, win.GWLP_WNDPROC, newWindowProc)
+	win.SetWindowLongPtr(hWnd, win.GWLP_WNDPROC, syscall.NewCallback(newWindowProc))
 }

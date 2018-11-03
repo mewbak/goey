@@ -2,6 +2,7 @@ package goey
 
 import (
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/loop"
 	"fmt"
 	"strconv"
 	"testing"
@@ -47,7 +48,7 @@ func ExampleSlider() {
 		}
 	}
 
-	err := Run(func() error {
+	err := loop.Run(func() error {
 		w, err := NewWindow("Slider", render())
 		if err != nil {
 			return err

@@ -1,7 +1,6 @@
 package goey
 
 import (
-	"syscall"
 	"time"
 	"unsafe"
 
@@ -31,22 +30,10 @@ func (w *DateInput) systemTime() win.SYSTEMTIME {
 }
 
 func (w *DateInput) mount(parent base.Control) (base.Element, error) {
-	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP)
-	hwnd := win.CreateWindowEx(0, &datetimepickClassName[0], nil,
-		style,
-		10, 10, 100, 100,
-		parent.HWnd, 0, 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
+	const STYLE = win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP
+	hwnd, _, err := createControlWindow(0, &datetimepickClassName[0], "", STYLE, parent.HWnd)
+	if err != nil {
 		return nil, err
-	}
-
-	// Set the font for the window
-	if hMessageFont != 0 {
-		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
 	}
 
 	// Set the properties for the control
@@ -57,7 +44,7 @@ func (w *DateInput) mount(parent base.Control) (base.Element, error) {
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &oldDateTimePickWindowProc, syscall.NewCallback(dateinputWindowProc))
+	subclassWindowProcedure(hwnd, &oldDateTimePickWindowProc, dateinputWindowProc)
 
 	retval := &dateinputElement{
 		Control:  Control{hwnd},

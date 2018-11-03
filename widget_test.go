@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"reflect"
 	"runtime"
-	"sync/atomic"
 	"testing"
 	"time"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/loop"
 )
 
 type Proper interface {
@@ -83,7 +83,7 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 			if testing.Verbose() {
 				time.Sleep(2000 * time.Millisecond)
 			}
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -95,15 +95,10 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	RunTest(t, func() {
-		err := Run(init)
-		if err != nil {
-			t.Errorf("Failed to run GUI loop, %s", err)
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-		}
-	})
+	err := loop.Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
 }
 
 func testingRenderWidgetsFail(t *testing.T, outError error, widgets ...base.Widget) {
@@ -123,12 +118,10 @@ func testingRenderWidgetsFail(t *testing.T, outError error, widgets ...base.Widg
 		return nil
 	}
 
-	RunTest(t, func() {
-		err := Run(init)
-		if err != nil {
-			t.Errorf("Failed to run GUI loop, %s", err)
-		}
-	})
+	err := loop.Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
 }
 
 func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
@@ -160,7 +153,7 @@ func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
 		}
 
 		go func(window *Window) {
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -172,15 +165,10 @@ func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	RunTest(t, func() {
-		err := Run(init)
-		if err != nil {
-			t.Errorf("Failed to run GUI loop, %s", err)
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-		}
-	})
+	err := loop.Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
 }
 
 func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
@@ -206,7 +194,7 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 		go func(window *Window) {
 			// Run the actions, which are counted.
 			for i := 0; i < 3; i++ {
-				err := Do(func() error {
+				err := loop.Do(func() error {
 					// Find the child element to be focused
 					child := window.child.(*vboxElement).children[i]
 					if elem, ok := child.(Focusable); ok {
@@ -225,7 +213,7 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 			}
 
 			// Close the window
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -237,16 +225,14 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	RunTest(t, func() {
-		err := Run(init)
-		if err != nil {
-			t.Errorf("Failed to run GUI loop, %s", err)
-		}
-		const want = "fabafbbbfcbc"
-		if s := log.String(); s != want {
-			t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
-		}
-	})
+	err := loop.Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
+	const want = "fabafbbbfcbc"
+	if s := log.String(); s != want {
+		t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
+	}
 }
 
 func testingCheckClick(t *testing.T, widgets ...base.Widget) {
@@ -275,7 +261,7 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 		go func(window *Window) {
 			// Run the actions, which are counted.
 			for i := 0; i < 3; i++ {
-				err := Do(func() error {
+				err := loop.Do(func() error {
 					// Find the child element to be clicked
 					child := window.child.(*vboxElement).children[i]
 					if elem, ok := child.(Clickable); ok {
@@ -291,7 +277,7 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 			}
 
 			// Close the window
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -303,16 +289,14 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 		return nil
 	}
 
-	RunTest(t, func() {
-		err := Run(init)
-		if err != nil {
-			t.Errorf("Failed to run GUI loop, %s", err)
-		}
-		const want = "cacbcc"
-		if s := log.String(); s != want {
-			t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
-		}
-	})
+	err := loop.Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
+	const want = "cacbcc"
+	if s := log.String(); s != want {
+		t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
+	}
 }
 
 func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Widget) {
@@ -366,7 +350,7 @@ func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Wid
 		}
 
 		go func(window *Window) {
-			err := Do(func() error {
+			err := loop.Do(func() error {
 				window.Close()
 				return nil
 			})
@@ -378,13 +362,8 @@ func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Wid
 		return nil
 	}
 
-	RunTest(t, func() {
-		err := Run(init)
-		if err != nil {
-			t.Errorf("Failed to run GUI loop, %s", err)
-		}
-		if c := atomic.LoadInt32(&mainWindowCount); c != 0 {
-			t.Errorf("Want mainWindow==0, got mainWindow==%d", c)
-		}
-	})
+	err := loop.Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
 }

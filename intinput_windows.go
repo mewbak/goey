@@ -10,38 +10,21 @@ import (
 )
 
 func (w *IntInput) mount(parent base.Control) (base.Element, error) {
-	text, err := syscall.UTF16PtrFromString(strconv.FormatInt(w.Value, 10))
-	if err != nil {
-		return nil, err
-	}
-
+	// Create the control
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE | win.WS_TABSTOP | win.ES_LEFT | win.ES_AUTOHSCROLL | win.ES_NUMBER)
 	if w.OnEnterKey != nil {
 		style = style | win.ES_MULTILINE
 	}
-	hwnd := win.CreateWindowEx(win.WS_EX_CLIENTEDGE, &edit.className[0], text,
-		style,
-		10, 10, 100, 100,
-		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
+	hwnd, _, err := createControlWindow(win.WS_EX_CLIENTEDGE, &edit.className[0], strconv.FormatInt(w.Value, 10), style, parent.HWnd)
+	if err != nil {
 		return nil, err
 	}
-
-	// Set the font for the window
-	if hMessageFont != 0 {
-		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
-	}
-
 	if w.Disabled {
 		win.EnableWindow(hwnd, false)
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &edit.oldWindowProc, syscall.NewCallback(textinputWindowProc))
+	subclassWindowProcedure(hwnd, &edit.oldWindowProc, textinputWindowProc)
 
 	// Create placeholder, if required.
 	if w.Placeholder != "" {

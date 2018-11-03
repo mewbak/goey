@@ -16,7 +16,7 @@ type tabsElement struct {
 	onChange func(int)
 
 	cachedBounds base.Rectangle
-	cachedInsets base.Size
+	cachedInsets base.Point
 	cachedTabsW  base.Length
 }
 
@@ -61,14 +61,14 @@ func (w *tabsElement) Close() {
 	}
 }
 
-func (w *tabsElement) contentInsets() (base.Length, base.Length) {
-	if w.cachedInsets.Height == 0 {
+func (w *tabsElement) contentInsets() base.Point {
+	if w.cachedInsets.Y == 0 {
 		x, y := w.control.ContentInsets()
-		w.cachedInsets.Width = base.FromPixelsX(x)
-		w.cachedInsets.Height = base.FromPixelsY(y)
+		w.cachedInsets.X = base.FromPixelsX(x)
+		w.cachedInsets.Y = base.FromPixelsY(y)
 	}
 
-	return w.cachedInsets.Width, w.cachedInsets.Height
+	return w.cachedInsets
 }
 
 func (w *tabsElement) controlTabsMinWidth() base.Length {
@@ -117,8 +117,8 @@ func (w *tabsElement) SetBounds(bounds base.Rectangle) {
 
 	if w.child != nil {
 		// Determine the bounds for the child widget
-		dx := bounds.Dx() - w.cachedInsets.Width
-		dy := bounds.Dy() - w.cachedInsets.Height
+		dx := bounds.Dx() - w.cachedInsets.X
+		dy := bounds.Dy() - w.cachedInsets.Y
 
 		bounds.Min.X = w.insets.Left
 		bounds.Min.Y = w.insets.Top

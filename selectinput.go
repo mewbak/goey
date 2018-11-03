@@ -28,8 +28,27 @@ func (*SelectInput) Kind() *base.Kind {
 // Mount creates a select control (combobox) in the GUI.
 // The newly created widget will be a child of the widget specified by parent.
 func (w *SelectInput) Mount(parent base.Control) (base.Element, error) {
+	// Update Value and Unset to make sure that are they are coherent with the
+	// length of items.
+	w.UpdateValue()
+
 	// Forward to the platform-dependant code
 	return w.mount(parent)
+}
+
+// UpdateValue will ensure that the Value is within the range of choices
+// provided by w.Items.
+func (w *SelectInput) UpdateValue() {
+	if length := len(w.Items); length > 0 {
+		if w.Value >= length {
+			w.Value = length - 1
+		} else if w.Value < 0 {
+			w.Value = 0
+		}
+	} else {
+		w.Value = 0
+		w.Unset = true
+	}
 }
 
 func (*selectinputElement) Kind() *base.Kind {
@@ -37,5 +56,10 @@ func (*selectinputElement) Kind() *base.Kind {
 }
 
 func (w *selectinputElement) UpdateProps(data base.Widget) error {
-	return w.updateProps(data.(*SelectInput))
+	si := data.(*SelectInput)
+
+	// Update Value and Unset to make sure that are they are coherent.
+	si.UpdateValue()
+	// Forward to the platform-dependant code
+	return w.updateProps(si)
 }

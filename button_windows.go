@@ -27,33 +27,17 @@ func buttonStyle(isDefault bool) uint32 {
 }
 
 func (w *Button) mount(parent base.Control) (base.Element, error) {
-	text, err := syscall.UTF16FromString(w.Text)
+	// Create the control.
+	hwnd, text, err := createControlWindow(0, &button.className[0], w.Text, buttonStyle(w.Default), parent.HWnd)
 	if err != nil {
 		return nil, err
 	}
-
-	hwnd := win.CreateWindowEx(0, &button.className[0], &text[0], buttonStyle(w.Default),
-		10, 10, 100, 100,
-		parent.HWnd, win.HMENU(nextControlID()), 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
-		return nil, err
-	}
-
-	// Set the font for the window
-	if hMessageFont != 0 {
-		win.SendMessage(hwnd, win.WM_SETFONT, uintptr(hMessageFont), 0)
-	}
-
 	if w.Disabled {
 		win.EnableWindow(hwnd, false)
 	}
 
 	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &button.oldWindowProc, syscall.NewCallback(buttonWindowProc))
+	subclassWindowProcedure(hwnd, &button.oldWindowProc, buttonWindowProc)
 
 	retval := &buttonElement{
 		Control: Control{hwnd},

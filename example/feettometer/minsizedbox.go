@@ -8,6 +8,8 @@ var (
 	minsizedboxKind = base.NewKind("bitbucket.org/rj/goey/example/feettometer.MinSizedBox")
 )
 
+// MinSizedBox is a custom layout widget that sizes its child widget according
+// to the MinIntrinsicWidth and MinIntrinsicHeight of that widget.
 type MinSizedBox struct {
 	Child base.Widget // Child widget.
 }

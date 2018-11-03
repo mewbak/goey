@@ -1,0 +1,109 @@
+package loop
+
+import (
+	"sync/atomic"
+	"syscall"
+	"unsafe"
+
+	"github.com/lxn/win"
+)
+
+var (
+	atomPost win.ATOM
+	hwndPost win.HWND
+	namePost = [...]uint16{'G', 'o', 'e', 'y', 'P', 'o', 's', 't', 'W', 'i', 'n', 'd', 'o', 'w', 0}
+
+	activeWindow uintptr
+)
+
+func initRun() error {
+	hInstance := win.GetModuleHandle(nil)
+	if hInstance == 0 {
+		return syscall.GetLastError()
+	}
+
+	// Make sure that we have registered a class for the hidden window.
+	if atomPost == 0 {
+		wc := win.WNDCLASSEX{
+			CbSize:        uint32(unsafe.Sizeof(win.WNDCLASSEX{})),
+			HInstance:     hInstance,
+			LpfnWndProc:   syscall.NewCallback(postWindowProc),
+			LpszClassName: &namePost[0],
+		}
+
+		atomPost = win.RegisterClassEx(&wc)
+		if atomPost == 0 {
+			return syscall.GetLastError()
+		}
+	}
+
+	// Create the hidden window.
+	hwndPost = win.CreateWindowEx(0, &namePost[0], nil, 0,
+		win.CW_USEDEFAULT, win.CW_USEDEFAULT, win.CW_USEDEFAULT, win.CW_USEDEFAULT,
+		win.HWND_DESKTOP, 0, hInstance, nil)
+	if hwndPost == 0 {
+		return syscall.GetLastError()
+	}
+	return nil
+}
+
+func terminateRun() {
+	win.DestroyWindow(hwndPost)
+	hwndPost = 0
+}
+
+func run() error {
+	// Run the message loop
+	err := loop()
+	for err == nil {
+		err = loop()
+	}
+	if err == ErrQuit {
+		err = nil
+	}
+	return err
+}
+
+func do(action func() error) error {
+	err := make(chan error, 1)
+	win.PostMessage(hwndPost, win.WM_USER, uintptr(unsafe.Pointer(&action)), uintptr(unsafe.Pointer(&err)))
+	return <-err
+}
+
+func loop() error {
+	// Obtain a copy of the next message from the queue.
+	var msg win.MSG
+	win.GetMessage(&msg, 0, 0, 0)
+
+	// Processing for application wide messages are handled in this block.
+	if msg.Message == win.WM_QUIT {
+		return ErrQuit
+	}
+
+	// Dispatch message.
+	if !win.IsDialogMessage(win.HWND(activeWindow), &msg) {
+		win.TranslateMessage(&msg)
+		win.DispatchMessage(&msg)
+	}
+	return nil
+}
+
+func stop() {
+	win.PostQuitMessage(0)
+}
+
+func SetActiveWindow(hwnd win.HWND) {
+	atomic.StoreUintptr(&activeWindow, uintptr(hwnd))
+}
+
+func postWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr {
+	switch msg {
+	case win.WM_USER:
+		err := (*(*func() error)(unsafe.Pointer(wParam)))()
+		(*(*chan error)(unsafe.Pointer(lParam))) <- err
+		return 0
+	}
+
+	// Let the default window proc handle all other messages
+	return win.DefWindowProc(hwnd, msg, wParam, lParam)
+}

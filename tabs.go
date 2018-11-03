@@ -62,21 +62,21 @@ func (*tabsElement) Kind() *base.Kind {
 }
 
 func (w *tabsElement) Layout(bc base.Constraints) base.Size {
-	xInset, yInset := w.contentInsets()
-	xInset += w.insets.Left + w.insets.Right
-	yInset += w.insets.Top + w.insets.Bottom
+	insets := w.contentInsets()
+	insets.X += w.insets.Left + w.insets.Right
+	insets.Y += w.insets.Top + w.insets.Bottom
 
 	if w.child == nil {
 		return bc.Constrain(base.Size{
-			Width:  xInset,
-			Height: yInset,
+			Width:  insets.X,
+			Height: insets.Y,
 		})
 	}
 
-	size := w.child.Layout(bc.Inset(xInset, yInset))
+	size := w.child.Layout(bc.Inset(insets.X, insets.Y))
 	return base.Size{
-		Width:  size.Width + xInset,
-		Height: size.Height + yInset,
+		Width:  size.Width + insets.X,
+		Height: size.Height + insets.Y,
 	}
 }
 

@@ -1,7 +1,8 @@
-package goey
+package loop
 
 import (
 	"errors"
+	"os"
 	"runtime"
 	"sync/atomic"
 	"testing"
@@ -21,10 +22,9 @@ var (
 )
 
 var (
-	isRunning      uint32
-	isTesting      uint32
-	testingActions chan func()
-	testingSync    chan struct{}
+	isRunning uint32
+	lockCount int32
+	isTesting uint32
 )
 
 // Run locks the OS thread to act as a GUI thread, and then iterates over the
@@ -40,16 +40,9 @@ var (
 // Any further modifications to the GUI also need to be scheduled on the GUI
 // thread, which can be done using the function Do.
 func Run(action func() error) error {
-	// This exists to support the examples.  They should be written like normal
-	// user code, and so need to call Run, not RunTest.  However, that code
-	// still needs to be dispatched to the event loop.
+	// If there is testing, then we need to keep locked to the main thread.
 	if atomic.LoadUint32(&isTesting) != 0 {
-		err := error(nil)
-		testingActions <- func() {
-			err = Run(action)
-		}
-		<-testingSync
-		return err
+		return runTesting(action)
 	}
 
 	// Want to gate entry into the GUI loop so that only one thread may enter
@@ -75,15 +68,22 @@ func Run(action func() error) error {
 		defer runtime.UnlockOSThread()
 	}
 
+	// Platform specific initialization ahead of running any user actions.
+	err := initRun()
+	if err != nil {
+		return err
+	}
+	defer terminateRun()
+
 	// Since we have now locked the OS thread, we can call the initial action.
 	// We want to hold a reference to a virtual window by increasing the
 	// count to prevent a premature exit if any windows are created and then
 	// destroyed during the initialization.  To handle any panics, the call
 	// to action needs to be wrapped in a function.
-	err := func(action func() error) error {
-		atomic.AddInt32(&mainWindowCount, 1)
+	err = func(action func() error) error {
+		atomic.AddInt32(&lockCount, 1)
 		defer func() {
-			atomic.AddInt32(&mainWindowCount, -1)
+			atomic.AddInt32(&lockCount, -1)
 		}()
 		return action()
 	}(action)
@@ -93,23 +93,12 @@ func Run(action func() error) error {
 
 	// Check that there is at least on top-level window still open.  Otherwise,
 	// there is not point in running the GUI event loop.
-	if c := atomic.LoadInt32(&mainWindowCount); c <= 0 {
+	if c := atomic.LoadInt32(&lockCount); c <= 0 {
 		return nil
 	}
 
 	// Defer to platform-specific code.
 	return run()
-}
-
-// RunTest runs the passed function on the main thread.  This code is meant to
-// be used in conjunction with TestMain (see package testing).
-func RunTest(t *testing.T, action func()) {
-	if atomic.LoadUint32(&isTesting) == 0 {
-		panic("This function is only meant to be called in testing")
-	}
-
-	testingActions <- action
-	<-testingSync
 }
 
 // Do runs the passed function on the GUI thread.  If the event loop is not
@@ -138,4 +127,27 @@ func Do(action func() error) error {
 
 	// Defer to platform-specific code.
 	return do(action)
+}
+
+// AddLockCount is used to track the number of top-level GUI elements that are
+// created.  When the count falls back to zero, the event loop will terminate.
+//
+// Users should not typically need to call this function.  Top-level GUI
+// elements, such as windows, will increment and decrement the count as they
+// are created and destroyed.
+func AddLockCount(delta int32) {
+	if newval := atomic.AddInt32(&lockCount, delta); newval == 0 {
+		stop()
+	}
+}
+
+// LockCount returns the current lock count.  This code is not meant to be used
+// in regular code, it exists to support testing.
+func LockCount() int32 {
+	return atomic.LoadInt32(&lockCount)
+}
+
+// TestMain should be used by any GUI wants to call tests...
+func TestMain(m *testing.M) {
+	os.Exit(testMain(m))
 }
