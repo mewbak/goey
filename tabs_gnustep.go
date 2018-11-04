@@ -80,12 +80,10 @@ func (w *tabsElement) controlTabsMinWidth() base.Length {
 
 func (w *tabsElement) mountPage(page int) {
 	if w.child != nil {
-		println("close")
 		w.child.Close()
 		w.child = nil
 	}
 
-	println("mount")
 	parent := base.Control{w.control.ContentView(page)}
 	child, _ := base.Mount(parent, w.widgets[page].Child)
 	child.Layout(base.Tight(base.Size{
@@ -97,14 +95,11 @@ func (w *tabsElement) mountPage(page int) {
 }
 
 func (w *tabsElement) OnChange(page int) {
-	println("...", page)
 	if page != w.value {
 		if w.onChange != nil {
-			println("cb")
 			w.onChange(page)
 		}
 		if page != w.value {
-			println("mount")
 			w.mountPage(page)
 			w.value = page
 		}

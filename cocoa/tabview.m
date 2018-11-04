@@ -32,10 +32,10 @@ void* tabviewNew( void* superview ) {
 	}
 
 	// Create the button.
-    // A default frame is required.  Otherwise, we get errors about negative
-    // size frames when tabs are created, which have their own content views.
-    // Also required for the bounds of those frames to be correctely
-    // initialized.
+	// A default frame is required.  Otherwise, we get errors about negative
+	// size frames when tabs are created, which have their own content views.
+	// Also required for the bounds of those frames to be correctely
+	// initialized.
 	NSTabView* control =
 	    [[NSTabView alloc] initWithFrame:NSMakeRect( 0, 0, 200, 200 )];
 	[control setDelegate:delegate];

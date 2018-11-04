@@ -8,11 +8,17 @@ import (
 )
 
 type selectinputElement struct {
-	control *cocoa.Text
+	control *cocoa.PopUpButton
 }
 
 func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
-	control := cocoa.NewText(parent.Handle, "date input")
+	control := cocoa.NewPopUpButton(parent.Handle)
+	for _, v := range w.Items {
+		control.AddItem(v)
+	}
+	control.SetValue(w.Value)
+	control.SetEnabled(!w.Disabled)
+	control.SetCallbacks(w.OnChange, w.OnFocus, w.OnBlur)
 
 	retval := &selectinputElement{
 		control: control,
@@ -28,17 +34,25 @@ func (w *selectinputElement) Close() {
 }
 
 func (w *selectinputElement) Layout(bc base.Constraints) base.Size {
-	px := w.MinIntrinsicWidth(base.Inf)
-	h := w.MinIntrinsicHeight(base.Inf)
-	return bc.Constrain(base.Size{px, h})
+	px, h := w.control.IntrinsicContentSize()
+	return bc.Constrain(base.Size{
+		base.FromPixelsX(px),
+		base.FromPixelsY(h),
+	})
 }
 
 func (w *selectinputElement) MinIntrinsicHeight(width base.Length) base.Length {
-	return 20 * base.DIP
+	_, h := w.control.IntrinsicContentSize()
+	return base.FromPixelsY(h)
 }
 
 func (w *selectinputElement) MinIntrinsicWidth(base.Length) base.Length {
-	return 200 * base.DIP
+	px, _ := w.control.IntrinsicContentSize()
+	return base.FromPixelsX(px)
+}
+
+func (w *selectinputElement) TakeFocus() bool {
+	return w.control.MakeFirstResponder()
 }
 
 func (w *selectinputElement) SetBounds(bounds base.Rectangle) {

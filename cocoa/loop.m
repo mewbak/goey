@@ -141,18 +141,18 @@ void stop() {
 	assert( [NSThread isMainThread] );
 	assert( NSApp && [NSApp isRunning] );
 
-    if ( [NSApp.windows count] > 0 ) {
-        // Want to post an action to the main thread.
-        // This will allow any windows that are probably
-        // still shutting down to complete that action.
-    	id thunk = [[DoStop alloc] init];
-    	[thunk performSelectorOnMainThread:@selector( main )
-    	                        withObject:nil
-    	                     waitUntilDone:NO];
-    	[thunk release];
-    } else {
-        [NSApp stop:nil];
-    }
+	if ( [NSApp.windows count] > 0 ) {
+		// Want to post an action to the main thread.
+		// This will allow any windows that are probably
+		// still shutting down to complete that action.
+		id thunk = [[DoStop alloc] init];
+		[thunk performSelectorOnMainThread:@selector( main )
+		                        withObject:nil
+		                     waitUntilDone:NO];
+		[thunk release];
+	} else {
+		[NSApp stop:nil];
+	}
 }
 
 @interface DoThunk : NSObject

@@ -70,6 +70,11 @@ extern void decorationSetStrokeColor( void* control, nscolor_t stroke );
 /* HR */
 extern void* hrNew( void* superview );
 
+/* PopUpButton */
+extern void* popupbuttonNew( void* superview );
+extern void popupbuttonAddItem( void* control, char const* text );
+extern void popupbuttonSetValue( void* control, int index );
+
 /* TabView */
 extern void* tabviewNew( void* superview );
 extern void tabviewAddItem( void* control, char const* text );
