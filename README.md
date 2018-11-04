@@ -7,6 +7,9 @@ properties and events may be limited to support portability. Additionally,
 styling of the controls will be limited, with the look of controls matching the
 native platform.
 
+[![Go Report Card](https://goreportcard.com/badge/bitbucket.org/rj/goey)](https://goreportcard.com/report/bitbucket.org/rj/goey) 
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/bitbucket/rj/goey?branch=default&svg=true)](https://ci.appveyor.com/project/rj/goey) 
+
 ## Install
 
 The package can be installed from the command line using the
@@ -59,8 +62,6 @@ Feedback and PRs welcome.
 
 In particular, if anyone has the expertise to provide a port for MacOS, that
 would provide support for all major desktop operating systems.
-
-[![Go Report Card](https://goreportcard.com/badge/bitbucket.org/rj/goey)](https://goreportcard.com/report/bitbucket.org/rj/goey)
 
 ## License
 
