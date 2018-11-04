@@ -1,11 +1,12 @@
 package goey
 
 import (
-	"bitbucket.org/rj/goey/base"
-	"bitbucket.org/rj/goey/loop"
 	"fmt"
 	"strconv"
 	"testing"
+
+	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/loop"
 )
 
 func ExampleSlider() {
@@ -69,6 +70,8 @@ func TestSliderCreate(t *testing.T) {
 		&Slider{Value: 50},
 		&Slider{Value: 50, Disabled: true},
 		&Slider{Value: 500, Max: 1000},
+		&Slider{Value: 20},
+		&Slider{Value: 200, Max: 300},
 	)
 }
 
@@ -83,7 +86,7 @@ func TestSliderClose(t *testing.T) {
 func TestSliderFocus(t *testing.T) {
 	testingCheckFocusAndBlur(t,
 		&Slider{Value: 50},
-		&Slider{Value: 50},
+		&Slider{Value: 40},
 		&Slider{Value: 500, Max: 1000},
 	)
 }
@@ -94,7 +97,7 @@ func TestSliderUpdate(t *testing.T) {
 		&Slider{Value: 50, Disabled: true},
 		&Slider{Value: 500, Max: 1000},
 	}, []base.Widget{
-		&Slider{Value: 50},
+		&Slider{Value: 60},
 		&Slider{Value: 50, Min: 10, Max: 60},
 		&Slider{Value: 500, Max: 1000, Disabled: true},
 	})

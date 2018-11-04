@@ -84,6 +84,13 @@ extern double progressValue( void* handle );
 extern void progressUpdate( void* handle, double min, double value,
                             double max );
 
+/* Slider */
+extern void* sliderNew( void* superview, double min, double value, double max );
+extern double sliderMax( void* handle );
+extern double sliderMin( void* handle );
+extern double sliderValue( void* handle );
+extern void sliderUpdate( void* handle, double min, double value, double max );
+
 /* TabView */
 extern void* tabviewNew( void* superview );
 extern void tabviewAddItem( void* control, char const* text );
