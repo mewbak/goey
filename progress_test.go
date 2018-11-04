@@ -10,6 +10,7 @@ func TestProgressCreate(t *testing.T) {
 	testingRenderWidgets(t,
 		&Progress{Value: 50, Min: 0, Max: 100},
 		&Progress{Value: 0},
+		&Progress{Value: 10, Min: 0, Max: 1000},
 	)
 }
 
@@ -17,6 +18,7 @@ func TestProgressClose(t *testing.T) {
 	testingCloseWidgets(t,
 		&Progress{Value: 50, Min: 0, Max: 100},
 		&Progress{Value: 0},
+		&Progress{Value: 10, Min: 0, Max: 1000},
 	)
 }
 

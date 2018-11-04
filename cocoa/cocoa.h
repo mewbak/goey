@@ -75,6 +75,15 @@ extern void* popupbuttonNew( void* superview );
 extern void popupbuttonAddItem( void* control, char const* text );
 extern void popupbuttonSetValue( void* control, int index );
 
+/* ProgressIndicator */
+extern void* progressNew( void* superview, double min, double value,
+                          double max );
+extern double progressMax( void* handle );
+extern double progressMin( void* handle );
+extern double progressValue( void* handle );
+extern void progressUpdate( void* handle, double min, double value,
+                            double max );
+
 /* TabView */
 extern void* tabviewNew( void* superview );
 extern void tabviewAddItem( void* control, char const* text );

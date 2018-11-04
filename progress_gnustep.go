@@ -8,11 +8,12 @@ import (
 )
 
 type progressElement struct {
-	control *cocoa.Text
+	control *cocoa.Progress
 }
 
 func (w *Progress) mount(parent base.Control) (base.Element, error) {
-	control := cocoa.NewText(parent.Handle, "date input")
+	control := cocoa.NewProgress(parent.Handle,
+		float64(w.Min), float64(w.Value), float64(w.Max))
 
 	retval := &progressElement{
 		control: control,
@@ -41,11 +42,23 @@ func (w *progressElement) MinIntrinsicWidth(base.Length) base.Length {
 	return 200 * base.DIP
 }
 
+func (w *progressElement) Props() base.Widget {
+	min := w.control.Min()
+	value := w.control.Value()
+	max := w.control.Max()
+	return &Progress{
+		Value: int(value),
+		Min:   int(min),
+		Max:   int(max),
+	}
+}
+
 func (w *progressElement) SetBounds(bounds base.Rectangle) {
 	px := bounds.Pixels()
 	w.control.SetFrame(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
 }
 
 func (w *progressElement) updateProps(data *Progress) error {
+	w.control.Update(float64(data.Min), float64(data.Value), float64(data.Max))
 	return nil
 }
