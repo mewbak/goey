@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
+	"time"
 
 	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/loop"
@@ -79,6 +80,9 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 		}
 
 		go func(window *Window) {
+			if testing.Verbose() && !testing.Short() {
+				time.Sleep(250*time.Millisecond)
+			}
 			err := loop.Do(func() error {
 				window.Close()
 				return nil

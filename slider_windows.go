@@ -34,10 +34,10 @@ func (w *Slider) mount(parent base.Control) (base.Element, error) {
 	if w.Disabled {
 		win.EnableWindow(hwnd, false)
 	}
-	win.SendMessage(hwnd, win.TBM_SETRANGEMAX, win.FALSE, 0xffff)
-	win.SendMessage(hwnd, TBM_SETLINESIZE, win.FALSE, 0xffff/100)
-	win.SendMessage(hwnd, TBM_SETPAGESIZE, win.FALSE, 0xffff/10)
-	win.SendMessage(hwnd, TBM_SETTICFREQ, win.FALSE, 0xffff/8)
+	win.SendMessage(hwnd, win.TBM_SETRANGEMAX, win.FALSE, 0x7fffffff)
+	win.SendMessage(hwnd, TBM_SETLINESIZE, win.FALSE, 0x7fffffff/100)
+	win.SendMessage(hwnd, TBM_SETPAGESIZE, win.FALSE, 0x7fffffff/10)
+	win.SendMessage(hwnd, TBM_SETTICFREQ, win.FALSE, 0x7fffffff/8)
 	currentValue := sliderToQuantized(w.Value, w.Min, w.Max)
 	win.SendMessage(hwnd, win.TBM_SETPOS, win.TRUE, currentValue)
 
@@ -88,6 +88,22 @@ func (w *sliderElement) MinIntrinsicWidth(base.Length) base.Length {
 	return 160 * DIP
 }
 
+func (w *sliderElement) Props() base.Widget {
+	currentValue := win.SendMessage(w.hWnd, win.TBM_GETPOS, 0, 0)
+	// We will get errors in testing because of rounding errors in conversion
+	// of float to int and back.
+
+	return &Slider{
+		Value:    sliderFromQuantized(currentValue, w.min, w.max),
+		Disabled: !win.IsWindowEnabled(w.hWnd),
+		Min:      w.min,
+		Max:      w.max,
+		OnChange: w.onChange,
+		OnFocus:  w.onFocus,
+		OnBlur:   w.onBlur,
+	}
+}
+
 func (w *sliderElement) updateProps(data *Slider) error {
 	w.min = data.Min
 	w.max = data.Max
@@ -103,11 +119,11 @@ func (w *sliderElement) updateProps(data *Slider) error {
 }
 
 func sliderFromQuantized(value uintptr, min, max float64) float64 {
-	return min + float64(value)*(max-min)/0xffff
+	return min + float64(value)*(max-min)/0x7fffffff
 }
 
 func sliderToQuantized(value, min, max float64) uintptr {
-	return uintptr((value-min)/(max-min)*0xffff + 0.5)
+	return uintptr((value-min)/(max-min)*0x7fffffff + 0.5)
 }
 
 func sliderWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (result uintptr) {

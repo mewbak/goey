@@ -615,7 +615,7 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 
 	case win.WM_CTLCOLORSTATIC:
 		win.SetBkMode(win.HDC(wParam), win.TRANSPARENT)
-		return uintptr(win.GetStockObject(win.NULL_BRUSH))
+		return uintptr(win.GetSysColorBrush(win.COLOR_3DFACE))
 
 	case win.WM_COMMAND:
 		if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE {
