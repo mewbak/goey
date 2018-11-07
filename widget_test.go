@@ -2,6 +2,7 @@ package goey
 
 import (
 	"bytes"
+	"math"
 	"reflect"
 	"runtime"
 	"testing"
@@ -34,6 +35,13 @@ func equal(t *testing.T, lhs, rhs base.Widget) bool {
 				t.Logf("Zeroing 'Placeholder' field during test")
 			}
 			value.SetString("")
+		}
+
+		if slider, ok := lhs.(*Slider); ok {
+			if newValue := math.Round(slider.Value*8) / 8; slider.Value != newValue {
+				t.Logf("Rounding 'Value' field during test from %f to %f", slider.Value, newValue)
+				slider.Value = newValue
+			}
 		}
 	}
 
@@ -81,7 +89,7 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 
 		go func(window *Window) {
 			if testing.Verbose() && !testing.Short() {
-				time.Sleep(250*time.Millisecond)
+				time.Sleep(250 * time.Millisecond)
 			}
 			err := loop.Do(func() error {
 				window.Close()

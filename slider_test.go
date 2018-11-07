@@ -67,6 +67,9 @@ func ExampleSlider() {
 func TestSliderCreate(t *testing.T) {
 	testingRenderWidgets(t,
 		&Slider{Value: 50},
+		&Slider{Value: 10},
+		&Slider{Value: 0},
+		&Slider{Value: 100},
 		&Slider{Value: 50, Disabled: true},
 		&Slider{Value: 500, Max: 1000},
 	)
