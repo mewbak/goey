@@ -84,6 +84,20 @@ type textinputElement struct {
 }
 
 func (w *textinputElement) Props() base.Widget {
+	return &TextInput{
+		Value:       w.Control.Text(),
+		Placeholder: w.propsPlaceholder(),
+		Disabled:    !win.IsWindowEnabled(w.hWnd),
+		Password:    win.SendMessage(w.hWnd, win.EM_GETPASSWORDCHAR, 0, 0) != 0,
+		ReadOnly:    (win.GetWindowLong(w.hWnd, win.GWL_STYLE) & win.ES_READONLY) != 0,
+		OnChange:    w.onChange,
+		OnFocus:     w.onFocus,
+		OnBlur:      w.onBlur,
+		OnEnterKey:  w.onEnterKey,
+	}
+}
+
+func (w *textinputElementBase) propsPlaceholder() string {
 	var buffer [80]uint16
 	win.SendMessage(w.hWnd, win.EM_GETCUEBANNER, uintptr(unsafe.Pointer(&buffer[0])), 80)
 	ndx := 0
@@ -93,19 +107,7 @@ func (w *textinputElement) Props() base.Widget {
 			break
 		}
 	}
-	placeholder := syscall.UTF16ToString(buffer[:ndx])
-
-	return &TextInput{
-		Value:       w.Control.Text(),
-		Placeholder: placeholder,
-		Disabled:    !win.IsWindowEnabled(w.hWnd),
-		Password:    win.SendMessage(w.hWnd, win.EM_GETPASSWORDCHAR, 0, 0) != 0,
-		ReadOnly:    (win.GetWindowLong(w.hWnd, win.GWL_STYLE) & win.ES_READONLY) != 0,
-		OnChange:    w.onChange,
-		OnFocus:     w.onFocus,
-		OnBlur:      w.onBlur,
-		OnEnterKey:  w.onEnterKey,
-	}
+	return syscall.UTF16ToString(buffer[:ndx])
 }
 
 func (w *textinputElementBase) Layout(bc base.Constraints) base.Size {

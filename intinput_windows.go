@@ -37,39 +37,84 @@ func (w *IntInput) mount(parent base.Control) (base.Element, error) {
 		win.SendMessage(hwnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
 	}
 
-	retval := &intinputElement{textinputElementBase{
-		Control:    Control{hwnd},
-		onChange:   w.wrapOnChange(),
-		onFocus:    w.OnFocus,
-		onBlur:     w.OnBlur,
+	retval := &intinputElement{
+		textinputElementBase: textinputElementBase{
+			Control: Control{hwnd},
+			onFocus: w.OnFocus,
+			onBlur:  w.OnBlur,
+		},
+		onChange:   w.OnChange,
 		onEnterKey: w.OnEnterKey,
-	}}
+	}
+	retval.setThunks()
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
 }
 
-func (w *IntInput) wrapOnChange() func(string) {
-	if w.OnChange == nil {
-		return nil
-	}
+type intinputElement struct {
+	textinputElementBase
+	onChange   func(int64)
+	onEnterKey func(int64)
+}
 
-	return func(value string) {
-		// Convert text from control to an integer
-		i, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			// This case should not occur, as the control should prevent invalid
-			// strings from being entered.
-			// TODO:  What reporting should be done here?
-			return
-		}
-		// With conversion completed, call original callback.
-		w.OnChange(i)
+// We are delegating a lot of behaviour to the textinput element.  However,
+// callbacks need to convert from string to int64.  This updates the callbacks
+// in the textinput to thunks that will do the necessary conversions.
+func (w *intinputElement) setThunks() {
+	if w.onChange != nil {
+		w.textinputElementBase.onChange = w.thunkOnChange
+	} else {
+		w.textinputElementBase.onChange = nil
+	}
+	if w.onEnterKey != nil {
+		w.textinputElementBase.onEnterKey = w.thunkOnEnterKey
+	} else {
+		w.textinputElementBase.onEnterKey = nil
 	}
 }
 
-type intinputElement struct {
-	textinputElementBase
+func (w *intinputElement) thunkOnChange(value string) {
+	// Convert text from control to an integer
+	i, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		// This case should not occur, as the control should prevent invalid
+		// strings from being entered.
+		// TODO:  What reporting should be done here?
+		return
+	}
+	// With conversion completed, call original callback.
+	w.onChange(i)
+}
+
+func (w *intinputElement) thunkOnEnterKey(value string) {
+	// Convert text from control to an integer
+	i, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		// This case should not occur, as the control should prevent invalid
+		// strings from being entered.
+		// TODO:  What reporting should be done here?
+		return
+	}
+	// With conversion completed, call original callback.
+	w.onEnterKey(i)
+}
+
+func (w *intinputElement) Props() base.Widget {
+	value, err := strconv.ParseInt(w.Control.Text(), 10, 64)
+	if err != nil {
+		return nil
+	}
+
+	return &IntInput{
+		Value:       value,
+		Placeholder: w.propsPlaceholder(),
+		Disabled:    !win.IsWindowEnabled(w.hWnd),
+		OnChange:    w.onChange,
+		OnFocus:     w.onFocus,
+		OnBlur:      w.onBlur,
+		OnEnterKey:  w.onEnterKey,
+	}
 }
 
 func (w *intinputElement) updateProps(data *IntInput) error {
@@ -77,22 +122,17 @@ func (w *intinputElement) updateProps(data *IntInput) error {
 	if text != w.Text() {
 		w.SetText(text)
 	}
-
-	if data.Placeholder != "" {
-		textPlaceholder, err := syscall.UTF16PtrFromString(data.Placeholder)
-		if err != nil {
-			return err
-		}
-
-		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
-	} else {
-		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, 0)
+	err := w.updatePlaceholder(data.Placeholder)
+	if err != nil {
+		return err
 	}
+	w.SetDisabled(data.Disabled)
 
-	w.onChange = data.wrapOnChange()
+	w.onChange = data.OnChange
 	w.onFocus = data.OnFocus
 	w.onBlur = data.OnBlur
 	w.onEnterKey = data.OnEnterKey
+	w.setThunks()
 
 	return nil
 }

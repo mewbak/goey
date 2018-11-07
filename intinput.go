@@ -17,7 +17,7 @@ type IntInput struct {
 	OnChange    func(value int64)  // OnChange will be called whenever the user changes the value for this field
 	OnFocus     func()             // OnFocus will be called whenever the field receives the keyboard focus
 	OnBlur      func()             // OnBlur will be called whenever the field loses the keyboard focus
-	OnEnterKey  func(value string) // OnEnterKey will be called whenever the use hits the enter key
+	OnEnterKey  func(value int64) // OnEnterKey will be called whenever the use hits the enter key
 }
 
 // Kind returns the concrete type for use in the Widget interface.
