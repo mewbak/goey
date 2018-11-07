@@ -45,15 +45,15 @@ func (w *Slider) Mount(parent base.Control) (base.Element, error) {
 	return w.mount(parent)
 }
 
-// UpdateRange sets a default range when Min and Max are uninitialized.
+// UpdateRange sets a default range when the fields Min and Max are both
+// default initialized.
 func (w *Slider) UpdateRange() {
 	if w.Min == 0 && w.Max == 0 {
 		w.Max = 100
 	}
 }
 
-// UpdateValue will clamp the slider's value if it is outside the slider's
-// range.
+// UpdateValue clamp the field Value to the range [Min,Max].
 func (w *Slider) UpdateValue() {
 	if w.Value < w.Min {
 		w.Value = w.Min

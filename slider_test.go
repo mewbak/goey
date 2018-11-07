@@ -102,3 +102,28 @@ func TestSliderUpdate(t *testing.T) {
 		&Slider{Value: 500, Max: 1000, Disabled: true},
 	})
 }
+
+func TestSlider_UpdateValue(t *testing.T) {
+	cases := []struct {
+		value    float64
+		min, max float64
+		out      float64
+	}{
+		{1, 0, 10, 1},
+		{0, 0, 10, 0},
+		{10, 0, 10, 10},
+		{-1, 0, 10, 0},
+		{11, 0, 10, 10},
+		{-1, 0, 0, 0},
+		{11, 0, 0, 0},
+		{-1, 0, -1, 0},
+	}
+
+	for i, v := range cases {
+		slider := Slider{Value: v.value, Min: v.min, Max: v.max}
+		slider.UpdateValue()
+		if slider.Value != v.out {
+			t.Errorf("Case %d: .Value does not match, got %f, want %f", i, slider.Value, v.out)
+		}
+	}
+}
