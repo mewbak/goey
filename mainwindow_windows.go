@@ -228,9 +228,23 @@ func (w *windowImpl) close() {
 	// Want to be able to close windows in Go, even if they have already been
 	// destroyed in the Win32 system
 	if w.hWnd != 0 {
+		// There is a heseinbug with the kill focus message when destroying
+		// windows.  To get consistent behaviour, we can remove focus before
+		// destroying the window.
+		focus := win.GetFocus()
+		if focus != 0 {
+			parent := win.GetAncestor(focus, win.GA_ROOT)
+			if parent == w.hWnd {
+				win.SetFocus(0)
+			}
+		}
+
+		// Actually destroy the window.
 		win.DestroyWindow(w.hWnd)
 		w.hWnd = 0
 	}
+
+	// This call to uninitalize OLE is paired with a call in newWindow.
 	win.OleUninitialize()
 }
 
@@ -364,7 +378,7 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 }
 
 func (w *windowImpl) show() {
-	win.ShowWindow(w.hWnd, win.SW_SHOW /* info.wShowWindow */)
+	win.ShowWindow(w.hWnd, win.SW_SHOW)
 	win.UpdateWindow(w.hWnd)
 }
 
