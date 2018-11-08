@@ -109,9 +109,8 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 		}
 
 		go func() {
-			t.Logf("Window created, start tests for %s", t.Name())
+			// Delegate to test specific actions.
 			action(t, mw)
-			t.Logf("Stopping tests for %s", t.Name())
 
 			// Note:  No work after this call to Do, since the call to Run may be
 			// terminated when the call to Do returns.
