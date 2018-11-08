@@ -11,12 +11,12 @@ var (
 // IntInput describes a widget that users input or update a single integer value.
 // The model for the value is a int64.
 type IntInput struct {
-	Value       int64              // Value is the current value for the field
-	Placeholder string             // Placeholder is a descriptive text that can be displayed when the field is empty
-	Disabled    bool               // Disabled is a flag indicating that the user cannot interact with this field
-	OnChange    func(value int64)  // OnChange will be called whenever the user changes the value for this field
-	OnFocus     func()             // OnFocus will be called whenever the field receives the keyboard focus
-	OnBlur      func()             // OnBlur will be called whenever the field loses the keyboard focus
+	Value       int64             // Value is the current value for the field
+	Placeholder string            // Placeholder is a descriptive text that can be displayed when the field is empty
+	Disabled    bool              // Disabled is a flag indicating that the user cannot interact with this field
+	OnChange    func(value int64) // OnChange will be called whenever the user changes the value for this field
+	OnFocus     func()            // OnFocus will be called whenever the field receives the keyboard focus
+	OnBlur      func()            // OnBlur will be called whenever the field loses the keyboard focus
 	OnEnterKey  func(value int64) // OnEnterKey will be called whenever the use hits the enter key
 }
 
