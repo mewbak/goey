@@ -1,0 +1,32 @@
+version: 1.0.{build}
+branches:
+  only:
+  - default
+image:
+- Visual Studio 2015
+- Ubuntu1804
+init:
+- cmd: go version
+- sh: sudo apt-get update -qq
+- sh: sudo apt-get install -y -qq golang-go libgtk-3-dev
+- sh: go version
+clone_script:
+- cmd: hg clone https://bitbucket.org/rj/goey %APPVEYOR_BUILD_FOLDER%/src/bitbucket.org/rj/goey
+- cmd: set GOPATH=%APPVEYOR_BUILD_FOLDER%
+- sh: hg clone https://bitbucket.org/rj/goey ${APPVEYOR_BUILD_FOLDER}/src/bitbucket.org/rj/goey
+- sh: export GOPATH=${APPVEYOR_BUILD_FOLDER}
+install:
+- cmd: go get -d bitbucket.org/rj/goey
+- sh: go get -d bitbucket.org/rj/goey
+build_script:
+- cmd: go install bitbucket.org/rj/goey/base
+- cmd: go install bitbucket.org/rj/goey/loop
+- cmd: go install bitbucket.org/rj/goey
+- sh: go install -v bitbucket.org/rj/goey/base
+- sh: go install -v bitbucket.org/rj/goey/loop
+- sh: go install -v bitbucket.org/rj/goey
+test_script:
+- cmd: go test -v bitbucket.org/rj/goey/base
+- cmd: go test -v bitbucket.org/rj/goey/loop
+- cmd: go test -v bitbucket.org/rj/goey
+- sh: go test -v bitbucket.org/rj/goey/base
