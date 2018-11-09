@@ -71,7 +71,7 @@ func TestVBoxUpdateProps(t *testing.T) {
 }
 
 func TestVBoxLayout(t *testing.T) {
-	children := mock.NewList(base.Size{13 * DIP, 26 * DIP}, base.Size{11 * DIP, 13 * DIP})
+	children := mock.NewList(base.Size{10 * DIP, 26 * DIP}, base.Size{20 * DIP, 13 * DIP})
 
 	cases := []struct {
 		children    []base.Element
@@ -85,11 +85,35 @@ func TestVBoxLayout(t *testing.T) {
 		{children, MainStart, Stretch, base.TightWidth(40 * DIP), base.Size{40 * DIP, 50 * DIP}, []base.Rectangle{
 			base.Rect(0, 0, 40*DIP, 26*DIP), base.Rect(0, 37*DIP, 40*DIP, 50*DIP),
 		}},
+		{children, MainCenter, Stretch, base.Tight(base.Size{40 * DIP, 150 * DIP}), base.Size{40 * DIP, 150 * DIP}, []base.Rectangle{
+			base.Rect(0, 50*DIP, 40*DIP, 76*DIP), base.Rect(0, 87*DIP, 40*DIP, 100*DIP),
+		}},
 		{children, MainEnd, Stretch, base.Tight(base.Size{40 * DIP, 150 * DIP}), base.Size{40 * DIP, 150 * DIP}, []base.Rectangle{
 			base.Rect(0, 100*DIP, 40*DIP, 126*DIP), base.Rect(0, 137*DIP, 40*DIP, 150*DIP),
 		}},
 		{children, SpaceBetween, Stretch, base.Tight(base.Size{40 * DIP, 150 * DIP}), base.Size{40 * DIP, 150 * DIP}, []base.Rectangle{
 			base.Rect(0, 0, 40*DIP, 26*DIP), base.Rect(0, 137*DIP, 40*DIP, 150*DIP),
+		}},
+		{children, MainStart, CrossStart, base.TightWidth(40 * DIP), base.Size{40 * DIP, 50 * DIP}, []base.Rectangle{
+			base.Rect(0, 0, 10*DIP, 26*DIP), base.Rect(0, 37*DIP, 20*DIP, 50*DIP),
+		}},
+		{children, MainStart, CrossCenter, base.TightWidth(40 * DIP), base.Size{40 * DIP, 50 * DIP}, []base.Rectangle{
+			base.Rect(15*DIP, 0, 25*DIP, 26*DIP), base.Rect(10*DIP, 37*DIP, 30*DIP, 50*DIP),
+		}},
+		{children, MainStart, CrossEnd, base.TightWidth(40 * DIP), base.Size{40 * DIP, 50 * DIP}, []base.Rectangle{
+			base.Rect(30*DIP, 0, 40*DIP, 26*DIP), base.Rect(20*DIP, 37*DIP, 40*DIP, 50*DIP),
+		}},
+		{children, Homogeneous, CrossStart, base.Tight(base.Size{40 * DIP, 150 * DIP}), base.Size{40 * DIP, 150 * DIP}, []base.Rectangle{
+			base.Rect(0, 0, 10*DIP, (2*75-11)*DIP/2), base.Rect(0, (2*75+11)*DIP/2, 20*DIP, 150*DIP),
+		}},
+		{children, Homogeneous, CrossCenter, base.Tight(base.Size{40 * DIP, 150 * DIP}), base.Size{40 * DIP, 150 * DIP}, []base.Rectangle{
+			base.Rect(15*DIP, 0, 25*DIP, (2*75-11)*DIP/2), base.Rect(10*DIP, (2*75+11)*DIP/2, 30*DIP, 150*DIP),
+		}},
+		{children, Homogeneous, CrossEnd, base.Tight(base.Size{40 * DIP, 150 * DIP}), base.Size{40 * DIP, 150 * DIP}, []base.Rectangle{
+			base.Rect(30*DIP, 0, 40*DIP, (2*75-11)*DIP/2), base.Rect(20*DIP, (2*75+11)*DIP/2, 40*DIP, 150*DIP),
+		}},
+		{children, Homogeneous, Stretch, base.Tight(base.Size{40 * DIP, 150 * DIP}), base.Size{40 * DIP, 150 * DIP}, []base.Rectangle{
+			base.Rect(0, 0, 40*DIP, (2*75-11)*DIP/2), base.Rect(0, (2*75+11)*DIP/2, 40*DIP, 150*DIP),
 		}},
 	}
 
