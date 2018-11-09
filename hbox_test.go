@@ -60,13 +60,28 @@ func TestHBoxUpdateProps(t *testing.T) {
 		&Button{Text: "B"},
 		&Button{Text: "C"},
 	}
+	widgets1 := []base.Widget{
+		&Button{Text: "A"},
+		&Label{Text: "B"},
+		&Button{Text: "C"},
+	}
+	widgets2 := []base.Widget{
+		&Label{Text: "AA"},
+		&Button{Text: "BA"},
+		&Label{Text: "CA"},
+		&Button{Text: "DA"},
+	}
 
 	testingUpdateWidgets(t, []base.Widget{
 		&HBox{AlignMain: MainStart},
 		&HBox{Children: buttons, AlignMain: MainEnd, AlignCross: CrossStart},
+		&HBox{Children: widgets1},
+		&HBox{Children: widgets2},
 	}, []base.Widget{
 		&HBox{Children: buttons, AlignMain: MainEnd},
 		&HBox{AlignMain: MainStart, AlignCross: CrossCenter},
+		&HBox{Children: widgets2},
+		&HBox{Children: widgets1},
 	})
 }
 

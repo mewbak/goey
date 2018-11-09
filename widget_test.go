@@ -2,7 +2,6 @@ package goey
 
 import (
 	"bytes"
-	"math"
 	"reflect"
 	"runtime"
 	"testing"
@@ -38,7 +37,7 @@ func equal(t *testing.T, lhs, rhs base.Widget) bool {
 		}
 
 		if slider, ok := lhs.(*Slider); ok {
-			if newValue := math.Round(slider.Value*8) / 8; slider.Value != newValue {
+			if newValue := float64(int64(slider.Value*8)) / 8; slider.Value != newValue {
 				t.Logf("Rounding 'Value' field during test from %f to %f", slider.Value, newValue)
 				slider.Value = newValue
 			}
