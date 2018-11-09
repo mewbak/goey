@@ -92,6 +92,7 @@ func (w *windowImpl) onSize() {
 	// Update the global DPI
 	base.DPI.X, base.DPI.Y = 96, 96
 
+	// Calculate the layout
 	width, height := w.handle.GetSize()
 	clientSize := base.Size{base.FromPixelsX(width), base.FromPixelsY(height)}
 	size := w.layoutChild(clientSize)
@@ -123,6 +124,8 @@ func (w *windowImpl) onSize() {
 		}
 	}
 	w.layout.SetSize(uint(size.Width.PixelsX()), uint(size.Height.PixelsY()))
+
+	// Set bounds on child control
 	bounds := base.Rectangle{
 		base.Point{}, base.Point{size.Width, size.Height},
 	}

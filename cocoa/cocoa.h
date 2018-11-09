@@ -37,8 +37,10 @@ extern void windowClose( void* handle );
 extern nssize_t windowContentSize( void* handle );
 extern void* windowContentView( void* handle );
 extern void windowMakeFirstResponder( void* handle, void* control );
+extern void windowSetContentSize( void* handle, int width, int height );
 extern void windowSetMinSize( void* handle, int width, int height );
 extern void windowSetIconImage( void* handle, void* nsimage );
+extern void windowSetScrollVisible( void* handle, bool_t horz, bool_t vert );
 extern void windowSetTitle( void* handle, char const* title );
 extern char const* windowTitle( void* handle );
 

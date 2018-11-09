@@ -54,6 +54,10 @@ func (w *Window) SetCallbacks(cb WindowCallbacks) {
 	windowCallbacks[unsafe.Pointer(w)] = cb
 }
 
+func (w *Window) SetContentSize(width, height int) {
+	C.windowSetContentSize(unsafe.Pointer(w), C.int(width), C.int(height))
+}
+
 func (w *Window) SetMinSize(width, height int) {
 	C.windowSetMinSize(unsafe.Pointer(w), C.int(width), C.int(height))
 }
@@ -67,6 +71,10 @@ func (w *Window) SetIcon(img image.Image) error {
 	C.windowSetIconImage(unsafe.Pointer(w), nsi)
 	C.imageClose(nsi)
 	return nil
+}
+
+func (w *Window) SetScrollVisible(horz, vert bool) {
+	C.windowSetScrollVisible(unsafe.Pointer(w), toBool(horz), toBool(vert))
 }
 
 func (w *Window) SetTitle(title string) {

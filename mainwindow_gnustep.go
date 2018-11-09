@@ -11,11 +11,13 @@ import (
 )
 
 type windowImpl struct {
-	handle           *cocoa.Window
-	contentView      *cocoa.View
-	child            base.Element
-	horizontalScroll bool
-	verticalScroll   bool
+	handle                  *cocoa.Window
+	contentView             *cocoa.View
+	child                   base.Element
+	horizontalScroll        bool
+	horizontalScrollVisible bool
+	verticalScroll          bool
+	verticalScrollVisible   bool
 
 	onClosing func() bool
 }
@@ -58,9 +60,40 @@ func (w *windowImpl) onSize() {
 	// Update the global DPI
 	base.DPI.X, base.DPI.Y = 96, 96
 
+	// Calculate the layout.
 	width, height := w.handle.ContentSize()
 	clientSize := base.Size{base.FromPixelsX(width), base.FromPixelsY(height)}
 	size := w.layoutChild(clientSize)
+	if w.horizontalScroll && w.verticalScroll {
+		// Show scroll bars if necessary.
+		w.showScrollV(size.Height, clientSize.Height)
+		ok := w.showScrollH(size.Width, clientSize.Width)
+		// Adding horizontal scroll take vertical space, so we need to check
+		// again for vertical scroll.
+		if ok {
+			_, height := w.handle.ContentSize()
+			w.showScrollV(size.Height, base.FromPixelsY(height))
+		}
+	} else if w.verticalScroll {
+		// Show scroll bars if necessary.
+		ok := w.showScrollV(size.Height, clientSize.Height)
+		if ok {
+			width, height := w.handle.ContentSize()
+			clientSize := base.Size{base.FromPixelsX(width), base.FromPixelsY(height)}
+			size = w.layoutChild(clientSize)
+		}
+	} else if w.horizontalScroll {
+		// Show scroll bars if necessary.
+		ok := w.showScrollH(size.Width, clientSize.Width)
+		if ok {
+			width, height := w.handle.ContentSize()
+			clientSize := base.Size{base.FromPixelsX(width), base.FromPixelsY(height)}
+			size = w.layoutChild(clientSize)
+		}
+	}
+	w.handle.SetContentSize(int(size.Width.PixelsX()), int(size.Height.PixelsY()))
+
+	// Set bounds on child control.
 	bounds := base.Rectangle{
 		base.Point{}, base.Point{size.Width, size.Height},
 	}
@@ -84,6 +117,12 @@ func (w *windowImpl) setChildPost() {
 func (w *windowImpl) setScroll(horz, vert bool) {
 	w.horizontalScroll = horz
 	w.verticalScroll = vert
+	w.handle.SetScrollVisible(false, false)
+	w.horizontalScrollVisible = false
+	w.verticalScrollVisible = false
+	// Redo layout to account for new box constraints, and show
+	// scrollbars if necessary
+	w.onSize()
 }
 
 func (w *windowImpl) show() {
@@ -102,6 +141,42 @@ func (w *windowImpl) setOnClosing(callback func() bool) {
 func (w *windowImpl) setTitle(value string) error {
 	w.handle.SetTitle(value)
 	return nil
+}
+
+func (w *windowImpl) showScrollH(width base.Length, clientWidth base.Length) bool {
+	if width > clientWidth {
+		if !w.horizontalScrollVisible {
+			// Show the scrollbar
+			w.handle.SetScrollVisible(true, w.verticalScrollVisible)
+			w.horizontalScrollVisible = true
+			return true
+		}
+	} else if w.horizontalScrollVisible {
+		// Remove the scroll bar
+		w.handle.SetScrollVisible(false, w.verticalScrollVisible)
+		w.horizontalScrollVisible = false
+		return true
+	}
+
+	return false
+}
+
+func (w *windowImpl) showScrollV(height base.Length, clientHeight base.Length) bool {
+	if height > clientHeight {
+		if !w.verticalScrollVisible {
+			// Show the scrollbar
+			w.handle.SetScrollVisible(w.horizontalScrollVisible, true)
+			w.verticalScrollVisible = true
+			return true
+		}
+	} else if w.verticalScrollVisible {
+		// Remove the scroll bar
+		w.handle.SetScrollVisible(w.horizontalScrollVisible, false)
+		w.verticalScrollVisible = false
+		return true
+	}
+
+	return false
 }
 
 func (w *windowImpl) title() (string, error) {
