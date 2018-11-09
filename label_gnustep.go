@@ -41,15 +41,15 @@ func (w *labelElement) MinIntrinsicWidth(base.Length) base.Length {
 	return 200 * base.DIP
 }
 
-func (w *labelElement) SetBounds(bounds base.Rectangle) {
-	px := bounds.Pixels()
-	w.control.SetFrame(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
-}
-
 func (w *labelElement) Props() base.Widget {
 	return &Label{
 		Text: w.control.Text(),
 	}
+}
+
+func (w *labelElement) SetBounds(bounds base.Rectangle) {
+	px := bounds.Pixels()
+	w.control.SetFrame(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
 }
 
 func (w *labelElement) updateProps(data *Label) error {

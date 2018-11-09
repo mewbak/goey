@@ -23,6 +23,11 @@ func NewText(window *View, title string) *Text {
 	return (*Text)(handle)
 }
 
+func (w *Text) Alignment() int {
+	rc := C.textAlignment(unsafe.Pointer(w))
+	return int(rc)
+}
+
 func (w *Text) SetAlignment(align int) {
 	C.textSetAlignment(unsafe.Pointer(w), C.int(align))
 }

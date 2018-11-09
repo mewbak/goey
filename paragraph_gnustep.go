@@ -15,7 +15,7 @@ func (w *P) mount(parent base.Control) (base.Element, error) {
 	control := cocoa.NewText(parent.Handle, w.Text)
 	control.SetAlignment(int(w.Align))
 
-	retval := &labelElement{
+	retval := &paragraphElement{
 		control: control,
 	}
 	return retval, nil
@@ -38,6 +38,13 @@ func (w *paragraphElement) MinIntrinsicHeight(width base.Length) base.Length {
 
 func (w *paragraphElement) MinIntrinsicWidth(base.Length) base.Length {
 	return 200 * base.DIP
+}
+
+func (w *paragraphElement) Props() base.Widget {
+	return &P{
+		Text:  w.control.Text(),
+		Align: TextAlignment(w.control.Alignment()),
+	}
 }
 
 func (w *paragraphElement) SetBounds(bounds base.Rectangle) {

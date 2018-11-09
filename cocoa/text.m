@@ -17,6 +17,24 @@ void* textNew( void* superview, char const* text ) {
 	return control;
 }
 
+int textAlignment( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[NSText class]] );
+	switch ( [(NSText*)handle alignment] ) {
+	default:
+	case NSTextAlignmentLeft:
+		return 0;
+
+	case NSTextAlignmentCenter:
+		return 1;
+
+	case NSTextAlignmentRight:
+		return 2;
+
+	case NSTextAlignmentJustified:
+		return 3;
+	}
+}
+
 void textSetText( void* handle, char const* text ) {
 	assert( handle && [(id)handle isKindOfClass:[NSText class]] );
 	assert( text );
