@@ -29,18 +29,10 @@ func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
 	}
 
 	// Add items to the control
-	longestString := ""
-	for _, v := range w.Items {
-		text, err := syscall.UTF16PtrFromString(v)
-		if err != nil {
-			win.DestroyWindow(hwnd)
-			return nil, err
-		}
-		win.SendMessage(hwnd, win.CB_ADDSTRING, 0, uintptr(unsafe.Pointer(text)))
-
-		if len(v) > len(longestString) {
-			longestString = v
-		}
+	longestString, err := selectinputAddItems(hwnd, w.Items)
+	if err != nil {
+		win.DestroyWindow(hwnd)
+		return nil, err
 	}
 	if !w.Unset {
 		win.SendMessage(hwnd, win.CB_SETCURSEL, uintptr(w.Value), 0)
@@ -59,6 +51,23 @@ func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
+}
+
+func selectinputAddItems(hwnd win.HWND, items []string) (string, error) {
+	longestString := ""
+	for _, v := range items {
+		text, err := syscall.UTF16PtrFromString(v)
+		if err != nil {
+			return "", err
+		}
+		win.SendMessage(hwnd, win.CB_ADDSTRING, 0, uintptr(unsafe.Pointer(text)))
+
+		if len(v) > len(longestString) {
+			longestString = v
+		}
+	}
+
+	return longestString, nil
 }
 
 type selectinputElement struct {
@@ -95,16 +104,52 @@ func (w *selectinputElement) MinIntrinsicWidth(height base.Length) base.Length {
 	return w.preferredWidth
 }
 
+func (w *selectinputElement) Props() base.Widget {
+	length := win.SendMessage(w.hWnd, win.CB_GETCOUNT, 0, 0)
+	items := make([]string, int(length))
+	for i := range items {
+		buffer := [80]uint16{}
+		length := win.SendMessage(w.hWnd, win.CB_GETLBTEXTLEN, uintptr(i), 0)
+		if length > 79 {
+			panic("not enough room")
+		}
+		win.SendMessage(w.hWnd, win.CB_GETLBTEXT, uintptr(i),
+			uintptr(unsafe.Pointer(&buffer)))
+		items[i] = syscall.UTF16ToString(buffer[:length])
+	}
+	value := win.SendMessage(w.hWnd, win.CB_GETCURSEL, 0, 0)
+	unset := false
+	if value == 0xFFFFFFFF /*win.CB_ERR, but bug with extension*/ {
+		value, unset = 0, true
+	}
+	return &SelectInput{
+		Items:    items,
+		Value:    int(value),
+		Unset:    unset,
+		Disabled: !win.IsWindowEnabled(w.hWnd),
+		OnChange: w.onChange,
+		OnFocus:  w.onFocus,
+		OnBlur:   w.onBlur,
+	}
+}
+
 func (w *selectinputElement) updateProps(data *SelectInput) error {
-	// TODO:  Update the items in the combobox
-	// TODO:  Update the selection based on Value
-	// TODO:  Update the selection based on Unset.
+	// This is a brute force approach.  The list of items is probably unchanged
+	// most of the time.
+	win.SendMessage(w.hWnd, win.CB_RESETCONTENT, 0, 0)
+	longestString, err := selectinputAddItems(w.hWnd, data.Items)
+	if err != nil {
+		return err
+	}
+	if !data.Unset {
+		win.SendMessage(w.hWnd, win.CB_SETCURSEL, uintptr(data.Value), 0)
+	}
 
 	w.SetDisabled(data.Disabled)
 	w.onChange = data.OnChange
 	w.onFocus = data.OnFocus
 	w.onBlur = data.OnBlur
-
+	w.longestString = longestString
 	// Clear cache
 	w.preferredWidth = 0
 
