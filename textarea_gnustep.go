@@ -48,6 +48,20 @@ func (w *textareaElement) MinIntrinsicWidth(base.Length) base.Length {
 	return base.FromPixelsX(px)
 }
 
+func (w *textareaElement) Props() base.Widget {
+	onchange, onfocus, onblur := w.control.Callbacks()
+
+	return &TextArea{
+		Value:       w.control.Value(),
+		Disabled:    !w.control.IsEnabled(),
+		Placeholder: w.control.Placeholder(),
+		ReadOnly   : false,
+		OnChange:    onchange,
+		OnFocus:     onfocus,
+		OnBlur:      onblur,
+	}
+}
+
 func (w *textareaElement) SetBounds(bounds base.Rectangle) {
 	px := bounds.Pixels()
 	w.control.SetFrame(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
