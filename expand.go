@@ -32,7 +32,7 @@ func (*Expand) Kind() *base.Kind {
 // will be a child of the widget specified by parent.
 func (w *Expand) Mount(parent base.Control) (base.Element, error) {
 	// Mount the child
-	child, err := w.Child.Mount(parent)
+	child, err := base.Mount(parent, w.Child)
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +51,10 @@ type expandElement struct {
 }
 
 func (w *expandElement) Close() {
-	w.child.Close()
-	w.child = nil
+	if w.child != nil {
+		w.child.Close()
+		w.child = nil
+	}
 }
 
 func (*expandElement) Kind() *base.Kind {
@@ -60,7 +62,7 @@ func (*expandElement) Kind() *base.Kind {
 }
 
 func (w *expandElement) Layout(bc base.Constraints) base.Size {
-	return w.child.Layout(bc)
+	return base.Layout(w.child, bc)
 }
 
 func (w *expandElement) MinIntrinsicHeight(width base.Length) base.Length {
@@ -72,7 +74,9 @@ func (w *expandElement) MinIntrinsicWidth(height base.Length) base.Length {
 }
 
 func (w *expandElement) SetBounds(bounds base.Rectangle) {
-	w.child.SetBounds(bounds)
+	if w.child != nil {
+		w.child.SetBounds(bounds)
+	}
 }
 
 func (w *expandElement) updateProps(data *Expand) (err error) {
