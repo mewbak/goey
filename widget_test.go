@@ -285,8 +285,12 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 	for i := byte(0); i < 3; i++ {
 		letter := 'a' + i
 		if elem, ok := widgets[i].(*Checkbox); ok {
+			// Chain the onclick callback for the element.
+			chainCallback := elem.OnChange
+			// Add wrapper to write to the test log.
 			elem.OnChange = func(value bool) {
 				log.Write([]byte{'c', letter})
+				chainCallback(value)
 			}
 		} else {
 			s := reflect.ValueOf(widgets[i])
