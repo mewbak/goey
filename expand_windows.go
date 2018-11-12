@@ -5,5 +5,8 @@ import (
 )
 
 func (w *expandElement) SetOrder(previous win.HWND) win.HWND {
-	return w.child.SetOrder(previous)
+	if w.child != nil {
+		previous = w.child.SetOrder(previous)
+	}
+	return previous
 }
