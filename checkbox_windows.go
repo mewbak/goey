@@ -113,6 +113,9 @@ func checkboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 		// Defer to the old window proc
 
 	case win.WM_COMMAND:
+		// WM_COMMAND is sent to the parent, which will only forward certain
+		// message.  This code should only ever see EN_UPDATE, but we will
+		// still check.
 		switch notification := win.HIWORD(uint32(wParam)); notification {
 		case win.BN_CLICKED:
 			// Need to process the click to update the checkbox.

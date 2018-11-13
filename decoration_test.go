@@ -38,6 +38,7 @@ func TestDecorationCreate(t *testing.T) {
 	// These should all be able to mount without error.
 	testingRenderWidgets(t,
 		&Decoration{Child: &Button{Text: "A"}, Insets: DefaultInsets()},
+		&Decoration{Child: &Label{Text: "A"}, Fill: red, Insets: DefaultInsets()},
 		&Decoration{Child: child},
 		&Decoration{Child: child, Stroke: black},
 		&Decoration{Child: child, Stroke: white},

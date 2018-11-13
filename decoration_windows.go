@@ -38,14 +38,8 @@ func (w *Decoration) mount(parent base.Control) (base.Element, error) {
 	}
 
 	style := uint32(win.WS_CHILD | win.WS_VISIBLE)
-	hwnd := win.CreateWindowEx(win.WS_EX_CONTROLPARENT, &decoration.className[0], nil, style,
-		10, 10, 100, 100,
-		parent.HWnd, 0, 0, nil)
-	if hwnd == 0 {
-		err := syscall.GetLastError()
-		if err == nil {
-			return nil, syscall.EINVAL
-		}
+	hwnd, _, err := createControlWindow(win.WS_EX_CONTROLPARENT, &decoration.className[0], "", style, parent.HWnd)
+	if err != nil {
 		return nil, err
 	}
 
@@ -256,10 +250,7 @@ func decorationWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uint
 		return 0
 
 	case win.WM_COMMAND:
-		if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE {
-			return win.SendDlgItemMessage(hwnd, int32(win.LOWORD(uint32(wParam))), msg, wParam, lParam)
-		}
-		// Defer to the default window proc
+		return windowprocWmCommand(wParam, lParam)
 
 	case win.WM_CTLCOLORSTATIC:
 		win.SetBkMode(win.HDC(wParam), win.TRANSPARENT)

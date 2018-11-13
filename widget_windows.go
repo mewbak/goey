@@ -1,12 +1,11 @@
 package goey
 
 import (
-	"sync/atomic"
 	"syscall"
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
-	win2 "bitbucket.org/rj/goey/syscall"
+	win2 "bitbucket.org/rj/goey/internal/syscall"
 	"github.com/lxn/win"
 )
 
@@ -22,12 +21,6 @@ func init() {
 	initCtrls.DwICC = win.ICC_STANDARD_CLASSES | win.ICC_DATE_CLASSES | win.ICC_TAB_CLASSES
 	win.InitCommonControlsEx(&initCtrls)
 }
-
-// Control ID
-
-var (
-	currentControlID uint32 = 100
-)
 
 // Control is an opaque type used as a platform-specific handle to a control
 // created using the platform GUI.  As an example, this will refer to a HWND
@@ -112,14 +105,6 @@ func (w *Control) Close() {
 }
 
 func createControlWindow(exStyle uint32, classname *uint16, text string, style uint32, parent win.HWND) (win.HWND, []uint16, error) {
-	// Determine a unique ID for this control.  This is needed because
-	// WM_COMMAND messages only report the control ID, not the HWND, so this
-	// is the only to identify the source of those controls.
-	nextControlID := uint32(0)
-	if classname != &staticClassName[0] {
-		nextControlID = atomic.AddUint32(&currentControlID, 1)
-	}
-
 	// Get the text for the control.  There may be extra work here if the
 	// string is empty, but that is not expected to be common.
 	utftext, err := syscall.UTF16FromString(text)
@@ -130,7 +115,7 @@ func createControlWindow(exStyle uint32, classname *uint16, text string, style u
 	// Create the control.
 	hwnd := win.CreateWindowEx(exStyle, classname, &utftext[0], style,
 		win.CW_USEDEFAULT, win.CW_USEDEFAULT, win.CW_USEDEFAULT, win.CW_USEDEFAULT,
-		parent, win.HMENU(nextControlID), 0, nil)
+		parent, 0, 0, nil)
 	if hwnd == 0 {
 		err := syscall.GetLastError()
 		if err == nil {

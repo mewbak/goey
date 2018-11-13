@@ -177,8 +177,10 @@ func comboboxWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintpt
 		// Defer to the old window proc
 
 	case win.WM_COMMAND:
-		notification := win.HIWORD(uint32(wParam))
-		switch notification {
+		// WM_COMMAND is sent to the parent, which will only forward certain
+		// message.  This code should only ever see CBN_SELCHANGE, but we will
+		// still check.
+		switch notification := win.HIWORD(uint32(wParam)); notification {
 		case win.CBN_SELCHANGE:
 			if w := selectinputGetPtr(hwnd); w.onChange != nil {
 				cursel := win.SendMessage(hwnd, win.CB_GETCURSEL, 0, 0)

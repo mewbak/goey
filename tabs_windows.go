@@ -347,10 +347,7 @@ func tabsWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (
 		// Defer to default window proc
 
 	case win.WM_COMMAND:
-		if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE {
-			return win.SendDlgItemMessage(hwnd, int32(win.LOWORD(uint32(wParam))), msg, wParam, lParam)
-		}
-		// Defer to the default window proc
+		return windowprocWmCommand(wParam, lParam)
 
 	case win.WM_NOTIFY:
 		if n := (*win.NMHDR)(unsafe.Pointer(lParam)); true {

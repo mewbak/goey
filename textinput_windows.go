@@ -5,7 +5,7 @@ import (
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
-	win2 "bitbucket.org/rj/goey/syscall"
+	win2 "bitbucket.org/rj/goey/internal/syscall"
 	"github.com/lxn/win"
 )
 
@@ -196,8 +196,10 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 		// Defer to the old window proc
 
 	case win.WM_COMMAND:
-		notification := win.HIWORD(uint32(wParam))
-		switch notification {
+		// WM_COMMAND is sent to the parent, which will only forward certain
+		// message.  This code should only ever see EN_UPDATE, but we will
+		// still check.
+		switch notification := win.HIWORD(uint32(wParam)); notification {
 		case win.EN_UPDATE:
 			if w := textinputGetPtr(hwnd); w.onChange != nil {
 				w.onChange(win2.GetWindowText(hwnd))
