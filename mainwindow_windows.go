@@ -632,10 +632,7 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 		return uintptr(win.GetSysColorBrush(win.COLOR_3DFACE))
 
 	case win.WM_COMMAND:
-		if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE {
-			return win.SendDlgItemMessage(hwnd, int32(win.LOWORD(uint32(wParam))), msg, wParam, lParam)
-		}
-		// Defer to the default window proc
+		return windowprocWmCommand(wParam, lParam)
 
 	case win.WM_NOTIFY:
 		if n := (*win.NMHDR)(unsafe.Pointer(lParam)); true {
@@ -647,6 +644,20 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 
 	// Let the default window proc handle all other messages
 	return win.DefWindowProc(hwnd, msg, wParam, lParam)
+}
+
+func windowprocWmCommand(wParam uintptr, lParam uintptr) uintptr {
+	// These are the notifications that the controls needs to receive.
+	if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE || n == win.CBN_SELCHANGE {
+		// For BN_CLICKED, EN_UPDATE, and CBN_SELCHANGE, lParam is the window
+		// handle of the control.  We don't need to use the control identifier
+		// from wParam, we can dispatch directly to the control.
+		return win.SendMessage(win.HWND(lParam), win.WM_COMMAND, wParam, lParam)
+	}
+
+	// Defer to the default window proc.  However, the default window proc will
+	// return 0 for WM_COMMAND.
+	return 0
 }
 
 func windowGetPtr(hwnd win.HWND) *windowImpl {
