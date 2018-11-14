@@ -8,7 +8,7 @@ var (
 	paddingKind = base.NewKind("bitbucket.org/rj/goey.Padding")
 )
 
-// Insets describe padding that should ba added around a widget.
+// Insets describe padding that should be added around a widget.
 type Insets struct {
 	Top    base.Length
 	Right  base.Length
@@ -27,6 +27,12 @@ func DefaultInsets() Insets {
 // all four sides.
 func UniformInsets(l base.Length) Insets {
 	return Insets{l, l, l, l}
+}
+
+// String returns a string representation of i like "Insets{92:00,92:00,46:00,46:00}".
+func (i *Insets) String() string {
+	return "Insets{" + i.Top.String() + "," + i.Right.String() + "," +
+		i.Bottom.String() + "," + i.Left.String() + "}"
 }
 
 // Padding describes a widget that adds some space around a single child widget.

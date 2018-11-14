@@ -126,6 +126,9 @@ func testingRenderWidget(t *testing.T, widget base.Widget) (ok bool) {
 		}
 
 		go func(window *Window) {
+			if testing.Verbose() {
+				time.Sleep(2000 * time.Millisecond)
+			}
 			err := loop.Do(func() error {
 				window.Close()
 				return nil
@@ -239,7 +242,7 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 			// Run the actions, which are counted.
 			for i := 0; i < 3; i++ {
 				err := loop.Do(func() error {
-					// Find the child element to be clicked
+					// Find the child element to be focused
 					child := window.child.(*vboxElement).children[i]
 					if elem, ok := child.(Focusable); ok {
 						ok := elem.TakeFocus()

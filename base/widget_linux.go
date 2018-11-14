@@ -1,3 +1,5 @@
+// +build !gnustep
+
 package base
 
 import "github.com/gotk3/gotk3/gtk"

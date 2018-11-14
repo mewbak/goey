@@ -1,3 +1,5 @@
+// +build !gnustep
+
 package goey
 
 import (
@@ -129,7 +131,7 @@ func (w *tabsElement) Close() {
 	}
 }
 
-func (w *tabsElement) controlInsets() base.Point {
+func (w *tabsElement) contentInsets() base.Point {
 	if w.cachedInsets.Y == 0 {
 		h1, _ := w.handle.GetPreferredHeight()
 		// How should the offset between the notebook widget and the contained
@@ -193,7 +195,7 @@ func (w *tabsElement) SetBounds(bounds base.Rectangle) {
 
 	if w.child != nil {
 		// Determine the bounds for the child widget
-		insets := w.controlInsets()
+		insets := w.contentInsets()
 		insets.X += w.insets.Left + w.insets.Right
 		insets.Y += w.insets.Top + w.insets.Bottom
 		bounds = base.Rectangle{

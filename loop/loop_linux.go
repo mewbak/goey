@@ -1,6 +1,10 @@
+// +build !gnustep
+
 package loop
 
 import (
+	"testing"
+
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -23,6 +27,10 @@ func run() error {
 	return nil
 }
 
+func runTesting(func() error) error {
+	panic("unreachable")
+}
+
 func do(action func() error) error {
 	err := make(chan error, 1)
 	glib.IdleAdd(func() {
@@ -33,4 +41,10 @@ func do(action func() error) error {
 
 func stop() {
 	gtk.MainQuit()
+}
+
+func testMain(m *testing.M) int {
+	// On GTK, we need to be locked to a thread, but not to a particular
+	// thread.  No need for special coordination.
+	return m.Run()
 }
