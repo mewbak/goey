@@ -29,15 +29,26 @@ func (w *paragraphElement) Close() {
 }
 
 func (w *paragraphElement) measureReflowLimits() {
-	paragraphMaxWidth = 40 * base.DIP
+	x := w.control.EightyEms()
+	paragraphMaxWidth = base.FromPixelsX(x)
 }
 
 func (w *paragraphElement) MinIntrinsicHeight(width base.Length) base.Length {
-	return 20 * base.DIP
+	if width == base.Inf {
+		width = w.maxReflowWidth()
+	}
+
+	y := w.control.MinHeight(width.PixelsX())
+	return base.FromPixelsY(y)
 }
 
-func (w *paragraphElement) MinIntrinsicWidth(base.Length) base.Length {
-	return 200 * base.DIP
+func (w *paragraphElement) MinIntrinsicWidth(height base.Length) base.Length {
+	if height != base.Inf {
+		panic("not implemented")
+	}
+
+	x := w.control.MinWidth()
+	return min(base.FromPixelsX(x), w.minReflowWidth())
 }
 
 func (w *paragraphElement) Props() base.Widget {

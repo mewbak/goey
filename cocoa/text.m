@@ -35,6 +35,69 @@ int textAlignment( void* handle ) {
 	}
 }
 
+static NSSize measureTextSize( NSFont* font, NSString* text, NSSize size ) {
+	assert( font && text );
+
+	// Create objects.
+	NSTextContainer* container =
+	    [[NSTextContainer alloc] initWithContainerSize:size];
+	NSLayoutManager* manager = [[NSLayoutManager alloc] init];
+	NSTextStorage* storage = [[NSTextStorage alloc] initWithString:text];
+
+	// Configure the objects
+	[container setLineFragmentPadding:0.0];
+	[manager addTextContainer:container];
+	[storage addLayoutManager:manager];
+	[storage addAttribute:NSFontAttributeName
+	                value:font
+	                range:NSMakeRange( 0, [storage length] )];
+
+	// Force layout
+	[manager glyphRangeForTextContainer:container];
+	// Find the size
+	size = [manager usedRectForTextContainer:container].size;
+
+	// Release objects
+	[manager release];
+	[container release];
+	[storage release];
+
+	return size;
+}
+
+int textEightyEms( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[NSText class]] );
+
+	static char const eightyEms[] = "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+	                                "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm";
+
+	// Measure the width of the string.
+	NSString* ems = [NSString stringWithCString:eightyEms length:80];
+	NSSize size = measureTextSize( [(NSText*)handle font], ems,
+	                               NSMakeSize( FLT_MAX, FLT_MAX ) );
+	[ems release];
+
+	return size.width;
+}
+
+int textMinHeight( void* handle, int width ) {
+	assert( handle && [(id)handle isKindOfClass:[NSText class]] );
+
+	NSSize size =
+	    measureTextSize( [(NSText*)handle font], [(NSText*)handle string],
+	                     NSMakeSize( width, FLT_MAX ) );
+	return size.height;
+}
+
+int textMinWidth( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[NSText class]] );
+
+	NSSize size =
+	    measureTextSize( [(NSText*)handle font], [(NSText*)handle string],
+	                     NSMakeSize( FLT_MAX, FLT_MAX ) );
+	return size.width;
+}
+
 void textSetText( void* handle, char const* text ) {
 	assert( handle && [(id)handle isKindOfClass:[NSText class]] );
 	assert( text );

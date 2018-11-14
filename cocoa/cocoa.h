@@ -103,6 +103,9 @@ extern nssize_t tabviewContentInsets( void* control );
 /* Text */
 extern void* textNew( void* superview, char const* text );
 extern int textAlignment( void* handle );
+extern int textEightyEms( void* handle );
+extern int textMinHeight( void* handle, int width );
+extern int textMinWidth( void* handle );
 extern void textSetText( void* handle, char const* text );
 extern void textSetAlignment( void* handle, int align );
 extern char const* textText( void* handle );
