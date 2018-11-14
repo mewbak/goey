@@ -170,6 +170,11 @@ func (w *textareaElement) SetBounds(bounds base.Rectangle) {
 	syscall.SetBounds(&w.frame.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
+func (w *textareaElement) TakeFocus() bool {
+	control := Control{&w.handle.Widget}
+	return control.TakeFocus()
+}
+
 func (w *textareaElement) updateProps(data *TextArea) error {
 	// TextView will send a 'changed' event, even if the new value is the
 	// same.  To stop an infinite loop, we need to protect by checking
