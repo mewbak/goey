@@ -26,7 +26,9 @@ func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
 	for _, v := range w.Items {
 		control.AppendText(v)
 	}
-	control.SetActive(w.Value)
+	if !w.Unset {
+		control.SetActive(w.Value)
+	}
 	control.SetCanFocus(true)
 	control.SetSensitive(!w.Disabled)
 
@@ -64,9 +66,12 @@ func (w *selectinputElement) Props() base.Widget {
 
 	value := w.comboboxtext().GetActive()
 	unset := value < 0
+	if unset {
+		value = 0
+	}
 
 	return &SelectInput{
-		Items:    nil,
+		Items:    w.propsItems(),
 		Value:    int(value),
 		Unset:    unset,
 		Disabled: !w.comboboxtext().GetSensitive(),
@@ -75,6 +80,31 @@ func (w *selectinputElement) Props() base.Widget {
 		OnBlur:   w.onBlur.callback,
 	}
 
+}
+
+func (w *selectinputElement) propsItems() []string {
+	// Get the model for the combobox, which contains the list of items.
+	model, err := w.comboboxtext().GetModel()
+	if err != nil {
+		return nil
+	}
+
+	// Iterate through the list.  The model can in principle hold a tree, but
+	// that won't occur within the combobox.
+	items := []string{}
+	for iter, ok := model.GetIterFirst(); ok; ok = model.IterNext(iter) {
+		v, err := model.GetValue(iter, 0)
+		if err != nil {
+			return nil
+		}
+		vs, err := v.GetString()
+		if err != nil {
+			return nil
+		}
+		items = append(items, vs)
+	}
+
+	return items
 }
 
 func (w *selectinputElement) updateProps(data *SelectInput) error {
@@ -86,7 +116,9 @@ func (w *selectinputElement) updateProps(data *SelectInput) error {
 	for _, v := range data.Items {
 		cbt.AppendText(v)
 	}
-	cbt.SetActive(data.Value)
+	if !data.Unset {
+		cbt.SetActive(data.Value)
+	}
 
 	cbt.SetSensitive(!data.Disabled)
 	w.onChange = data.OnChange
