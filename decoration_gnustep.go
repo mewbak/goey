@@ -10,19 +10,18 @@ import (
 type decorationElement struct {
 	control *cocoa.Decoration
 	insets  Insets
-	radius  base.Length
 
 	child     base.Element
 	childSize base.Size
 }
 
 func (w *Decoration) mount(parent base.Control) (base.Element, error) {
-	control := cocoa.NewDecoration(parent.Handle, w.Fill, w.Stroke)
+	control := cocoa.NewDecoration(parent.Handle, w.Fill, w.Stroke,
+		w.Radius.PixelsX(), w.Radius.PixelsY())
 
 	retval := &decorationElement{
 		control: control,
 		insets:  w.Insets,
-		radius:  w.Radius,
 	}
 
 	child, err := base.DiffChild(base.Control{&control.View}, nil, w.Child)
@@ -47,7 +46,14 @@ func (w *decorationElement) Close() {
 }
 
 func (w *decorationElement) props() *Decoration {
-	return &Decoration{}
+	radiusX, _ := w.control.BorderRadius()
+
+	return &Decoration{
+		Fill:   w.control.FillColor(),
+		Stroke: w.control.StrokeColor(),
+		Insets: w.insets,
+		Radius: base.FromPixelsX(radiusX),
+	}
 }
 
 func (w *decorationElement) SetBounds(bounds base.Rectangle) {

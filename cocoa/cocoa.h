@@ -64,7 +64,11 @@ extern char const* buttonTitle( void* handle );
 extern void buttonSetTitle( void* handle, char const* title );
 
 /* Decoration */
-extern void* decorationNew( void* superview, nscolor_t fill, nscolor_t stroke );
+extern void* decorationNew( void* superview, nscolor_t fill, nscolor_t stroke,
+                            nssize_t radius );
+extern nssize_t decorationBorderRadius( void* control );
+extern nscolor_t decorationFillColor( void* control );
+extern nscolor_t decorationStrokeColor( void* control );
 extern void decorationSetBorderRadius( void* control, nssize_t radius );
 extern void decorationSetFillColor( void* control, nscolor_t fill );
 extern void decorationSetStrokeColor( void* control, nscolor_t stroke );
