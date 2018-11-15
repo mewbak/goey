@@ -9,6 +9,7 @@
 @property( nonatomic ) NSSize borderRadius;
 @property( nonatomic, retain ) NSColor* fillColor;
 @property( nonatomic, retain ) NSColor* strokeColor;
+- (void)dealloc;
 - (void)drawRect:(NSRect)dirtyRect;
 - (BOOL)isOpaque;
 @end
@@ -18,6 +19,12 @@
 @synthesize borderRadius;
 @synthesize fillColor;
 @synthesize strokeColor;
+
+- (void)dealloc {
+	[fillColor release];
+	[strokeColor release];
+	[super dealloc];
+}
 
 - (void)drawRect:(NSRect)dirtyRect {
 	NSRect frame = [self frame];

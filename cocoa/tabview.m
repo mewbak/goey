@@ -56,6 +56,7 @@ void tabviewAddItem( void* control, char const* text ) {
 	[item setLabel:label];
 	[label release];
 	[(NSTabView*)control addTabViewItem:item];
+	[item release];
 }
 
 void tabviewSelectItem( void* control, int index ) {

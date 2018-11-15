@@ -62,8 +62,10 @@ void* windowNew( char const* title, unsigned width, unsigned height ) {
 	// Replace the content view of the windows with a scrolled view.  This will
 	// provide scrollbars and scrolling when necessary.
 	NSScrollView* sw = [[NSScrollView alloc] init];
-	[sw setDocumentView:[[NSView alloc] init]];
+	NSView* swv = [[NSView alloc] init];
+	[sw setDocumentView:swv];
 	[window setContentView:sw];
+	[swv release];
 	[sw release];
 
 	[window makeKeyAndOrderFront:nil];

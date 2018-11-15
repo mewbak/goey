@@ -62,8 +62,8 @@ static void initApplication() {
 		delegate = [[GApplicationDelegate alloc] init];
 	}
 
-	NSString* quitString = [[NSString alloc] initWithUTF8String:"Quit "];
-	NSString* qString = [[NSString alloc] initWithUTF8String:"q"];
+	NSString* quitString = [NSString stringWithUTF8String:"Quit "];
+	NSString* qString = [NSString stringWithUTF8String:"q"];
 
 	[NSApplication sharedApplication];
 	//[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
@@ -73,7 +73,7 @@ static void initApplication() {
 	id appMenuItem = [[NSMenuItem new] autorelease];
 	[menubar addItem:appMenuItem];
 	[NSApp setMainMenu:menubar];
-	id appMenu = [[NSMenu new] autorelease];
+	NSMenu* appMenu = [[NSMenu new] autorelease];
 	id appName = [[NSProcessInfo processInfo] processName];
 	id quitTitle = [quitString stringByAppendingString:appName];
 	id quitMenuItem = [[[NSMenuItem alloc] initWithTitle:quitTitle

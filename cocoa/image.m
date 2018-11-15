@@ -35,6 +35,7 @@ void* imageNewFromRGBA( uint8_t* imageData, int width, int height,
 	NSImage* image = [[NSImage alloc] initWithSize:NSMakeSize( width, height )];
 	assert( image );
 	[image addRepresentation:imagerep];
+	[imagerep release];
 	return image;
 }
 
@@ -70,6 +71,7 @@ void* imageNewFromGray( uint8_t* imageData, int width, int height,
 	NSImage* image = [[NSImage alloc] initWithSize:NSMakeSize( width, height )];
 	assert( image );
 	[image addRepresentation:imagerep];
+	[imagerep release];
 	return image;
 }
 
