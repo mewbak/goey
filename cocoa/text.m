@@ -71,11 +71,12 @@ int textEightyEms( void* handle ) {
 	static char const eightyEms[] = "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
 	                                "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm";
 
-	// Measure the width of the string.
+	// Documentation is unclear, but assuming that the returned string is
+	// in the autopool.
 	NSString* ems = [NSString stringWithCString:eightyEms length:80];
+	// Measure the width of the string.
 	NSSize size = measureTextSize( [(NSText*)handle font], ems,
 	                               NSMakeSize( FLT_MAX, FLT_MAX ) );
-	[ems release];
 
 	return size.width;
 }
