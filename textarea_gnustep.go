@@ -14,8 +14,9 @@ type textareaElement struct {
 
 func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	control := cocoa.NewTextField(parent.Handle, w.Value)
-	control.SetValue(w.Value)
 	control.SetPlaceholder(w.Placeholder)
+	control.SetEnabled(!w.Disabled)
+	control.SetEditable(!w.ReadOnly)
 	control.SetCallbacks(w.OnChange, w.OnFocus, w.OnBlur)
 
 	retval := &textareaElement{
@@ -57,7 +58,7 @@ func (w *textareaElement) Props() base.Widget {
 		Value:       w.control.Value(),
 		Disabled:    !w.control.IsEnabled(),
 		Placeholder: w.control.Placeholder(),
-		ReadOnly:    false,
+		ReadOnly:    !w.control.IsEditable(),
 		MinLines:    w.minLines,
 		OnChange:    onchange,
 		OnFocus:     onfocus,
@@ -78,6 +79,7 @@ func (w *textareaElement) updateProps(data *TextArea) error {
 	w.control.SetValue(data.Value)
 	w.control.SetPlaceholder(data.Placeholder)
 	w.control.SetEnabled(!data.Disabled)
+	w.control.SetEditable(!data.ReadOnly)
 	w.minLines = data.MinLines
 	w.control.SetCallbacks(data.OnChange, data.OnFocus, data.OnBlur)
 	return nil

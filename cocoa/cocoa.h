@@ -116,7 +116,9 @@ extern char const* textText( void* handle );
 
 /* TextField */
 extern void* textfieldNew( void* superview, char const* text );
+extern bool_t textfieldIsEditable( void* handle );
 extern char const* textfieldPlaceholder( void* handle );
+extern void textfieldSetEditable( void* handle, bool_t value );
 extern void textfieldSetValue( void* handle, char const* text );
 extern void textfieldSetPlaceholder( void* handle, char const* text );
 extern char const* textfieldValue( void* handle );

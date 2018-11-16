@@ -51,9 +51,17 @@ func (w *TextField) SetCallbacks(onchange func(string), onfocus func(), onblur f
 	}
 }
 
+func (w *TextField) IsEditable() bool {
+	return C.textfieldIsEditable(unsafe.Pointer(w)) != 0
+}
+
 func (w *TextField) Placeholder() string {
 	ctext := C.textfieldPlaceholder(unsafe.Pointer(w))
 	return C.GoString(ctext)
+}
+
+func (w *TextField) SetEditable(value bool) {
+	C.textfieldSetEditable(unsafe.Pointer(w), toBool(value))
 }
 
 func (w *TextField) SetValue(text string) {
