@@ -79,7 +79,11 @@ extern void* hrNew( void* superview );
 /* PopUpButton */
 extern void* popupbuttonNew( void* superview );
 extern void popupbuttonAddItem( void* control, char const* text );
-extern void popupbuttonSetValue( void* control, int index );
+extern char const* popupbuttonItemAtIndex( void* control, int index );
+extern int popupbuttonNumberOfItems( void* control );
+extern void popupbuttonRemoveAllItems( void* control );
+extern void popupbuttonSetValue( void* control, int index, bool_t unset );
+extern int popupbuttonValue( void* control );
 
 /* ProgressIndicator */
 extern void* progressNew( void* superview, double min, double value,

@@ -55,8 +55,27 @@ func (w *PopUpButton) AddItem(text string) {
 	C.popupbuttonAddItem(unsafe.Pointer(w), ctext)
 }
 
-func (w *PopUpButton) SetValue(value int) {
-	C.popupbuttonSetValue(unsafe.Pointer(w), C.int(value))
+func (w *PopUpButton) ItemAtIndex(index int) string {
+	rc := C.popupbuttonItemAtIndex(unsafe.Pointer(w), C.int(index))
+	return C.GoString(rc)
+}
+
+func (w *PopUpButton) NumberOfItems() int {
+	rc := C.popupbuttonNumberOfItems(unsafe.Pointer(w))
+	return int(rc)
+}
+
+func (w *PopUpButton) RemoveAllItems() {
+	C.popupbuttonRemoveAllItems(unsafe.Pointer(w))
+}
+
+func (w *PopUpButton) SetValue(value int, unset bool) {
+	C.popupbuttonSetValue(unsafe.Pointer(w), C.int(value), toBool(unset))
+}
+
+func (w *PopUpButton) Value() int {
+	rc := C.popupbuttonValue(unsafe.Pointer(w))
+	return int(rc)
 }
 
 //export popupbuttonOnChange
