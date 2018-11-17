@@ -24,10 +24,10 @@ type Focusable interface {
 }
 
 func equal(t *testing.T, lhs, rhs base.Widget) bool {
-	// On windows, the message EM_GETCUEBANNER does not work unless the manifest
-	// is set correctly.  This cannot be done for the package, since that
-	// manifest will conflict with the manifest of any app.
 	if runtime.GOOS == "windows" {
+		// On windows, the message EM_GETCUEBANNER does not work unless the manifest
+		// is set correctly.  This cannot be done for the package, since that
+		// manifest will conflict with the manifest of any app.
 		if value := reflect.ValueOf(rhs).Elem().FieldByName("Placeholder"); value.IsValid() {
 			placeholder := value.String()
 			if placeholder != "" {
@@ -36,11 +36,23 @@ func equal(t *testing.T, lhs, rhs base.Widget) bool {
 			value.SetString("")
 		}
 
+		// The implementation on windows has a limited resolution compared to
+		// float64.
 		if slider, ok := lhs.(*Slider); ok {
 			if newValue := float64(int64(slider.Value*8)) / 8; slider.Value != newValue {
 				t.Logf("Rounding 'Value' field during test from %f to %f", slider.Value, newValue)
 				slider.Value = newValue
 			}
+		}
+	} else if runtime.GOOS == "linux" {
+		// On linux with GTK, this package is using a GtkTextView to create
+		// the multi-line text editor, and that widget does not support
+		// placeholders.
+		if elem, ok := rhs.(*TextArea); ok {
+			if elem.Placeholder != "" {
+				t.Logf("Zeroing 'Placeholder' field during test")
+			}
+			elem.Placeholder = ""
 		}
 	}
 
