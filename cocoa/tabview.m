@@ -59,10 +59,39 @@ void tabviewAddItem( void* control, char const* text ) {
 	[item release];
 }
 
+char const* tabviewItemAtIndex( void* handle, int index ) {
+	assert( handle && [(id)handle isKindOfClass:[NSTabView class]] );
+
+	NSTabViewItem* item = [(NSTabView*)handle tabViewItemAtIndex:index];
+	return [[item label] cStringUsingEncoding:NSUTF8StringEncoding];
+}
+
+int tabviewNumberOfItems( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[NSTabView class]] );
+
+	return [(NSTabView*)handle numberOfTabViewItems];
+}
+
+void tabviewRemoveItemAtIndex( void* handle, int index ) {
+	assert( handle && [(id)handle isKindOfClass:[NSTabView class]] );
+
+	NSTabViewItem* item = [(NSTabView*)handle tabViewItemAtIndex:index];
+	[(NSTabView*)handle removeTabViewItem:item];
+}
+
 void tabviewSelectItem( void* control, int index ) {
 	assert( control && [(id)control isKindOfClass:[NSTabView class]] );
 
 	[(NSTabView*)control selectTabViewItemAtIndex:index];
+}
+
+void tabviewSetItemAtIndex( void* handle, int index, char const* text ) {
+	assert( handle && [(id)handle isKindOfClass:[NSTabView class]] );
+
+	NSString* label = [[NSString alloc] initWithUTF8String:text];
+	NSTabViewItem* item = [(NSTabView*)handle tabViewItemAtIndex:index];
+	[item setLabel:label];
+	[label release];
 }
 
 void* tabviewContentView( void* control, int index ) {

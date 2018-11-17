@@ -104,7 +104,11 @@ extern void sliderUpdate( void* handle, double min, double value, double max );
 /* TabView */
 extern void* tabviewNew( void* superview );
 extern void tabviewAddItem( void* control, char const* text );
+extern char const* tabviewItemAtIndex( void* control, int index );
+extern int tabviewNumberOfItems( void* control );
+extern void tabviewRemoveItemAtIndex( void* control, int index );
 extern void tabviewSelectItem( void* control, int index );
+extern void tabviewSetItemAtIndex( void* control, int index, char const* text );
 extern void* tabviewContentView( void* control, int index );
 extern nssize_t tabviewContentInsets( void* control );
 
