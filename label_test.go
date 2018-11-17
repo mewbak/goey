@@ -1,12 +1,30 @@
 package goey
 
 import (
+	"math/rand"
+	"reflect"
 	"testing"
 	"testing/quick"
-	"unicode"
 
 	"bitbucket.org/rj/goey/base"
 )
+
+func labelValues(values []reflect.Value, rand *rand.Rand) {
+	const complexSize = 50
+
+	// This is copied from the testing/quick package, but modified somewhat.
+	// The function in the standard library will create strings using all
+	// code points in the range up to 0x10FFFF.  This works fine on Linux,
+	// but on Windows unrecognized codepoints are replaced with 0xFFFD,
+	// which is appropriate but breaks the tests.  Here, we restrict code
+	// points to ASCII less the control characters.
+	numChars := rand.Intn(complexSize)
+	codePoints := make([]rune, numChars)
+	for i := 0; i < numChars; i++ {
+		codePoints[i] = rune(0x20 + rand.Intn(0x7F-0x20))
+	}
+	values[0] = reflect.ValueOf(string(codePoints))
+}
 
 func TestLabel(t *testing.T) {
 	testingRenderWidgets(t,
@@ -18,15 +36,9 @@ func TestLabel(t *testing.T) {
 	)
 
 	f := func(text string) bool {
-		// Filter out bad unicode code points
-		for _, v := range []rune(text) {
-			if !unicode.IsGraphic(v) {
-				return true
-			}
-		}
 		return testingRenderWidget(t, &Label{Text: text})
 	}
-	if err := quick.Check(f, nil); err != nil {
+	if err := quick.Check(f, &quick.Config{Values: labelValues}); err != nil {
 		t.Errorf("quick: %s", err)
 	}
 }
