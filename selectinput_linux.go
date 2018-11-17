@@ -39,8 +39,11 @@ func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
 
 	control.Connect("destroy", selectinputOnDestroy, retval)
 	retval.shChange = setSignalHandler(&control.Widget, 0, w.OnChange != nil, "changed", selectinputOnChanged, retval)
-	retval.onFocus.Set(&control.Widget, w.OnFocus)
-	retval.onBlur.Set(&control.Widget, w.OnBlur)
+	if child, err := control.GetChild(); err == nil {
+		child.SetCanFocus(true)
+		retval.onFocus.Set(child, w.OnFocus)
+		retval.onBlur.Set(child, w.OnBlur)
+	}
 	control.Show()
 
 	return retval, nil
@@ -107,6 +110,16 @@ func (w *selectinputElement) propsItems() []string {
 	return items
 }
 
+func (w *selectinputElement) TakeFocus() bool {
+	widget, err := w.comboboxtext().GetChild()
+	if err != nil {
+		return false
+	}
+
+	control := Control{widget}
+	return control.TakeFocus()
+}
+
 func (w *selectinputElement) updateProps(data *SelectInput) error {
 	cbt := w.comboboxtext()
 
@@ -123,7 +136,9 @@ func (w *selectinputElement) updateProps(data *SelectInput) error {
 	cbt.SetSensitive(!data.Disabled)
 	w.onChange = data.OnChange
 	w.shChange = setSignalHandler(&cbt.Widget, w.shChange, data.OnChange != nil, "changed", selectinputOnChanged, w)
-	w.onFocus.Set(&cbt.Widget, data.OnFocus)
-	w.onBlur.Set(&cbt.Widget, data.OnBlur)
+	if child, err := cbt.GetChild(); err == nil {
+		w.onFocus.Set(child, data.OnFocus)
+		w.onBlur.Set(child, data.OnBlur)
+	}
 	return nil
 }
