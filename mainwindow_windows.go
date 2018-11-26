@@ -7,6 +7,7 @@ import (
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/dialog"
 	win2 "bitbucket.org/rj/goey/internal/syscall"
 	"bitbucket.org/rj/goey/loop"
 	"github.com/lxn/win"
@@ -254,9 +255,14 @@ func (w *windowImpl) NativeHandle() win.HWND {
 	return w.hWnd
 }
 
-func (w *windowImpl) message(m *Message) {
-	m.title = win2.GetWindowText(w.hWnd)
-	m.handle = uintptr(w.hWnd)
+func (w *windowImpl) message(m *dialog.Message) {
+	m.WithTitle(win2.GetWindowText(w.hWnd))
+	m.WithOwner(w.hWnd)
+}
+
+func (w *windowImpl) openfiledialog(m *dialog.OpenFile) {
+	m.WithTitle(win2.GetWindowText(w.hWnd))
+	m.WithOwner(w.hWnd)
 }
 
 // setChild updates the child element of the window.  It also updates any

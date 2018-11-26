@@ -2,9 +2,9 @@ package goey
 
 import (
 	"image"
-	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/dialog"
 	"bitbucket.org/rj/goey/loop"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
@@ -138,9 +138,15 @@ func (w *windowImpl) close() {
 	}
 }
 
-func (w *windowImpl) message(m *Message) {
-	m.title, m.err = w.handle.GetTitle()
-	m.handle = uintptr(unsafe.Pointer(w.handle))
+func (w *windowImpl) message(m *dialog.Message) {
+	title, _ := w.handle.GetTitle()
+	// TODO:  Error handling for above
+	m.WithTitle(title)
+	m.WithParent(w.handle)
+}
+
+func (w *windowImpl) openfiledialog(m *dialog.OpenFile) {
+	m.WithParent(w.handle)
 }
 
 func get_vscrollbar_width(window *gtk.Window) (base.Length, error) {

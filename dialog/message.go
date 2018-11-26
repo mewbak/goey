@@ -1,4 +1,4 @@
-package goey
+package dialog
 
 import (
 	"errors"

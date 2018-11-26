@@ -1,6 +1,8 @@
-package goey
+package dialog
 
 import (
+	"unsafe"
+
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -21,4 +23,10 @@ func (m *Message) withWarn() {
 
 func (m *Message) withInfo() {
 	m.icon = uint(gtk.MESSAGE_INFO)
+}
+
+// WithParent sets the parent of the dialog box.
+func (m *Message) WithParent(parent *gtk.Window) *Message {
+	m.handle = uintptr(unsafe.Pointer(parent))
+	return m
 }
