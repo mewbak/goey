@@ -117,6 +117,14 @@ func (w *Window) OpenFileDialog() *dialog.OpenFile {
 	return ret
 }
 
+// SaveFileDialog returns a builder that can be used to construct a save file
+// dialog, and then show that dialog.
+func (w *Window) SaveFileDialog() *dialog.SaveFile {
+	ret := dialog.NewSaveFile()
+	w.savefiledialog(ret)
+	return ret
+}
+
 // Scroll returns the flags that determine whether scrolling is allowed in the
 // horizontal and vertical directions.
 func (w *Window) Scroll() (horizontal, vertical bool) {

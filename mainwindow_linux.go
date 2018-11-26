@@ -149,6 +149,10 @@ func (w *windowImpl) openfiledialog(m *dialog.OpenFile) {
 	m.WithParent(w.handle)
 }
 
+func (w *windowImpl) savefiledialog(m *dialog.SaveFile) {
+	m.WithParent(w.handle)
+}
+
 func get_vscrollbar_width(window *gtk.Window) (base.Length, error) {
 	if vscrollbarWidth != 0 {
 		return vscrollbarWidth, nil

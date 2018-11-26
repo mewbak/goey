@@ -265,6 +265,11 @@ func (w *windowImpl) openfiledialog(m *dialog.OpenFile) {
 	m.WithOwner(w.hWnd)
 }
 
+func (w *windowImpl) savefiledialog(m *dialog.SaveFile) {
+	m.WithTitle(win2.GetWindowText(w.hWnd))
+	m.WithOwner(w.hWnd)
+}
+
 // setChild updates the child element of the window.  It also updates any
 // cached data linked to the child element, in particular the window's
 // minimum size.  This function will also perform layout on the child.
