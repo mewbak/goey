@@ -66,10 +66,18 @@ func (w *expandElement) Layout(bc base.Constraints) base.Size {
 }
 
 func (w *expandElement) MinIntrinsicHeight(width base.Length) base.Length {
+	if w.child == nil {
+		return 0
+	}
+
 	return w.child.MinIntrinsicHeight(width)
 }
 
 func (w *expandElement) MinIntrinsicWidth(height base.Length) base.Length {
+	if w.child == nil {
+		return 0
+	}
+
 	return w.child.MinIntrinsicWidth(height)
 }
 
