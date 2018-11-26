@@ -7,9 +7,16 @@ import (
 
 // OpenFile is a builder to construct an open file dialog to the user.
 type OpenFile struct {
-	handle uintptr
-	title  string
-	err    error
+	handle   uintptr
+	title    string
+	filename string
+	filters  []filter
+	err      error
+}
+
+type filter struct {
+	name    string
+	pattern string
 }
 
 // NewOpenFile initializes a new open file dialog.
@@ -28,6 +35,20 @@ func (m *OpenFile) Show() (string, error) {
 	return m.show()
 }
 
+// AddFilter adds a filter to the list of filename patterns that the user can
+// select.
+func (m *OpenFile) AddFilter(name, pattern string) *OpenFile {
+	m.filters = append(m.filters, filter{name, pattern})
+	return m
+}
+
+// WithFilename sets the current or default filename for the dialog.
+func (m *OpenFile) WithFilename(filename string) *OpenFile {
+	m.filename = filename
+	return m
+}
+
+// WithTitle adds a title to the dialog.
 func (m *OpenFile) WithTitle(text string) *OpenFile {
 	text = strings.TrimSpace(text)
 	if text == "" {
