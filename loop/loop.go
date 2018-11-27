@@ -97,8 +97,13 @@ func Run(action func() error) error {
 // Note, this function contains a race-condition, in that the the action may be
 // scheduled while the event loop is being terminated, in which case the
 // scheduled action may never be run.  Presumably, those actions don't need to
-// be run on the GUI thread, so they can be schedule using a different
+// be run on the GUI thread, so they should be scheduled using a different
 // mechanism.
+//
+// If the passed function panics, the panic will happen on the GUI thread.
+// This will cause the call to Run to terminate, stopping the GUI.  However,
+// this will not close any open windows, leading to a potentially unrecoverable
+// state.
 func Do(action func() error) error {
 	// Check if the event loop is current running.
 	if atomic.LoadUint32(&isRunning) == 0 {
