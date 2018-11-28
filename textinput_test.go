@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
@@ -64,7 +65,7 @@ func TestTextInputClose(t *testing.T) {
 	)
 }
 
-func TestTextInputEvents(t *testing.T) {
+func TestTextInputOnFocus(t *testing.T) {
 	testingCheckFocusAndBlur(t,
 		&TextInput{},
 		&TextInput{},
@@ -72,7 +73,36 @@ func TestTextInputEvents(t *testing.T) {
 	)
 }
 
-func TestTextInputProps(t *testing.T) {
+func TestTextInputOnChange(t *testing.T) {
+	log := bytes.NewBuffer(nil)
+
+	testingTypeKeys(t, "Hello",
+		&TextInput{OnChange: func(v string) {
+			log.WriteString(v)
+			log.WriteString("\x1E")
+		}})
+
+	const want = "H\x1EHe\x1EHel\x1EHell\x1EHello\x1E"
+	if got := log.String(); got != want {
+		t.Errorf("Wanted %v, got %v", want, got)
+	}
+}
+
+func TestTextInputOnEnterKey(t *testing.T) {
+	log := bytes.NewBuffer(nil)
+
+	testingTypeKeys(t, "Hello\n",
+		&TextInput{OnEnterKey: func(v string) {
+			log.WriteString(v)
+		}})
+
+	const want = "Hello"
+	if got := log.String(); got != want {
+		t.Errorf("Wanted %v, got %v", want, got)
+	}
+}
+
+func TestTextInputUpdateProps(t *testing.T) {
 	testingUpdateWidgets(t, []base.Widget{
 		&TextInput{Value: "A"},
 		&TextInput{Value: "B", Placeholder: "..."},
