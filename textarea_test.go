@@ -6,11 +6,11 @@ import (
 	"bitbucket.org/rj/goey/base"
 )
 
-func TestTextArea(t *testing.T) {
+func TestTextAreaMount(t *testing.T) {
 	// Note, cannot use zero value for MinLines.  This will be changed to a
 	// default value, and cause the post mounting check that the widget was
 	// correctly instantiated to fail.
-	testingRenderWidgets(t,
+	testingMountWidgets(t,
 		&TextArea{Value: "A", MinLines: 3},
 		&TextArea{Value: "B", MinLines: 3, Placeholder: "..."},
 		&TextArea{Value: "C", MinLines: 3, Disabled: true},

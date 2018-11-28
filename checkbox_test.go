@@ -18,8 +18,8 @@ func checkboxValues(values []reflect.Value, rand *rand.Rand) {
 	values[2] = reflect.ValueOf(rand.Uint64()%2 == 0)
 }
 
-func TestCheckboxCreate(t *testing.T) {
-	testingRenderWidgets(t,
+func TestCheckboxMount(t *testing.T) {
+	testingMountWidgets(t,
 		&Checkbox{Value: false, Text: "A"},
 		&Checkbox{Value: true, Text: "B"},
 		&Checkbox{Value: false, Text: "C", Disabled: true},
@@ -28,7 +28,7 @@ func TestCheckboxCreate(t *testing.T) {
 	)
 
 	f := func(text string, value, disabled bool) bool {
-		return testingRenderWidget(t, &Checkbox{Text: text, Value: value, Disabled: disabled})
+		return testingMountWidget(t, &Checkbox{Text: text, Value: value, Disabled: disabled})
 	}
 	if err := quick.Check(f, &quick.Config{Values: checkboxValues}); err != nil {
 		t.Errorf("quick: %s", err)

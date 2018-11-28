@@ -44,8 +44,8 @@ func ExampleTextInput() {
 	}
 }
 
-func TestTextInput(t *testing.T) {
-	testingRenderWidgets(t,
+func TestTextInputMount(t *testing.T) {
+	testingMountWidgets(t,
 		&TextInput{Value: "A"},
 		&TextInput{Value: "B", Placeholder: "..."},
 		&TextInput{Value: "C", Disabled: true},

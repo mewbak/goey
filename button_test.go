@@ -58,15 +58,15 @@ func buttonValues(values []reflect.Value, rand *rand.Rand) {
 	values[2] = reflect.ValueOf(rand.Uint64()%2 == 0)
 }
 
-func TestButtonCreate(t *testing.T) {
-	testingRenderWidgets(t,
+func TestButtonMount(t *testing.T) {
+	testingMountWidgets(t,
 		&Button{Text: "A"},
 		&Button{Text: "D", Disabled: true},
 		&Button{Text: "E", Default: true},
 	)
 
 	f := func(text string, disabled, def bool) bool {
-		return testingRenderWidget(t, &Button{Text: text, Disabled: disabled, Default: def})
+		return testingMountWidget(t, &Button{Text: text, Disabled: disabled, Default: def})
 	}
 	if err := quick.Check(f, &quick.Config{Values: buttonValues}); err != nil {
 		t.Errorf("quick: %s", err)

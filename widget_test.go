@@ -59,7 +59,7 @@ func equal(t *testing.T, lhs, rhs base.Widget) bool {
 	return reflect.DeepEqual(lhs, rhs)
 }
 
-func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
+func testingMountWidgets(t *testing.T, widgets ...base.Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
@@ -115,7 +115,7 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 	}
 }
 
-func testingRenderWidget(t *testing.T, widget base.Widget) (ok bool) {
+func testingMountWidget(t *testing.T, widget base.Widget) (ok bool) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
@@ -157,7 +157,7 @@ func testingRenderWidget(t *testing.T, widget base.Widget) (ok bool) {
 	return /* naked return, code set in init callback */
 }
 
-func testingRenderWidgetsFail(t *testing.T, outError error, widgets ...base.Widget) {
+func testingMountWidgetsFail(t *testing.T, outError error, widgets ...base.Widget) {
 	init := func() error {
 		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
 		if window != nil {

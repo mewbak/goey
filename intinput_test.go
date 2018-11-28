@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestIntInputCreate(t *testing.T) {
-	testingRenderWidgets(t,
+func TestIntInputMount(t *testing.T) {
+	testingMountWidgets(t,
 		&IntInput{Value: 1},
 		&IntInput{Value: 2, Placeholder: "..."},
 		&IntInput{Value: 3, Disabled: true},

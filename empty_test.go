@@ -6,8 +6,8 @@ import (
 	"bitbucket.org/rj/goey/base"
 )
 
-func TestEmptyCreate(t *testing.T) {
-	testingRenderWidgets(t,
+func TestEmptyMount(t *testing.T) {
+	testingMountWidgets(t,
 		&Empty{},
 		&Empty{},
 		&Empty{},

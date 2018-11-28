@@ -23,9 +23,9 @@ func (w *alignElement) Props() base.Widget {
 	}
 }
 
-func TestAlignCreate(t *testing.T) {
+func TestAlignMount(t *testing.T) {
 	// These should all be able to mount without error.
-	testingRenderWidgets(t,
+	testingMountWidgets(t,
 		&Align{Child: &Button{Text: "A"}},
 		&Align{HAlign: AlignStart, Child: &Button{Text: "B"}},
 		&Align{HAlign: AlignEnd, Child: &Button{Text: "C"}},
@@ -36,7 +36,7 @@ func TestAlignCreate(t *testing.T) {
 
 	// These should mount with an error.
 	err := errors.New("Mock error 1")
-	testingRenderWidgetsFail(t, err,
+	testingMountWidgetsFail(t, err,
 		&Align{Child: &mock.Widget{Err: err}},
 	)
 }

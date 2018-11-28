@@ -3,6 +3,7 @@ package goey
 import (
 	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/mock"
+	"errors"
 	"testing"
 )
 
@@ -26,10 +27,16 @@ func (w *expandElement) Props() base.Widget {
 	}
 }
 
-func TestExpandCreate(t *testing.T) {
-	testingRenderWidgets(t,
+func TestExpandMount(t *testing.T) {
+	testingMountWidgets(t,
 		&Expand{},
 		&Expand{Child: &mock.Widget{}},
+	)
+
+	// This should mount with an error.
+	err := errors.New("Mock error 1")
+	testingMountWidgetsFail(t, err,
+		&Expand{Child: &mock.Widget{Err: err}},
 	)
 }
 

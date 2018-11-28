@@ -7,11 +7,11 @@ import (
 	"bitbucket.org/rj/goey/base"
 )
 
-func TestDateInputCreate(t *testing.T) {
+func TestDateInputMount(t *testing.T) {
 	v1 := time.Date(2006, time.January, 2, 0, 0, 0, 0, time.Local)
 	v2 := time.Date(2007, time.January, 2, 0, 0, 0, 0, time.Local)
 
-	testingRenderWidgets(t,
+	testingMountWidgets(t,
 		&DateInput{Value: v1},
 		&DateInput{Value: v2, Disabled: true},
 		&DateInput{Value: v2},

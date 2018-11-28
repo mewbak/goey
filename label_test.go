@@ -26,8 +26,8 @@ func labelValues(values []reflect.Value, rand *rand.Rand) {
 	values[0] = reflect.ValueOf(string(codePoints))
 }
 
-func TestLabel(t *testing.T) {
-	testingRenderWidgets(t,
+func TestLabelMount(t *testing.T) {
+	testingMountWidgets(t,
 		&Label{Text: "A"},
 		&Label{Text: "B"},
 		&Label{Text: "C"},
@@ -36,7 +36,7 @@ func TestLabel(t *testing.T) {
 	)
 
 	f := func(text string) bool {
-		return testingRenderWidget(t, &Label{Text: text})
+		return testingMountWidget(t, &Label{Text: text})
 	}
 	if err := quick.Check(f, &quick.Config{Values: labelValues}); err != nil {
 		t.Errorf("quick: %s", err)

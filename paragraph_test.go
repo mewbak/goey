@@ -17,8 +17,8 @@ func paragraphValues(values []reflect.Value, rand *rand.Rand) {
 	values[1] = reflect.ValueOf(TextAlignment(rand.Uint64() % 4))
 }
 
-func TestParagraph(t *testing.T) {
-	testingRenderWidgets(t,
+func TestParagraphMount(t *testing.T) {
+	testingMountWidgets(t,
 		&P{Text: "A", Align: JustifyLeft},
 		&P{Text: "B", Align: JustifyRight},
 		&P{Text: "C", Align: JustifyCenter},
@@ -28,7 +28,7 @@ func TestParagraph(t *testing.T) {
 	)
 
 	f := func(text string, align TextAlignment) bool {
-		return testingRenderWidget(t, &P{Text: text, Align: align})
+		return testingMountWidget(t, &P{Text: text, Align: align})
 	}
 	if err := quick.Check(f, &quick.Config{Values: paragraphValues}); err != nil {
 		t.Errorf("quick: %s", err)
