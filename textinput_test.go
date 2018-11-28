@@ -49,6 +49,8 @@ func TestTextInput(t *testing.T) {
 		&TextInput{Value: "A"},
 		&TextInput{Value: "B", Placeholder: "..."},
 		&TextInput{Value: "C", Disabled: true},
+		&TextInput{Value: "D", ReadOnly: true},
+		&TextInput{Value: "E", Password: true},
 	)
 }
 
@@ -57,6 +59,8 @@ func TestTextInputClose(t *testing.T) {
 		&TextInput{Value: "A"},
 		&TextInput{Value: "B", Placeholder: "..."},
 		&TextInput{Value: "C", Disabled: true},
+		&TextInput{Value: "D", ReadOnly: true},
+		&TextInput{Value: "E", Password: true},
 	)
 }
 
@@ -73,9 +77,11 @@ func TestTextInputProps(t *testing.T) {
 		&TextInput{Value: "A"},
 		&TextInput{Value: "B", Placeholder: "..."},
 		&TextInput{Value: "C", Disabled: true},
+		&TextInput{Value: "D", ReadOnly: true},
 	}, []base.Widget{
-		&TextInput{Value: "AA"},
+		&TextInput{Value: "AA", ReadOnly: true},
 		&TextInput{Value: "BA", Disabled: true},
 		&TextInput{Value: "CA", Placeholder: "***", Disabled: false},
+		&TextInput{Value: "DA"},
 	})
 }

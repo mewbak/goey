@@ -22,7 +22,7 @@ func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	subclassWindowProcedure(hwnd, &edit.oldWindowProc, textinputWindowProc)
 
 	// Create placeholder, if required.
-	if w.Value == "" && w.Placeholder != "" {
+	if w.Placeholder != "" {
 		textPlaceholder, err := syscall.UTF16PtrFromString(w.Placeholder)
 		if err != nil {
 			win.DestroyWindow(hwnd)
