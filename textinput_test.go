@@ -3,7 +3,10 @@ package goey
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
+	"reflect"
 	"testing"
+	"testing/quick"
 
 	"bitbucket.org/rj/goey/base"
 )
@@ -45,6 +48,16 @@ func ExampleTextInput() {
 	}
 }
 
+func textinputValues(values []reflect.Value, rand *rand.Rand) {
+	// Get a string
+	labelValues(values, rand)
+
+	// Create a choices for disabled and default
+	values[1] = reflect.ValueOf(rand.Uint64()%2 == 0)
+	values[2] = reflect.ValueOf(rand.Uint64()%2 == 0)
+	values[3] = reflect.ValueOf(rand.Uint64()%2 == 0)
+}
+
 func TestTextInputMount(t *testing.T) {
 	testingMountWidgets(t,
 		&TextInput{Value: "A"},
@@ -53,6 +66,13 @@ func TestTextInputMount(t *testing.T) {
 		&TextInput{Value: "D", ReadOnly: true},
 		&TextInput{Value: "E", Password: true},
 	)
+
+	f := func(value string, disabled, password, readonly bool) bool {
+		return testingMountWidget(t, &TextInput{Value: value, Disabled: disabled, Password: password, ReadOnly: readonly})
+	}
+	if err := quick.Check(f, &quick.Config{Values: textinputValues}); err != nil {
+		t.Errorf("quick: %s", err)
+	}
 }
 
 func TestTextInputClose(t *testing.T) {

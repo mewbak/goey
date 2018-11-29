@@ -12,6 +12,8 @@ func TestIntInputMount(t *testing.T) {
 		&IntInput{Value: 1},
 		&IntInput{Value: 2, Placeholder: "..."},
 		&IntInput{Value: 3, Disabled: true},
+		&IntInput{Value: 4, Min: 0, Max: 10},
+		&IntInput{Value: 5, Min: -1000, Max: 1000},
 	)
 }
 
@@ -20,6 +22,8 @@ func TestIntInputClose(t *testing.T) {
 		&IntInput{Value: 1},
 		&IntInput{Value: 2, Placeholder: "..."},
 		&IntInput{Value: 3, Disabled: true},
+		&IntInput{Value: 4, Min: 0, Max: 10},
+		&IntInput{Value: 5, Min: -1000, Max: 1000},
 	)
 }
 

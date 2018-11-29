@@ -53,7 +53,7 @@ func (w *Slider) UpdateRange() {
 	}
 }
 
-// UpdateValue clamp the field Value to the range [Min,Max].
+// UpdateValue clamps the field Value to the range [Min,Max].
 func (w *Slider) UpdateValue() {
 	if w.Value < w.Min {
 		w.Value = w.Min

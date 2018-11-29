@@ -55,6 +55,7 @@ func renderWindow() base.Widget {
 							OnChange: func(v string) { println("password input ", v) }},
 						&goey.Label{Text: "Integer input:"},
 						&goey.IntInput{Value: 3, Placeholder: "Please enter a number",
+							Min: -100, Max: 100,
 							OnChange: func(v int64) { println("int input ", v) }},
 						&goey.Label{Text: "Date input:"},
 						&goey.DateInput{Value: time.Now().Add(24 * time.Hour),

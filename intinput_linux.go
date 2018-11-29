@@ -26,7 +26,7 @@ func (w *IntInput) mount(parent base.Control) (base.Element, error) {
 	parent.Handle.Add(control)
 
 	// Update properties on the control
-	control.SetRange(-0x7FFFFFFFFFFFFFFF, 0x7FFFFFFFFFFFFFFF)
+	control.SetRange(float64(w.Min), float64(w.Max))
 	control.SetValue(float64(w.Value))
 	control.SetIncrements(1, 10)
 	control.SetPlaceholderText(w.Placeholder)
@@ -65,6 +65,22 @@ func (w *intinputElement) spinbutton() *gtk.SpinButton {
 	return (*gtk.SpinButton)(unsafe.Pointer(w.handle))
 }
 
+// Because GTK uses double (or float64 in Go) to store the range, it cannot
+// keep full precision for values near the minimum or maximum of the int64
+// range.  This function is just for Props, and is used to adjust the int64
+// to get a match.
+func toInt64(scale float64) int64 {
+	a := int64(scale)
+	if float64(a) == scale {
+		return a
+	}
+	if float64(a-1) == scale {
+		return a - 1
+	}
+	println("mismatch", a, scale)
+	return a
+}
+
 func (w *intinputElement) Props() base.Widget {
 	button := w.spinbutton()
 
@@ -77,6 +93,8 @@ func (w *intinputElement) Props() base.Widget {
 		Value:       int64(button.GetValue()),
 		Placeholder: placeholder,
 		Disabled:    !button.GetSensitive(),
+		Min:         toInt64(button.GetAdjustment().GetLower()),
+		Max:         toInt64(button.GetAdjustment().GetUpper()),
 		OnChange:    w.onChange,
 		OnFocus:     w.onFocus.callback,
 		OnBlur:      w.onBlur.callback,
@@ -87,6 +105,7 @@ func (w *intinputElement) updateProps(data *IntInput) error {
 	button := w.spinbutton()
 
 	w.onChange = nil // break OnChange to prevent event
+	button.SetRange(float64(data.Min), float64(data.Max))
 	button.SetValue(float64(data.Value))
 	button.SetPlaceholderText(data.Placeholder)
 	button.SetSensitive(!data.Disabled)
