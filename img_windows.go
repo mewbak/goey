@@ -98,6 +98,17 @@ func bitmapToImage(hdc win.HDC, hbitmap win.HBITMAP) image.Image {
 		for i := 0; i < len(buffer); i += 4 {
 			buffer[i+0], buffer[i+2] = buffer[i+2], buffer[i+0]
 		}
+		// In GDI, all bitmaps are bottom up.  We need to reorder the rows
+		// before the data can be used for a PNG.
+		// TODO:  Combine this pass with the previous.
+		stride := int(bmi.BmiHeader.BiWidth)*4
+		for y := 0; y < int(bmi.BmiHeader.BiHeight/2); y++ {
+			y2 := int(bmi.BmiHeader.BiHeight) - y - 1
+			for x := 0; x < stride; x++ {
+				// The stride is always the same as the width?
+				buffer[y*stride+x], buffer[y2*stride+x] = buffer[y2*stride+x], buffer[y*stride+x]
+			}
+		}
 		return &image.RGBA{
 			Pix:    buffer,
 			Stride: int(bmi.BmiHeader.BiWidth * 4),

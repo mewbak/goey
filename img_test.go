@@ -9,17 +9,45 @@ import (
 	"bitbucket.org/rj/goey/base"
 )
 
+func drawVerticalRGB(img *image.RGBA) {
+	colors := [3]color.RGBA{
+		{255, 0, 0, 255},
+		{0, 255, 0, 255},
+		{0, 0, 255, 255},
+	}
+	dx, dy := img.Bounds().Dx(), img.Bounds().Dy()
+	draw.Draw(img, image.Rect(0, 0, dx/3, dy), image.NewUniform(colors[0]), image.Point{}, draw.Src)
+	draw.Draw(img, image.Rect(dx/3, 0, dx*2/3, dy), image.NewUniform(colors[1]), image.Point{}, draw.Src)
+	draw.Draw(img, image.Rect(dx*2/3, 0, dx, dy), image.NewUniform(colors[2]), image.Point{}, draw.Src)
+}
+
+func drawHorizontalRGB(img *image.RGBA) {
+	colors := [3]color.RGBA{
+		{255, 0, 0, 255},
+		{0, 255, 0, 255},
+		{0, 0, 255, 255},
+	}
+	dx, dy := img.Bounds().Dx(), img.Bounds().Dy()
+	draw.Draw(img, image.Rect(0, 0, dx, dy/3), image.NewUniform(colors[0]), image.Point{}, draw.Src)
+	draw.Draw(img, image.Rect(0, dy/3, dx, dy*2/3), image.NewUniform(colors[1]), image.Point{}, draw.Src)
+	draw.Draw(img, image.Rect(0, dy*2/3, dx, dy), image.NewUniform(colors[2]), image.Point{}, draw.Src)
+}
+
 func TestImgMount(t *testing.T) {
 	bounds := image.Rect(0, 0, 92, 92)
-	images := []*image.RGBA{image.NewRGBA(bounds), image.NewRGBA(bounds), image.NewRGBA(bounds)}
+	images := []*image.RGBA{image.NewRGBA(bounds), image.NewRGBA(bounds), image.NewRGBA(bounds), image.NewRGBA(bounds), image.NewRGBA(bounds)}
 	draw.Draw(images[0], bounds, image.NewUniform(color.RGBA{255, 255, 0, 255}), image.Point{}, draw.Src)
 	draw.Draw(images[1], bounds, image.NewUniform(color.RGBA{255, 0, 255, 255}), image.Point{}, draw.Src)
 	draw.Draw(images[2], bounds, image.NewUniform(color.RGBA{0, 255, 255, 255}), image.Point{}, draw.Src)
+	drawVerticalRGB(images[3])
+	drawHorizontalRGB(images[4])
 
 	testingMountWidgets(t,
-		&Img{Image: images[0], Width: 100 * DIP, Height: 10 * DIP},
-		&Img{Image: images[1]},
-		&Img{Image: images[2]},
+		&Align{Child: &Img{Image: images[0], Width: 100 * DIP, Height: 10 * DIP}},
+		&Align{Child: &Img{Image: images[1], Width: 20 * DIP}},
+		&Align{Child: &Img{Image: images[2], Height: 30 * DIP}},
+		&Align{Child: &Img{Image: images[3]}},
+		&Align{Child: &Img{Image: images[4]}},
 	)
 }
 

@@ -53,6 +53,10 @@ func NewWindow(title string, child base.Widget) (*Window, error) {
 	// Show the window
 	w.show()
 
+	if filename := os.Getenv("GOEY_SCREENSHOT"); filename != "" {
+		asyncScreenshot(filename, w)
+	}
+
 	return w, nil
 }
 

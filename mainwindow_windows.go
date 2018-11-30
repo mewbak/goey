@@ -270,6 +270,42 @@ func (w *windowImpl) savefiledialog(m *dialog.SaveFile) {
 	m.WithOwner(w.hWnd)
 }
 
+// Screenshot returns an image of the window, as displayed on screen.
+func (w *windowImpl) Screenshot() (image.Image, error) {
+	// Need the client rect for the window.
+	region := win.RECT{}
+	win.GetWindowRect(w.hWnd, &region)
+
+	// Create the device context and bitmap for the image
+	hdcScreen := win.GetDC(0)
+	defer func() {
+		win.ReleaseDC(0, hdcScreen)
+	}()
+	hdc := win.CreateCompatibleDC(hdcScreen)
+	defer func() {
+		win.DeleteObject(win.HGDIOBJ(hdc))
+	}()
+	bitmap := win.CreateCompatibleBitmap(hdcScreen, region.Right-region.Left, region.Bottom-region.Top)
+	defer func() {
+		win.DeleteObject(win.HGDIOBJ(bitmap))
+	}()
+	win.SelectObject(hdc, win.HGDIOBJ(bitmap))
+	rc := win.StretchBlt(hdc, 0, 0, region.Right-region.Left, region.Bottom-region.Top,
+		hdcScreen, region.Left, region.Top, region.Right-region.Left, region.Bottom-region.Top,
+		win.SRCCOPY)
+	if !rc {
+		err := syscall.GetLastError()
+		if err == nil {
+			err = syscall.EINVAL
+		}
+		return nil, err
+	}
+
+	// Convert the bitmap to a image.Image.
+	img := bitmapToImage(hdc, bitmap)
+	return img, nil
+}
+
 // setChild updates the child element of the window.  It also updates any
 // cached data linked to the child element, in particular the window's
 // minimum size.  This function will also perform layout on the child.
