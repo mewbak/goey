@@ -5,6 +5,7 @@ import (
 
 	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/dialog"
+	"bitbucket.org/rj/goey/internal/syscall"
 	"bitbucket.org/rj/goey/loop"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
@@ -151,6 +152,28 @@ func (w *windowImpl) openfiledialog(m *dialog.OpenFile) {
 
 func (w *windowImpl) savefiledialog(m *dialog.SaveFile) {
 	m.WithParent(w.handle)
+}
+
+// Screenshot returns an image of the window, as displayed on screen.
+func (w *windowImpl) Screenshot() (image.Image, error) {
+	screen, err := w.handle.GetScreen()
+	if err != nil {
+		return nil, err
+	}
+
+	rw, err := screen.GetRootWindow()
+	if err != nil {
+		return nil, err
+	}
+
+	pixbuf := syscall.PixbufGetFromWindow(rw, w.handle)
+	if pixbuf == nil {
+		panic("nil pointer")
+	}
+
+	// Convert the pixbuf to a image.Image.
+	img := pixbufToImage(pixbuf)
+	return img, nil
 }
 
 func get_vscrollbar_width(window *gtk.Window) (base.Length, error) {
