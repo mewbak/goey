@@ -56,7 +56,7 @@ func (m *Message) WithInfo() *Message {
 func (m *Message) WithTitle(text string) *Message {
 	text = strings.TrimSpace(text)
 	if text == "" {
-		m.err = errors.New("Invalid argument, 'text' cannot be empty in call to NewMessage")
+		m.err = errors.New("Invalid argument, 'text' cannot be empty in call to WithTitle")
 	} else {
 		m.title = text
 	}

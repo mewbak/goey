@@ -52,7 +52,7 @@ func (m *OpenFile) WithFilename(filename string) *OpenFile {
 func (m *OpenFile) WithTitle(text string) *OpenFile {
 	text = strings.TrimSpace(text)
 	if text == "" {
-		m.err = errors.New("Invalid argument, 'text' cannot be empty in call to NewMessage")
+		m.err = errors.New("Invalid argument, 'text' cannot be empty in call to WithTitle")
 	} else {
 		m.title = text
 	}

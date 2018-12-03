@@ -47,7 +47,7 @@ func (m *SaveFile) WithFilename(filename string) *SaveFile {
 func (m *SaveFile) WithTitle(text string) *SaveFile {
 	text = strings.TrimSpace(text)
 	if text == "" {
-		m.err = errors.New("Invalid argument, 'text' cannot be empty in call to NewMessage")
+		m.err = errors.New("Invalid argument, 'text' cannot be empty in call to WithTitle")
 	} else {
 		m.title = text
 	}
