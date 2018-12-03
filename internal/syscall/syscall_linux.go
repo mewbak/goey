@@ -47,6 +47,25 @@ func PixbufNewFromBytes(bytes []uint8, colorspace gdk.Colorspace, hasAlpha bool,
 	return &gdk.Pixbuf{glib.Take(unsafe.Pointer(ret))}
 }
 
+// PixbufGetFromWindow is a wrapper around gdk_pixbuf_get_from_window.
+func PixbufGetFromWindow(root *gdk.Window, window *gtk.Window) *gdk.Pixbuf {
+	// Get the coordinates for the window
+	tmp := C.gtk_widget_get_window((*C.GtkWidget)(unsafe.Pointer(window.GObject)))
+	var x, y, w, h C.gint
+	C.gdk_window_get_origin(tmp, &x, &y)
+	C.gdk_window_get_geometry(tmp, nil, nil, &w, &h)
+
+	// The offsets to the dimensions below are to capture the title bar and
+	// the borders for the window.  This is tuned to XFCE, and will likely need
+	// to be adjusted with any other DE.
+	ret := C.gdk_pixbuf_get_from_window((*C.GdkWindow)(unsafe.Pointer(root.Native())),
+		x-1, y-25, C.gint(w)+2, C.gint(h)+26)
+	if ret == nil {
+		return nil
+	}
+	return &gdk.Pixbuf{glib.Take(unsafe.Pointer(ret))}
+}
+
 // WidgetGetPreferredHeightForWidth is a wrapper around gtk_widget_get_preferred_height_for_width.
 func WidgetGetPreferredHeightForWidth(widget *gtk.Widget, width int) (int, int) {
 	var minimum, natural C.gint
