@@ -75,6 +75,7 @@ func (w *Control) TakeFocus() bool {
 	return win.SetFocus(w.hWnd) != 0
 }
 
+// TypeKeys sends events to the control as if the string was typed by a user.
 func (w *Control) TypeKeys(text string) chan error {
 	err := make(chan error, 1)
 

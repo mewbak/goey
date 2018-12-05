@@ -3,6 +3,8 @@ package goey
 import (
 	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/internal/syscall"
+	"bitbucket.org/rj/goey/loop"
+	"fmt"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -46,6 +48,43 @@ func (w *Control) TakeFocus() bool {
 	// get the focus events.
 	time.Sleep(250 * time.Millisecond)
 	return w.handle.IsFocus()
+}
+
+// TypeKeys sends events to the control as if the string was typed by a user.
+func (w *Control) TypeKeys(text string) chan error {
+	err := make(chan error, 1)
+
+	go func() {
+		defer close(err)
+
+		loop.Do(func() error {
+			if !w.TakeFocus() {
+				err <- fmt.Errorf("error on take focus")
+			}
+			return nil
+		})
+
+		time.Sleep(50 * time.Millisecond)
+		println("typing")
+		for _, r := range text {
+			evt := gdk.EventKeyNew()
+			syscall.SetEventKeyInformation(w.handle, evt, r, 0)
+			loop.Do(func() error {
+				w.handle.Event(evt.Event)
+				return nil
+			})
+			time.Sleep(10 * time.Millisecond)
+
+			syscall.SetEventKeyInformation(w.handle, evt, r, 1)
+			loop.Do(func() error {
+				w.handle.Event(evt.Event)
+				return nil
+			})
+			time.Sleep(10 * time.Millisecond)
+		}
+	}()
+
+	return err
 }
 
 // Layout determines the best size for an element that satisfies the

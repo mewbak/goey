@@ -28,6 +28,18 @@ import (
 //	GtkAllocation alloc = { x, y, width, height };
 //	gtk_widget_size_allocate( handle, &alloc );
 //}
+// static void goey_set_key_info(void* widget, void* evt_, guint r, gchar release ) {
+//  GdkEventKey* evt = evt_;
+//  evt->type = release ? GDK_KEY_RELEASE : GDK_KEY_PRESS;
+//  evt->window = gtk_widget_get_window( GTK_WIDGET(widget) );
+//  evt->time = GDK_CURRENT_TIME;
+//  evt->send_event = 1;
+//  switch ( r ) {
+//    case 0x1b: evt->keyval = GDK_KEY_Escape; break;
+//    case '\n': evt->keyval = GDK_KEY_Return; break;
+//    default: evt->keyval = r;
+//  }
+// }
 import "C"
 
 func fromBool(value bool) C.gboolean {
@@ -80,4 +92,8 @@ func WidgetGetPreferredHeightForWidth(widget *gtk.Widget, width int) (int, int) 
 func SetBounds(widget *gtk.Widget, x, y, width, height int) {
 	p := unsafe.Pointer(widget.GObject)
 	C.goey_set_bounds((*C.GtkWidget)(p), C.gint(x), C.gint(y), C.gint(width), C.gint(height))
+}
+
+func SetEventKeyInformation(widget *gtk.Widget, evt *gdk.EventKey, r rune, release uint8) {
+	C.goey_set_key_info(unsafe.Pointer(widget.Native()), unsafe.Pointer(evt.GdkEvent), C.guint(r), C.gchar(release))
 }
