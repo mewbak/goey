@@ -67,6 +67,15 @@ func (w *Button) SetCallbacks(onclick func(), onchange func(bool), onfocus func(
 	}
 }
 
+func (w *Button) IsDefault() bool {
+	rc := C.buttonIsDefault(unsafe.Pointer(w))
+	return rc != 0
+}
+
+func (w *Button) SetDefault(value bool) {
+	C.buttonSetDefault(unsafe.Pointer(w), toBool(value))
+}
+
 func (w *Button) State() bool {
 	rc := C.buttonState(unsafe.Pointer(w))
 	return int(rc) != 0

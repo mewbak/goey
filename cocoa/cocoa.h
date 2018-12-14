@@ -57,8 +57,10 @@ extern bool_t controlMakeFirstResponder( void* handle );
 /* Button */
 extern void* buttonNew( void* superview, char const* title );
 extern void* buttonNewCheck( void* window, char const* title, bool_t value );
+extern bool_t buttonIsDefault( void* handle );
 extern void buttonPerformClick( void* handle );
 extern bool_t buttonState( void* handle );
+extern void buttonSetDefault( void* handle, bool_t value );
 extern void buttonSetState( void* handle, bool_t checked );
 extern char const* buttonTitle( void* handle );
 extern void buttonSetTitle( void* handle, char const* title );

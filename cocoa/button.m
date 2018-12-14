@@ -80,17 +80,42 @@ void buttonPerformClick( void* handle ) {
 	[[(GButton*)handle cell] performClick:nil];
 }
 
+bool_t buttonIsDefault( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GButton class]] );
+
+	return [[(GButton*)handle keyEquivalent] length] != 0;
+}
+
 bool_t buttonState( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GButton class]] );
+
 	NSInteger s = [(GButton*)handle state];
 	return s == NSOnState;
 }
 
+void buttonSetDefault( void* handle, bool_t isdefault ) {
+	assert( handle && [(id)handle isKindOfClass:[GButton class]] );
+
+	NSString* ke = 0;
+	if ( isdefault ) {
+		ke = [[[NSString alloc] initWithBytesNoCopy:"\r"
+		                                     length:1
+		                                   encoding:NSUTF8StringEncoding
+		                               freeWhenDone:NO] autorelease];
+	}
+	return [(GButton*)handle setKeyEquivalent:ke];
+}
+
 void buttonSetState( void* handle, bool_t state ) {
+	assert( handle && [(id)handle isKindOfClass:[GButton class]] );
+
 	NSInteger s = state ? NSOnState : NSOffState;
 	[(GButton*)handle setState:s];
 }
 
 char const* buttonTitle( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GButton class]] );
+
 	NSString* title = [(GButton*)handle title];
 	return [title cStringUsingEncoding:NSUTF8StringEncoding];
 }
