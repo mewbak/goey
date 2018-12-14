@@ -1,6 +1,7 @@
 package goey
 
 import (
+	"strconv"
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
@@ -11,10 +12,12 @@ import (
 type intinputElement struct {
 	Control
 
-	onChange func(int64)
-	shChange glib.SignalHandle
-	onFocus  focusSlot
-	onBlur   blurSlot
+	onChange   func(int64)
+	shChange   glib.SignalHandle
+	onFocus    focusSlot
+	onBlur     blurSlot
+	onEnterKey func(int64)
+	shEnterKey glib.SignalHandle
 }
 
 func (w *IntInput) mount(parent base.Control) (base.Element, error) {
@@ -34,8 +37,9 @@ func (w *IntInput) mount(parent base.Control) (base.Element, error) {
 
 	// Create the element
 	retval := &intinputElement{
-		Control:  Control{&control.Widget},
-		onChange: w.OnChange,
+		Control:    Control{&control.Widget},
+		onChange:   w.OnChange,
+		onEnterKey: w.OnEnterKey,
 	}
 
 	// Connect all callbacks for the events
@@ -43,9 +47,22 @@ func (w *IntInput) mount(parent base.Control) (base.Element, error) {
 	retval.shChange = setSignalHandler(&control.Widget, 0, retval.onChange != nil, "value-changed", intinputOnChanged, retval)
 	retval.onFocus.Set(&control.Widget, w.OnFocus)
 	retval.onBlur.Set(&control.Widget, w.OnBlur)
+	retval.shEnterKey = setSignalHandler(&control.Widget, 0, retval.onEnterKey != nil, "activate", intinputOnActivate, retval)
 	control.Show()
 
 	return retval, nil
+}
+
+func intinputOnActivate(obj *glib.Object, mounted *intinputElement) {
+	// Not sure why, but the widget comes into this callback as a glib.Object,
+	// and not the gtk.SpinButton.  Need to wrap the value.  This pokes into the internals
+	// of the gtk package.
+	widget := gtk.SpinButton{gtk.Entry{gtk.Widget{glib.InitiallyUnowned{obj}}, gtk.Editable{obj}}}
+	text, _ := widget.GetText()
+	value, _ := strconv.ParseInt(text,10,64)
+	// What should be done with a parsing error.  The control should prevent
+	// that occurring.
+	mounted.onEnterKey(value)
 }
 
 func intinputOnChanged(widget *gtk.SpinButton, mounted *intinputElement) {
@@ -53,8 +70,11 @@ func intinputOnChanged(widget *gtk.SpinButton, mounted *intinputElement) {
 		return
 	}
 
-	text := widget.GetValue()
-	mounted.onChange(int64(text))
+	text, _ := widget.GetText()
+	value, _ := strconv.ParseInt(text,10,64)
+	// What should be done with a parsing error.  The control should prevent
+	// that occurring.
+	mounted.onChange(value)
 }
 
 func intinputOnDestroy(widget *gtk.SpinButton, mounted *intinputElement) {
@@ -98,6 +118,7 @@ func (w *intinputElement) Props() base.Widget {
 		OnChange:    w.onChange,
 		OnFocus:     w.onFocus.callback,
 		OnBlur:      w.onBlur.callback,
+		OnEnterKey:  w.onEnterKey,
 	}
 }
 
@@ -113,6 +134,8 @@ func (w *intinputElement) updateProps(data *IntInput) error {
 	w.shChange = setSignalHandler(&button.Widget, w.shChange, data.OnChange != nil, "value-changed", intinputOnChanged, w)
 	w.onFocus.Set(&button.Widget, data.OnFocus)
 	w.onBlur.Set(&button.Widget, data.OnBlur)
+	w.onEnterKey = data.OnEnterKey
+	w.shEnterKey = setSignalHandler(&button.Widget, w.shEnterKey, data.OnEnterKey != nil, "activate", intinputOnActivate, w)
 
 	return nil
 }

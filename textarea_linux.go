@@ -175,6 +175,11 @@ func (w *textareaElement) TakeFocus() bool {
 	return control.TakeFocus()
 }
 
+func (w*textareaElement) TypeKeys(text string) chan error {
+	control := Control{&w.handle.Widget}
+	return control.TypeKeys(text)
+}
+
 func (w *textareaElement) updateProps(data *TextArea) error {
 	// TextView will send a 'changed' event, even if the new value is the
 	// same.  To stop an infinite loop, we need to protect by checking

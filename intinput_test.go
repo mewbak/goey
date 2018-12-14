@@ -2,6 +2,7 @@ package goey
 
 import (
 	"reflect"
+	"runtime"
 	"testing"
 
 	"bitbucket.org/rj/goey/base"
@@ -44,6 +45,10 @@ func TestIntInputOnChange(t *testing.T) {
 		}})
 
 	want := []int64{1, 12, 123, 1234}
+	if runtime.GOOS == "linux" {
+		// Control does not output events for intermediate typing.
+		want = []int64{1234}
+	}
 	if !reflect.DeepEqual(want, log) {
 		t.Errorf("Wanted %v, got %v", want, log)
 	}

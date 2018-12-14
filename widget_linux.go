@@ -1,14 +1,15 @@
 package goey
 
 import (
+	"fmt"
+	"time"
+
 	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/internal/syscall"
 	"bitbucket.org/rj/goey/loop"
-	"fmt"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
-	"time"
 )
 
 // Control is an opaque type used as a platform-specific handle to a control
@@ -64,8 +65,7 @@ func (w *Control) TypeKeys(text string) chan error {
 			return nil
 		})
 
-		time.Sleep(50 * time.Millisecond)
-		println("typing")
+		time.Sleep(500 * time.Millisecond)
 		for _, r := range text {
 			evt := gdk.EventKeyNew()
 			syscall.SetEventKeyInformation(w.handle, evt, r, 0)

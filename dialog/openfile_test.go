@@ -2,14 +2,14 @@ package dialog
 
 import (
 	"bitbucket.org/rj/goey/loop"
-	"testing"
-	"path/filepath"
 	"os"
+	"path/filepath"
+	"testing"
 )
 
 func getwd(t *testing.T) string {
 	path, err := os.Getwd()
-	if err!=nil {
+	if err != nil {
 		t.Fatalf("Could not determien the working directory, %s", err)
 	}
 	return path
@@ -39,7 +39,7 @@ func TestNewOpenFile(t *testing.T) {
 		if err != nil {
 			t.Errorf("Failed to show dialog, %s", err)
 		}
-		if expect := filepath.Join(getwd(t),"abcd.txt"); filename != expect {
+		if expect := filepath.Join(getwd(t), "abcd.txt"); filename != expect {
 			t.Errorf("Unexpected filename, %s", filename)
 		}
 

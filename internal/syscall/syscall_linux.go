@@ -35,8 +35,14 @@ import (
 //  evt->time = GDK_CURRENT_TIME;
 //  evt->send_event = 1;
 //  switch ( r ) {
-//    case 0x1b: evt->keyval = GDK_KEY_Escape; break;
-//    case '\n': evt->keyval = GDK_KEY_Return; break;
+//    case 0x1b:
+//      evt->keyval = GDK_KEY_Escape;
+//      evt->hardware_keycode = 9;
+//      break;
+//    case '\n':
+//      evt->keyval = GDK_KEY_Return;
+//      evt->hardware_keycode = 36;
+//      break;
 //    default: evt->keyval = r;
 //  }
 // }
