@@ -26,13 +26,30 @@ func toColor(clr color.Color) C.nscolor_t {
 	}
 }
 
-func NewDecoration(window *View, fill color.Color, stroke color.Color) *Decoration {
-	handle := C.decorationNew(unsafe.Pointer(window), toColor(fill), toColor(stroke))
+func NewDecoration(window *View, fill color.Color, stroke color.Color, rx, ry int) *Decoration {
+	handle := C.decorationNew(unsafe.Pointer(window),
+		toColor(fill), toColor(stroke),
+		C.nssize_t{C.int32_t(rx), C.int32_t(ry)})
 	return (*Decoration)(handle)
 }
 
 func (w *Decoration) Close() {
 	C.viewClose(unsafe.Pointer(w))
+}
+
+func (w *Decoration) BorderRadius() (int, int) {
+	size := C.decorationBorderRadius(unsafe.Pointer(w))
+	return int(size.width), int(size.height)
+}
+
+func (w *Decoration) FillColor() color.RGBA {
+	clr := C.decorationFillColor(unsafe.Pointer(w))
+	return color.RGBA{uint8(clr.r), uint8(clr.g), uint8(clr.b), uint8(clr.a)}
+}
+
+func (w *Decoration) StrokeColor() color.RGBA {
+	clr := C.decorationStrokeColor(unsafe.Pointer(w))
+	return color.RGBA{uint8(clr.r), uint8(clr.g), uint8(clr.b), uint8(clr.a)}
 }
 
 func (w *Decoration) SetBorderRadius(x, y int) {

@@ -16,7 +16,7 @@ func (w *SelectInput) mount(parent base.Control) (base.Element, error) {
 	for _, v := range w.Items {
 		control.AddItem(v)
 	}
-	control.SetValue(w.Value)
+	control.SetValue(w.Value, w.Unset)
 	control.SetEnabled(!w.Disabled)
 	control.SetCallbacks(w.OnChange, w.OnFocus, w.OnBlur)
 
@@ -51,6 +51,35 @@ func (w *selectinputElement) MinIntrinsicWidth(base.Length) base.Length {
 	return base.FromPixelsX(px)
 }
 
+func (w *selectinputElement) Props() base.Widget {
+	onchange, onfocus, onblur := w.control.Callbacks()
+
+	value := w.control.Value()
+	unset := value < 0
+	if unset {
+		value = 0
+	}
+
+	return &SelectInput{
+		Items:    w.propsItems(),
+		Value:    int(value),
+		Unset:    unset,
+		Disabled: !w.control.IsEnabled(),
+		OnChange: onchange,
+		OnFocus:  onfocus,
+		OnBlur:   onblur,
+	}
+}
+
+func (w *selectinputElement) propsItems() []string {
+	length := w.control.NumberOfItems()
+	ret := make([]string, length)
+	for i := range ret {
+		ret[i] = w.control.ItemAtIndex(i)
+	}
+	return ret
+}
+
 func (w *selectinputElement) TakeFocus() bool {
 	return w.control.MakeFirstResponder()
 }
@@ -61,5 +90,12 @@ func (w *selectinputElement) SetBounds(bounds base.Rectangle) {
 }
 
 func (w *selectinputElement) updateProps(data *SelectInput) error {
+	w.control.RemoveAllItems()
+	for _, v := range data.Items {
+		w.control.AddItem(v)
+	}
+	w.control.SetValue(data.Value, data.Unset)
+	w.control.SetEnabled(!data.Disabled)
+	w.control.SetCallbacks(data.OnChange, data.OnFocus, data.OnBlur)
 	return nil
 }

@@ -7,8 +7,8 @@ import (
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
+	win2 "bitbucket.org/rj/goey/internal/syscall"
 	"bitbucket.org/rj/goey/loop"
-	win2 "bitbucket.org/rj/goey/syscall"
 	"github.com/lxn/win"
 )
 
@@ -228,9 +228,23 @@ func (w *windowImpl) close() {
 	// Want to be able to close windows in Go, even if they have already been
 	// destroyed in the Win32 system
 	if w.hWnd != 0 {
+		// There is a heseinbug with the kill focus message when destroying
+		// windows.  To get consistent behaviour, we can remove focus before
+		// destroying the window.
+		focus := win.GetFocus()
+		if focus != 0 {
+			parent := win.GetAncestor(focus, win.GA_ROOT)
+			if parent == w.hWnd {
+				win.SetFocus(0)
+			}
+		}
+
+		// Actually destroy the window.
 		win.DestroyWindow(w.hWnd)
 		w.hWnd = 0
 	}
+
+	// This call to uninitalize OLE is paired with a call in newWindow.
 	win.OleUninitialize()
 }
 
@@ -364,7 +378,7 @@ func (w *windowImpl) setScrollPos(direction int32, wParam uintptr) {
 }
 
 func (w *windowImpl) show() {
-	win.ShowWindow(w.hWnd, win.SW_SHOW /* info.wShowWindow */)
+	win.ShowWindow(w.hWnd, win.SW_SHOW)
 	win.UpdateWindow(w.hWnd)
 }
 
@@ -615,13 +629,10 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 
 	case win.WM_CTLCOLORSTATIC:
 		win.SetBkMode(win.HDC(wParam), win.TRANSPARENT)
-		return uintptr(win.GetStockObject(win.NULL_BRUSH))
+		return uintptr(win.GetSysColorBrush(win.COLOR_3DFACE))
 
 	case win.WM_COMMAND:
-		if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE {
-			return win.SendDlgItemMessage(hwnd, int32(win.LOWORD(uint32(wParam))), msg, wParam, lParam)
-		}
-		// Defer to the default window proc
+		return windowprocWmCommand(wParam, lParam)
 
 	case win.WM_NOTIFY:
 		if n := (*win.NMHDR)(unsafe.Pointer(lParam)); true {
@@ -633,6 +644,20 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 
 	// Let the default window proc handle all other messages
 	return win.DefWindowProc(hwnd, msg, wParam, lParam)
+}
+
+func windowprocWmCommand(wParam uintptr, lParam uintptr) uintptr {
+	// These are the notifications that the controls needs to receive.
+	if n := win.HIWORD(uint32(wParam)); n == win.BN_CLICKED || n == win.EN_UPDATE || n == win.CBN_SELCHANGE {
+		// For BN_CLICKED, EN_UPDATE, and CBN_SELCHANGE, lParam is the window
+		// handle of the control.  We don't need to use the control identifier
+		// from wParam, we can dispatch directly to the control.
+		return win.SendMessage(win.HWND(lParam), win.WM_COMMAND, wParam, lParam)
+	}
+
+	// Defer to the default window proc.  However, the default window proc will
+	// return 0 for WM_COMMAND.
+	return 0
 }
 
 func windowGetPtr(hwnd win.HWND) *windowImpl {

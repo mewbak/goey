@@ -53,11 +53,23 @@ void* textfieldNew( void* superview, char const* text ) {
 	return control;
 }
 
+bool_t textfieldIsEditable( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GTextField class]] );
+
+	return [(GTextField*)handle isEditable];
+}
+
 char const* textfieldPlaceholder( void* handle ) {
 	assert( handle && [(id)handle isKindOfClass:[GTextField class]] );
 
 	NSString* text = [[(GTextField*)handle cell] placeholderString];
 	return [text cStringUsingEncoding:NSUTF8StringEncoding];
+}
+
+void textfieldSetEditable( void* handle, bool_t value ) {
+	assert( handle && [(id)handle isKindOfClass:[GTextField class]] );
+
+	[(GTextField*)handle setEditable:value];
 }
 
 void textfieldSetValue( void* handle, char const* text ) {

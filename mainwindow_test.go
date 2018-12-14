@@ -109,12 +109,11 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 		}
 
 		go func() {
-			t.Logf("Window created, start tests for %s", t.Name())
+			// Delegate to test specific actions.
 			action(t, mw)
 			if testing.Verbose() {
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(250 * time.Millisecond)
 			}
-			t.Logf("Stopping tests for %s", t.Name())
 
 			// Note:  No work after this call to Do, since the call to Run may be
 			// terminated when the call to Do returns.

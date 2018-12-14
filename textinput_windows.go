@@ -5,7 +5,7 @@ import (
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
-	win2 "bitbucket.org/rj/goey/syscall"
+	win2 "bitbucket.org/rj/goey/internal/syscall"
 	"github.com/lxn/win"
 )
 
@@ -84,6 +84,20 @@ type textinputElement struct {
 }
 
 func (w *textinputElement) Props() base.Widget {
+	return &TextInput{
+		Value:       w.Control.Text(),
+		Placeholder: w.propsPlaceholder(),
+		Disabled:    !win.IsWindowEnabled(w.hWnd),
+		Password:    win.SendMessage(w.hWnd, win.EM_GETPASSWORDCHAR, 0, 0) != 0,
+		ReadOnly:    (win.GetWindowLong(w.hWnd, win.GWL_STYLE) & win.ES_READONLY) != 0,
+		OnChange:    w.onChange,
+		OnFocus:     w.onFocus,
+		OnBlur:      w.onBlur,
+		OnEnterKey:  w.onEnterKey,
+	}
+}
+
+func (w *textinputElementBase) propsPlaceholder() string {
 	var buffer [80]uint16
 	win.SendMessage(w.hWnd, win.EM_GETCUEBANNER, uintptr(unsafe.Pointer(&buffer[0])), 80)
 	ndx := 0
@@ -93,19 +107,7 @@ func (w *textinputElement) Props() base.Widget {
 			break
 		}
 	}
-	placeholder := syscall.UTF16ToString(buffer[:ndx])
-
-	return &TextInput{
-		Value:       w.Control.Text(),
-		Placeholder: placeholder,
-		Disabled:    !win.IsWindowEnabled(w.hWnd),
-		Password:    win.SendMessage(w.hWnd, win.EM_GETPASSWORDCHAR, 0, 0) != 0,
-		ReadOnly:    (win.GetWindowLong(w.hWnd, win.GWL_STYLE) & win.ES_READONLY) != 0,
-		OnChange:    w.onChange,
-		OnFocus:     w.onFocus,
-		OnBlur:      w.onBlur,
-		OnEnterKey:  w.onEnterKey,
-	}
+	return syscall.UTF16ToString(buffer[:ndx])
 }
 
 func (w *textinputElementBase) Layout(bc base.Constraints) base.Size {
@@ -194,8 +196,10 @@ func textinputWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintp
 		// Defer to the old window proc
 
 	case win.WM_COMMAND:
-		notification := win.HIWORD(uint32(wParam))
-		switch notification {
+		// WM_COMMAND is sent to the parent, which will only forward certain
+		// message.  This code should only ever see EN_UPDATE, but we will
+		// still check.
+		switch notification := win.HIWORD(uint32(wParam)); notification {
 		case win.EN_UPDATE:
 			if w := textinputGetPtr(hwnd); w.onChange != nil {
 				w.onChange(win2.GetWindowText(hwnd))

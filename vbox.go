@@ -345,7 +345,7 @@ func (w *vboxElement) updateProps(data *VBox) (err error) {
 	w.alignCross = data.AlignCross
 	w.children, err = base.DiffChildren(w.parent, w.children, data.Children)
 	// Clear cached values
-	w.childrenInfo, w.totalFlex = updateFlex(w.children, w.alignMain, nil)
+	w.childrenInfo, w.totalFlex = updateFlex(w.children, w.alignMain, w.childrenInfo)
 	w.totalHeight = 0
 	return err
 }

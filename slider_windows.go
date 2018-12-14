@@ -19,6 +19,11 @@ func init() {
 }
 
 func (w *Slider) mount(parent base.Control) (base.Element, error) {
+	// This value should be as large as possible to maximize the resolution
+	// of the slider.  However, if it is too large, then it will trip a bug
+	// on windows, causing very high CPU usage.
+	const RANGEMAX = 0xffffff
+
 	const TBS_HORZ = 0x0000
 	const TBS_AUTOTICKS = 0x0001
 	const TBM_SETTICFREQ = win.WM_USER + 20
@@ -34,10 +39,10 @@ func (w *Slider) mount(parent base.Control) (base.Element, error) {
 	if w.Disabled {
 		win.EnableWindow(hwnd, false)
 	}
-	win.SendMessage(hwnd, win.TBM_SETRANGEMAX, win.FALSE, 0xffff)
-	win.SendMessage(hwnd, TBM_SETLINESIZE, win.FALSE, 0xffff/100)
-	win.SendMessage(hwnd, TBM_SETPAGESIZE, win.FALSE, 0xffff/10)
-	win.SendMessage(hwnd, TBM_SETTICFREQ, win.FALSE, 0xffff/8)
+	win.SendMessage(hwnd, win.TBM_SETRANGEMAX, win.FALSE, RANGEMAX)
+	win.SendMessage(hwnd, TBM_SETLINESIZE, win.FALSE, RANGEMAX/100)
+	win.SendMessage(hwnd, TBM_SETPAGESIZE, win.FALSE, RANGEMAX/16)
+	win.SendMessage(hwnd, TBM_SETTICFREQ, win.FALSE, RANGEMAX/8)
 	currentValue := sliderToQuantized(w.Value, w.Min, w.Max)
 	win.SendMessage(hwnd, win.TBM_SETPOS, win.TRUE, currentValue)
 
@@ -88,6 +93,22 @@ func (w *sliderElement) MinIntrinsicWidth(base.Length) base.Length {
 	return 160 * DIP
 }
 
+func (w *sliderElement) Props() base.Widget {
+	currentValue := win.SendMessage(w.hWnd, win.TBM_GETPOS, 0, 0)
+	// We will get errors in testing because of rounding errors in conversion
+	// of float to int and back.
+
+	return &Slider{
+		Value:    sliderFromQuantized(currentValue, w.min, w.max),
+		Disabled: !win.IsWindowEnabled(w.hWnd),
+		Min:      w.min,
+		Max:      w.max,
+		OnChange: w.onChange,
+		OnFocus:  w.onFocus,
+		OnBlur:   w.onBlur,
+	}
+}
+
 func (w *sliderElement) updateProps(data *Slider) error {
 	w.min = data.Min
 	w.max = data.Max
@@ -103,11 +124,11 @@ func (w *sliderElement) updateProps(data *Slider) error {
 }
 
 func sliderFromQuantized(value uintptr, min, max float64) float64 {
-	return min + float64(value)*(max-min)/0xffff
+	return min + float64(value)*(max-min)/0xffffff
 }
 
 func sliderToQuantized(value, min, max float64) uintptr {
-	return uintptr((value-min)/(max-min)*0xffff + 0.5)
+	return uintptr((value-min)/(max-min)*0xffffff + 0.5)
 }
 
 func sliderWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (result uintptr) {

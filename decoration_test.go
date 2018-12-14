@@ -33,14 +33,19 @@ func decorationChildWidget(child base.Element) base.Widget {
 }
 
 func TestDecorationCreate(t *testing.T) {
+	child := &mock.Widget{Size: base.Size{15 * base.DIP, 15 * base.DIP}}
+
 	// These should all be able to mount without error.
 	testingRenderWidgets(t,
-		&Decoration{Child: &Button{Text: "A"}},
-		&Decoration{},
-		&Decoration{Stroke: black},
-		&Decoration{Fill: black, Stroke: white, Radius: 4 * DIP},
-		&Decoration{Fill: white, Stroke: black},
-		&Decoration{Fill: red},
+		&Decoration{Child: &Button{Text: "A"}, Insets: DefaultInsets()},
+		&Decoration{Child: &Label{Text: "A"}, Fill: red, Insets: DefaultInsets()},
+		&Decoration{Child: child},
+		&Decoration{Child: child, Stroke: black},
+		&Decoration{Child: child, Stroke: white},
+		&Decoration{Child: child, Stroke: red},
+		&Decoration{Child: child, Fill: black, Stroke: white, Radius: 4 * DIP, Insets: DefaultInsets()},
+		&Decoration{Child: child, Fill: white, Stroke: black},
+		&Decoration{Child: child, Fill: red},
 	)
 
 	// These should mount with an error.

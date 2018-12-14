@@ -40,10 +40,6 @@ func (w *TabView) AddItem(text string) {
 	C.tabviewAddItem(unsafe.Pointer(w), ctext)
 }
 
-func (w *TabView) SelectItem(index int) {
-	C.tabviewSelectItem(unsafe.Pointer(w), C.int(index))
-}
-
 func (w *TabView) ContentView(index int) *View {
 	view := C.tabviewContentView(unsafe.Pointer(w), C.int(index))
 	return (*View)(view)
@@ -52,6 +48,33 @@ func (w *TabView) ContentView(index int) *View {
 func (w *TabView) ContentInsets() (int, int) {
 	size := C.tabviewContentInsets(unsafe.Pointer(w))
 	return int(size.width), int(size.height)
+}
+
+func (w *TabView) ItemAtIndex(index int) string {
+	ctext := C.tabviewItemAtIndex(unsafe.Pointer(w), C.int(index))
+	return C.GoString(ctext)
+}
+
+func (w *TabView) NumberOfItems() int {
+	rc := C.tabviewNumberOfItems(unsafe.Pointer(w))
+	return int(rc)
+}
+
+func (w *TabView) RemoveItemAtIndex(index int) {
+	C.tabviewRemoveItemAtIndex(unsafe.Pointer(w), C.int(index))
+}
+
+func (w *TabView) SelectItem(index int) {
+	C.tabviewSelectItem(unsafe.Pointer(w), C.int(index))
+}
+
+func (w *TabView) SetItemAtIndex(index int, text string) {
+	ctext := C.CString(text)
+	defer func() {
+		C.free(unsafe.Pointer(ctext))
+	}()
+
+	C.tabviewSetItemAtIndex(unsafe.Pointer(w), C.int(index), ctext)
 }
 
 func (w *TabView) SetOnChange(cb func(int)) {

@@ -9,6 +9,7 @@
 @property( nonatomic ) NSSize borderRadius;
 @property( nonatomic, retain ) NSColor* fillColor;
 @property( nonatomic, retain ) NSColor* strokeColor;
+- (void)dealloc;
 - (void)drawRect:(NSRect)dirtyRect;
 - (BOOL)isOpaque;
 @end
@@ -18,6 +19,12 @@
 @synthesize borderRadius;
 @synthesize fillColor;
 @synthesize strokeColor;
+
+- (void)dealloc {
+	[fillColor release];
+	[strokeColor release];
+	[super dealloc];
+}
 
 - (void)drawRect:(NSRect)dirtyRect {
 	NSRect frame = [self frame];
@@ -55,19 +62,59 @@
 
 @end
 
-void* decorationNew( void* superview, nscolor_t fill, nscolor_t stroke ) {
+void* decorationNew( void* superview, nscolor_t fill, nscolor_t stroke,
+                     nssize_t radius ) {
 	assert( superview && [(id)superview isKindOfClass:[NSView class]] );
 
 	// Create the button
 	GDecoration* control = [[GDecoration alloc] init];
 	decorationSetFillColor( control, fill );
 	decorationSetStrokeColor( control, stroke );
+	decorationSetBorderRadius( control, radius );
 
 	// Add the button as the view for the window
 	[(NSView*)superview addSubview:control];
 
 	// Return handle to the control
 	return control;
+}
+
+nssize_t decorationBorderRadius( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GDecoration class]] );
+
+	NSSize size = [(GDecoration*)handle borderRadius];
+	nssize_t rc = {size.width, size.height};
+	return rc;
+}
+
+nscolor_t decorationFillColor( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GDecoration class]] );
+
+	NSColor* clr = [(GDecoration*)handle fillColor];
+	if ( !clr ) {
+		nscolor_t clr = {0, 0, 0, 0};
+		return clr;
+	}
+
+	CGFloat r, g, b, a;
+	[clr getRed:&r green:&g blue:&b alpha:&a];
+	nscolor_t ret = {r * 255, g * 255, b * 255, a * 255};
+	return ret;
+}
+
+nscolor_t decorationStrokeColor( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GDecoration class]] );
+
+	NSColor* clr = [(GDecoration*)handle strokeColor];
+	if ( !clr ) {
+		nscolor_t clr = {0, 0, 0, 0};
+		return clr;
+	}
+
+	CGFloat r, g, b, a;
+	[clr getRed:&r green:&g blue:&b alpha:&a];
+	nscolor_t ret = {r * 255, g * 255, b * 255, a * 255};
+	return ret;
 }
 
 static NSColor* createColor( nscolor_t clr ) {

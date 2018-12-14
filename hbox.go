@@ -310,25 +310,24 @@ func (w *hboxElement) setBoundsForChild(i int, v base.Element, posX, posY, posX2
 	}
 }
 
-func updateFlex(c []base.Element, alignMain MainAxisAlign, oldSlice []boxElementInfo) ([]boxElementInfo, int) {
-	ci := []boxElementInfo(nil)
-	if len(c) >= len(oldSlice) {
-		ci = make([]boxElementInfo, len(c))
+func updateFlex(c []base.Element, alignMain MainAxisAlign, clientInfo []boxElementInfo) ([]boxElementInfo, int) {
+	if len(c) <= cap(clientInfo) {
+		clientInfo = clientInfo[:len(c)]
 	} else {
-		ci = oldSlice[:len(c)]
+		clientInfo = make([]boxElementInfo, len(c))
 	}
 
 	totalFlex := 0
 	for i, v := range c {
 		if elem, ok := v.(*expandElement); ok {
-			ci[i].flex = elem.factor + 1
+			clientInfo[i].flex = elem.factor + 1
 			totalFlex += elem.factor + 1
 		}
 	}
 	if alignMain == Homogeneous {
 		totalFlex = 0
 	}
-	return ci, totalFlex
+	return clientInfo, totalFlex
 }
 
 func (w *hboxElement) updateProps(data *HBox) (err error) {
@@ -337,7 +336,7 @@ func (w *hboxElement) updateProps(data *HBox) (err error) {
 	w.alignCross = data.AlignCross
 	w.children, err = base.DiffChildren(w.parent, w.children, data.Children)
 	// Clear cached values
-	w.childrenInfo, w.totalFlex = updateFlex(w.children, w.alignMain, nil)
+	w.childrenInfo, w.totalFlex = updateFlex(w.children, w.alignMain, w.childrenInfo)
 	w.totalWidth = 0
 	return err
 }

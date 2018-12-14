@@ -136,10 +136,10 @@ func (w *windowImpl) control() base.Control {
 	return base.Control{&w.layout.Container}
 }
 
-func (mw *windowImpl) close() {
-	if mw.handle != nil {
-		mw.handle.Destroy()
-		mw.handle = nil
+func (w *windowImpl) close() {
+	if w.handle != nil {
+		w.handle.Destroy()
+		w.handle = nil
 	}
 }
 

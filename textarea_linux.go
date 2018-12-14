@@ -4,7 +4,7 @@ package goey
 
 import (
 	"bitbucket.org/rj/goey/base"
-	"bitbucket.org/rj/goey/syscall"
+	"bitbucket.org/rj/goey/internal/syscall"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )

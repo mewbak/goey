@@ -57,8 +57,37 @@ void popupbuttonAddItem( void* handle, char const* text ) {
 	[nstext release];
 }
 
-void popupbuttonSetValue( void* handle, int index ) {
+char const* popupbuttonItemAtIndex( void* handle, int index ) {
 	assert( handle && [(id)handle isKindOfClass:[GPopUpButton class]] );
 
-	[(GPopUpButton*)handle selectItemAtIndex:index];
+	NSString* text = [(GPopUpButton*)handle itemTitleAtIndex:index];
+	return [text cStringUsingEncoding:NSUTF8StringEncoding];
+}
+
+int popupbuttonNumberOfItems( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GPopUpButton class]] );
+
+	return [(GPopUpButton*)handle numberOfItems];
+}
+
+void popupbuttonRemoveAllItems( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GPopUpButton class]] );
+
+	[(GPopUpButton*)handle removeAllItems];
+}
+
+void popupbuttonSetValue( void* handle, int index, bool_t unset ) {
+	assert( handle && [(id)handle isKindOfClass:[GPopUpButton class]] );
+
+	if ( unset ) {
+		[(GPopUpButton*)handle selectItem:nil];
+	} else {
+		[(GPopUpButton*)handle selectItemAtIndex:index];
+	}
+}
+
+int popupbuttonValue( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GPopUpButton class]] );
+
+	return [(GPopUpButton*)handle indexOfSelectedItem];
 }

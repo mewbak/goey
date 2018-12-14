@@ -35,6 +35,13 @@ func equal(t *testing.T, lhs, rhs base.Widget) bool {
 			}
 			value.SetString("")
 		}
+
+		if slider, ok := lhs.(*Slider); ok {
+			if newValue := float64(int64(slider.Value*8)) / 8; slider.Value != newValue {
+				t.Logf("Rounding 'Value' field during test from %f to %f", slider.Value, newValue)
+				slider.Value = newValue
+			}
+		}
 	}
 
 	return reflect.DeepEqual(lhs, rhs)
@@ -55,28 +62,67 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 		}
 
 		// Check that the controls that were mounted match with the list
-		if children := window.children(); children != nil {
-			if len(children) != len(widgets) {
-				t.Errorf("Wanted len(children) == len(widgets), got %d and %d", len(children), len(widgets))
-			} else {
-				for i := range children {
-					if n1, n2 := children[i].Kind(), widgets[i].Kind(); n1 != n2 {
-						t.Errorf("Wanted children[%d].Kind() == widgets[%d].Kind(), got %s, want %s", i, i, n1, n2)
-					} else if widget, ok := children[i].(Proper); ok {
-						data := widget.Props()
-						if n1, n2 := data.Kind(), widgets[i].Kind(); n1 != n2 {
-							t.Errorf("Wanted data.Kind() == widgets[%d].Kind(), got %s, want %s", i, n1, n2)
-						}
-						if !equal(t, data, widgets[i]) {
-							t.Errorf("Wanted data == widgets[%d], got %v, want %v", i, data, widgets[i])
-						}
-					} else {
-						t.Logf("Cannot verify props of child")
+		if children := window.children(); len(children) != len(widgets) {
+			t.Errorf("Wanted len(children) == len(widgets), got %d and %d", len(children), len(widgets))
+		} else {
+			for i := range children {
+				if n1, n2 := children[i].Kind(), widgets[i].Kind(); n1 != n2 {
+					t.Errorf("Wanted children[%d].Kind() == widgets[%d].Kind(), got %s, want %s", i, i, n1, n2)
+				} else if widget, ok := children[i].(Proper); ok {
+					data := widget.Props()
+					if n1, n2 := data.Kind(), widgets[i].Kind(); n1 != n2 {
+						t.Errorf("Wanted data.Kind() == widgets[%d].Kind(), got %s, want %s", i, n1, n2)
 					}
+					if !equal(t, data, widgets[i]) {
+						t.Errorf("Wanted data == widgets[%d], got %v, want %v", i, data, widgets[i])
+					}
+				} else {
+					t.Logf("Cannot verify props of child")
 				}
 			}
+		}
+		go func(window *Window) {
+			if testing.Verbose() && !testing.Short() {
+				time.Sleep(250 * time.Millisecond)
+			}
+			err := loop.Do(func() error {
+				window.Close()
+				return nil
+			})
+			if err != nil {
+				t.Errorf("Error in Do, %s", err)
+			}
+		}(window)
+
+		return nil
+	}
+
+	err := loop.Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
+}
+
+func testingRenderWidget(t *testing.T, widget base.Widget) (ok bool) {
+	init := func() error {
+		// Create the window.  Some of the tests here are not expected in
+		// production code, but we can be a little paranoid here.
+		window, err := NewWindow(t.Name(), &VBox{Children: []base.Widget{widget}})
+		if err != nil {
+			t.Errorf("Failed to create window, %s", err)
+			return nil
+		}
+		if window == nil {
+			t.Errorf("Unexpected nil for window")
+			return nil
+		}
+
+		// Check that the controls that were mounted match with the list
+		if children := window.children(); len(children) != 1 {
+			t.Errorf("Wanted len(children) == 1, got %d", len(children))
 		} else {
-			t.Errorf("Want window.Children()!=nil")
+			ok = children[0].Kind() == widget.Kind() &&
+				equal(t, children[0].(Proper).Props(), widget)
 		}
 
 		go func(window *Window) {
@@ -99,6 +145,7 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
 	}
+	return /* naked return, code set in init callback */
 }
 
 func testingRenderWidgetsFail(t *testing.T, outError error, widgets ...base.Widget) {
@@ -241,8 +288,12 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 	for i := byte(0); i < 3; i++ {
 		letter := 'a' + i
 		if elem, ok := widgets[i].(*Checkbox); ok {
+			// Chain the onclick callback for the element.
+			chainCallback := elem.OnChange
+			// Add wrapper to write to the test log.
 			elem.OnChange = func(value bool) {
 				log.Write([]byte{'c', letter})
+				chainCallback(value)
 			}
 		} else {
 			s := reflect.ValueOf(widgets[i])

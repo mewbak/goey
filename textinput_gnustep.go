@@ -15,6 +15,7 @@ func (w *TextInput) mount(parent base.Control) (base.Element, error) {
 	control := cocoa.NewTextField(parent.Handle, w.Value)
 	control.SetPlaceholder(w.Placeholder)
 	control.SetEnabled(!w.Disabled)
+	control.SetEditable(!w.ReadOnly)
 	control.SetCallbacks(w.OnChange, w.OnFocus, w.OnBlur)
 
 	retval := &textinputElement{
@@ -65,7 +66,7 @@ func (w *textinputElement) Props() base.Widget {
 		Disabled:    !w.control.IsEnabled(),
 		Placeholder: w.control.Placeholder(),
 		Password:    false,
-		ReadOnly:    false,
+		ReadOnly:    !w.control.IsEditable(),
 		OnChange:    onchange,
 		OnFocus:     onfocus,
 		OnBlur:      onblur,
@@ -76,6 +77,7 @@ func (w *textinputElement) updateProps(data *TextInput) error {
 	w.control.SetValue(data.Value)
 	w.control.SetPlaceholder(data.Placeholder)
 	w.control.SetEnabled(!data.Disabled)
+	w.control.SetEditable(!data.ReadOnly)
 	w.control.SetCallbacks(data.OnChange, data.OnFocus, data.OnBlur)
 	return nil
 }

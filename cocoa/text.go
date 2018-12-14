@@ -28,6 +28,21 @@ func (w *Text) Alignment() int {
 	return int(rc)
 }
 
+func (w *Text) EightyEms() int {
+	csize := C.textEightyEms(unsafe.Pointer(w))
+	return int(csize)
+}
+
+func (w *Text) MinHeight(width int) int {
+	csize := C.textMinHeight(unsafe.Pointer(w), C.int(width))
+	return int(csize)
+}
+
+func (w *Text) MinWidth() int {
+	csize := C.textMinWidth(unsafe.Pointer(w))
+	return int(csize)
+}
+
 func (w *Text) SetAlignment(align int) {
 	C.textSetAlignment(unsafe.Pointer(w), C.int(align))
 }

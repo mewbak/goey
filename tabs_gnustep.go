@@ -106,6 +106,23 @@ func (w *tabsElement) OnChange(page int) {
 	}
 }
 
+func (w *tabsElement) Props() base.Widget {
+	count := w.control.NumberOfItems()
+	children := make([]TabItem, count)
+	for i := 0; i < count; i++ {
+		label := w.control.ItemAtIndex(i)
+		children[i].Caption = label
+		children[i].Child = w.widgets[i].Child
+	}
+
+	return &Tabs{
+		Value:    w.value,
+		Children: children,
+		Insets:   w.insets,
+		OnChange: w.onChange,
+	}
+}
+
 func (w *tabsElement) SetBounds(bounds base.Rectangle) {
 	px := bounds.Pixels()
 	w.control.SetFrame(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
@@ -126,5 +143,41 @@ func (w *tabsElement) SetBounds(bounds base.Rectangle) {
 	}
 }
 func (w *tabsElement) updateProps(data *Tabs) error {
+	if len(w.widgets) > len(data.Children) {
+		// Modify captions for existing tabs
+		for i, v := range data.Children {
+			w.control.SetItemAtIndex(i, v.Caption)
+		}
+		// Remove excess tabs
+		for i := len(w.widgets); i > len(data.Children); i-- {
+			w.control.RemoveItemAtIndex(i - 1)
+		}
+	} else {
+		// Modify captions for existing tabs
+		for i, v := range data.Children[:len(w.widgets)] {
+			w.control.SetItemAtIndex(i, v.Caption)
+		}
+		// Append new tabs
+		for _, v := range data.Children[len(w.widgets):] {
+			w.control.AddItem(v.Caption)
+		}
+	}
+	w.widgets = data.Children
+
+	// Update the selected widget
+	if data.Value != w.value {
+		w.mountPage(data.Value)
+
+		w.control.SelectItem(data.Value)
+		w.value = data.Value
+	} else {
+		parent := base.Control{w.control.ContentView(w.value)}
+		child, err := base.DiffChild(parent, w.child, data.Children[data.Value].Child)
+		w.child = child
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

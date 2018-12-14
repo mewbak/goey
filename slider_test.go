@@ -68,6 +68,9 @@ func ExampleSlider() {
 func TestSliderCreate(t *testing.T) {
 	testingRenderWidgets(t,
 		&Slider{Value: 50},
+		&Slider{Value: 10},
+		&Slider{Value: 0},
+		&Slider{Value: 100},
 		&Slider{Value: 50, Disabled: true},
 		&Slider{Value: 500, Max: 1000},
 		&Slider{Value: 20},
@@ -101,4 +104,29 @@ func TestSliderUpdate(t *testing.T) {
 		&Slider{Value: 50, Min: 10, Max: 60},
 		&Slider{Value: 500, Max: 1000, Disabled: true},
 	})
+}
+
+func TestSlider_UpdateValue(t *testing.T) {
+	cases := []struct {
+		value    float64
+		min, max float64
+		out      float64
+	}{
+		{1, 0, 10, 1},
+		{0, 0, 10, 0},
+		{10, 0, 10, 10},
+		{-1, 0, 10, 0},
+		{11, 0, 10, 10},
+		{-1, 0, 0, 0},
+		{11, 0, 0, 0},
+		{-1, 0, -1, 0},
+	}
+
+	for i, v := range cases {
+		slider := Slider{Value: v.value, Min: v.min, Max: v.max}
+		slider.UpdateValue()
+		if slider.Value != v.out {
+			t.Errorf("Case %d: .Value does not match, got %f, want %f", i, slider.Value, v.out)
+		}
+	}
 }

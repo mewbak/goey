@@ -78,9 +78,6 @@ func TestFromPixels(t *testing.T) {
 }
 
 func TestLength(t *testing.T) {
-	t.Logf("Constants DIP: %d", 1*DIP)
-	t.Logf("Constants PT:  %d", 1*PT)
-	t.Logf("Constants PC:  %d", 1*PC)
 	if rt := (1 * DIP).DIP(); rt != 1 {
 		t.Errorf("Unexpected round-trip for Length, %v =/= %v", rt, 1)
 	}
@@ -124,6 +121,27 @@ func TestLength_Clamp(t *testing.T) {
 	for i, v := range cases {
 		if out := v.in.Clamp(v.min, v.max); out != v.out {
 			t.Errorf("Error in case %d, want %s, got %s", i, v.out, out)
+		}
+	}
+}
+
+func TestPoint(t *testing.T) {
+	cases := []struct {
+		a, b Point
+		add  Point
+		sub  Point
+	}{
+		{Point{}, Point{1 * DIP, 2 * DIP}, Point{1 * DIP, 2 * DIP}, Point{-1 * DIP, -2 * DIP}},
+		{Point{1 * DIP, 2 * DIP}, Point{}, Point{1 * DIP, 2 * DIP}, Point{1 * DIP, 2 * DIP}},
+		{Point{3 * DIP, 5 * DIP}, Point{7 * DIP, 11 * DIP}, Point{10 * DIP, 16 * DIP}, Point{-4 * DIP, -6 * DIP}},
+	}
+
+	for i, v := range cases {
+		if out := v.a.Add(v.b); out != v.add {
+			t.Errorf("Error in case %d, want %s, got %s", i, v.add, out)
+		}
+		if out := v.a.Sub(v.b); out != v.sub {
+			t.Errorf("Error in case %d, want %s, got %s", i, v.add, out)
 		}
 	}
 }

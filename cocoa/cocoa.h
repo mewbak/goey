@@ -64,7 +64,11 @@ extern char const* buttonTitle( void* handle );
 extern void buttonSetTitle( void* handle, char const* title );
 
 /* Decoration */
-extern void* decorationNew( void* superview, nscolor_t fill, nscolor_t stroke );
+extern void* decorationNew( void* superview, nscolor_t fill, nscolor_t stroke,
+                            nssize_t radius );
+extern nssize_t decorationBorderRadius( void* control );
+extern nscolor_t decorationFillColor( void* control );
+extern nscolor_t decorationStrokeColor( void* control );
 extern void decorationSetBorderRadius( void* control, nssize_t radius );
 extern void decorationSetFillColor( void* control, nscolor_t fill );
 extern void decorationSetStrokeColor( void* control, nscolor_t stroke );
@@ -75,7 +79,11 @@ extern void* hrNew( void* superview );
 /* PopUpButton */
 extern void* popupbuttonNew( void* superview );
 extern void popupbuttonAddItem( void* control, char const* text );
-extern void popupbuttonSetValue( void* control, int index );
+extern char const* popupbuttonItemAtIndex( void* control, int index );
+extern int popupbuttonNumberOfItems( void* control );
+extern void popupbuttonRemoveAllItems( void* control );
+extern void popupbuttonSetValue( void* control, int index, bool_t unset );
+extern int popupbuttonValue( void* control );
 
 /* ProgressIndicator */
 extern void* progressNew( void* superview, double min, double value,
@@ -96,20 +104,29 @@ extern void sliderUpdate( void* handle, double min, double value, double max );
 /* TabView */
 extern void* tabviewNew( void* superview );
 extern void tabviewAddItem( void* control, char const* text );
+extern char const* tabviewItemAtIndex( void* control, int index );
+extern int tabviewNumberOfItems( void* control );
+extern void tabviewRemoveItemAtIndex( void* control, int index );
 extern void tabviewSelectItem( void* control, int index );
+extern void tabviewSetItemAtIndex( void* control, int index, char const* text );
 extern void* tabviewContentView( void* control, int index );
 extern nssize_t tabviewContentInsets( void* control );
 
 /* Text */
 extern void* textNew( void* superview, char const* text );
 extern int textAlignment( void* handle );
+extern int textEightyEms( void* handle );
+extern int textMinHeight( void* handle, int width );
+extern int textMinWidth( void* handle );
 extern void textSetText( void* handle, char const* text );
 extern void textSetAlignment( void* handle, int align );
 extern char const* textText( void* handle );
 
 /* TextField */
 extern void* textfieldNew( void* superview, char const* text );
+extern bool_t textfieldIsEditable( void* handle );
 extern char const* textfieldPlaceholder( void* handle );
+extern void textfieldSetEditable( void* handle, bool_t value );
 extern void textfieldSetValue( void* handle, char const* text );
 extern void textfieldSetPlaceholder( void* handle, char const* text );
 extern char const* textfieldValue( void* handle );

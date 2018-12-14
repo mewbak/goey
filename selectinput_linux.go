@@ -62,6 +62,23 @@ func (w *selectinputElement) comboboxtext() *gtk.ComboBoxText {
 	return (*gtk.ComboBoxText)(unsafe.Pointer(w.handle))
 }
 
+func (w *selectinputElement) Props() base.Widget {
+
+	value := w.comboboxtext().GetActive()
+	unset := value < 0
+
+	return &SelectInput{
+		Items:    nil,
+		Value:    int(value),
+		Unset:    unset,
+		Disabled: !w.comboboxtext().GetSensitive(),
+		OnChange: w.onChange,
+		OnFocus:  w.onFocus.callback,
+		OnBlur:   w.onBlur.callback,
+	}
+
+}
+
 func (w *selectinputElement) updateProps(data *SelectInput) error {
 	cbt := w.comboboxtext()
 

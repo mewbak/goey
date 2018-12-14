@@ -7,6 +7,10 @@ properties and events may be limited to support portability. Additionally,
 styling of the controls will be limited, with the look of controls matching the
 native platform.
 
+[![Documentation](https://godoc.org/bitbucket.org/rj/goey?status.svg)](http://godoc.org/bitbucket.org/rj/goey)
+[![Go Report Card](https://goreportcard.com/badge/bitbucket.org/rj/goey)](https://goreportcard.com/report/bitbucket.org/rj/goey) 
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/bitbucket/rj/goey?branch=default&svg=true)](https://ci.appveyor.com/project/rj/goey) 
+
 ## Install
 
 The package can be installed from the command line using the
@@ -49,6 +53,7 @@ recognize by the go build program. Additionally, you could use build flags
 |![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/twofields/twofields_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/twofields/twofields_linux.png)|
 |![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/decoration/decoration_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/decoration/decoration_linux.png)|
 |![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/colour/colour_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/colour/colour_linux.png)|
+|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/feettometer/feettometer_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/feettometer/feettometer_linux.png)|
 |![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls1_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls1_linux.png)|
 |![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls2_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls2_linux.png)|
 |![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls3_windows.png)|![Screenshot](https://bitbucket.org/rj/goey/raw/default/example/controls/controls3_linux.png)|
@@ -59,8 +64,6 @@ Feedback and PRs welcome.
 
 In particular, if anyone has the expertise to provide a port for MacOS, that
 would provide support for all major desktop operating systems.
-
-[![Go Report Card](https://goreportcard.com/badge/bitbucket.org/rj/goey)](https://goreportcard.com/report/bitbucket.org/rj/goey)
 
 ## License
 
