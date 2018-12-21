@@ -1,17 +1,19 @@
 package dialog
 
 import (
-	"unsafe"
-
 	"github.com/gotk3/gotk3/gtk"
 )
 
 func (m *SaveFile) show() (string, error) {
-	dlg, err := gtk.FileChooserNativeDialogNew(m.title, (*gtk.Window)(unsafe.Pointer(m.handle)), gtk.FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel")
+	dlg, err := gtk.FileChooserDialogNewWith2Buttons(m.title, m.parent, gtk.FILE_CHOOSER_ACTION_SAVE, "_Save", gtk.RESPONSE_ACCEPT, "_Cancel", gtk.RESPONSE_CANCEL)
 	if err != nil {
 		return "", err
 	}
-	defer dlg.Destroy()
+	activeDialogForTesting = &dlg.Dialog
+	defer func() {
+		activeDialogForTesting = nil
+		dlg.Destroy()
+	}()
 
 	for _, v := range m.filters {
 		addFilterToDialog(dlg, v.name, v.pattern)
@@ -27,6 +29,6 @@ func (m *SaveFile) show() (string, error) {
 
 // WithParent sets the parent of the dialog box.
 func (m *SaveFile) WithParent(parent *gtk.Window) *SaveFile {
-	m.handle = uintptr(unsafe.Pointer(parent))
+	m.parent = parent
 	return m
 }

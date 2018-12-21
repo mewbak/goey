@@ -2,6 +2,7 @@ package dialog
 
 import (
 	"fmt"
+	"path/filepath"
 	"syscall"
 	"unsafe"
 
@@ -14,15 +15,18 @@ func (m *OpenFile) show() (string, error) {
 		return "", err
 	}
 
-	file := [1024]uint16{}
-
 	ofn := win.OPENFILENAME{
 		LStructSize: uint32(unsafe.Sizeof(win.OPENFILENAME{})),
-		HwndOwner:   win.HWND(m.handle),
+		HwndOwner:   m.hWnd,
 		LpstrFilter: buildFilterString(m.filters),
-		LpstrFile:   &file[0],
-		NMaxFile:    1024,
 		LpstrTitle:  title,
+		Flags:       win.OFN_PATHMUSTEXIST | win.OFN_FILEMUSTEXIST,
+	}
+
+	filename := [1024]uint16{}
+	buffer, err := buildFileString(&ofn, filename[:], m.filename)
+	if err != nil {
+		return "", err
 	}
 
 	rc := win.GetOpenFileName(&ofn)
@@ -32,7 +36,7 @@ func (m *OpenFile) show() (string, error) {
 		}
 		return "", nil
 	}
-	return syscall.UTF16ToString(file[:]), nil
+	return syscall.UTF16ToString(buffer), nil
 }
 
 func buildFilterString(filters []filter) *uint16 {
@@ -57,8 +61,30 @@ func buildFilterString(filters []filter) *uint16 {
 	return &buffer[0]
 }
 
+func buildFileString(ofn *win.OPENFILENAME, buffer []uint16, filename string) ([]uint16, error) {
+	if filename == "" {
+		ofn.LpstrFile = &buffer[0]
+		ofn.NMaxFile = uint32(cap(buffer))
+		return buffer, nil
+	}
+
+	tmp, err := syscall.UTF16FromString(filepath.FromSlash(filename))
+	if err != nil {
+		return nil, err
+	}
+
+	// Copy the filename (with path) into the buffer, extending its size if
+	// necessary.
+	buffer = append(buffer[:0], tmp...)
+
+	// In case the filename is now longer
+	ofn.LpstrFile = &buffer[0]
+	ofn.NMaxFile = uint32(cap(buffer))
+	return buffer[:cap(buffer)], nil
+}
+
 // WithOwner sets the owner of the dialog box.
 func (m *OpenFile) WithOwner(hwnd win.HWND) *OpenFile {
-	m.handle = uintptr(hwnd)
+	m.hWnd = hwnd
 	return m
 }

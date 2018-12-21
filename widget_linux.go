@@ -67,20 +67,17 @@ func (w *Control) TypeKeys(text string) chan error {
 
 		time.Sleep(500 * time.Millisecond)
 		for _, r := range text {
-			evt := gdk.EventKeyNew()
-			syscall.SetEventKeyInformation(w.handle, evt, r, 0)
 			loop.Do(func() error {
-				w.handle.Event(evt.Event)
+				syscall.WidgetSendKey(w.handle, r, 0, 0)
 				return nil
 			})
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 
-			syscall.SetEventKeyInformation(w.handle, evt, r, 1)
 			loop.Do(func() error {
-				w.handle.Event(evt.Event)
+				syscall.WidgetSendKey(w.handle, r, 0, 1)
 				return nil
 			})
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 		}
 	}()
 

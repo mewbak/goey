@@ -7,11 +7,10 @@ import (
 
 // Message is a builder to construct a message dialog to the user.
 type Message struct {
-	handle uintptr
-	text   string
-	title  string
-	icon   uint
-	err    error
+	Dialog
+	text  string
+	title string
+	icon  uint
 }
 
 // NewMessage initializes a new message object with the specified text.
@@ -20,7 +19,9 @@ type Message struct {
 func NewMessage(text string) *Message {
 	text = strings.TrimSpace(text)
 	if text == "" {
-		return &Message{err: errors.New("Invalid argument, 'text' cannot be empty in call to NewMessage")}
+		retval := &Message{}
+		retval.err = errors.New("Invalid argument, 'text' cannot be empty in call to NewMessage")
+		return retval
 	}
 	return &Message{text: text, title: "goey"}
 }

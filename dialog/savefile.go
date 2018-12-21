@@ -7,11 +7,10 @@ import (
 
 // SaveFile is a builder to construct an open file dialog to the user.
 type SaveFile struct {
-	handle   uintptr
+	Dialog
 	title    string
 	filename string
 	filters  []filter
-	err      error
 }
 
 // NewSaveFile initializes a new open file dialog.

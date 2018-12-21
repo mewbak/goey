@@ -1,12 +1,17 @@
 package dialog
 
 import (
-	"bitbucket.org/rj/goey/loop"
 	"fmt"
-	"github.com/lxn/win"
 	"time"
 	"unsafe"
+
+	"bitbucket.org/rj/goey/loop"
+	"github.com/lxn/win"
 )
+
+type dialogImpl struct {
+	hWnd win.HWND
+}
 
 func typeKeys(text string) chan error {
 	err := make(chan error, 1)
@@ -14,7 +19,7 @@ func typeKeys(text string) chan error {
 	go func() {
 		defer close(err)
 
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 		for _, r := range text {
 			inp := [2]win.KEYBD_INPUT{
 				{win.INPUT_KEYBOARD, win.KEYBDINPUT{}},

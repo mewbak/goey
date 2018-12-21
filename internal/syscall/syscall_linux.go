@@ -28,10 +28,8 @@ import (
 //	GtkAllocation alloc = { x, y, width, height };
 //	gtk_widget_size_allocate( handle, &alloc );
 //}
-// static void goey_set_key_info(void* widget, void* evt_, guint r, gchar release ) {
-//  GdkEventKey* evt = evt_;
-//  evt->type = release ? GDK_KEY_RELEASE : GDK_KEY_PRESS;
-//  evt->window = gtk_widget_get_window( GTK_WIDGET(widget) );
+// static void goey_set_key_info(GdkEventKey* evt, GdkWindow* window, guint r ) {
+//  evt->window = window;
 //  evt->time = GDK_CURRENT_TIME;
 //  evt->send_event = 1;
 //  switch ( r ) {
@@ -45,6 +43,11 @@ import (
 //      break;
 //    default: evt->keyval = r;
 //  }
+// }
+// static void goey_widget_send_key( GtkWidget* widget, guint r, GdkModifierType modifiers, gchar release ) {
+//   GdkEvent* evt = gdk_event_new( release ? GDK_KEY_RELEASE : GDK_KEY_PRESS );
+//   goey_set_key_info( (GdkEventKey*)evt, gtk_widget_get_window( widget ), r );
+//   gtk_widget_event( widget, evt );
 // }
 import "C"
 
@@ -92,14 +95,17 @@ func WidgetGetPreferredHeightForWidth(widget *gtk.Widget, width int) (int, int) 
 	return int(minimum), int(natural)
 }
 
+// WidgetSendKey is a wrapper around gtk_widget_event to send a key press and release event.
+func WidgetSendKey(widget *gtk.Widget, keyval rune, modifiers gdk.ModifierType, release uint8) {
+	p := unsafe.Pointer(widget.GObject)
+	//C.gtk_test_widget_send_key((*C.GtkWidget)(p), C.guint(keyval), C.GdkModifierType(modifiers))
+	C.goey_widget_send_key((*C.GtkWidget)(p), C.guint(keyval), C.GdkModifierType(modifiers), C.gchar(release))
+}
+
 // SetBounds is a specialized wrapper around gtk_widget_size_allocate.  However,
 // this function also assumes that the parent is a GtkLayout, and so also
 // moves the widget using gtk_layout_move.
 func SetBounds(widget *gtk.Widget, x, y, width, height int) {
 	p := unsafe.Pointer(widget.GObject)
 	C.goey_set_bounds((*C.GtkWidget)(p), C.gint(x), C.gint(y), C.gint(width), C.gint(height))
-}
-
-func SetEventKeyInformation(widget *gtk.Widget, evt *gdk.EventKey, r rune, release uint8) {
-	C.goey_set_key_info(unsafe.Pointer(widget.Native()), unsafe.Pointer(evt.GdkEvent), C.guint(r), C.gchar(release))
 }

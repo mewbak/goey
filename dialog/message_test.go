@@ -1,9 +1,10 @@
 package dialog
 
 import (
-	"bitbucket.org/rj/goey/loop"
 	"fmt"
 	"testing"
+
+	"bitbucket.org/rj/goey/loop"
 )
 
 func ExampleNewMessage() {
@@ -15,24 +16,35 @@ func ExampleNewMessage() {
 }
 
 func TestNewMessage(t *testing.T) {
+	cases := []struct {
+		build      func() error
+		asyncEnter bool
+		ok         bool
+	}{
+		{func() error {
+			return NewMessage("Some text for the body of the dialog box.").WithTitle(t.Name()).WithInfo().Show()
+		}, true, true},
+		{func() error { return NewMessage("").Err() }, false, false},
+		{func() error { return NewMessage("").Show() }, false, false},
+		{func() error { return NewMessage("Some text...").WithTitle("").Err() }, false, false},
+		{func() error { return NewMessage("Some text...").WithTitle("").Show() }, false, false},
+	}
+
 	init := func() error {
-		// The following creates a modal dialog with a message.
-		asyncKeyEnter()
-		err := NewMessage("Some text for the body of the dialog box.").WithTitle(t.Name()).WithInfo().Show()
-		if err != nil {
-			t.Errorf("Failed to show message, %s", err)
+		for i, v := range cases {
+			if v.asyncEnter {
+				asyncKeyEnter()
+			}
+
+			err := v.build()
+			if got := err == nil; got != v.ok {
+				t.Errorf("Case %d,  want %v, got %v", i, v.ok, got)
+				if err != nil {
+					t.Logf("Error: %s", err)
+				}
+			}
 		}
 
-		// The following should return an error.
-		err = NewMessage("").Show()
-		if err == nil {
-			t.Errorf("Missing error")
-		}
-
-		err = NewMessage("Some text...").WithTitle("").Show()
-		if err == nil {
-			t.Errorf("Missing error")
-		}
 		return nil
 	}
 

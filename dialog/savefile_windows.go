@@ -14,15 +14,17 @@ func (m *SaveFile) show() (string, error) {
 		return "", err
 	}
 
-	file := [1024]uint16{}
-
 	ofn := win.OPENFILENAME{
 		LStructSize: uint32(unsafe.Sizeof(win.OPENFILENAME{})),
-		HwndOwner:   win.HWND(m.handle),
+		HwndOwner:   m.hWnd,
 		LpstrFilter: buildFilterString(m.filters),
-		LpstrFile:   &file[0],
-		NMaxFile:    1024,
 		LpstrTitle:  title,
+	}
+
+	filename := [1024]uint16{}
+	buffer, err := buildFileString(&ofn, filename[:], m.filename)
+	if err != nil {
+		return "", err
 	}
 
 	rc := win.GetSaveFileName(&ofn)
@@ -32,11 +34,11 @@ func (m *SaveFile) show() (string, error) {
 		}
 		return "", nil
 	}
-	return syscall.UTF16ToString(file[:]), nil
+	return syscall.UTF16ToString(buffer), nil
 }
 
 // WithOwner sets the owner of the dialog box.
 func (m *SaveFile) WithOwner(hwnd win.HWND) *SaveFile {
-	m.handle = uintptr(hwnd)
+	m.hWnd = hwnd
 	return m
 }

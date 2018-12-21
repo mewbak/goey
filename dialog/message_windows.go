@@ -16,7 +16,7 @@ func (m *Message) show() error {
 		return err
 	}
 
-	rc := win.MessageBox(win.HWND(m.handle), text, title, uint32(m.icon))
+	rc := win.MessageBox(m.hWnd, text, title, uint32(m.icon))
 	if rc == 0 {
 		return syscall.GetLastError()
 	}
@@ -37,6 +37,6 @@ func (m *Message) withInfo() {
 
 // WithOwner sets the owner of the dialog box.
 func (m *Message) WithOwner(hwnd win.HWND) *Message {
-	m.handle = uintptr(hwnd)
+	m.hWnd = hwnd
 	return m
 }
