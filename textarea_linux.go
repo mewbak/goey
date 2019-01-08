@@ -175,7 +175,7 @@ func (w *textareaElement) TakeFocus() bool {
 	return control.TakeFocus()
 }
 
-func (w*textareaElement) TypeKeys(text string) chan error {
+func (w *textareaElement) TypeKeys(text string) chan error {
 	control := Control{&w.handle.Widget}
 	return control.TypeKeys(text)
 }
@@ -201,7 +201,7 @@ func (w *textareaElement) updateProps(data *TextArea) error {
 	w.minLines = data.MinLines
 	w.onChange = data.OnChange
 	if data.OnChange != nil && w.shChange == 0 {
-		sh, err := buffer.Connect("changed", textinputOnChanged, w)
+		sh, err := buffer.Connect("changed", textareaOnChanged, w)
 		if err != nil {
 			panic("Failed to connect 'changed' event")
 		}
