@@ -76,9 +76,12 @@ void textfieldSetValue( void* handle, char const* text ) {
 	assert( handle && [(id)handle isKindOfClass:[GTextField class]] );
 	assert( text );
 
-	NSString* title = [[NSString alloc] initWithUTF8String:text];
-	[(GTextField*)handle setStringValue:title];
-	[title release];
+	NSString* value = [[NSString alloc] initWithUTF8String:text];
+	NSString* oldValue = [(GTextField*)handle stringValue];
+	if ( [value compare:oldValue] != NSOrderedSame ) {
+		[(GTextField*)handle setStringValue:value];
+	}
+	[value release];
 }
 
 void textfieldSetPlaceholder( void* handle, char const* text ) {
