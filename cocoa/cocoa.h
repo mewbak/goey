@@ -24,6 +24,9 @@ extern void do_thunk( void );
 extern void stop( void );
 extern bool_t isMainThread( void );
 
+/* Message dialog */
+extern void messageDialog( void* window, char const* text, char const* title, char icon );
+
 extern void trace( char const* func );
 #ifdef NTRACE
 #define TRACE() ( (void)0 )

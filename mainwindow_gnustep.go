@@ -4,6 +4,7 @@ package goey
 
 import (
 	"image"
+	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/cocoa"
@@ -50,6 +51,8 @@ func (w *windowImpl) close() {
 }
 
 func (w *windowImpl) message(m *Message) {
+	//m.title, m.err = w.handle.GetTitle()
+	m.handle = uintptr(unsafe.Pointer(w.handle))
 }
 
 func (w *windowImpl) onSize() {

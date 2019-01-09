@@ -2,7 +2,7 @@
 #include "cocoa.h"
 #import <Cocoa/Cocoa.h>
 
-@interface GTextField : NSTextField <NSTextFieldDelegate>
+@interface GTextField : NSTextField
 - (BOOL)becomeFirstResponder;
 - (BOOL)resignFirstResponder;
 - (void)controlTextDidChange:(NSNotification*)obj;
