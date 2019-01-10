@@ -136,6 +136,19 @@ extern void textfieldSetValue( void* handle, char const* text );
 extern void textfieldSetPlaceholder( void* handle, char const* text );
 extern char const* textfieldValue( void* handle );
 
+/* IntField */
+extern void* intfieldNew( void* superview, int64_t value, int64_t min,
+                          int64_t max );
+extern void intfieldClose( void* handle );
+extern bool_t intfieldIsEditable( void* handle );
+extern char const* intfieldPlaceholder( void* handle );
+extern void intfieldSetEditable( void* handle, bool_t value );
+extern void intfieldSetValue( void* handle, int64_t value, int64_t min,
+                              int64_t max );
+extern void intfieldSetPlaceholder( void* handle, char const* text );
+extern int64_t intfieldValue( void* handle );
+extern void intfieldSetFrame( void* handle, int x, int y, int dx, int dy );
+
 /* TextView */
 extern void* textviewNew( void* superview, char const* text );
 extern void textviewSetValue( void* handle, char const* text );

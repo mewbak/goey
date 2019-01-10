@@ -8,11 +8,14 @@ import (
 )
 
 type intinputElement struct {
-	control *cocoa.Text
+	control *cocoa.IntField
 }
 
 func (w *IntInput) mount(parent base.Control) (base.Element, error) {
-	control := cocoa.NewText(parent.Handle, "date input")
+	control := cocoa.NewIntField(parent.Handle, w.Value, -100, 100)
+	control.SetPlaceholder(w.Placeholder)
+	control.SetEnabled(!w.Disabled)
+	control.SetCallbacks(w.OnChange, w.OnFocus, w.OnBlur)
 
 	retval := &intinputElement{
 		control: control,
@@ -34,11 +37,13 @@ func (w *intinputElement) Layout(bc base.Constraints) base.Size {
 }
 
 func (w *intinputElement) MinIntrinsicHeight(width base.Length) base.Length {
-	return 20 * base.DIP
+	_, h := w.control.IntrinsicContentSize()
+	return base.FromPixelsY(h)
 }
 
 func (w *intinputElement) MinIntrinsicWidth(base.Length) base.Length {
-	return 200 * base.DIP
+	px, _ := w.control.IntrinsicContentSize()
+	return base.FromPixelsX(px)
 }
 
 func (w *intinputElement) SetBounds(bounds base.Rectangle) {
@@ -47,5 +52,9 @@ func (w *intinputElement) SetBounds(bounds base.Rectangle) {
 }
 
 func (w *intinputElement) updateProps(data *IntInput) error {
+	w.control.SetValue(data.Value, -100, 100)
+	w.control.SetPlaceholder(data.Placeholder)
+	w.control.SetEnabled(!data.Disabled)
+	w.control.SetCallbacks(data.OnChange, data.OnFocus, data.OnBlur)
 	return nil
 }
