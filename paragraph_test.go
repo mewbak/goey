@@ -1,15 +1,24 @@
 package goey
 
 import (
+	"math/rand"
+	"reflect"
 	"testing"
 	"testing/quick"
-	"unicode"
 
 	"bitbucket.org/rj/goey/base"
 )
 
-func TestParagraph(t *testing.T) {
-	testingRenderWidgets(t,
+func paragraphValues(values []reflect.Value, rand *rand.Rand) {
+	// Get a string
+	labelValues(values, rand)
+
+	// Create a random alignment
+	values[1] = reflect.ValueOf(TextAlignment(rand.Uint64() % 4))
+}
+
+func TestParagraphMount(t *testing.T) {
+	testingMountWidgets(t,
 		&P{Text: "A", Align: JustifyLeft},
 		&P{Text: "B", Align: JustifyRight},
 		&P{Text: "C", Align: JustifyCenter},
@@ -18,16 +27,10 @@ func TestParagraph(t *testing.T) {
 		&P{Text: "ABCD\nEFGH", Align: JustifyLeft},
 	)
 
-	f := func(text string, align uint) bool {
-		// Filter out bad unicode code points
-		for _, v := range []rune(text) {
-			if !unicode.IsGraphic(v) {
-				return true
-			}
-		}
-		return testingRenderWidget(t, &P{Text: text, Align: TextAlignment(align % 4)})
+	f := func(text string, align TextAlignment) bool {
+		return testingMountWidget(t, &P{Text: text, Align: align})
 	}
-	if err := quick.Check(f, nil); err != nil {
+	if err := quick.Check(f, &quick.Config{Values: paragraphValues}); err != nil {
 		t.Errorf("quick: %s", err)
 	}
 }

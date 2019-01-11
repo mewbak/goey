@@ -1,8 +1,12 @@
 package goey
 
 import (
+	"bytes"
 	"fmt"
+	"math/rand"
+	"reflect"
 	"testing"
+	"testing/quick"
 
 	"bitbucket.org/rj/goey/base"
 )
@@ -44,12 +48,31 @@ func ExampleTextInput() {
 	}
 }
 
-func TestTextInput(t *testing.T) {
-	testingRenderWidgets(t,
+func textinputValues(values []reflect.Value, rand *rand.Rand) {
+	// Get a string
+	labelValues(values, rand)
+
+	// Create a choices for disabled and default
+	values[1] = reflect.ValueOf(rand.Uint64()%2 == 0)
+	values[2] = reflect.ValueOf(rand.Uint64()%2 == 0)
+	values[3] = reflect.ValueOf(rand.Uint64()%2 == 0)
+}
+
+func TestTextInputMount(t *testing.T) {
+	testingMountWidgets(t,
 		&TextInput{Value: "A"},
 		&TextInput{Value: "B", Placeholder: "..."},
 		&TextInput{Value: "C", Disabled: true},
+		&TextInput{Value: "D", ReadOnly: true},
+		&TextInput{Value: "E", Password: true},
 	)
+
+	f := func(value string, disabled, password, readonly bool) bool {
+		return testingMountWidget(t, &TextInput{Value: value, Disabled: disabled, Password: password, ReadOnly: readonly})
+	}
+	if err := quick.Check(f, &quick.Config{Values: textinputValues}); err != nil {
+		t.Errorf("quick: %s", err)
+	}
 }
 
 func TestTextInputClose(t *testing.T) {
@@ -57,10 +80,12 @@ func TestTextInputClose(t *testing.T) {
 		&TextInput{Value: "A"},
 		&TextInput{Value: "B", Placeholder: "..."},
 		&TextInput{Value: "C", Disabled: true},
+		&TextInput{Value: "D", ReadOnly: true},
+		&TextInput{Value: "E", Password: true},
 	)
 }
 
-func TestTextInputEvents(t *testing.T) {
+func TestTextInputOnFocus(t *testing.T) {
 	testingCheckFocusAndBlur(t,
 		&TextInput{},
 		&TextInput{},
@@ -68,14 +93,45 @@ func TestTextInputEvents(t *testing.T) {
 	)
 }
 
-func TestTextInputProps(t *testing.T) {
+func TestTextInputOnChange(t *testing.T) {
+	log := bytes.NewBuffer(nil)
+
+	testingTypeKeys(t, "Hello",
+		&TextInput{OnChange: func(v string) {
+			log.WriteString(v)
+			log.WriteString("\x1E")
+		}})
+
+	const want = "H\x1EHe\x1EHel\x1EHell\x1EHello\x1E"
+	if got := log.String(); got != want {
+		t.Errorf("Wanted %v, got %v", want, got)
+	}
+}
+
+func TestTextInputOnEnterKey(t *testing.T) {
+	log := bytes.NewBuffer(nil)
+
+	testingTypeKeys(t, "Hello\n",
+		&TextInput{OnEnterKey: func(v string) {
+			log.WriteString(v)
+		}})
+
+	const want = "Hello"
+	if got := log.String(); got != want {
+		t.Errorf("Wanted %v, got %v", want, got)
+	}
+}
+
+func TestTextInputUpdateProps(t *testing.T) {
 	testingUpdateWidgets(t, []base.Widget{
 		&TextInput{Value: "A"},
 		&TextInput{Value: "B", Placeholder: "..."},
 		&TextInput{Value: "C", Disabled: true},
+		&TextInput{Value: "D", ReadOnly: true},
 	}, []base.Widget{
-		&TextInput{Value: "AA"},
+		&TextInput{Value: "AA", ReadOnly: true},
 		&TextInput{Value: "BA", Disabled: true},
 		&TextInput{Value: "CA", Placeholder: "***", Disabled: false},
+		&TextInput{Value: "DA"},
 	})
 }

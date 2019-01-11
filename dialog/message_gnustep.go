@@ -1,14 +1,13 @@
 // +build gnustep
 
-package goey
+package dialog
 
 import (
 	"bitbucket.org/rj/goey/cocoa"
-	"unsafe"
 )
 
 func (m *Message) show() error {
-	cocoa.MessageDialog((*cocoa.Window)(unsafe.Pointer(m.handle)), m.text, m.title, byte(m.icon))
+	cocoa.MessageDialog(m.parent, m.text, m.title, byte(m.icon))
 	return nil
 }
 
@@ -22,4 +21,10 @@ func (m *Message) withWarn() {
 
 func (m *Message) withInfo() {
 	m.icon = 'i'
+}
+
+// WithParent sets the parent of the dialog box.
+func (m *Message) WithParent(parent *cocoa.Window) *Message {
+	m.parent = parent
+	return m
 }

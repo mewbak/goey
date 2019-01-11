@@ -26,12 +26,14 @@ extern bool_t isMainThread( void );
 
 /* Message dialog */
 extern void messageDialog( void* window, char const* text, char const* title, char icon );
+extern void openPanel( void* window );
+extern void savePanel( void* window );
 
 extern void trace( char const* func );
 #ifdef NTRACE
 #define TRACE() ( (void)0 )
 #else
-#define TRACEx) trace(__func__)
+#define TRACE() trace(__func__)
 #endif
 
 /* Window */

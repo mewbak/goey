@@ -30,9 +30,6 @@ func (w *Button) mount(parent base.Control) (base.Element, error) {
 	// Update properties on the control
 	control.SetSensitive(!w.Disabled)
 	control.SetCanDefault(w.Default)
-	if w.Default {
-		control.GrabDefault()
-	}
 	control.Show()
 
 	// Create the element
@@ -71,7 +68,7 @@ func (w *buttonElement) Props() base.Widget {
 	return &Button{
 		Text:     text,
 		Disabled: !button.GetSensitive(),
-		Default:  button.HasDefault(),
+		Default:  button.GetCanDefault(),
 		OnClick:  w.onClick.callback,
 		OnFocus:  w.onFocus.callback,
 		OnBlur:   w.onBlur.callback,
@@ -83,9 +80,6 @@ func (w *buttonElement) updateProps(data *Button) error {
 	button.SetLabel(data.Text)
 	button.SetSensitive(!data.Disabled)
 	button.SetCanDefault(data.Default)
-	if data.Default {
-		button.GrabDefault()
-	}
 	w.onClick.Set(w.handle, data.OnClick)
 	w.onFocus.Set(w.handle, data.OnFocus)
 	w.onBlur.Set(w.handle, data.OnBlur)

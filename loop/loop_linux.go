@@ -9,6 +9,11 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+const (
+	// Flag to control behaviour of UnlockOSThread in Run.
+	unlockThreadAfterRun = true
+)
+
 func init() {
 	gtk.Init(nil)
 }

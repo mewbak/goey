@@ -1,8 +1,11 @@
 package goey
 
 import (
+	"math/rand"
+	"reflect"
 	"strconv"
 	"testing"
+	"testing/quick"
 
 	"bitbucket.org/rj/goey/base"
 )
@@ -46,12 +49,28 @@ func ExampleButton() {
 	}
 }
 
-func TestButtonCreate(t *testing.T) {
-	testingRenderWidgets(t,
+func buttonValues(values []reflect.Value, rand *rand.Rand) {
+	// Get a string
+	labelValues(values, rand)
+
+	// Create a choices for disabled and default
+	values[1] = reflect.ValueOf(rand.Uint64()%2 == 0)
+	values[2] = reflect.ValueOf(rand.Uint64()%2 == 0)
+}
+
+func TestButtonMount(t *testing.T) {
+	testingMountWidgets(t,
 		&Button{Text: "A"},
 		&Button{Text: "D", Disabled: true},
 		&Button{Text: "E", Default: true},
 	)
+
+	f := func(text string, disabled, def bool) bool {
+		return testingMountWidget(t, &Button{Text: text, Disabled: disabled, Default: def})
+	}
+	if err := quick.Check(f, &quick.Config{Values: buttonValues}); err != nil {
+		t.Errorf("quick: %s", err)
+	}
 }
 
 func TestButtonClose(t *testing.T) {

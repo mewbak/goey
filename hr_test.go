@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestHR(t *testing.T) {
-	testingRenderWidgets(t,
+func TestHRMount(t *testing.T) {
+	testingMountWidgets(t,
 		&HR{},
 		&HR{},
 		&HR{},

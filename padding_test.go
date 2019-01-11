@@ -20,9 +20,9 @@ func (w *paddingElement) Props() base.Widget {
 	}
 }
 
-func TestPaddingCreate(t *testing.T) {
+func TestPaddingMount(t *testing.T) {
 	// These should all be able to mount without error.
-	testingRenderWidgets(t,
+	testingMountWidgets(t,
 		&Padding{Child: &Button{Text: "A"}},
 		&Padding{Insets: DefaultInsets(), Child: &Button{Text: "B"}},
 		&Padding{Insets: UniformInsets(48 * DIP), Child: &Button{Text: "C"}},
@@ -31,10 +31,10 @@ func TestPaddingCreate(t *testing.T) {
 
 	// These should mount with an error.
 	err := errors.New("Mock error 1")
-	testingRenderWidgetsFail(t, err,
+	testingMountWidgetsFail(t, err,
 		&Padding{Child: &mock.Widget{Err: err}},
 	)
-	testingRenderWidgetsFail(t, err,
+	testingMountWidgetsFail(t, err,
 		&Padding{Insets: DefaultInsets(), Child: &mock.Widget{Err: err}},
 	)
 }

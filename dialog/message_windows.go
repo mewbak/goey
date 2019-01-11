@@ -1,8 +1,9 @@
-package goey
+package dialog
 
 import (
-	"github.com/lxn/win"
 	"syscall"
+
+	"github.com/lxn/win"
 )
 
 func (m *Message) show() error {
@@ -15,7 +16,7 @@ func (m *Message) show() error {
 		return err
 	}
 
-	rc := win.MessageBox(win.HWND(m.handle), text, title, uint32(m.icon))
+	rc := win.MessageBox(m.hWnd, text, title, uint32(m.icon))
 	if rc == 0 {
 		return syscall.GetLastError()
 	}
@@ -32,4 +33,10 @@ func (m *Message) withWarn() {
 
 func (m *Message) withInfo() {
 	m.icon |= win.MB_ICONINFORMATION
+}
+
+// WithOwner sets the owner of the dialog box.
+func (m *Message) WithOwner(hwnd win.HWND) *Message {
+	m.hWnd = hwnd
+	return m
 }

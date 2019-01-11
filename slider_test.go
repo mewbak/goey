@@ -65,8 +65,8 @@ func ExampleSlider() {
 	}
 }
 
-func TestSliderCreate(t *testing.T) {
-	testingRenderWidgets(t,
+func TestSliderMount(t *testing.T) {
+	testingMountWidgets(t,
 		&Slider{Value: 50},
 		&Slider{Value: 10},
 		&Slider{Value: 0},

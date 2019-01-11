@@ -63,8 +63,10 @@ func Run(action func() error) error {
 	// was changed.  However, on GNUstep with Go 1.9 or earlier, the following
 	// call will break testing this the calls do not nest, and a call to
 	// LockOSThread is done at the package init.
-	// Refer to https://golang.org/doc/go1.10
-	if runtime.GOOS == "windows" {
+	// Refer to https://golang.org/doc/go1.10.
+	// Conversely, we need to release the thread on Linux with GTK to prevent
+	// hangs with repeated calls to Run.
+	if unlockThreadAfterRun {
 		defer runtime.UnlockOSThread()
 	}
 
@@ -114,8 +116,13 @@ func Run(action func() error) error {
 // Note, this function contains a race-condition, in that the the action may be
 // scheduled while the event loop is being terminated, in which case the
 // scheduled action may never be run.  Presumably, those actions don't need to
-// be run on the GUI thread, so they can be schedule using a different
+// be run on the GUI thread, so they should be scheduled using a different
 // mechanism.
+//
+// If the passed function panics, the panic will happen on the GUI thread.
+// This will cause the call to Run to terminate, stopping the GUI.  However,
+// this will not close any open windows, leading to a potentially unrecoverable
+// state.
 func Do(action func() error) error {
 	// Check if the event loop is current running.
 	if atomic.LoadUint32(&isRunning) == 0 {
@@ -137,7 +144,11 @@ func Do(action func() error) error {
 // are created and destroyed.
 func AddLockCount(delta int32) {
 	if newval := atomic.AddInt32(&lockCount, delta); newval == 0 {
-		stop()
+		if atomic.LoadUint32(&isRunning) != 0 {
+			// We had better be on the GUI thread, or this call may cause a
+			// crash.
+			stop()
+		}
 	}
 }
 

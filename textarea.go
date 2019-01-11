@@ -10,6 +10,9 @@ var (
 
 // TextArea describes a widget that users input or update a multi-line of text.
 // The model for the value is a string value.
+//
+// Using a placeholder may not be supported on all platforms.  No errors will
+// be generated, but the placeholder text may not appear on screen.
 type TextArea struct {
 	Value       string             // Values is the current string for the field
 	Placeholder string             // Placeholder is a descriptive text that can be displayed when the field is empty

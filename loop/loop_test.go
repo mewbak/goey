@@ -261,3 +261,113 @@ func TestDoFailure(t *testing.T) {
 		t.Errorf("Unexpected success in call to Do")
 	}
 }
+
+func TestDoWithError(t *testing.T) {
+	const errorString = "No luck"
+
+	init := func() error {
+		// Verify that the test is starting in the correct state.
+		if c := loop.LockCount(); c != 1 {
+			t.Errorf("Want lockCount==1, got lockCount==%d", c)
+			return nil
+		}
+
+		// Create window and verify.
+		// We need at least one window open to maintain GUI loop.
+		loop.AddLockCount(1)
+		if c := loop.LockCount(); c != 2 {
+			t.Fatalf("Want lockCount==2, got lockCount==%d", c)
+		}
+
+		go func() {
+			// Run the actions, which are counted.
+			err := loop.Do(func() error {
+				return errors.New(errorString)
+			})
+			if err == nil {
+				t.Errorf("Failed to return error in Do")
+			} else if err.Error() != errorString {
+				t.Errorf("Incorrect error returned in Do, %v != %v", err.Error(), errorString)
+			}
+
+			// Close the window
+			err = loop.Do(func() error {
+				loop.AddLockCount(-1)
+				return nil
+			})
+			if err != nil {
+				t.Errorf("Error in Do, %s", err)
+			}
+		}()
+
+		return nil
+	}
+
+	err := loop.Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
+	if c := loop.LockCount(); c != 0 {
+		t.Errorf("Want lockCount==0, got lockCount==%d", c)
+	}
+}
+
+func TestDoWithPanic(t *testing.T) {
+	const errorString = "No luck"
+
+	defer func() {
+		r := recover()
+		if r != nil {
+			if s, ok := r.(string); !ok {
+				t.Errorf("Unexpected recover, %v", r)
+			} else if s != errorString {
+				t.Errorf("Unexpected recover, %s", s)
+			}
+		} else {
+			t.Errorf("Missing panic")
+		}
+
+		// Make sure that window count is properly maintained.
+		// Note that because of the panic, we never closed the window.
+		if c := loop.LockCount(); c != 1 {
+			t.Errorf("Want lockCount==1, got lockCount==%d", c)
+		}
+
+		// Need to close the window, otherwise any following tests will be
+		// affected.
+		loop.AddLockCount(-1)
+	}()
+
+	init := func() error {
+		// Verify that the test is starting in the correct state.
+		if c := loop.LockCount(); c != 1 {
+			t.Errorf("Want lockCount==1, got lockCount==%d", c)
+			return nil
+		}
+
+		// Create window and verify.
+		// We need at least one window open to maintain GUI loop.
+		loop.AddLockCount(1)
+		if c := loop.LockCount(); c != 2 {
+			t.Fatalf("Want lockCount==2, got lockCount==%d", c)
+		}
+
+		go func() {
+			// Run the actions, which are counted.
+			_ = loop.Do(func() error {
+				panic(errorString)
+			})
+			t.Errorf("unreachable")
+		}()
+
+		return nil
+	}
+
+	err := loop.Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
+	if c := loop.LockCount(); c != 0 {
+		t.Errorf("Want lockCount==0, got lockCount==%d", c)
+	}
+}

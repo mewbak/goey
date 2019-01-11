@@ -32,3 +32,21 @@ void messageDialog( void* window, char const* text, char const* title, char icon
 	[alert runModal];
 	[alert release];
 }
+
+void openPanel( void* window ) {
+	assert( !window || [(id)window isKindOfClass:[NSWindow class]] );
+
+	NSOpenPanel* panel = [NSOpenPanel openPanel];
+
+	[panel runModal];
+	[panel release];
+}
+
+void savePanel( void* window ) {
+	assert( !window || [(id)window isKindOfClass:[NSWindow class]] );
+
+	NSSavePanel* panel = [NSSavePanel savePanel];
+
+	[panel runModal];
+	[panel release];
+}

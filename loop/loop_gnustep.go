@@ -12,6 +12,11 @@ import (
 	"bitbucket.org/rj/goey/cocoa"
 )
 
+const (
+	// Flag to control behaviour of UnlockOSThread in Run.
+	unlockThreadAfterRun = false
+)
+
 type PanicError struct {
 	Str string
 }

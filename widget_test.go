@@ -23,11 +23,15 @@ type Focusable interface {
 	TakeFocus() bool
 }
 
+type Typeable interface {
+	TypeKeys(text string) chan error
+}
+
 func equal(t *testing.T, lhs, rhs base.Widget) bool {
-	// On windows, the message EM_GETCUEBANNER does not work unless the manifest
-	// is set correctly.  This cannot be done for the package, since that
-	// manifest will conflict with the manifest of any app.
 	if runtime.GOOS == "windows" {
+		// On windows, the message EM_GETCUEBANNER does not work unless the manifest
+		// is set correctly.  This cannot be done for the package, since that
+		// manifest will conflict with the manifest of any app.
 		if value := reflect.ValueOf(rhs).Elem().FieldByName("Placeholder"); value.IsValid() {
 			placeholder := value.String()
 			if placeholder != "" {
@@ -36,18 +40,30 @@ func equal(t *testing.T, lhs, rhs base.Widget) bool {
 			value.SetString("")
 		}
 
+		// The implementation on windows has a limited resolution compared to
+		// float64.
 		if slider, ok := lhs.(*Slider); ok {
 			if newValue := float64(int64(slider.Value*8)) / 8; slider.Value != newValue {
 				t.Logf("Rounding 'Value' field during test from %f to %f", slider.Value, newValue)
 				slider.Value = newValue
 			}
 		}
+	} else if runtime.GOOS == "linux" {
+		// On linux with GTK, this package is using a GtkTextView to create
+		// the multi-line text editor, and that widget does not support
+		// placeholders.
+		if elem, ok := rhs.(*TextArea); ok {
+			if elem.Placeholder != "" {
+				t.Logf("Zeroing 'Placeholder' field during test")
+			}
+			elem.Placeholder = ""
+		}
 	}
 
 	return reflect.DeepEqual(lhs, rhs)
 }
 
-func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
+func testingMountWidgets(t *testing.T, widgets ...base.Widget) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
@@ -103,7 +119,7 @@ func testingRenderWidgets(t *testing.T, widgets ...base.Widget) {
 	}
 }
 
-func testingRenderWidget(t *testing.T, widget base.Widget) (ok bool) {
+func testingMountWidget(t *testing.T, widget base.Widget) (ok bool) {
 	init := func() error {
 		// Create the window.  Some of the tests here are not expected in
 		// production code, but we can be a little paranoid here.
@@ -148,7 +164,7 @@ func testingRenderWidget(t *testing.T, widget base.Widget) (ok bool) {
 	return /* naked return, code set in init callback */
 }
 
-func testingRenderWidgetsFail(t *testing.T, outError error, widgets ...base.Widget) {
+func testingMountWidgetsFail(t *testing.T, outError error, widgets ...base.Widget) {
 	init := func() error {
 		window, err := NewWindow(t.Name(), &VBox{Children: widgets})
 		if window != nil {
@@ -220,6 +236,7 @@ func testingCloseWidgets(t *testing.T, widgets ...base.Widget) {
 
 func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 	log := bytes.NewBuffer(nil)
+	skipFlag := false
 
 	for i := byte(0); i < 3; i++ {
 		s := reflect.ValueOf(widgets[i])
@@ -250,7 +267,7 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 							t.Errorf("Failed to set focus on the control")
 						}
 					} else {
-						t.Errorf("Control does not support TakeFocus")
+						skipFlag = true
 					}
 					return nil
 				})
@@ -276,14 +293,72 @@ func testingCheckFocusAndBlur(t *testing.T, widgets ...base.Widget) {
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
 	}
+	if skipFlag {
+		t.Skip("Control does not support TakeFocus")
+	}
+
 	const want = "fabafbbbfcbc"
 	if s := log.String(); s != want {
 		t.Errorf("Incorrect log string, want %s, got log==%s", want, s)
 	}
 }
 
+func testingTypeKeys(t *testing.T, text string, widget base.Widget) {
+	skipFlag := false
+
+	init := func() error {
+		window, err := NewWindow(t.Name(), &VBox{Children: []base.Widget{widget}})
+		if err != nil {
+			t.Errorf("Failed to create window, %s", err)
+		}
+
+		var typingErr chan error
+		go func(window *Window) {
+			err := loop.Do(func() error {
+				child := window.child.(*vboxElement).children[0]
+				if elem, ok := child.(Typeable); ok {
+					typingErr = elem.TypeKeys(text)
+				} else {
+					skipFlag = true
+				}
+				return nil
+			})
+			if err != nil {
+				t.Errorf("Error in Do, %s", err)
+			}
+
+			// Wait for typing to complete, and check for errors
+			if typingErr != nil {
+				for v := range typingErr {
+					t.Errorf("Failed to type keys on the control, %v", v)
+				}
+			}
+
+			// Close the window
+			err = loop.Do(func() error {
+				window.Close()
+				return nil
+			})
+			if err != nil {
+				t.Errorf("Error in Do, %s", err)
+			}
+		}(window)
+
+		return nil
+	}
+
+	err := loop.Run(init)
+	if err != nil {
+		t.Errorf("Failed to run GUI loop, %s", err)
+	}
+	if skipFlag {
+		t.Skip("Control does not support TypeKeys")
+	}
+}
+
 func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 	log := bytes.NewBuffer(nil)
+	skipFlag := false
 
 	for i := byte(0); i < 3; i++ {
 		letter := 'a' + i
@@ -318,7 +393,7 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 					if elem, ok := child.(Clickable); ok {
 						elem.Click()
 					} else {
-						t.Errorf("Control does not support Click")
+						skipFlag = true
 					}
 					return nil
 				})
@@ -344,6 +419,10 @@ func testingCheckClick(t *testing.T, widgets ...base.Widget) {
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
 	}
+	if skipFlag {
+		t.Skip("Control does not support Click")
+	}
+
 	const want = "cacbcc"
 	if s := log.String(); s != want {
 		t.Errorf("Incorrect log string, want %s, got log==%s", want, s)

@@ -23,14 +23,14 @@ func (w *hboxElement) Props() base.Widget {
 	}
 }
 
-func TestHBox(t *testing.T) {
+func TestHBoxMount(t *testing.T) {
 	buttons := []base.Widget{
 		&Button{Text: "A"},
 		&Button{Text: "B"},
 		&Button{Text: "C"},
 	}
 
-	testingRenderWidgets(t,
+	testingMountWidgets(t,
 		&HBox{},
 		&HBox{Children: buttons, AlignMain: MainStart},
 		&HBox{Children: buttons, AlignMain: MainCenter},

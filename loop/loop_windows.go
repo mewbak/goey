@@ -8,6 +8,11 @@ import (
 	"github.com/lxn/win"
 )
 
+const (
+	// Flag to control behaviour of UnlockOSThread in Run.
+	unlockThreadAfterRun = true
+)
+
 var (
 	atomPost win.ATOM
 	hwndPost win.HWND
@@ -19,6 +24,9 @@ var (
 func initRun() error {
 	hInstance := win.GetModuleHandle(nil)
 	if hInstance == 0 {
+		// Not sure that the call to GetModuleHandle can ever fail when the
+		// argument is nil.  The handle for the current .exe is certainly
+		// valid?
 		return syscall.GetLastError()
 	}
 

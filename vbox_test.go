@@ -23,14 +23,14 @@ func (w *vboxElement) Props() base.Widget {
 	}
 }
 
-func TestVBox(t *testing.T) {
+func TestVBoxMount(t *testing.T) {
 	buttons := []base.Widget{
 		&Button{Text: "A"},
 		&Button{Text: "B"},
 		&Button{Text: "C"},
 	}
 
-	testingRenderWidgets(t,
+	testingMountWidgets(t,
 		&VBox{},
 		&VBox{Children: buttons, AlignMain: MainStart},
 		&VBox{Children: buttons, AlignMain: MainCenter},

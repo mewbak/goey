@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func TestSelectInputCreate(t *testing.T) {
+func TestSelectInputMount(t *testing.T) {
 	options := []string{"Option A", "Option B", "Option C"}
 
-	testingRenderWidgets(t,
+	testingMountWidgets(t,
 		&SelectInput{Value: 0, Items: options},
 		&SelectInput{Value: 1, Items: options},
 		&SelectInput{Value: 2, Items: options, Disabled: true},

@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/dialog"
 )
 
 var (
@@ -51,6 +52,10 @@ func NewWindow(title string, child base.Widget) (*Window, error) {
 
 	// Show the window
 	w.show()
+
+	if filename := os.Getenv("GOEY_SCREENSHOT"); filename != "" {
+		asyncScreenshot(filename, w)
+	}
 
 	return w, nil
 }
@@ -100,11 +105,27 @@ func (w *windowImpl) layoutChild(windowSize base.Size) base.Size {
 	return size
 }
 
-// Message returns a message constructor that can be used to build and then
-// show a dialog box with a message.
-func (w *Window) Message(text string) *Message {
-	ret := NewMessage(text)
+// Message returns a builder that can be used to construct a message
+// dialog, and then show that dialog.
+func (w *Window) Message(text string) *dialog.Message {
+	ret := dialog.NewMessage(text)
 	w.message(ret)
+	return ret
+}
+
+// OpenFileDialog returns a builder that can be used to construct an open file
+// dialog, and then show that dialog.
+func (w *Window) OpenFileDialog() *dialog.OpenFile {
+	ret := dialog.NewOpenFile()
+	w.openfiledialog(ret)
+	return ret
+}
+
+// SaveFileDialog returns a builder that can be used to construct a save file
+// dialog, and then show that dialog.
+func (w *Window) SaveFileDialog() *dialog.SaveFile {
+	ret := dialog.NewSaveFile()
+	w.savefiledialog(ret)
 	return ret
 }
 

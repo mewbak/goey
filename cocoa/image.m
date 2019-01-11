@@ -5,6 +5,7 @@
 void* imageNewFromRGBA( uint8_t* imageData, int width, int height,
                         int stride ) {
 	assert( imageData );
+	assert( width>0 && height>0 );
 
 	NSBitmapImageRep* imagerep =
 	    [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
@@ -42,6 +43,7 @@ void* imageNewFromRGBA( uint8_t* imageData, int width, int height,
 void* imageNewFromGray( uint8_t* imageData, int width, int height,
                         int stride ) {
 	assert( imageData );
+	assert( width>0 && height>0 );
 
 	NSBitmapImageRep* imagerep =
 	    [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
@@ -60,10 +62,9 @@ void* imageNewFromGray( uint8_t* imageData, int width, int height,
 	if ( [imagerep bytesPerRow] == stride ) {
 		// Check for overflow
 		assert( width * height > width && width * height > height );
-		assert( ( width * height * 4 ) > width * height );
 		// Copy the data
 		assert( [imagerep bitmapData] );
-		memcpy( [imagerep bitmapData], imageData, width * height * 4 );
+		memcpy( [imagerep bitmapData], imageData, width * height );
 	} else {
 		assert( false ); // not implemented
 	}
@@ -76,8 +77,7 @@ void* imageNewFromGray( uint8_t* imageData, int width, int height,
 }
 
 void imageClose( void* image ) {
-	assert( image );
-	assert( [(id)image isKindOfClass:[NSImage class]] );
+	assert( image && [(id)image isKindOfClass:[NSImage class]] );
 
 	[(NSImage*)image release];
 }

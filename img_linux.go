@@ -52,6 +52,32 @@ func pixbufToImage(pixbuf *gdk.Pixbuf) image.Image {
 		}
 	}
 
+	if cs == gdk.COLORSPACE_RGB && !alpha && bps == 8 {
+		width := pixbuf.GetWidth()
+		height := pixbuf.GetHeight()
+		stride := pixbuf.GetRowstride()
+		pix := pixbuf.GetPixels()
+
+		// Create new pixel data, converting RGB to RGBA
+		newpix := make([]byte, height*width*4)
+		for y := 0; y < height; y++ {
+			for x := 0; x < width; x++ {
+				newpix[y*width*4+x*4+0] = pix[y*stride+x*3+0]
+				newpix[y*width*4+x*4+1] = pix[y*stride+x*3+1]
+				newpix[y*width*4+x*4+2] = pix[y*stride+x*3+2]
+				newpix[y*width*4+x*4+3] = 0xff
+			}
+		}
+
+		// Note:  stride of the new image data does not match data returned
+		// from Pixbuf.
+		return &image.RGBA{
+			Pix:    newpix,
+			Stride: width * 4,
+			Rect:   image.Rect(0, 0, width, height),
+		}
+	}
+
 	return nil
 }
 

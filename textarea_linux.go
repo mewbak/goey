@@ -172,6 +172,16 @@ func (w *textareaElement) SetBounds(bounds base.Rectangle) {
 	syscall.SetBounds(&w.frame.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 }
 
+func (w *textareaElement) TakeFocus() bool {
+	control := Control{&w.handle.Widget}
+	return control.TakeFocus()
+}
+
+func (w *textareaElement) TypeKeys(text string) chan error {
+	control := Control{&w.handle.Widget}
+	return control.TypeKeys(text)
+}
+
 func (w *textareaElement) updateProps(data *TextArea) error {
 	// TextView will send a 'changed' event, even if the new value is the
 	// same.  To stop an infinite loop, we need to protect by checking
@@ -193,7 +203,7 @@ func (w *textareaElement) updateProps(data *TextArea) error {
 	w.minLines = data.MinLines
 	w.onChange = data.OnChange
 	if data.OnChange != nil && w.shChange == 0 {
-		sh, err := buffer.Connect("changed", textinputOnChanged, w)
+		sh, err := buffer.Connect("changed", textareaOnChanged, w)
 		if err != nil {
 			panic("Failed to connect 'changed' event")
 		}

@@ -6,8 +6,8 @@ import (
 	"bitbucket.org/rj/goey/base"
 )
 
-func TestProgressCreate(t *testing.T) {
-	testingRenderWidgets(t,
+func TestProgressMount(t *testing.T) {
+	testingMountWidgets(t,
 		&Progress{Value: 50, Min: 0, Max: 100},
 		&Progress{Value: 0},
 		&Progress{Value: 10, Min: 0, Max: 1000},

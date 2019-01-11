@@ -6,13 +6,13 @@ import (
 	"bitbucket.org/rj/goey/base"
 )
 
-func TestTabsCreate(t *testing.T) {
+func TestTabsMount(t *testing.T) {
 	items := []TabItem{
 		{"Tab 1", &Button{Text: "Click me A!"}},
 		{"Tab 2", &Button{Text: "Click me B!"}},
 	}
 
-	testingRenderWidgets(t,
+	testingMountWidgets(t,
 		&Tabs{Children: items},
 		&Tabs{Value: 1, Children: items},
 	)

@@ -7,6 +7,7 @@ import (
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/dialog"
 	win2 "bitbucket.org/rj/goey/internal/syscall"
 	"bitbucket.org/rj/goey/loop"
 	"github.com/lxn/win"
@@ -254,9 +255,55 @@ func (w *windowImpl) NativeHandle() win.HWND {
 	return w.hWnd
 }
 
-func (w *windowImpl) message(m *Message) {
-	m.title = win2.GetWindowText(w.hWnd)
-	m.handle = uintptr(w.hWnd)
+func (w *windowImpl) message(m *dialog.Message) {
+	m.WithTitle(win2.GetWindowText(w.hWnd))
+	m.WithOwner(w.hWnd)
+}
+
+func (w *windowImpl) openfiledialog(m *dialog.OpenFile) {
+	m.WithTitle(win2.GetWindowText(w.hWnd))
+	m.WithOwner(w.hWnd)
+}
+
+func (w *windowImpl) savefiledialog(m *dialog.SaveFile) {
+	m.WithTitle(win2.GetWindowText(w.hWnd))
+	m.WithOwner(w.hWnd)
+}
+
+// Screenshot returns an image of the window, as displayed on screen.
+func (w *windowImpl) Screenshot() (image.Image, error) {
+	// Need the client rect for the window.
+	region := win.RECT{}
+	win.GetWindowRect(w.hWnd, &region)
+
+	// Create the device context and bitmap for the image
+	hdcScreen := win.GetDC(0)
+	defer func() {
+		win.ReleaseDC(0, hdcScreen)
+	}()
+	hdc := win.CreateCompatibleDC(hdcScreen)
+	defer func() {
+		win.DeleteObject(win.HGDIOBJ(hdc))
+	}()
+	bitmap := win.CreateCompatibleBitmap(hdcScreen, region.Right-region.Left, region.Bottom-region.Top)
+	defer func() {
+		win.DeleteObject(win.HGDIOBJ(bitmap))
+	}()
+	win.SelectObject(hdc, win.HGDIOBJ(bitmap))
+	rc := win.StretchBlt(hdc, 0, 0, region.Right-region.Left, region.Bottom-region.Top,
+		hdcScreen, region.Left, region.Top, region.Right-region.Left, region.Bottom-region.Top,
+		win.SRCCOPY)
+	if !rc {
+		err := syscall.GetLastError()
+		if err == nil {
+			err = syscall.EINVAL
+		}
+		return nil, err
+	}
+
+	// Convert the bitmap to a image.Image.
+	img := bitmapToImage(hdc, bitmap)
+	return img, nil
 }
 
 // setChild updates the child element of the window.  It also updates any

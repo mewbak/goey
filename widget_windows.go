@@ -1,11 +1,14 @@
 package goey
 
 import (
+	"fmt"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
 	win2 "bitbucket.org/rj/goey/internal/syscall"
+	"bitbucket.org/rj/goey/loop"
 	"github.com/lxn/win"
 )
 
@@ -70,6 +73,56 @@ func (w *Control) TakeFocus() bool {
 	}
 
 	return win.SetFocus(w.hWnd) != 0
+}
+
+// TypeKeys sends events to the control as if the string was typed by a user.
+func (w *Control) TypeKeys(text string) chan error {
+	err := make(chan error, 1)
+
+	go func() {
+		defer close(err)
+
+		loop.Do(func() error {
+			if !w.TakeFocus() {
+				err <- fmt.Errorf("windows error on take focus, %x", win.GetLastError())
+			}
+			// If edit control, make sure all of the text is selected.
+			if win.GetWindowLongPtr(w.hWnd, win.GWLP_WNDPROC) == syscall.NewCallback(textinputWindowProc) {
+				win.SendMessage(w.hWnd, win.EM_SETSEL, 0, 0x7fff)
+			}
+			return nil
+		})
+
+		time.Sleep(50 * time.Millisecond)
+		for _, r := range text {
+			inp := [2]win.KEYBD_INPUT{
+				{win.INPUT_KEYBOARD, win.KEYBDINPUT{}},
+				{win.INPUT_KEYBOARD, win.KEYBDINPUT{}},
+			}
+
+			if r == '\n' {
+				inp[0].Ki.WVk = win.VK_RETURN
+				inp[1].Ki.WVk = win.VK_RETURN
+				inp[1].Ki.DwFlags = win.KEYEVENTF_KEYUP
+			} else {
+				inp[0].Ki.WScan = uint16(r)
+				inp[0].Ki.DwFlags = win.KEYEVENTF_UNICODE
+				inp[1].Ki.WScan = uint16(r)
+				inp[1].Ki.DwFlags = win.KEYEVENTF_UNICODE | win.KEYEVENTF_KEYUP
+			}
+
+			loop.Do(func() error {
+				rc := win.SendInput(2, unsafe.Pointer(&inp), int32(unsafe.Sizeof(inp[0])))
+				if rc != 2 {
+					err <- fmt.Errorf("windows error, %x", win.GetLastError())
+				}
+				return nil
+			})
+			time.Sleep(10 * time.Millisecond)
+		}
+	}()
+
+	return err
 }
 
 // SetOrder is a call around SetWindowPos used to ensure that a window appears

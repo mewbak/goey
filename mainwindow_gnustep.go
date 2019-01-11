@@ -4,11 +4,11 @@ package goey
 
 import (
 	"image"
-	"unsafe"
 
 	"bitbucket.org/rj/goey/base"
 	"bitbucket.org/rj/goey/cocoa"
 	"bitbucket.org/rj/goey/loop"
+	"bitbucket.org/rj/goey/dialog"
 )
 
 type windowImpl struct {
@@ -50,9 +50,19 @@ func (w *windowImpl) close() {
 	}
 }
 
-func (w *windowImpl) message(m *Message) {
+func (w *windowImpl) message(m *dialog.Message) {
 	//m.title, m.err = w.handle.GetTitle()
-	m.handle = uintptr(unsafe.Pointer(w.handle))
+	m.WithParent( w.handle)
+}
+
+func (w *windowImpl) openfiledialog(m *dialog.OpenFile) {
+	//m.title, m.err = w.handle.GetTitle()
+	m.WithParent( w.handle)
+}
+
+func (w *windowImpl) savefiledialog(m *dialog.SaveFile) {
+	//m.title, m.err = w.handle.GetTitle()
+	m.WithParent( w.handle)
 }
 
 func (w *windowImpl) onSize() {
