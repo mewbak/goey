@@ -20,7 +20,7 @@ typedef struct nscolor_tag {
 /* Event loop */
 extern void init( void );
 extern void run( void );
-extern void do_thunk( void );
+extern void performOnMainThread( void );
 extern void stop( void );
 extern bool_t isMainThread( void );
 

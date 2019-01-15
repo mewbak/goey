@@ -65,7 +65,7 @@ func runTesting(action func() error) error {
 }
 
 func do(action func() error) error {
-	return cocoa.Do(action)
+	return cocoa.PerformOnMainThread(action)
 }
 
 func stop() {

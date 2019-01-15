@@ -25,12 +25,12 @@ var (
 	thunkMutex  sync.Mutex
 )
 
-func Do(action func() error) error {
+func PerformOnMainThread(action func() error) error {
 	thunkMutex.Lock()
 	defer thunkMutex.Unlock()
 
 	thunkAction = action
-	C.do_thunk()
+	C.performOnMainThread()
 	return thunkErr
 }
 

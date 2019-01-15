@@ -173,7 +173,7 @@ void stop() {
 
 @end
 
-void do_thunk() {
+void performOnMainThread() {
 	TRACE();
 
 	assert( [NSThread isMultiThreaded] );
