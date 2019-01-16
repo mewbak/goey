@@ -26,8 +26,8 @@ extern bool_t isMainThread( void );
 
 /* Message dialog */
 extern void messageDialog( void* window, char const* text, char const* title, char icon );
-extern void openPanel( void* window );
-extern void savePanel( void* window );
+extern char const* openPanel( void* window, char const* dir, char const* base );
+extern char const* savePanel( void* window, char const* dir, char const* base );
 
 extern void trace( char const* func );
 #ifdef NTRACE

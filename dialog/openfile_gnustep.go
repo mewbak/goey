@@ -7,8 +7,8 @@ import (
 )
 
 func (m *OpenFile) show() (string, error) {
-	cocoa.OpenPanel(m.parent)
-	return "", nil
+	retval := cocoa.OpenPanel(m.parent, m.filename)
+	return retval, nil
 }
 
 // WithParent sets the parent of the dialog box.

@@ -33,20 +33,35 @@ void messageDialog( void* window, char const* text, char const* title, char icon
 	[alert release];
 }
 
-void openPanel( void* window ) {
+static void setFilename( NSSavePanel* panel, char const* dir, char const* base ) {
+	if ( dir ) {
+		assert( base );
+
+		NSString* tmp = [[NSString alloc] initWithUTF8String:dir];
+		[panel setDirectory:tmp];
+		[tmp release];
+		tmp = [[NSString alloc] initWithUTF8String:base];
+		[panel setNameFieldStringValue:tmp];
+		[tmp release];
+	}
+}
+
+char const* openPanel( void* window, char const* dir, char const* base ) {
 	assert( !window || [(id)window isKindOfClass:[NSWindow class]] );
 
 	NSOpenPanel* panel = [NSOpenPanel openPanel];
+	setFilename( panel, dir, base );
 
 	[panel runModal];
-	[panel release];
+	return [[panel filename] cStringUsingEncoding:NSUTF8StringEncoding];
 }
 
-void savePanel( void* window ) {
+char const* savePanel( void* window, char const* dir, char const* base ) {
 	assert( !window || [(id)window isKindOfClass:[NSWindow class]] );
 
 	NSSavePanel* panel = [NSSavePanel savePanel];
+	setFilename( panel, dir, base );
 
 	[panel runModal];
-	[panel release];
+	return [[panel filename] cStringUsingEncoding:NSUTF8StringEncoding];
 }
