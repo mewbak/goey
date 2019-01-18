@@ -5,6 +5,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"bitbucket.org/rj/goey/internal/nopanic"
 	"github.com/lxn/win"
 )
 
@@ -68,9 +69,10 @@ func run() error {
 }
 
 func do(action func() error) error {
+	// Marshal the action to the GUI thread, and collect the return value.
 	err := make(chan error, 1)
 	win.PostMessage(hwndPost, win.WM_USER, uintptr(unsafe.Pointer(&action)), uintptr(unsafe.Pointer(&err)))
-	return <-err
+	return nopanic.Unwrap(<-err)
 }
 
 func loop() error {
@@ -102,7 +104,7 @@ func SetActiveWindow(hwnd win.HWND) {
 func postWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) uintptr {
 	switch msg {
 	case win.WM_USER:
-		err := (*(*func() error)(unsafe.Pointer(wParam)))()
+		err := nopanic.Wrap(*(*func() error)(unsafe.Pointer(wParam)))
 		(*(*chan error)(unsafe.Pointer(lParam))) <- err
 		return 0
 	}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -54,7 +55,7 @@ func ExampleWrap_2() {
 	// No luck!
 }
 
-func ExamplePanicError_Panic() {
+func ExampleUnwrap() {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered...")
@@ -63,16 +64,12 @@ func ExamplePanicError_Panic() {
 	}()
 
 	// Wrap the callback to prevent the escape of any panics.
-	err := nopanic.Wrap(func() error {
+	err := nopanic.Unwrap(nopanic.Wrap(func() error {
 		// Bad things sometimes happen to good people...
 		panic("No luck!")
-	})
+	}))
 	// Check for errors.
 	if err != nil {
-		// If this is a PanicError, we rethrow.
-		if value, ok := err.(nopanic.PanicError); ok {
-			value.Panic()
-		}
 		// Otherwise, continue with normal error handling.
 		fmt.Println("Normal error...")
 		fmt.Println(err)
@@ -117,8 +114,47 @@ func TestWrap(t *testing.T) {
 			if err.Stack() == "" {
 				t.Errorf("Case %d:  missing stack trace", i)
 			}
+			if err.Error() == "" {
+				t.Errorf("Case %d:  missing stack trace", i)
+			}
+			if !strings.HasSuffix(err.Error(), err.Stack()) {
+				t.Errorf("Case %d: stack trace is not a suffix of the error message", i)
+			}
 		} else if !reflect.DeepEqual(out, v.out) {
 			t.Errorf("Case %d:  got %v, want %v", i, out, v.out)
 		}
 	}
+}
+
+func TestUnwrap(t *testing.T) {
+	err1 := errors.New("No luck!")
+
+	cases := []struct {
+		in  error
+		out error
+	}{
+		{nil, nil},
+		{err1, err1},
+	}
+
+	for i, v := range cases {
+		out := nopanic.Unwrap(v.in)
+		if !reflect.DeepEqual(out, v.out) {
+			t.Errorf("Case %d:  got %v, want %v", i, out, v.out)
+		}
+	}
+}
+
+func TestUnwrap2(t *testing.T) {
+	err1 := errors.New("No luck!")
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Missing panic")
+		}
+	}()
+
+	nopanic.Unwrap(nopanic.Wrap(func() error {
+		panic(err1)
+	}))
 }

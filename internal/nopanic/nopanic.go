@@ -16,12 +16,6 @@ func (pe PanicError) Error() string {
 	return fmt.Sprintf("%v\n\n%s", pe.value, pe.stack)
 }
 
-// Panic panics with itself as the value.  This method exist in case future
-// changes to the language allow better tracking of the original stack trace.
-func (pe PanicError) Panic() {
-	panic(pe)
-}
-
 // Value returns the value returned by recover after a panic.
 func (pe PanicError) Value() interface{} {
 	return pe.value
@@ -46,8 +40,21 @@ func Wrap(action func() error) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = New(r)
+
+			// If r is an instance of PanicError, we should consider using it
+			// as is, rather than adding another layer of wrapping.
 		}
 	}()
 
 	return action()
+}
+
+// Unwrap will panic if err is an instance of PanicError, otherwise it will
+// return the error unmodified.
+func Unwrap(err error) error {
+	if pe, ok := err.(PanicError); ok {
+		panic(pe)
+	}
+
+	return err
 }
