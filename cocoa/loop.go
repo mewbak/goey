@@ -7,6 +7,7 @@ package cocoa
 */
 import "C"
 import "sync"
+import "bitbucket.org/rj/goey/internal/nopanic"
 
 func Init() error {
 	C.init()
@@ -26,17 +27,20 @@ var (
 )
 
 func PerformOnMainThread(action func() error) error {
+	// Lock thunk to avoid overwriting of thunkAction or thunkErr
 	thunkMutex.Lock()
 	defer thunkMutex.Unlock()
+	// Is additional syncronization required to provide memory barriers to
+	// coordinate with the GUI thread?
 
 	thunkAction = action
 	C.performOnMainThread()
-	return thunkErr
+	return nopanic.Unwrap(thunkErr)
 }
 
 //export callbackDo
 func callbackDo() {
-	thunkErr = thunkAction()
+	thunkErr = nopanic.Wrap(thunkAction())
 }
 
 func Stop() {

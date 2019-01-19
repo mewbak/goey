@@ -315,29 +315,6 @@ func TestDoWithError(t *testing.T) {
 func TestDoWithPanic(t *testing.T) {
 	const errorString = "No luck"
 
-	defer func() {
-		r := recover()
-		if r != nil {
-			if s, ok := r.(string); !ok {
-				t.Errorf("Unexpected recover, %v", r)
-			} else if s != errorString {
-				t.Errorf("Unexpected recover, %s", s)
-			}
-		} else {
-			t.Errorf("Missing panic")
-		}
-
-		// Make sure that window count is properly maintained.
-		// Note that because of the panic, we never closed the window.
-		if c := loop.LockCount(); c != 1 {
-			t.Errorf("Want lockCount==1, got lockCount==%d", c)
-		}
-
-		// Need to close the window, otherwise any following tests will be
-		// affected.
-		loop.AddLockCount(-1)
-	}()
-
 	init := func() error {
 		// Verify that the test is starting in the correct state.
 		if c := loop.LockCount(); c != 1 {
@@ -353,6 +330,21 @@ func TestDoWithPanic(t *testing.T) {
 		}
 
 		go func() {
+			defer func() {
+				if r := recover(); r == nil {
+					t.Errorf("Failed to recover the expected panic")
+				} else if _, ok := r.(error); !ok {
+					t.Errorf("Unexpected value for the panic")
+				}
+
+				// Need to head back to the GUI thread to stop the event loop.
+				_ = loop.Do(func() error {
+					// Close the window
+					loop.AddLockCount(-1)
+					return nil
+				})
+			}()
+
 			// Run the actions, which are counted.
 			_ = loop.Do(func() error {
 				panic(errorString)

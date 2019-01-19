@@ -27,7 +27,7 @@ var (
 	isTesting uint32
 )
 
-// Run locks the OS thread to act as a GUI thread, and then iterates over the
+// Run locks the OS thread to act as a GUI thread, and then starts the GUI
 // event loop until there are no more instances of Window open.
 // If the main loop is already running, this function will return an error
 // (ErrAlreadyRunning).
@@ -103,7 +103,7 @@ func Run(action func() error) error {
 	return run()
 }
 
-// Do runs the passed function on the GUI thread.  If the event loop is not
+// Do runs the passed function on the GUI thread.  If the GUI event loop is not
 // running, this function will return an error (ErrNotRunning).  Any error from
 // the callback will also be returned.
 //
@@ -113,16 +113,18 @@ func Run(action func() error) error {
 // already executing on the GUI thread, the use of Do is also unnecessary in
 // that context.
 //
-// Note, this function contains a race-condition, in that the the action may be
+// Note, this function contains a race-condition.  An action may be
 // scheduled while the event loop is being terminated, in which case the
 // scheduled action may never be run.  Presumably, those actions don't need to
 // be run on the GUI thread, so they should be scheduled using a different
 // mechanism.
 //
-// If the passed function panics, the panic will happen on the GUI thread.
-// This will cause the call to Run to terminate, stopping the GUI.  However,
-// this will not close any open windows, leading to a potentially unrecoverable
-// state.
+// If the passed function panics, the panic will be recovered, and wrapped into
+// an error.  That error will be used to create a new panic within the
+// caller's goroutine.  If the program terminates because of that panic, there
+// will be two active goroutines in the stack trace.  One active goroutine will
+// be the GUI thread, where the panic originated, and a secton active goroutine
+// from caller's goroutine.
 func Do(action func() error) error {
 	// Check if the event loop is current running.
 	if atomic.LoadUint32(&isRunning) == 0 {
@@ -142,7 +144,15 @@ func Do(action func() error) error {
 // Users should not typically need to call this function.  Top-level GUI
 // elements, such as windows, will increment and decrement the count as they
 // are created and destroyed.
+//
+// If the GUI event loop is not running, this function will panic.
 func AddLockCount(delta int32) {
+	// Check if the event loop is current running.
+	if atomic.LoadUint32(&isRunning) == 0 {
+		panic(ErrNotRunning)
+	}
+
+	// Update the lock count.
 	if newval := atomic.AddInt32(&lockCount, delta); newval == 0 {
 		if atomic.LoadUint32(&isRunning) != 0 {
 			// We had better be on the GUI thread, or this call may cause a
