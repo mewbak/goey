@@ -14,9 +14,15 @@ native platform.
 ## Install
 
 The package can be installed from the command line using the
-[go](https://golang.org/cmd/go/) tool.
+[go](https://golang.org/cmd/go/) tool.  However, depending on your OS, please
+check for special instructions below.
 
     go get bitbucket.org/rj/goey
+
+### Windows
+
+No special instructions are required to build this package on windows.
+CGO is not used.
 
 ### Linux
 
@@ -28,6 +34,15 @@ of the dependencies.
 On Ubuntu:
 
     sudo apt-get install libgtk-3-dev
+
+
+### MacOS
+
+There is a in-progress port for Cocoa.  It is currently being developped using 
+GNUstep on Linux, but has been developped based on documentation from Apple.
+All controls, except for the date control (which is not available in GNUstep),
+are implemented.  However, additional testing, especially on Darwin, is still
+required.
 
 ## Getting Started
 

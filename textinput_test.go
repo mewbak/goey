@@ -67,12 +67,18 @@ func TestTextInputMount(t *testing.T) {
 		&TextInput{Value: "E", Password: true},
 	)
 
-	f := func(value string, disabled, password, readonly bool) bool {
-		return testingMountWidget(t, &TextInput{Value: value, Disabled: disabled, Password: password, ReadOnly: readonly})
-	}
-	if err := quick.Check(f, &quick.Config{Values: textinputValues}); err != nil {
-		t.Errorf("quick: %s", err)
-	}
+	t.Run("QuickCheck", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("skipping test in short mode")
+		}
+
+		f := func(value string, disabled, password, readonly bool) bool {
+			return testingMountWidget(t, &TextInput{Value: value, Disabled: disabled, Password: password, ReadOnly: readonly})
+		}
+		if err := quick.Check(f, &quick.Config{Values: textinputValues}); err != nil {
+			t.Errorf("quick: %s", err)
+		}
+	})
 }
 
 func TestTextInputClose(t *testing.T) {

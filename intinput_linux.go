@@ -61,7 +61,7 @@ func intinputOnActivate(obj *glib.Object, mounted *intinputElement) {
 	// of the gtk package.
 	widget := gtk.SpinButton{gtk.Entry{gtk.Widget{glib.InitiallyUnowned{obj}}, gtk.Editable{obj}}}
 	text, _ := widget.GetText()
-	value, _ := strconv.ParseInt(text,10,64)
+	value, _ := strconv.ParseInt(text, 10, 64)
 	// What should be done with a parsing error.  The control should prevent
 	// that occurring.
 	mounted.onEnterKey(value)
@@ -73,7 +73,7 @@ func intinputOnChanged(widget *gtk.SpinButton, mounted *intinputElement) {
 	}
 
 	text, _ := widget.GetText()
-	value, _ := strconv.ParseInt(text,10,64)
+	value, _ := strconv.ParseInt(text, 10, 64)
 	// What should be done with a parsing error.  The control should prevent
 	// that occurring.
 	mounted.onChange(value)

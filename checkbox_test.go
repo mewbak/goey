@@ -27,12 +27,18 @@ func TestCheckboxMount(t *testing.T) {
 		&Checkbox{Text: ""},
 	)
 
-	f := func(text string, value, disabled bool) bool {
-		return testingMountWidget(t, &Checkbox{Text: text, Value: value, Disabled: disabled})
-	}
-	if err := quick.Check(f, &quick.Config{Values: checkboxValues}); err != nil {
-		t.Errorf("quick: %s", err)
-	}
+	t.Run("QuickCheck", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("skipping test in short mode")
+		}
+
+		f := func(text string, value, disabled bool) bool {
+			return testingMountWidget(t, &Checkbox{Text: text, Value: value, Disabled: disabled})
+		}
+		if err := quick.Check(f, &quick.Config{Values: checkboxValues}); err != nil {
+			t.Errorf("quick: %s", err)
+		}
+	})
 }
 
 func TestCheckboxClose(t *testing.T) {

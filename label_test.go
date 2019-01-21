@@ -35,12 +35,18 @@ func TestLabelMount(t *testing.T) {
 		&Label{Text: "ABCD\nEDFG"},
 	)
 
-	f := func(text string) bool {
-		return testingMountWidget(t, &Label{Text: text})
-	}
-	if err := quick.Check(f, &quick.Config{Values: labelValues}); err != nil {
-		t.Errorf("quick: %s", err)
-	}
+	t.Run("QuickCheck", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("skipping test in short mode")
+		}
+
+		f := func(text string) bool {
+			return testingMountWidget(t, &Label{Text: text})
+		}
+		if err := quick.Check(f, &quick.Config{Values: labelValues}); err != nil {
+			t.Errorf("quick: %s", err)
+		}
+	})
 }
 
 func TestLabelClose(t *testing.T) {

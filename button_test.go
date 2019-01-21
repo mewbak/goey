@@ -65,12 +65,18 @@ func TestButtonMount(t *testing.T) {
 		&Button{Text: "E", Default: true},
 	)
 
-	f := func(text string, disabled, def bool) bool {
-		return testingMountWidget(t, &Button{Text: text, Disabled: disabled, Default: def})
-	}
-	if err := quick.Check(f, &quick.Config{Values: buttonValues}); err != nil {
-		t.Errorf("quick: %s", err)
-	}
+	t.Run("QuickCheck", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("skipping test in short mode")
+		}
+
+		f := func(text string, disabled, def bool) bool {
+			return testingMountWidget(t, &Button{Text: text, Disabled: disabled, Default: def})
+		}
+		if err := quick.Check(f, &quick.Config{Values: buttonValues}); err != nil {
+			t.Errorf("quick: %s", err)
+		}
+	})
 }
 
 func TestButtonClose(t *testing.T) {
