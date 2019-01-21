@@ -27,12 +27,18 @@ func TestParagraphMount(t *testing.T) {
 		&P{Text: "ABCD\nEFGH", Align: JustifyLeft},
 	)
 
-	f := func(text string, align TextAlignment) bool {
-		return testingMountWidget(t, &P{Text: text, Align: align})
-	}
-	if err := quick.Check(f, &quick.Config{Values: paragraphValues}); err != nil {
-		t.Errorf("quick: %s", err)
-	}
+	t.Run("QuickCheck", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("skipping test in short mode")
+		}
+
+		f := func(text string, align TextAlignment) bool {
+			return testingMountWidget(t, &P{Text: text, Align: align})
+		}
+		if err := quick.Check(f, &quick.Config{Values: paragraphValues}); err != nil {
+			t.Errorf("quick: %s", err)
+		}
+	})
 }
 
 func TestParagraphClose(t *testing.T) {
