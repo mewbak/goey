@@ -20,6 +20,8 @@
 // be recognize by the go build program.  Additionally, you could use build flags
 // (-ldflags="-H windowsgui") to change the type of application built.
 //
+// CGO is not required.
+//
 // Linux
 //
 // Although this package does not use CGO, some of its dependencies
@@ -30,4 +32,11 @@
 // On Ubuntu:
 //
 //      sudo apt-get install libgtk-3-dev
+//
+// Darwin (MacOS)
+//
+// A port to darwin using the Cocoa API is in the repository, but is only
+// available under the macos branch.  Development has been done on linux using
+// GNUstep, so the build tags will need to be updated to build on a darwin
+// system.
 package goey
