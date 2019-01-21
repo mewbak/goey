@@ -40,7 +40,7 @@ func PerformOnMainThread(action func() error) error {
 
 //export callbackDo
 func callbackDo() {
-	thunkErr = nopanic.Wrap(thunkAction())
+	thunkErr = nopanic.Wrap(thunkAction)
 }
 
 func Stop() {

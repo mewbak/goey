@@ -7,6 +7,7 @@ import (
 
 	"bitbucket.org/rj/goey"
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/dialog"
 	"bitbucket.org/rj/goey/loop"
 )
 
@@ -59,7 +60,7 @@ func render() base.Widget {
 				&goey.Button{
 					Text: "Show message box without parent",
 					OnClick: func() {
-						goey.NewMessage("This is the body of the message.  Note, you can still interact with the main window.").Show()
+						dialog.NewMessage("This is the body of the message.  Note, you can still interact with the main window.").Show()
 					},
 				},
 			},
