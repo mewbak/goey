@@ -21,13 +21,8 @@ install:
 - cmd: go get -d bitbucket.org/rj/goey
 - sh: go get -d bitbucket.org/rj/goey
 build_script:
-- cmd: go install bitbucket.org/rj/goey/base
-- cmd: go install bitbucket.org/rj/goey/loop
-- cmd: go install bitbucket.org/rj/goey/dialog
-- cmd: go install bitbucket.org/rj/goey
-- cmd: go install bitbucket.org/rj/goey/example/onebutton
-- cmd: go install bitbucket.org/rj/goey/example/twofields
-- cmd: go install bitbucket.org/rj/goey/example/threebuttons
+- cmd: go install -v bitbucket.org/rj/goey
+- cmd: go install -v bitbucket.org/rj/goey/example/...
 - sh: go install -v bitbucket.org/rj/goey/base
 - sh: go install -v bitbucket.org/rj/goey/loop
 - sh: go install -v bitbucket.org/rj/goey/dialog
