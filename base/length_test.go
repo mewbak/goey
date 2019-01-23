@@ -70,7 +70,7 @@ func ExampleRectangle_Pixels() {
 	fmt.Printf("Rectangle %s when translated to pixels is %s.", r, rpx)
 
 	// Output:
-	// Rectangle (10:00,20:00)-(90:00,80:00) when translated to pixels is (20-40)-(180,160).
+	// Rectangle (10:00,20:00)-(90:00,80:00) when translated to pixels is (20,40)-(180,160).
 }
 
 func TestFromPixels(t *testing.T) {
