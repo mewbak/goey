@@ -2,8 +2,10 @@ package loop
 
 import (
 	"errors"
+	"os"
 	"runtime"
 	"sync/atomic"
+	"testing"
 )
 
 var (
@@ -22,6 +24,7 @@ var (
 var (
 	isRunning uint32
 	lockCount int32
+	isTesting uint32
 )
 
 // Run locks the OS thread to act as a GUI thread, and then starts the GUI
@@ -37,9 +40,10 @@ var (
 // Any further modifications to the GUI also need to be scheduled on the GUI
 // thread, which can be done using the function Do.
 func Run(action func() error) error {
-	// Pin the GUI message loop to a single thread
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
+	// If there is testing, then we need to keep locked to the main thread.
+	if atomic.LoadUint32(&isTesting) != 0 {
+		return runTesting(action)
+	}
 
 	// Want to gate entry into the GUI loop so that only one thread may enter
 	// at a time.  Since this is supposed to be non-blocking, we can't use
@@ -50,6 +54,21 @@ func Run(action func() error) error {
 	defer func() {
 		atomic.StoreUint32(&isRunning, 0)
 	}()
+
+	// Pin the GUI message loop to a single thread
+	runtime.LockOSThread()
+	// The following deferred call to UnlockOSThread works fine on WIN32 and
+	// on Linux, where it is paired with the above LockOSThread.  It would
+	// also work with GNUstep on Go 1.10, where the behaviour of this pair
+	// was changed.  However, on GNUstep with Go 1.9 or earlier, the following
+	// call will break testing this the calls do not nest, and a call to
+	// LockOSThread is done at the package init.
+	// Refer to https://golang.org/doc/go1.10.
+	// Conversely, we need to release the thread on Linux with GTK to prevent
+	// hangs with repeated calls to Run.
+	if unlockThreadAfterRun {
+		defer runtime.UnlockOSThread()
+	}
 
 	// Platform specific initialization ahead of running any user actions.
 	err := initRun()
@@ -135,6 +154,21 @@ func AddLockCount(delta int32) {
 
 	// Update the lock count.
 	if newval := atomic.AddInt32(&lockCount, delta); newval == 0 {
-		stop()
+		if atomic.LoadUint32(&isRunning) != 0 {
+			// We had better be on the GUI thread, or this call may cause a
+			// crash.
+			stop()
+		}
 	}
+}
+
+// LockCount returns the current lock count.  This code is not meant to be used
+// in regular code, it exists to support testing.
+func LockCount() int32 {
+	return atomic.LoadInt32(&lockCount)
+}
+
+// TestMain should be used by any GUI wants to call tests...
+func TestMain(m *testing.M) {
+	os.Exit(testMain(m))
 }

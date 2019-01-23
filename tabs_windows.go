@@ -93,7 +93,7 @@ type tabsElement struct {
 	hbrush       win.HBRUSH
 }
 
-func (w *tabsElement) controlInsets() base.Point {
+func (w *tabsElement) contentInsets() base.Point {
 	if w.cachedInsets.Y == 0 {
 		rect := win.RECT{}
 

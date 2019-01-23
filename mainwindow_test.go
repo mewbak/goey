@@ -111,6 +111,9 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 		go func() {
 			// Delegate to test specific actions.
 			action(t, mw)
+			if testing.Verbose() {
+				time.Sleep(250 * time.Millisecond)
+			}
 
 			// Note:  No work after this call to Do, since the call to Run may be
 			// terminated when the call to Do returns.
@@ -129,12 +132,20 @@ func testingWindow(t *testing.T, action func(*testing.T, *Window)) {
 	}
 }
 
+func TestMain(m *testing.M) {
+	loop.TestMain(m)
+}
+
 func TestWindow_SetChild(t *testing.T) {
 	testingWindow(t, func(t *testing.T, mw *Window) {
 		widgets := []base.Widget{}
 
 		for i := 1; i < 10; i++ {
-			time.Sleep(50 * time.Millisecond)
+			if testing.Verbose() {
+				time.Sleep(250 * time.Millisecond)
+			} else {
+				time.Sleep(50 * time.Millisecond)
+			}
 			widgets = append(widgets, &Button{Text: "Button " + strconv.Itoa(i)})
 			err := loop.Do(func() error {
 				return mw.SetChild(&VBox{
@@ -188,7 +199,7 @@ func TestNewWindow_SetIcon(t *testing.T) {
 				return mw.SetIcon(img)
 			})
 			if err != nil {
-				t.Errorf("Error calling SetTitle, %s", err)
+				t.Errorf("Error calling SetIcon, %s", err)
 			}
 			time.Sleep(50 * time.Millisecond)
 		}

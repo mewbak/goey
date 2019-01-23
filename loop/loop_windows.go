@@ -9,6 +9,11 @@ import (
 	"github.com/lxn/win"
 )
 
+const (
+	// Flag to control behaviour of UnlockOSThread in Run.
+	unlockThreadAfterRun = true
+)
+
 var (
 	atomPost win.ATOM
 	hwndPost win.HWND

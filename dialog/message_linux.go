@@ -1,3 +1,5 @@
+// +build !gnustep
+
 package dialog
 
 import (
