@@ -46,7 +46,7 @@ func (w *decorationElement) Layout(bc base.Constraints) base.Size {
 	vinset := w.insets.Top + w.insets.Bottom
 
 	innerConstraints := bc.Inset(hinset, vinset)
-	w.childSize = base.Layout(w.child, innerConstraints)
+	w.childSize = w.child.Layout(innerConstraints)
 	return base.Size{
 		w.childSize.Width + hinset,
 		w.childSize.Height + vinset,
@@ -55,21 +55,11 @@ func (w *decorationElement) Layout(bc base.Constraints) base.Size {
 
 func (w *decorationElement) MinIntrinsicHeight(width base.Length) base.Length {
 	vinset := w.insets.Top + w.insets.Bottom
-
-	if w.child == nil {
-		return vinset
-	}
-
 	return w.child.MinIntrinsicHeight(width) + vinset
 }
 
 func (w *decorationElement) MinIntrinsicWidth(height base.Length) base.Length {
 	hinset := w.insets.Left + w.insets.Right
-
-	if w.child == nil {
-		return hinset
-	}
-
 	return w.child.MinIntrinsicWidth(height) + hinset
 }
 

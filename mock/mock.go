@@ -15,6 +15,20 @@ func New(size base.Size) *Element {
 	}
 }
 
+// NewIfNotZero returns a new mock element if the size is not zero, otherwise
+// it returns the nil element.
+func NewIfNotZero(size base.Size) base.Element {
+	if size.IsZero() {
+		elem, err := base.Mount(base.Control{}, nil)
+		if err != nil {
+			panic("Mounting a memory only element should never fail")
+		}
+		return elem
+	}
+
+	return New(size)
+}
+
 // NewList returns a slice of new mock elements.
 func NewList(sizes ...base.Size) []base.Element {
 	ret := make([]base.Element, 0, len(sizes))

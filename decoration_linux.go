@@ -30,7 +30,7 @@ func (w *Decoration) mount(parent base.Control) (base.Element, error) {
 	control.Connect("draw", decorationOnDraw, retval)
 	control.Show()
 
-	child, err := base.DiffChild(parent, nil, w.Child)
+	child, err := base.Mount(parent, w.Child)
 	if err != nil {
 		control.Destroy()
 		return nil, err
@@ -117,13 +117,11 @@ func (w *decorationElement) SetBounds(bounds base.Rectangle) {
 	pixels := bounds.Pixels()
 	syscall.SetBounds(&w.handle.Widget, pixels.Min.X, pixels.Min.Y, pixels.Dx(), pixels.Dy())
 
-	if w.child != nil {
-		bounds.Min.X += w.insets.Left
-		bounds.Min.Y += w.insets.Top
-		bounds.Max.X -= w.insets.Right
-		bounds.Max.Y -= w.insets.Bottom
-		w.child.SetBounds(bounds)
-	}
+	bounds.Min.X += w.insets.Left
+	bounds.Min.Y += w.insets.Top
+	bounds.Max.X -= w.insets.Right
+	bounds.Max.Y -= w.insets.Bottom
+	w.child.SetBounds(bounds)
 }
 
 func (w *decorationElement) updateProps(data *Decoration) error {

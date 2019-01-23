@@ -54,13 +54,10 @@ func (w *Decoration) mount(parent base.Control) (base.Element, error) {
 	}
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
-	if w.Child != nil {
-		child, err := w.Child.Mount(base.Control{hwnd})
-		if err != nil {
-			win.DestroyWindow(hwnd)
-			return nil, err
-		}
-		retval.child = child
+	retval.child, err = base.Mount(base.Control{hwnd}, w.Child)
+	if err != nil {
+		win.DestroyWindow(hwnd)
+		return nil, err
 	}
 
 	return retval, nil
@@ -162,23 +159,19 @@ func (w *decorationElement) SetBounds(bounds base.Rectangle) {
 	// Update background control position
 	w.Control.SetBounds(bounds)
 
-	if w.child != nil {
-		px := base.FromPixelsX(1)
-		py := base.FromPixelsY(1)
-		position := bounds.Min
-		bounds.Min.X += px + w.insets.Left - position.X
-		bounds.Min.Y += py + w.insets.Top - position.Y
-		bounds.Max.X -= px + w.insets.Right + position.X
-		bounds.Max.Y -= py + w.insets.Bottom + position.Y
-		w.child.SetBounds(bounds)
-	}
+	px := base.FromPixelsX(1)
+	py := base.FromPixelsY(1)
+	position := bounds.Min
+	bounds.Min.X += px + w.insets.Left - position.X
+	bounds.Min.Y += py + w.insets.Top - position.Y
+	bounds.Max.X -= px + w.insets.Right + position.X
+	bounds.Max.Y -= py + w.insets.Bottom + position.Y
+	w.child.SetBounds(bounds)
 }
 
 func (w *decorationElement) SetOrder(previous win.HWND) win.HWND {
 	previous = w.Control.SetOrder(previous)
-	if w.child != nil {
-		previous = w.child.SetOrder(previous)
-	}
+	w.child.SetOrder(0)
 	return previous
 }
 

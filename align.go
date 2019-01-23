@@ -87,7 +87,7 @@ func (*alignElement) Kind() *base.Kind {
 }
 
 func (w *alignElement) Layout(bc base.Constraints) base.Size {
-	size := base.Layout(w.child, bc.Loosen())
+	size := w.child.Layout(bc.Loosen())
 	w.childSize = size
 	if w.widthFactor > 0 {
 		size.Width = base.Length(float64(size.Width) * w.widthFactor)
@@ -99,10 +99,6 @@ func (w *alignElement) Layout(bc base.Constraints) base.Size {
 }
 
 func (w *alignElement) MinIntrinsicHeight(width base.Length) base.Length {
-	if w.child == nil {
-		return 0
-	}
-
 	height := w.child.MinIntrinsicHeight(width)
 	if w.heightFactor > 0 {
 		return base.Length(float64(height) * w.heightFactor)
@@ -111,10 +107,6 @@ func (w *alignElement) MinIntrinsicHeight(width base.Length) base.Length {
 }
 
 func (w *alignElement) MinIntrinsicWidth(height base.Length) base.Length {
-	if w.child == nil {
-		return 0
-	}
-
 	width := w.child.MinIntrinsicWidth(height)
 	if w.widthFactor > 0 {
 		return base.Length(float64(width) * w.widthFactor)
@@ -123,10 +115,6 @@ func (w *alignElement) MinIntrinsicWidth(height base.Length) base.Length {
 }
 
 func (w *alignElement) SetBounds(bounds base.Rectangle) {
-	if w.child == nil {
-		return
-	}
-
 	x := bounds.Min.X.Scale(int(w.hAlign)-int(AlignEnd), int(AlignStart)-int(AlignEnd)) +
 		(bounds.Max.X-w.childSize.Width).Scale(int(w.hAlign)-int(AlignStart), int(AlignEnd)-int(AlignStart))
 	y := bounds.Min.Y.Scale(int(w.vAlign)-int(AlignEnd), int(AlignStart)-int(AlignEnd)) +

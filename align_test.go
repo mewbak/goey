@@ -100,11 +100,9 @@ func TestAlignLayout(t *testing.T) {
 
 	for i, v := range cases {
 		elem := alignElement{
+			child:        mock.NewIfNotZero(v.in),
 			widthFactor:  v.widthFactor,
 			heightFactor: v.heightFactor,
-		}
-		if !v.in.IsZero() {
-			elem.child = mock.New(v.in)
 		}
 
 		if out := elem.Layout(v.bc); out != v.out {
@@ -135,11 +133,9 @@ func TestAlignMinIntrinsicSize(t *testing.T) {
 
 	for i, v := range cases {
 		elem := alignElement{
+			child:        mock.NewIfNotZero(v.in),
 			widthFactor:  v.widthFactor,
 			heightFactor: v.heightFactor,
-		}
-		if !v.in.IsZero() {
-			elem.child = mock.New(v.in)
 		}
 
 		if out := elem.MinIntrinsicWidth(base.Inf); out != v.out.Width {

@@ -62,29 +62,19 @@ func (*expandElement) Kind() *base.Kind {
 }
 
 func (w *expandElement) Layout(bc base.Constraints) base.Size {
-	return base.Layout(w.child, bc)
+	return w.child.Layout(bc)
 }
 
 func (w *expandElement) MinIntrinsicHeight(width base.Length) base.Length {
-	if w.child == nil {
-		return 0
-	}
-
 	return w.child.MinIntrinsicHeight(width)
 }
 
 func (w *expandElement) MinIntrinsicWidth(height base.Length) base.Length {
-	if w.child == nil {
-		return 0
-	}
-
 	return w.child.MinIntrinsicWidth(height)
 }
 
 func (w *expandElement) SetBounds(bounds base.Rectangle) {
-	if w.child != nil {
-		w.child.SetBounds(bounds)
-	}
+	w.child.SetBounds(bounds)
 }
 
 func (w *expandElement) updateProps(data *Expand) (err error) {

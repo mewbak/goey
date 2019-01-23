@@ -46,6 +46,10 @@ func (*nilElement) MinIntrinsicWidth(Length) Length {
 	return 0
 }
 
+func (*nilElement) Props() Widget {
+	return nil
+}
+
 func (*nilElement) SetBounds(Rectangle) {
 	return
 }

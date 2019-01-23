@@ -106,10 +106,8 @@ func TestDecorationMinIntrinsicSize(t *testing.T) {
 
 	for i, v := range cases {
 		elem := decorationElement{
+			child:  mock.NewIfNotZero(v.mockSize),
 			insets: v.insets,
-		}
-		if !v.mockSize.IsZero() {
-			elem.child = mock.New(v.mockSize)
 		}
 
 		if out := elem.MinIntrinsicWidth(base.Inf); out != v.out.Width {
