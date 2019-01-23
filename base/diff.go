@@ -17,13 +17,16 @@ func CloseElements(children []Element) {
 // closed if necessary.  On the other hand, the caller will be responsible
 // for the returned element.  Note that the returned element may be non-nil
 // even in the presence of an error.
+//
+// If the rhs is nil, DiffChild will still return a non-nil element.  See
+// the function Method for more details.
 func DiffChild(parent Control, lhs Element, rhs Widget) (Element, error) {
 	// If the rhs is empty, then make sure we delete the lhs if necessary
 	if rhs == nil {
 		if lhs != nil {
 			lhs.Close()
 		}
-		return nil, nil
+		return (*nilElement)(nil), nil
 	}
 
 	// if the lhs is empty, then create a new element
@@ -121,34 +124,4 @@ func DiffChildren(parent Control, lhs []Element, rhs []Widget) ([]Element, error
 	}
 
 	return lhs, nil
-}
-
-// Layout will layout a non-nil element, otherwise is will return a default
-// size respecting the layout contraints.
-func Layout(elem Element, bc Constraints) Size {
-	if elem == nil {
-		if bc.IsBounded() {
-			return bc.Max
-		} else if bc.HasBoundedWidth() {
-			return Size{bc.Max.Width, bc.Min.Height}
-		} else if bc.HasBoundedHeight() {
-			return Size{bc.Min.Width, bc.Max.Height}
-		}
-		return bc.Min
-	}
-
-	size := elem.Layout(bc)
-	if !bc.IsSatisfiedBy(size) {
-		panic("Error in element layout, size does not satisfy constraints")
-	}
-	return size
-}
-
-// Mount will try to mount a non-nil widget, otherwise it returns nil for the
-// element.
-func Mount(parent Control, widget Widget) (Element, error) {
-	if widget == nil {
-		return nil, nil
-	}
-	return widget.Mount(parent)
 }

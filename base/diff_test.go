@@ -2,7 +2,6 @@ package base
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -75,30 +74,6 @@ func (m *mockElement) UpdateProps(data Widget) error {
 	return m.updateProps(data.(*mock))
 }
 
-func ExampleMount() {
-	// This won't work in real code, as the zero value for a control is not
-	// generally useable.
-	parent := Control{}
-
-	// It is okay to mount a nil widget.
-	elem, err := Mount(parent, nil)
-	if err != nil {
-		panic("Unexpected error!")
-	}
-	fmt.Println("The value of elem is nil...", elem == nil)
-
-	elem, err = Mount(parent, &mock{})
-	if err != nil {
-		panic("Unexpected error!")
-	}
-	fmt.Println("The value of elem is nil...", elem == nil)
-	elem.Close()
-
-	// Output:
-	// The value of elem is nil... true
-	// The value of elem is nil... false
-}
-
 func TestCloseElements(t *testing.T) {
 	kind := NewKind("bitbucket.org/rj/goey/base.Mock")
 
@@ -136,14 +111,15 @@ func TestDiffChild(t *testing.T) {
 		lhsClosed bool
 	}{
 		// Trivial case
-		{nil, nil, nil, nil, false},
+		{nil, nil, (*nilElement)(nil), nil, false},
+		{(*nilElement)(nil), nil, (*nilElement)(nil), nil, false},
 		// Mount
 		{nil, &mock{kind: &kind1}, &mockElement{kind: &kind1}, nil, false},
 		{nil, &mock{kind: &kind1, Prop: 3}, &mockElement{kind: &kind1, Prop: 3}, nil, false},
 		{nil, &mock{kind: &kind2}, &mockElement{kind: &kind2}, nil, false},
 		{nil, &mock{kind: &kind2, Prop: 13}, &mockElement{kind: &kind2, Prop: 13}, nil, false},
 		// Remove existing element
-		{&mockElement{kind: &kind1}, nil, nil, nil, true},
+		{&mockElement{kind: &kind1}, nil, (*nilElement)(nil), nil, true},
 		// Replace existing element
 		{&mockElement{kind: &kind1, Prop: 3}, &mock{kind: &kind2, Prop: 13}, &mockElement{kind: &kind2, Prop: 13}, nil, true},
 		// Update existing element
@@ -295,11 +271,11 @@ func TestLayout(t *testing.T) {
 		bc  Constraints
 		out Size
 	}{
-		{nil, Tight(size1), size1},
-		{nil, Loose(size1), size1},
-		{nil, TightWidth(size1.Width), Size{size1.Width, 0}},
-		{nil, TightHeight(size1.Height), Size{0, size1.Height}},
-		{nil, Expand(), Size{}},
+		{&nilElement{}, Tight(size1), size1},
+		{&nilElement{}, Loose(size1), size1},
+		{&nilElement{}, TightWidth(size1.Width), Size{size1.Width, 0}},
+		{&nilElement{}, TightHeight(size1.Height), Size{0, size1.Height}},
+		{&nilElement{}, Expand(), Size{}},
 		{&mockElement{}, Tight(size1), size1},
 		{&mockElement{}, Loose(size1), Size{}},
 		{&mockElement{}, TightWidth(size1.Width), Size{size1.Width, 0}},
@@ -308,44 +284,9 @@ func TestLayout(t *testing.T) {
 	}
 
 	for i, v := range cases {
-		out := Layout(v.in, v.bc)
+		out := v.in.Layout(v.bc)
 		if out != v.out {
 			t.Errorf("Case %d: Returned size does not match, got %v, want %v", i, out, v.out)
-		}
-	}
-}
-
-func TestMount(t *testing.T) {
-	kind1 := NewKind("bitbucket.org/rj/goey/base.Mock1")
-	kind2 := NewKind("bitbucket.org/rj/goey/base.Mock2")
-	err1 := errors.New("fake error 1 for mounting widget")
-	err2 := errors.New("fake error 2 for mounting widget")
-
-	cases := []struct {
-		in  Widget
-		out Element
-		err error
-	}{
-		{nil, nil, nil},
-		{&mock{kind: &kind1}, &mockElement{kind: &kind1}, nil},
-		{&mock{kind: &kind1, Prop: 3}, &mockElement{kind: &kind1, Prop: 3}, nil},
-		{&mock{kind: &kind2}, &mockElement{kind: &kind2}, nil},
-		{&mock{kind: &kind2, Prop: 13}, &mockElement{kind: &kind2, Prop: 13}, nil},
-		{&mock{kind: &kind1, err: err1}, nil, err1},
-		{&mock{kind: &kind1, err: err2}, nil, err2},
-	}
-
-	for i, v := range cases {
-		out, err := Mount(Control{}, v.in)
-		if err != v.err {
-			if v.err == nil {
-				t.Errorf("Case %d: Unexpected error during Mount, %s", i, err)
-			} else {
-				t.Errorf("Case %d: Returned error does not match, got %v, want %v", i, err, v.err)
-			}
-		}
-		if !reflect.DeepEqual(out, v.out) {
-			t.Errorf("Case %d: Returned element does not match, got %v, want %v", i, out, v.out)
 		}
 	}
 }
