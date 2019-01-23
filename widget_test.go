@@ -2,6 +2,7 @@ package goey
 
 import (
 	"bytes"
+	"errors"
 	"reflect"
 	"runtime"
 	"testing"
@@ -493,4 +494,86 @@ func testingUpdateWidgets(t *testing.T, widgets []base.Widget, update []base.Wid
 	if err != nil {
 		t.Errorf("Failed to run GUI loop, %s", err)
 	}
+}
+
+func testingUpdateWidget(t *testing.T) (updater func(base.Widget) bool, closer func()) {
+	ready := make(chan *Window, 1)
+	done := make(chan struct{})
+
+	go func() {
+		init := func() error {
+			// Create the window.  Some of the tests here are not expected in
+			// production code, but we can be a little paranoid here.
+			window, err := NewWindow(t.Name(), nil)
+			if err != nil {
+				t.Errorf("Failed to create window, %s", err)
+				return nil
+			}
+			if window == nil {
+				t.Errorf("Unexpected nil for window")
+				return nil
+			}
+
+			// Check that the controls that were mounted match with the list
+			if len(window.children()) != 0 {
+				t.Errorf("Want len(window.Children())!=0")
+			}
+
+			ready <- window
+			return nil
+		}
+
+		err := loop.Run(init)
+		if err != nil {
+			t.Errorf("Failed to run GUI loop, %s", err)
+		}
+		close(done)
+	}()
+
+	window := <-ready
+
+	updater = func(w base.Widget) bool {
+		err := loop.Do(func() error {
+			err := window.SetChild(w)
+			if err != nil {
+				return err
+			}
+
+			child := window.Child()
+			if n1, n2 := child.Kind(), w.Kind(); n1 != n2 {
+				return errors.New("child's kind does not match widget's kind")
+			} else if widget, ok := child.(Proper); ok {
+				data := widget.Props()
+				if n1, n2 := data.Kind(), w.Kind(); n1 != n2 {
+					return errors.New("child's prop's kind does not match widget's kind")
+				}
+				if !equal(t, data, w) {
+					return errors.New("child's prop's not equal to widget")
+				}
+			} else {
+				return errors.New("child does not support props")
+			}
+			return nil
+		})
+
+		if err != nil {
+			t.Errorf("Error during widget update, %s", err)
+			return false
+		}
+		return true
+	}
+	closer = func() {
+		// Close the window
+		err := loop.Do(func() error {
+			window.Close()
+			return nil
+		})
+		if err != nil {
+			t.Errorf("Error in Do, %s", err)
+		}
+
+		// Wait for the GUI loop to terminate
+		<-done
+	}
+	return updater, closer
 }
