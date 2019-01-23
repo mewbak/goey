@@ -19,17 +19,12 @@ clone_script:
 - sh: export GOPATH=${APPVEYOR_BUILD_FOLDER}
 install:
 - cmd: go get -d bitbucket.org/rj/goey
+- cmd: go get -d bitbucket.org/rj/goey/icons
 - sh: go get -d bitbucket.org/rj/goey
+- sh: go get -d bitbucket.org/rj/goey/icons
 build_script:
-- cmd: go install -v bitbucket.org/rj/goey
-- cmd: go install -v bitbucket.org/rj/goey/example/...
-- sh: go install -v bitbucket.org/rj/goey/base
-- sh: go install -v bitbucket.org/rj/goey/loop
-- sh: go install -v bitbucket.org/rj/goey/dialog
-- sh: go install -v bitbucket.org/rj/goey
-- sh: go install bitbucket.org/rj/goey/example/onebutton
-- sh: go install bitbucket.org/rj/goey/example/twofields
-- sh: go install bitbucket.org/rj/goey/example/threebuttons
+- cmd: go install -v bitbucket.org/rj/goey/...
+- sh: go install -v bitbucket.org/rj/goey/...
 test_script:
 - cmd: go test -v bitbucket.org/rj/goey/base
 - cmd: go test -v bitbucket.org/rj/goey/loop
