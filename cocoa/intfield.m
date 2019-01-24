@@ -32,7 +32,7 @@
 		value = minValue;
 		[self setIntegerValue:value];
 	}
-	[[self stepper] setIntegerValue:value ];
+	[[self stepper] setIntegerValue:value];
 	intfieldOnChange( self, value );
 }
 
@@ -70,7 +70,7 @@ void* intfieldNew( void* superview, int64_t value, int64_t min, int64_t max ) {
 	[control setEditable:YES];
 	//[control setUsesSingleLineMode:YES];
 	[control setDelegate:control];
-	assert( sizeof(NSInteger) >= sizeof(int64_t) );
+	assert( sizeof( NSInteger ) >= sizeof( int64_t ) );
 	[control setIntegerValue:value];
 
 	NSStepper* stepper = [[NSStepper alloc] init];
@@ -101,6 +101,37 @@ bool_t intfieldIsEditable( void* handle ) {
 	assert( handle && [(id)handle isKindOfClass:[GIntField class]] );
 
 	return [(GIntField*)handle isEditable];
+}
+
+// Because Cocoa uses double (or float64 in Go) to store the range, it cannot
+// keep full precision for values near the minimum or maximum of the int64
+// range.  This function is just for Props, and is used to adjust the int64
+// to get a match.
+static int64_t toInt64(double scale) {
+	int64_t a = scale;
+	if ( (double)a == scale ) {
+		return a;
+	}
+	if ( (double)(a-1) == scale ) {
+		return a - 1;
+	}
+    printf("mismatch...%ld %f\n", a, scale);
+	return a;
+}
+
+
+int64_t intfieldMax( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GIntField class]] );
+
+	NSStepper* stepper = [(GIntField*)handle stepper];
+	return toInt64([stepper maxValue]);
+}
+
+int64_t intfieldMin( void* handle ) {
+	assert( handle && [(id)handle isKindOfClass:[GIntField class]] );
+
+	NSStepper* stepper = [(GIntField*)handle stepper];
+	return toInt64([stepper minValue]);
 }
 
 char const* intfieldPlaceholder( void* handle ) {

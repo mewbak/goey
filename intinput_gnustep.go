@@ -12,7 +12,7 @@ type intinputElement struct {
 }
 
 func (w *IntInput) mount(parent base.Control) (base.Element, error) {
-	control := cocoa.NewIntField(parent.Handle, w.Value, -100, 100)
+	control := cocoa.NewIntField(parent.Handle, w.Value, w.Min, w.Max)
 	control.SetPlaceholder(w.Placeholder)
 	control.SetEnabled(!w.Disabled)
 	control.SetCallbacks(w.OnChange, w.OnFocus, w.OnBlur)
@@ -46,13 +46,28 @@ func (w *intinputElement) MinIntrinsicWidth(base.Length) base.Length {
 	return base.FromPixelsX(px)
 }
 
+func (w *intinputElement) Props() base.Widget {
+	onchange, onfocus, onblur := w.control.Callbacks()
+
+	return &IntInput{
+		Value:       w.control.Value(),
+		Min:         w.control.Min(),
+		Max:         w.control.Max(),
+		Disabled:    !w.control.IsEnabled(),
+		Placeholder: w.control.Placeholder(),
+		OnChange:    onchange,
+		OnFocus:     onfocus,
+		OnBlur:      onblur,
+	}
+}
+
 func (w *intinputElement) SetBounds(bounds base.Rectangle) {
 	px := bounds.Pixels()
 	w.control.SetFrame(px.Min.X, px.Min.Y, px.Dx(), px.Dy())
 }
 
 func (w *intinputElement) updateProps(data *IntInput) error {
-	w.control.SetValue(data.Value, -100, 100)
+	w.control.SetValue(data.Value, data.Min, data.Max)
 	w.control.SetPlaceholder(data.Placeholder)
 	w.control.SetEnabled(!data.Disabled)
 	w.control.SetCallbacks(data.OnChange, data.OnFocus, data.OnBlur)

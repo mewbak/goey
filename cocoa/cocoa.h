@@ -33,7 +33,7 @@ extern void trace( char const* func );
 #ifdef NTRACE
 #define TRACE() ( (void)0 )
 #else
-#define TRACE() trace(__func__)
+#define TRACE() trace( __func__ )
 #endif
 
 /* Window */
@@ -143,6 +143,8 @@ extern void* intfieldNew( void* superview, int64_t value, int64_t min,
                           int64_t max );
 extern void intfieldClose( void* handle );
 extern bool_t intfieldIsEditable( void* handle );
+extern int64_t intfieldMax( void* handle );
+extern int64_t intfieldMin( void* handle );
 extern char const* intfieldPlaceholder( void* handle );
 extern void intfieldSetEditable( void* handle, bool_t value );
 extern void intfieldSetValue( void* handle, int64_t value, int64_t min,

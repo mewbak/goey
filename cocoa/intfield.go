@@ -50,6 +50,14 @@ func (w *IntField) IsEditable() bool {
 	return C.intfieldIsEditable(unsafe.Pointer(w)) != 0
 }
 
+func (w *IntField) Max() int64 {
+	return int64(C.intfieldMax(unsafe.Pointer(w)))
+}
+
+func (w *IntField) Min() int64 {
+	return int64(C.intfieldMin(unsafe.Pointer(w)))
+}
+
 func (w *IntField) Placeholder() string {
 	ctext := C.intfieldPlaceholder(unsafe.Pointer(w))
 	return C.GoString(ctext)
