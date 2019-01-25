@@ -230,6 +230,55 @@ func TestDo(t *testing.T) {
 	}
 }
 
+func BenchmarkDo(b *testing.B) {
+	init := func() error {
+		// Verify that the test is starting in the correct state.
+		if c := atomic.LoadInt32(&lockCount); c != 1 {
+			b.Errorf("Want lockCount==1, got lockCount==%d", c)
+			return nil
+		}
+
+		// Create window and verify.
+		// We need at least one window open to maintain GUI loop.
+		AddLockCount(1)
+		if c := atomic.LoadInt32(&lockCount); c != 2 {
+			b.Fatalf("Want lockCount==2, got lockCount==%d", c)
+		}
+
+		go func() {
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				err := Do(func() error {
+					return nil
+				})
+				if err != nil {
+					b.Errorf("Error in Do, %s", err)
+				}
+			}
+			b.StopTimer()
+
+			// Close the window
+			err := Do(func() error {
+				AddLockCount(-1)
+				return nil
+			})
+			if err != nil {
+				b.Errorf("Error in Do, %s", err)
+			}
+		}()
+
+		return nil
+	}
+
+	err := Run(init)
+	if err != nil {
+		b.Errorf("Failed to run GUI loop, %s", err)
+	}
+	if c := atomic.LoadInt32(&lockCount); c != 0 {
+		b.Errorf("Want lockCount==0, got lockCount==%d", c)
+	}
+}
+
 func TestDoFailure(t *testing.T) {
 	err := Do(func() error {
 		return nil
