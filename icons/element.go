@@ -43,7 +43,7 @@ func (w *iconElement) updateProps(data Icon) error {
 
 	// TODO:  We should either cache and reuse the image data, or at least
 	// draw onto the existing buffer.
-	img, err := drawImage(rune(data))
+	img, err := DrawImage(rune(data))
 	if err != nil {
 		return err
 	}
