@@ -14,11 +14,10 @@ func ExampleMount() {
 
 	// It is okay to mount a nil widget.
 	elem, err := Mount(parent, nil)
-	defer elem.Close()
-
 	if err != nil {
 		panic("Unexpected error!")
 	}
+	defer elem.Close()
 	fmt.Println("The value of elem is nil...", elem == nil)
 	fmt.Println("The kind of elem is...", elem.Kind())
 

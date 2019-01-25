@@ -1,12 +1,14 @@
 package icons
 
 import (
+	"bitbucket.org/rj/goey"
 	"bitbucket.org/rj/goey/base"
 )
 
 type iconElement struct {
-	child base.Element
-	icon  rune
+	parent base.Control
+	child  base.Element
+	icon   rune
 }
 
 func (w *iconElement) Close() {
@@ -34,7 +36,26 @@ func (w *iconElement) SetBounds(bounds base.Rectangle) {
 	w.child.SetBounds(bounds)
 }
 
-func (w *iconElement) UpdateProps(data base.Widget) error {
-	// TODO
+func (w *iconElement) updateProps(data Icon) error {
+	if rune(data) == w.icon {
+		return nil
+	}
+
+	// TODO:  We should either cache and reuse the image data, or at least
+	// draw onto the existing buffer.
+	img, err := drawImage(rune(data))
+	if err != nil {
+		return err
+	}
+
+	elem, err := base.DiffChild(w.parent, w.child, &goey.Img{Image: img})
+	if err != nil {
+		return err
+	}
+	w.child = elem
 	return nil
+}
+
+func (w *iconElement) UpdateProps(data base.Widget) error {
+	return w.updateProps(data.(Icon))
 }
