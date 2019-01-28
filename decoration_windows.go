@@ -245,6 +245,9 @@ func decorationWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uint
 	case win.WM_COMMAND:
 		return windowprocWmCommand(wParam, lParam)
 
+	case win.WM_NOTIFY:
+		return windowprocWmNotify(wParam, lParam)
+
 	case win.WM_CTLCOLORSTATIC:
 		win.SetBkMode(win.HDC(wParam), win.TRANSPARENT)
 		return uintptr(decorationGetPtr(hwnd).hBrush)

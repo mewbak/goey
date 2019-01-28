@@ -38,13 +38,14 @@ func (w *IntInput) mount(parent base.Control) (base.Element, error) {
 		hwndUpDown, _, err = createControlWindow(win.WS_EX_LEFT|win.WS_EX_LTRREADING,
 			&intinput.className[0],
 			"",
-			win.WS_CHILDWINDOW|win.WS_VISIBLE|win.UDS_AUTOBUDDY|win.UDS_SETBUDDYINT|win.UDS_ALIGNRIGHT|win.UDS_ARROWKEYS|win.UDS_HOTTRACK|win.UDS_NOTHOUSANDS,
+			win.WS_CHILDWINDOW|win.WS_VISIBLE|win.UDS_SETBUDDYINT|win.UDS_ARROWKEYS|win.UDS_HOTTRACK|win.UDS_NOTHOUSANDS,
 			parent.HWnd)
 		if err != nil {
 			return nil, err
 		}
 		win.SendMessage(hwndUpDown, win.UDM_SETRANGE32, uintptr(w.Min), uintptr(w.Max))
 		win.SendMessage(hwndUpDown, win.UDM_SETPOS32, 0, uintptr(w.Value))
+		win.SendMessage(hwndUpDown, win.UDM_SETBUDDY, uintptr(hwnd), 0)
 	}
 
 	if w.Disabled {

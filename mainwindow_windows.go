@@ -682,11 +682,7 @@ func windowWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr)
 		return windowprocWmCommand(wParam, lParam)
 
 	case win.WM_NOTIFY:
-		if n := (*win.NMHDR)(unsafe.Pointer(lParam)); true {
-			return win.SendMessage(n.HwndFrom, win.WM_NOTIFY, wParam, lParam)
-		}
-		// Defer to the default window proc
-
+		return windowprocWmNotify(wParam, lParam)
 	}
 
 	// Let the default window proc handle all other messages
@@ -705,6 +701,11 @@ func windowprocWmCommand(wParam uintptr, lParam uintptr) uintptr {
 	// Defer to the default window proc.  However, the default window proc will
 	// return 0 for WM_COMMAND.
 	return 0
+}
+
+func windowprocWmNotify(wParam uintptr, lParam uintptr) uintptr {
+	n := (*win.NMHDR)(unsafe.Pointer(lParam))
+	return win.SendMessage(n.HwndFrom, win.WM_NOTIFY, wParam, lParam)
 }
 
 func windowGetPtr(hwnd win.HWND) *windowImpl {
