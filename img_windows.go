@@ -57,15 +57,6 @@ func imageToBitmap(prop image.Image) (win.HBITMAP, []uint8, error) {
 			panic("Error in CreateBitmap")
 		}
 		return hbitmap, buffer, nil
-	} else if img, ok := prop.(*image.Gray); ok {
-		// Create a copy of the backing for the pixel data
-		buffer := append([]uint8(nil), img.Pix...)
-		// Create the bitmap
-		hbitmap := win.CreateBitmap(int32(img.Rect.Dx()), int32(img.Rect.Dy()), 1, 8, unsafe.Pointer(&img.Pix[0]))
-		if hbitmap == 0 {
-			panic("Error in CreateBitmap")
-		}
-		return hbitmap, buffer, nil
 	}
 
 	// Create a new image in RGBA format
@@ -89,7 +80,7 @@ func bitmapToImage(hdc win.HDC, hbitmap win.HBITMAP) image.Image {
 	bmi := win.BITMAPINFO{}
 	bmi.BmiHeader.BiSize = uint32(unsafe.Sizeof(bmi))
 	win.GetDIBits(hdc, hbitmap, 0, 0, nil, &bmi, 0)
-	if bmi.BmiHeader.BiPlanes == 1 && bmi.BmiHeader.BiBitCount == 32 && bmi.BmiHeader.BiCompression == 3 /*BI_BITFIELDS*/ {
+	if bmi.BmiHeader.BiPlanes == 1 && bmi.BmiHeader.BiBitCount == 32 && bmi.BmiHeader.BiCompression == win.BI_BITFIELDS {
 		// Get the pixel data
 		buffer := make([]byte, bmi.BmiHeader.BiSizeImage)
 		win.GetDIBits(hdc, hbitmap, 0, uint32(bmi.BmiHeader.BiHeight), &buffer[0], &bmi, 0)

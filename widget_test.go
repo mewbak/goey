@@ -3,6 +3,8 @@ package goey
 import (
 	"bytes"
 	"errors"
+	"image"
+	"image/draw"
 	"reflect"
 	"runtime"
 	"testing"
@@ -28,7 +30,7 @@ type Typeable interface {
 	TypeKeys(text string) chan error
 }
 
-func equal(t *testing.T, lhs, rhs base.Widget) bool {
+func normalize(t *testing.T, rhs base.Widget) {
 	if runtime.GOOS == "windows" {
 		// On windows, the message EM_GETCUEBANNER does not work unless the manifest
 		// is set correctly.  This cannot be done for the package, since that
@@ -39,15 +41,6 @@ func equal(t *testing.T, lhs, rhs base.Widget) bool {
 				t.Logf("Zeroing 'Placeholder' field during test")
 			}
 			value.SetString("")
-		}
-
-		// The implementation on windows has a limited resolution compared to
-		// float64.
-		if slider, ok := lhs.(*Slider); ok {
-			if newValue := float64(int64(slider.Value*8)) / 8; slider.Value != newValue {
-				t.Logf("Rounding 'Value' field during test from %f to %f", slider.Value, newValue)
-				slider.Value = newValue
-			}
 		}
 	} else if runtime.GOOS == "linux" {
 		// On linux with GTK, this package is using a GtkTextView to create
@@ -61,6 +54,27 @@ func equal(t *testing.T, lhs, rhs base.Widget) bool {
 		}
 	}
 
+	if value := reflect.ValueOf(rhs).Elem().FieldByName("Image"); value.IsValid() {
+		if prop, ok := value.Interface().(*image.Gray); ok {
+			t.Logf("Converting 'Image' field from *image.Gray to *image.RGBA")
+			bounds := prop.Bounds()
+			img := image.NewRGBA(bounds)
+			draw.Draw(img, bounds, prop, bounds.Min, draw.Src)
+			value.Set(reflect.ValueOf(img))
+		}
+	}
+
+	if value := reflect.ValueOf(rhs).Elem().FieldByName("Child"); value.IsValid() {
+		if child := value.Interface(); child != nil {
+			normalize(t, child.(base.Widget))
+		}
+	}
+}
+
+func equal(t *testing.T, lhs, rhs base.Widget) bool {
+	// Noramlize (or canonicalize) the props used to construct the element.
+	normalize(t, rhs)
+	// Compare the widgets' properties.
 	return reflect.DeepEqual(lhs, rhs)
 }
 
