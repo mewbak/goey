@@ -94,6 +94,10 @@ func (w *wipeElement) MinIntrinsicWidth(height base.Length) base.Length {
 }
 
 func (w *wipeElement) SetBounds(bounds base.Rectangle) {
+	if bounds == w.bounds {
+		return
+	}
+
 	w.bounds = bounds
 	w.child.SetBounds(bounds)
 }
@@ -122,11 +126,12 @@ func (w *wipeElement) updateProps(data *Wipe) error {
 	w.child = child
 	if w.level > data.Level {
 		w.ease = NewEaseLength(0, w.bounds.Dx())
-		child.SetBounds(w.bounds.Add(base.Point{w.bounds.Dx(), 0}))
 	} else {
 		w.ease = NewEaseLength(0, -w.bounds.Dx())
-		child.SetBounds(w.bounds.Add(base.Point{-w.bounds.Dx(), 0}))
 	}
+	child.Layout(base.Tight(base.Size{w.bounds.Dx(), w.bounds.Dy()}))
+	child.SetBounds(w.bounds.Add(base.Point{w.ease.ca, 0}))
+
 	w.level = data.Level
 	AddAnimation(w)
 	return nil
