@@ -139,6 +139,14 @@ func (r Rectangle) String() string {
 	return r.Min.String() + "-" + r.Max.String()
 }
 
+// Add returns the rectangle r translated by p.
+func (r Rectangle) Add(p Point) Rectangle {
+	return Rectangle{
+		Point{r.Min.X + p.X, r.Min.Y + p.Y},
+		Point{r.Max.X + p.X, r.Max.Y + p.Y},
+	}
+}
+
 // Dx returns r's width.
 func (r Rectangle) Dx() Length {
 	return r.Max.X - r.Min.X
