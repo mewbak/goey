@@ -49,13 +49,16 @@ func update() {
 	err := mainWindow.SetChild(render())
 	if err != nil {
 		fmt.Println("Error: ", err.Error())
+		return
 	}
 
 	// Get an image for the current icon, and change the window's icon.
 	img, err := icons.DrawImage(iconData[iconIndex].Rune)
 	if err != nil {
-		mainWindow.SetIcon(img)
+		fmt.Println("Error: ", err.Error())
+		return
 	}
+	mainWindow.SetIcon(img)
 }
 
 func render() base.Widget {

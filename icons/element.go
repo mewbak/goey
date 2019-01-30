@@ -53,6 +53,7 @@ func (w *iconElement) updateProps(data Icon) error {
 		return err
 	}
 	w.child = elem
+	w.icon = rune(data)
 	return nil
 }
 
