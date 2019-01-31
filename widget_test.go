@@ -27,6 +27,7 @@ type Focusable interface {
 }
 
 type Typeable interface {
+	TakeFocus() bool
 	TypeKeys(text string) chan error
 }
 
@@ -329,7 +330,11 @@ func testingTypeKeys(t *testing.T, text string, widget base.Widget) {
 			err := loop.Do(func() error {
 				child := window.child.(*vboxElement).children[0]
 				if elem, ok := child.(Typeable); ok {
-					typingErr = elem.TypeKeys(text)
+					if elem.TakeFocus() {
+						typingErr = elem.TypeKeys(text)
+					} else {
+						t.Errorf("Control failed to take focus.")
+					}
 				} else {
 					skipFlag = true
 				}

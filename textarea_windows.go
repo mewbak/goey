@@ -9,7 +9,7 @@ import (
 )
 
 func (w *TextArea) mount(parent base.Control) (base.Element, error) {
-	// Create the control
+	// Create the control, and set properties
 	hwnd, _, err := createControlWindow(win.WS_EX_CLIENTEDGE, &edit.className[0], w.Value, w.style(), parent.HWnd)
 	if err != nil {
 		return nil, err
@@ -17,9 +17,6 @@ func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	if w.Disabled {
 		win.EnableWindow(hwnd, false)
 	}
-
-	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &edit.oldWindowProc, textinputWindowProc)
 
 	// Create placeholder, if required.
 	if w.Placeholder != "" {
@@ -32,6 +29,7 @@ func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 		win.SendMessage(hwnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
 	}
 
+	// Create the return value.
 	retval := &textareaElement{textinputElementBase{
 		Control:  Control{hwnd},
 		onChange: w.OnChange,
@@ -40,6 +38,9 @@ func (w *TextArea) mount(parent base.Control) (base.Element, error) {
 	},
 		minlinesDefault(w.MinLines),
 	}
+
+	// Link the control back to Go for event handling
+	subclassWindowProcedure(hwnd, &edit.oldWindowProc, textinputWindowProc)
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
@@ -98,7 +99,7 @@ func (w *textareaElement) updateProps(data *TextArea) error {
 	if data.Value != w.Text() {
 		w.SetText(data.Value)
 	}
-	err := w.updatePlaceholder(data.Placeholder)
+	err := updatePlaceholder(w.hWnd, data.Placeholder)
 	if err != nil {
 		return err
 	}

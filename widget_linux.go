@@ -1,7 +1,6 @@
 package goey
 
 import (
-	"fmt"
 	"time"
 
 	"bitbucket.org/rj/goey/base"
@@ -57,13 +56,6 @@ func (w *Control) TypeKeys(text string) chan error {
 
 	go func() {
 		defer close(err)
-
-		loop.Do(func() error {
-			if !w.TakeFocus() {
-				err <- fmt.Errorf("error on take focus")
-			}
-			return nil
-		})
 
 		time.Sleep(500 * time.Millisecond)
 		for _, r := range text {

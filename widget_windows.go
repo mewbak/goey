@@ -82,17 +82,6 @@ func (w *Control) TypeKeys(text string) chan error {
 	go func() {
 		defer close(err)
 
-		loop.Do(func() error {
-			if !w.TakeFocus() {
-				err <- fmt.Errorf("windows error on take focus, %x", win.GetLastError())
-			}
-			// If edit control, make sure all of the text is selected.
-			if win.GetWindowLongPtr(w.hWnd, win.GWLP_WNDPROC) == syscall.NewCallback(textinputWindowProc) {
-				win.SendMessage(w.hWnd, win.EM_SETSEL, 0, 0x7fff)
-			}
-			return nil
-		})
-
 		time.Sleep(50 * time.Millisecond)
 		for _, r := range text {
 			inp := [2]win.KEYBD_INPUT{
