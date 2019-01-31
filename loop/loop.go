@@ -7,11 +7,6 @@ import (
 )
 
 var (
-	// ErrQuit indicates that the event loop should terminate.  This return
-	// will only be used on platforms that expose their loop iteration function
-	// in addition to Run.
-	ErrQuit = errors.New("quit message")
-
 	// ErrNotRunning indicates that the main loop is not running.
 	ErrNotRunning = errors.New("main loop is not running")
 
@@ -81,7 +76,8 @@ func Run(action func() error) error {
 	}
 
 	// Defer to platform-specific code.
-	return run()
+	run()
+	return nil
 }
 
 // Do runs the passed function on the GUI thread.  If the GUI event loop is not

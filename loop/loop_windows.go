@@ -56,16 +56,10 @@ func terminateRun() {
 	hwndPost = 0
 }
 
-func run() error {
+func run() {
 	// Run the message loop
-	err := loop()
-	for err == nil {
-		err = loop()
+	for loop() {
 	}
-	if err == ErrQuit {
-		err = nil
-	}
-	return err
 }
 
 func do(action func() error) error {
@@ -75,14 +69,14 @@ func do(action func() error) error {
 	return nopanic.Unwrap(<-err)
 }
 
-func loop() error {
+func loop() (ok bool) {
 	// Obtain a copy of the next message from the queue.
 	var msg win.MSG
 	win.GetMessage(&msg, 0, 0, 0)
 
 	// Processing for application wide messages are handled in this block.
 	if msg.Message == win.WM_QUIT {
-		return ErrQuit
+		return false
 	}
 
 	// Dispatch message.
@@ -90,7 +84,7 @@ func loop() error {
 		win.TranslateMessage(&msg)
 		win.DispatchMessage(&msg)
 	}
-	return nil
+	return true
 }
 
 func stop() {

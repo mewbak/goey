@@ -47,3 +47,7 @@ static gboolean goey_main_context_invoke_cb(gpointer user_data) {
 void goey_main_context_invoke( void ) {
     g_main_context_invoke( NULL, goey_main_context_invoke_cb, NULL );
 }
+
+void goey_idle_add( void ) {
+    g_idle_add( goey_main_context_invoke_cb, NULL );
+}

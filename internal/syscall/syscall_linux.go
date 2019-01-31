@@ -87,10 +87,16 @@ var (
 	invokeFunction = make(chan func(), 1)
 )
 
-// MainContextInvoke is a wrapper around g_main_context.
+// MainContextInvoke is a wrapper around g_main_context_invoke.
 func MainContextInvoke(function func()) {
 	invokeFunction <- function
 	C.goey_main_context_invoke()
+}
+
+// IdleAdd is a wrapper around g_idle_add.
+func IdleAdd(function func()) {
+	invokeFunction <- function
+	C.goey_idle_add()
 }
 
 //export mainContextInvokeCallback
