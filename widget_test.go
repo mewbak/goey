@@ -333,6 +333,9 @@ func testingTypeKeys(t *testing.T, text string, widget base.Widget) {
 
 		var typingErr chan error
 		go func(window *Window) {
+			// On WIN32, let the window complete any opening animation.
+			time.Sleep(20 * time.Millisecond)
+
 			err := loop.Do(func() error {
 				child := window.child.(*vboxElement).children[0]
 				if elem, ok := child.(Typeable); ok {
