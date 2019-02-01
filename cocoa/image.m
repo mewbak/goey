@@ -98,8 +98,50 @@ void* imageviewNew( void* superview, void* image ) {
 	return control;
 }
 
+int imageviewImageWidth( void* control ) {
+	assert( control && [(id)control isKindOfClass:[NSImageView class]] );
+
+	NSArray* reps = [[(NSImageView*)control image] representations];
+	NSImageRep* rep = [reps  objectAtIndex:0];
+	return [rep pixelsWide];
+}
+
+int imageviewImageHeight( void* control ) {
+	assert( control && [(id)control isKindOfClass:[NSImageView class]] );
+
+	NSArray* reps = [[(NSImageView*)control image] representations];
+	NSImageRep* rep = [reps  objectAtIndex:0];
+	return [rep pixelsHigh];
+}
+
+int imageviewImageDepth( void* control ) {
+	assert( control && [(id)control isKindOfClass:[NSImageView class]] );
+
+	NSArray* reps = [[(NSImageView*)control image] representations];
+	NSImageRep* rep = [reps  objectAtIndex:0];
+
+	if ( [rep colorSpaceName]==NSDeviceWhiteColorSpace ) {
+		int bits = [rep bitsPerSample];
+		if ( [rep hasAlpha] ) {
+			bits *= 2;
+		}
+		return bits;
+	}
+
+	assert( [rep colorSpaceName]==NSDeviceRGBColorSpace );
+	int bits = [rep bitsPerSample];
+	bits *= [rep hasAlpha] ? 4 : 3;
+	return bits;
+}
+
+void imageviewImageData( void* control, void* data ) {
+	assert( control && [(id)control isKindOfClass:[NSImageView class]] );
+
+
+}
+
 void imageviewSetImage( void* control, void* image ) {
-	assert( control );
+	assert( control && [(id)control isKindOfClass:[NSImageView class]] );
 	assert( image );
 
 	[(NSImageView*)control setImage:(NSImage*)image];

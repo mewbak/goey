@@ -54,6 +54,21 @@ func NewImageView(window *View, prop image.Image) (*ImageView, error) {
 }
 
 func (w *ImageView) Image() image.Image {
+	width := C.imageviewImageWidth(unsafe.Pointer(w))
+	height := C.imageviewImageHeight(unsafe.Pointer(w))
+	depth := C.imageviewImageDepth(unsafe.Pointer(w))
+
+	if depth == 8 {
+		img := image.NewGray(image.Rect(0, 0, int(width), int(height)))
+		C.imageviewImageData(unsafe.Pointer(w), unsafe.Pointer(&img.Pix[0]), 8)
+		return img
+	}
+	if depth == 32 {
+		img := image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
+		C.imageviewImageData(unsafe.Pointer(w), unsafe.Pointer(&img.Pix[0]))
+		return img
+	}
+
 	return nil
 }
 

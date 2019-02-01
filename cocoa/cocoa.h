@@ -166,6 +166,10 @@ extern void imageClose( void* handle );
 
 /* ImageView */
 extern void* imageviewNew( void* superview, void* image );
+extern int imageviewImageWidth( void* control );
+extern int imageviewImageHeight( void* control );
+extern int imageviewImageDepth( void* control );
+extern void imageviewImageData( void* control, void* data );
 extern void imageviewSetImage( void* control, void* image );
 
 #endif
