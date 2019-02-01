@@ -53,7 +53,7 @@ void* imageNewFromGray( uint8_t* imageData, int width, int height,
 	                                       samplesPerPixel:1
 	                                              hasAlpha:NO
 	                                              isPlanar:NO
-	                                        colorSpaceName:NSDeviceRGBColorSpace
+	                                        colorSpaceName:NSDeviceWhiteColorSpace
 	                                           bytesPerRow:width
 	                                          bitsPerPixel:8];
 	assert( imagerep );
