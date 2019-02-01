@@ -280,7 +280,7 @@ func (w *windowImpl) setIcon(img image.Image) error {
 
 func (w *windowImpl) setOnClosing(callback func() bool) {
 	w.onClosing = callback
-	w.shClosing = setSignalHandler(&w.handle.Widget, 0, callback != nil, "delete-event", windowOnClosing, w)
+	w.shClosing = setSignalHandler(&w.handle.Widget, w.shClosing, callback != nil, "delete-event", windowOnClosing, w)
 }
 
 func (w *windowImpl) setTitle(value string) error {
