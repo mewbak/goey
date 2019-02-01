@@ -10,20 +10,13 @@ import (
 
 	"bitbucket.org/rj/assert"
 	"bitbucket.org/rj/goey/cocoa"
+	"bitbucket.org/rj/goey/internal/nopanic"
 )
 
 const (
 	// Flag to control behaviour of UnlockOSThread in Run.
 	unlockThreadAfterRun = false
 )
-
-type PanicError struct {
-	Str string
-}
-
-func (p *PanicError) Error() string {
-	return p.Str
-}
 
 var (
 	cocoaInit      sync.Once
@@ -49,19 +42,14 @@ func terminateRun() {
 	// Do nothing
 }
 
-func run() error {
+func run() {
 	assert.Assert(cocoa.IsMainThread(), "Not main thread")
 	cocoa.Run()
-	return nil
 }
 
 func runTesting(action func() error) error {
 	testingActions <- action
-	err := <-testingSync
-	if v, ok := err.(*PanicError); ok {
-		panic(v.Str)
-	}
-	return err
+	return nopanic.Unwrap(<-testingSync)
 }
 
 func do(action func() error) error {
@@ -73,10 +61,10 @@ func stop() {
 }
 
 func testMain(m *testing.M) int {
+	// Ensure that we are locked to the main thread.
 	runtime.LockOSThread()
-	if !cocoa.IsMainThread() {
-		panic("not main thread")
-	}
+	assert.Assert(cocoa.IsMainThread(), "Not main thread")
+
 	atomic.StoreUint32(&isTesting, 1)
 	defer func() {
 		atomic.StoreUint32(&isTesting, 0)
@@ -93,26 +81,19 @@ func testMain(m *testing.M) int {
 	}()
 
 	for a := range testingActions {
-		if !cocoa.IsMainThread() {
-			println("!!!! not main thread")
-		} else {
-			err := func() (err error) {
-				atomic.StoreUint32(&isTesting, 0)
-				defer func() {
-					atomic.StoreUint32(&isTesting, 1)
-				}()
-				defer func() {
-					if r := recover(); r != nil {
-						if v, ok := r.(string); ok {
-							err = &PanicError{Str: v}
-						}
-					}
-				}()
+		assert.Assert(cocoa.IsMainThread(), "Not main thread")
 
-				return Run(a)
+		err := func() (err error) {
+			atomic.StoreUint32(&isTesting, 0)
+			defer func() {
+				atomic.StoreUint32(&isTesting, 1)
 			}()
-			testingSync <- err
-		}
+
+			return nopanic.Wrap(func() error {
+				return Run(a)
+			})
+		}()
+		testingSync <- err
 	}
 
 	return <-wait

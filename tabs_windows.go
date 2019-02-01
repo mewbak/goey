@@ -351,30 +351,34 @@ func tabsWindowProc(hwnd win.HWND, msg uint32, wParam uintptr, lParam uintptr) (
 
 	case win.WM_NOTIFY:
 		if n := (*win.NMHDR)(unsafe.Pointer(lParam)); true {
-			if n.Code == uint32(0x100000000+win.TCN_SELCHANGE) {
-				cursel := int(win.SendMessage(hwnd, win.TCM_GETCURSEL, 0, 0))
-				if w := tabsGetPtr(hwnd); w.value != cursel {
-					if w.onChange != nil {
-						w.onChange(cursel)
-					}
-					if w.value != cursel {
-						child, err := base.DiffChild(w.parent, w.child, w.widgets[cursel].Child)
-						if err != nil {
-							panic("Unhandled error!")
+			if n.HwndFrom == hwnd {
+				if n.Code == uint32(0x100000000+win.TCN_SELCHANGE) {
+					cursel := int(win.SendMessage(hwnd, win.TCM_GETCURSEL, 0, 0))
+					if w := tabsGetPtr(hwnd); w.value != cursel {
+						if w.onChange != nil {
+							w.onChange(cursel)
 						}
-						if child != nil {
-							child.SetOrder(w.hWnd)
-							child.Layout(base.Tight(base.Size{
-								Width:  w.cachedBounds.Dx(),
-								Height: w.cachedBounds.Dy(),
-							}))
-							child.SetBounds(w.cachedBounds)
-							win.InvalidateRect(win.GetParent(w.hWnd), nil, false)
+						if w.value != cursel {
+							child, err := base.DiffChild(w.parent, w.child, w.widgets[cursel].Child)
+							if err != nil {
+								panic("Unhandled error!")
+							}
+							if child != nil {
+								child.SetOrder(w.hWnd)
+								child.Layout(base.Tight(base.Size{
+									Width:  w.cachedBounds.Dx(),
+									Height: w.cachedBounds.Dy(),
+								}))
+								child.SetBounds(w.cachedBounds)
+								win.InvalidateRect(win.GetParent(w.hWnd), nil, false)
+							}
+							w.child = child
+							w.value = cursel
 						}
-						w.child = child
-						w.value = cursel
 					}
 				}
+			} else {
+				return windowprocWmNotify(wParam, lParam)
 			}
 		}
 		return 0

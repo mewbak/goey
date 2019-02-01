@@ -5,8 +5,6 @@ import (
 )
 
 func (w *alignElement) SetOrder(previous win.HWND) win.HWND {
-	if w.child != nil {
-		previous = w.child.SetOrder(previous)
-	}
+	previous = w.child.SetOrder(previous)
 	return previous
 }

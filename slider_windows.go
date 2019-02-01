@@ -124,7 +124,16 @@ func (w *sliderElement) updateProps(data *Slider) error {
 }
 
 func sliderFromQuantized(value uintptr, min, max float64) float64 {
-	return min + float64(value)*(max-min)/0xffffff
+	// Perform the conversion.
+	retval := min + float64(value)*(max-min)/0xffffff
+
+	// Apply correction if necessary to account for precision of slider.
+	// The implementation on windows has a limited resolution compared to
+	// float64.
+	if tmp := float64(int64(retval*8)) / 8; tmp != retval {
+		retval = tmp
+	}
+	return retval
 }
 
 func sliderToQuantized(value, min, max float64) uintptr {

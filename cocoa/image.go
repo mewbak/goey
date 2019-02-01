@@ -53,6 +53,10 @@ func NewImageView(window *View, prop image.Image) (*ImageView, error) {
 	return (*ImageView)(control), nil
 }
 
+func (w *ImageView) Image() image.Image {
+	return nil
+}
+
 func (w *ImageView) SetImage(prop image.Image) error {
 	image, err := imageToNSImage(prop)
 	if err != nil {

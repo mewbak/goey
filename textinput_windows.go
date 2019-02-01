@@ -31,9 +31,6 @@ func (w *TextInput) mount(parent base.Control) (base.Element, error) {
 		win.EnableWindow(hwnd, false)
 	}
 
-	// Subclass the window procedure
-	subclassWindowProcedure(hwnd, &edit.oldWindowProc, textinputWindowProc)
-
 	// Create placeholder, if required.
 	if w.Placeholder != "" {
 		textPlaceholder, err := syscall.UTF16PtrFromString(w.Placeholder)
@@ -45,6 +42,7 @@ func (w *TextInput) mount(parent base.Control) (base.Element, error) {
 		win.SendMessage(hwnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
 	}
 
+	// Create the return value.
 	retval := &textinputElement{textinputElementBase{
 		Control:    Control{hwnd},
 		onChange:   w.OnChange,
@@ -52,6 +50,9 @@ func (w *TextInput) mount(parent base.Control) (base.Element, error) {
 		onBlur:     w.OnBlur,
 		onEnterKey: w.OnEnterKey,
 	}}
+
+	// Link the control back to Go for event handling
+	subclassWindowProcedure(hwnd, &edit.oldWindowProc, textinputWindowProc)
 	win.SetWindowLongPtr(hwnd, win.GWLP_USERDATA, uintptr(unsafe.Pointer(retval)))
 
 	return retval, nil
@@ -86,7 +87,7 @@ type textinputElement struct {
 func (w *textinputElement) Props() base.Widget {
 	return &TextInput{
 		Value:       w.Control.Text(),
-		Placeholder: w.propsPlaceholder(),
+		Placeholder: propsPlaceholder(w.hWnd),
 		Disabled:    !win.IsWindowEnabled(w.hWnd),
 		Password:    win.SendMessage(w.hWnd, win.EM_GETPASSWORDCHAR, 0, 0) != 0,
 		ReadOnly:    (win.GetWindowLong(w.hWnd, win.GWL_STYLE) & win.ES_READONLY) != 0,
@@ -97,9 +98,9 @@ func (w *textinputElement) Props() base.Widget {
 	}
 }
 
-func (w *textinputElementBase) propsPlaceholder() string {
+func propsPlaceholder(hWnd win.HWND) string {
 	var buffer [80]uint16
-	win.SendMessage(w.hWnd, win.EM_GETCUEBANNER, uintptr(unsafe.Pointer(&buffer[0])), 80)
+	win.SendMessage(hWnd, win.EM_GETCUEBANNER, uintptr(unsafe.Pointer(&buffer[0])), 80)
 	ndx := 0
 	for i, v := range buffer {
 		if v == 0 {
@@ -126,7 +127,15 @@ func (w *textinputElementBase) MinIntrinsicWidth(base.Length) base.Length {
 	return 75 * DIP
 }
 
-func (w *textinputElementBase) updatePlaceholder(text string) error {
+func (w *textinputElementBase) TakeFocus() bool {
+	ok := w.Control.TakeFocus()
+	if ok {
+		win.SendMessage(w.hWnd, win.EM_SETSEL, 0, 0x7fff)
+	}
+	return ok
+}
+
+func updatePlaceholder(hWnd win.HWND, text string) error {
 	// Update the control
 	if text != "" {
 		textPlaceholder, err := syscall.UTF16PtrFromString(text)
@@ -134,9 +143,9 @@ func (w *textinputElementBase) updatePlaceholder(text string) error {
 			return err
 		}
 
-		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
+		win.SendMessage(hWnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(textPlaceholder)))
 	} else {
-		win.SendMessage(w.hWnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(&edit.emptyString)))
+		win.SendMessage(hWnd, win.EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(&edit.emptyString)))
 	}
 
 	return nil
@@ -146,7 +155,7 @@ func (w *textinputElementBase) updateProps(data *TextInput) error {
 	if data.Value != w.Text() {
 		w.SetText(data.Value)
 	}
-	err := w.updatePlaceholder(data.Placeholder)
+	err := updatePlaceholder(w.hWnd, data.Placeholder)
 	if err != nil {
 		return err
 	}

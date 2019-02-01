@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"bitbucket.org/rj/goey/internal/nopanic"
 	"bitbucket.org/rj/goey/loop"
 )
 
@@ -127,6 +128,10 @@ func TestRunWithPanic(t *testing.T) {
 	defer func() {
 		r := recover()
 		if r != nil {
+			if pe, ok := r.(nopanic.PanicError); ok {
+				r = pe.Value()
+			}
+
 			if s, ok := r.(string); !ok {
 				t.Errorf("Unexpected recover, %v", r)
 			} else if s != errorString {
@@ -249,6 +254,55 @@ func TestDo(t *testing.T) {
 	}
 	if c := atomic.LoadUint32(&count); c != 10 {
 		t.Errorf("Want count=10, got count==%d", c)
+	}
+}
+
+func BenchmarkDo(b *testing.B) {
+	init := func() error {
+		// Verify that the test is starting in the correct state.
+		if c := loop.LockCount(); c != 1 {
+			b.Errorf("Want lockCount==1, got lockCount==%d", c)
+			return nil
+		}
+
+		// Create window and verify.
+		// We need at least one window open to maintain GUI loop.
+		loop.AddLockCount(1)
+		if c := loop.LockCount(); c != 2 {
+			b.Fatalf("Want lockCount==2, got lockCount==%d", c)
+		}
+
+		go func() {
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				err := loop.Do(func() error {
+					return nil
+				})
+				if err != nil {
+					b.Errorf("Error in Do, %s", err)
+				}
+			}
+			b.StopTimer()
+
+			// Close the window
+			err := loop.Do(func() error {
+				loop.AddLockCount(-1)
+				return nil
+			})
+			if err != nil {
+				b.Errorf("Error in Do, %s", err)
+			}
+		}()
+
+		return nil
+	}
+
+	err := loop.Run(init)
+	if err != nil {
+		b.Errorf("Failed to run GUI loop, %s", err)
+	}
+	if c := loop.LockCount(); c != 0 {
+		b.Errorf("Want lockCount==0, got lockCount==%d", c)
 	}
 }
 

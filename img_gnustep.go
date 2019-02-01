@@ -3,9 +3,8 @@
 package goey
 
 import (
-	"bitbucket.org/rj/goey/cocoa"
-
 	"bitbucket.org/rj/goey/base"
+	"bitbucket.org/rj/goey/cocoa"
 )
 
 type imgElement struct {
@@ -34,6 +33,14 @@ func (w *imgElement) Close() {
 	if w.control != nil {
 		w.control.Close()
 		w.control = nil
+	}
+}
+
+func (w *imgElement) Props() base.Widget {
+	return &Img{
+		Image:  w.control.Image(),
+		Width:  w.width,
+		Height: w.height,
 	}
 }
 
